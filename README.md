@@ -202,6 +202,27 @@ Kickoff の更新時は、`05_REVISIONS.md` に履歴を残します。
 `templates/` ディレクトリに各ドキュメントのテンプレートがあります。
 プロジェクトに合わせてカスタマイズしてください。
 
+### テンプレート設計思想
+
+テンプレートは「AIと人間の思考を揃えるためのインターフェース」として設計されています。
+
+| 原則 | 説明 |
+|------|------|
+| **必須項目は空でも枠を作る** | 抜けを可視化し、記入漏れを防止 |
+| **AIが勝手に決めてはいけない所は明示** | Open Questions セクションで人間の判断が必要な項目を列挙 |
+| **レビューで見る場所を固定** | 構造を統一し、確認箇所を明確化 |
+
+### テンプレート構成
+
+| ファイル | 役割 | 主要セクション |
+|----------|------|---------------|
+| `00_KICKOFF.md` | 目標・成功条件定義 | Goal, Success Criteria, Dependencies（構造化）, Open Questions |
+| `01_SPEC.md` | 変更仕様 | Scope（In/Out）, Users/Use-cases, Requirements（FR/NFR分離）, Acceptance Criteria（Given/When/Then） |
+| `02_PLAN.md` | 実装計画 | Overview, Steps（シンプル構造）, Risks, Rollback |
+| `03_REVIEW.md` | レビュー記録 | Review Result（Status）, Findings, Required Changes, Nice-to-have |
+| `04_IMPLEMENT_LOG.md` | 実装ログ | 日付ベースのログ形式（Step, Summary, Files, Test Result） |
+| `05_REVISIONS.md` | 変更履歴 | Revision番号ベース（Reason, Changed Sections） |
+
 ## トラブルシューティング
 
 ### state.json が壊れた場合

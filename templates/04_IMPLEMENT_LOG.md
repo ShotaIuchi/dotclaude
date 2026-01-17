@@ -3,78 +3,52 @@
 > Plan: [02_PLAN.md](./02_PLAN.md)
 > Started: {{STARTED_AT}}
 
-## Progress
-
-| Step | Status | Started | Completed | Notes |
-|------|--------|---------|-----------|-------|
-| 1 | {{STATUS_1}} | {{STARTED_1}} | {{COMPLETED_1}} | {{NOTES_1}} |
-| 2 | {{STATUS_2}} | {{STARTED_2}} | {{COMPLETED_2}} | {{NOTES_2}} |
-
 ---
 
-## Step 1: {{STEP_1_TITLE}}
+## {{DATE_1}}
 
-### Started: {{STEP_1_STARTED}}
+### Step: {{STEP_NUMBER}}
 
-**Plan から:**
-- {{PLANNED_TASK_1_1}}
+**Summary:**
+{{SUMMARY}}
 
-### Changes Made
+**Files:**
+- `{{FILE_1}}`
+- `{{FILE_2}}`
 
-**{{FILE_1}}:**
-```diff
-{{DIFF_1}}
-```
-
-### Issues Encountered
-
-<!-- 実装中に発生した問題 -->
-- {{ISSUE_1}}
-
-### Resolution
-
-<!-- 問題の解決方法 -->
-- {{RESOLUTION_1}}
-
-### Completed: {{STEP_1_COMPLETED}}
-
-**実際の変更:**
-- {{ACTUAL_CHANGE_1}}
-
-**次のステップへの申し送り:**
-- {{HANDOVER_1}}
-
----
-
-## Step 2: {{STEP_2_TITLE}}
-
-### Started: {{STEP_2_STARTED}}
-
-<!-- Step 2 の実装ログ -->
-
----
-
-## Summary
-
-### Files Changed
-
-| File | Lines Added | Lines Removed | Type |
-|------|-------------|---------------|------|
-| {{FILE_1}} | {{ADDED_1}} | {{REMOVED_1}} | {{TYPE_1}} |
-
-### Test Results
-
+**Test Result:**
 ```
 {{TEST_OUTPUT}}
 ```
 
-### Build Status
-
-```
-{{BUILD_OUTPUT}}
-```
-
-## Notes
-
-<!-- 全体を通しての気づき、次回への教訓 -->
+**Notes:**
 {{NOTES}}
+
+---
+
+## {{DATE_2}}
+
+### Step: {{STEP_NUMBER_2}}
+
+**Summary:**
+{{SUMMARY_2}}
+
+**Files:**
+- `{{FILE_3}}`
+
+**Test Result:**
+```
+{{TEST_OUTPUT_2}}
+```
+
+**Notes:**
+{{NOTES_2}}
+
+---
+
+## Final Summary
+
+| Date | Step | Status | Notes |
+|------|------|--------|-------|
+| {{DATE_1}} | {{STEP_NUMBER}} | {{STATUS_1}} | {{FINAL_NOTES_1}} |
+| {{DATE_2}} | {{STEP_NUMBER_2}} | {{STATUS_2}} | {{FINAL_NOTES_2}} |

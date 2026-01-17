@@ -4,66 +4,31 @@
 > Reviewed: {{REVIEWED_AT}}
 > Reviewer: {{REVIEWER}}
 
-## Review Summary
+## Review Result
 
-<!-- レビュー全体の所見 -->
-{{SUMMARY}}
-
-## Checklist
-
-### Code Quality
-- [ ] コードスタイルがプロジェクト規約に準拠
-- [ ] 適切なエラーハンドリング
-- [ ] 不要なコメント・デバッグコードの除去
-
-### Functionality
-- [ ] 仕様通りに動作する
-- [ ] エッジケースが考慮されている
-- [ ] パフォーマンスに問題がない
-
-### Testing
-- [ ] テストが追加されている
-- [ ] テストがパスする
-- [ ] テストカバレッジが十分
-
-### Documentation
-- [ ] 必要なドキュメントが更新されている
-- [ ] API ドキュメントが最新
-
-### Security
-- [ ] セキュリティ上の問題がない
-- [ ] 機密情報がハードコードされていない
+<!-- approved / changes-requested -->
+**Status:** {{STATUS}}
 
 ## Findings
 
-### Must Fix (Blocking)
+<!-- レビューで発見した問題点 -->
+- {{FINDING_1}}
+- {{FINDING_2}}
+
+## Required Changes
 
 <!-- 修正必須の指摘 -->
 | # | Location | Issue | Suggestion |
 |---|----------|-------|------------|
 | 1 | {{LOCATION_1}} | {{ISSUE_1}} | {{SUGGESTION_1}} |
 
-### Should Fix (Non-blocking)
+## Nice-to-have
 
-<!-- 修正推奨の指摘 -->
-| # | Location | Issue | Suggestion |
-|---|----------|-------|------------|
-| 1 | {{LOCATION_2}} | {{ISSUE_2}} | {{SUGGESTION_2}} |
+<!-- 修正推奨・改善提案（必須ではない） -->
+- {{NICE_TO_HAVE_1}}
+- {{NICE_TO_HAVE_2}}
 
-### Suggestions (Optional)
+## Notes
 
-<!-- 改善提案 -->
-- {{SUGGESTION_3}}
-
-## Decision
-
-<!-- Approved / Request Changes / Needs Discussion -->
-**Status:** {{STATUS}}
-
-**Comments:**
-{{COMMENTS}}
-
-## Follow-up Actions
-
-<!-- レビュー後の対応事項 -->
-- [ ] {{ACTION_1}}
+<!-- レビューコメント、補足情報 -->
+{{NOTES}}

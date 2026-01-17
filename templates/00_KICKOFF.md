@@ -1,6 +1,7 @@
 # Kickoff: {{WORK_ID}}
 
 > Issue: #{{ISSUE_NUMBER}}
+> Owner: {{OWNER}}
 > Created: {{CREATED_AT}}
 > Revision: {{REVISION}}
 
@@ -29,8 +30,28 @@
 
 ## Dependencies
 
-<!-- 前提となる他の作業や外部要因 -->
-- {{DEPENDENCY_1}}
+<!-- 並行開発時の衝突防止のため構造化 -->
+
+### Depends on
+
+<!-- この作業が依存する他の作業・外部要因 -->
+- {{DEPENDS_ON_1}}
+
+### Impacts
+
+<!-- この作業が影響を与える可能性のある箇所 -->
+- {{IMPACTS_1}}
+
+### Conflicts
+
+<!-- 並行作業で衝突する可能性のある作業 -->
+- {{CONFLICTS_1}}
+
+## Open Questions
+
+<!-- AIが勝手に決めてはいけない項目。人間の判断が必要な点を列挙 -->
+- [ ] {{QUESTION_1}}
+- [ ] {{QUESTION_2}}
 
 ## Notes
 
