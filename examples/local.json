@@ -1,0 +1,10 @@
+{
+  "works": {
+    "FEAT-123-export-csv": {
+      "worktree_path": ".worktrees/feat-123-export-csv"
+    },
+    "FIX-456-login-error": {
+      "worktree_path": ".worktrees/fix-456-login-error"
+    }
+  }
+}

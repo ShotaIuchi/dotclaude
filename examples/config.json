@@ -1,0 +1,16 @@
+{
+  "default_base_branch": "develop",
+  "base_branch_candidates": ["develop", "main", "master"],
+  "allow_pattern_candidates": ["release/.*", "hotfix/.*"],
+  "branch_prefix": {
+    "FEAT": "feat",
+    "FIX": "fix",
+    "REFACTOR": "refactor",
+    "CHORE": "chore",
+    "RFC": "rfc"
+  },
+  "worktree": {
+    "enabled": true,
+    "root_dir": ".worktrees"
+  }
+}
