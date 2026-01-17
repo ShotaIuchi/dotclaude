@@ -28,12 +28,12 @@ AI（Claude Code）と人間が同じ状態・同じ成果物を見て作業す�
 # 1. このリポジトリをクローン
 git clone https://github.com/your-org/dotclaude.git
 
-# 2. プロジェクトの .claude/ にシンボリックリンクを作成
-cd your-project
-ln -s /path/to/dotclaude/.claude/commands .claude/commands
+# 2. dotclaude を ~/.claude にシンボリックリンク（グローバル設定）
+ln -s /path/to/dotclaude/dotclaude ~/.claude
 
-# または直接コピー
-cp -r /path/to/dotclaude/.claude/commands .claude/commands
+# または、プロジェクト単位で利用する場合
+cd your-project
+ln -s /path/to/dotclaude/dotclaude .claude
 ```
 
 ### 初期化
@@ -114,6 +114,22 @@ cp -r /path/to/dotclaude/.claude/commands .claude/commands
 /wf1-kickoff revise "スコープを縮小して、CSV エクスポートのみに絞る"
 ```
 
+## リポジトリ構成
+
+```
+dotclaude/                 # このリポジトリ
+├── dotclaude/             # ~/.claude にリンクする対象
+│   └── commands/          # スラッシュコマンド定義
+├── guides/                # アーキテクチャガイド
+│   ├── android/
+│   ├── ios/
+│   └── kmp/
+├── examples/              # 設定ファイル例
+├── scripts/               # シェルスクリプト
+├── templates/             # ドキュメントテンプレート
+└── README.md
+```
+
 ## ディレクトリ構成
 
 ```
@@ -130,7 +146,7 @@ your-project/
 │       ├── 03_REVIEW.md
 │       ├── 04_IMPLEMENT_LOG.md
 │       └── 05_REVISIONS.md
-└── .claude/
+└── .claude/             # dotclaude からのシンボリックリンク
     └── commands/        # スラッシュコマンド
         ├── wf0-workspace.md
         ├── wf0-restore.md
