@@ -56,7 +56,7 @@ git checkout -b <branch_name> <base_branch>
 `.wf/` ディレクトリがなければ作成：
 
 ```bash
-source scripts/wf-init.sh
+source "$HOME/.claude/scripts/wf-init.sh"
 wf_init_project
 ```
 

@@ -23,7 +23,7 @@ $ARGUMENTS を解析して以下の処理を実行してください。
 ```bash
 if [ ! -f .wf/state.json ]; then
   echo "WF システムが初期化されていません"
-  echo "scripts/wf-init.sh を実行してください"
+  echo "$HOME/.claude/scripts/wf-init.sh を実行してください"
   exit 1
 fi
 ```
