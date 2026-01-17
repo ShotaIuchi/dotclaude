@@ -117,41 +117,9 @@ Plan に記載された作業内容に従って実装：
 
 `04_IMPLEMENT_LOG.md` に追記：
 
-```markdown
----
+**テンプレート参照:** `~/.claude/templates/04_IMPLEMENT_LOG.md` を読み込んで使用してください。
 
-## Step <n>: <title>
-
-### Started: <timestamp>
-
-**Plan から:**
-- <planned_task1>
-- <planned_task2>
-
-### Changes Made
-
-**<file1>:**
-```diff
-<変更差分>
-```
-
-### Issues Encountered
-
-- <発生した問題>
-
-### Resolution
-
-- <解決方法>
-
-### Completed: <timestamp>
-
-**実際の変更:**
-- <actual_change1>
-- <actual_change2>
-
-**次のステップへの申し送り:**
-- <handover_notes>
-```
+テンプレートのステップセクション構造に従い、実装内容を記録します。
 
 ### 8. state.json の更新
 

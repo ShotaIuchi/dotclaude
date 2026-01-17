@@ -49,60 +49,9 @@ Plan の内容を確認し、以下の観点でレビュー：
 
 レビュー結果を `03_REVIEW.md` に記録：
 
-```markdown
-# Review: <work-id>
+**テンプレート参照:** `~/.claude/templates/03_REVIEW.md` を読み込んで使用してください。
 
-> Plan: [02_PLAN.md](./02_PLAN.md)
-> Reviewed: <timestamp>
-> Reviewer: <reviewer>
-
-## Review Summary
-
-<レビュー全体の所見>
-
-## Checklist
-
-### Code Quality
-- [x] コードスタイルがプロジェクト規約に準拠
-- [x] 適切なエラーハンドリング
-- [ ] 不要なコメント・デバッグコードの除去
-
-### Functionality
-- [x] 仕様通りに動作する
-- [ ] エッジケースが考慮されている
-- [x] パフォーマンスに問題がない
-
-...
-
-## Findings
-
-### Must Fix (Blocking)
-
-| # | Location | Issue | Suggestion |
-|---|----------|-------|------------|
-| 1 | Step 2 | DB接続のエラーハンドリングが不足 | try-catch の追加 |
-
-### Should Fix (Non-blocking)
-
-| # | Location | Issue | Suggestion |
-|---|----------|-------|------------|
-| 1 | Step 1 | 変数名が不明確 | より説明的な名前に変更 |
-
-### Suggestions (Optional)
-
-- ログ出力の追加を検討
-
-## Decision
-
-**Status:** Request Changes
-
-**Comments:**
-Step 2 のエラーハンドリングを追加後、再レビューしてください。
-
-## Follow-up Actions
-
-- [ ] Step 2 にエラーハンドリングを追加
-```
+テンプレートのプレースホルダをレビュー結果で置換します。
 
 ### 3. Code レビュー
 

@@ -5,50 +5,55 @@
 
 ---
 
-## {{DATE_1}}
+## Step {{STEP_NUMBER}}: {{STEP_TITLE}}
 
-### Step: {{STEP_NUMBER}}
+### Started: {{STEP_STARTED_AT}}
 
-**Summary:**
-{{SUMMARY}}
+### Planned
 
-**Files:**
-- `{{FILE_1}}`
-- `{{FILE_2}}`
+<!-- Plan から抽出した予定作業 -->
+- {{PLANNED_TASK_1}}
+- {{PLANNED_TASK_2}}
 
-**Test Result:**
+### Changes Made
+
+<!-- 実際に行った変更（diff 形式推奨） -->
+
+**{{FILE_1}}:**
+```diff
+{{DIFF_1}}
+```
+
+**{{FILE_2}}:**
+```diff
+{{DIFF_2}}
+```
+
+### Issues Encountered
+
+<!-- 発生した問題と解決方法 -->
+| Issue | Resolution |
+|-------|------------|
+| {{ISSUE_1}} | {{RESOLUTION_1}} |
+
+### Test Result
+
 ```
 {{TEST_OUTPUT}}
 ```
 
-**Notes:**
-{{NOTES}}
+### Completed: {{STEP_COMPLETED_AT}}
 
----
+### Handover
 
-## {{DATE_2}}
-
-### Step: {{STEP_NUMBER_2}}
-
-**Summary:**
-{{SUMMARY_2}}
-
-**Files:**
-- `{{FILE_3}}`
-
-**Test Result:**
-```
-{{TEST_OUTPUT_2}}
-```
-
-**Notes:**
-{{NOTES_2}}
+<!-- 次のステップへの申し送り事項 -->
+- {{HANDOVER_1}}
+- {{HANDOVER_2}}
 
 ---
 
 ## Final Summary
 
-| Date | Step | Status | Notes |
-|------|------|--------|-------|
-| {{DATE_1}} | {{STEP_NUMBER}} | {{STATUS_1}} | {{FINAL_NOTES_1}} |
-| {{DATE_2}} | {{STEP_NUMBER_2}} | {{STATUS_2}} | {{FINAL_NOTES_2}} |
+| Step | Title | Status | Started | Completed | Notes |
+|------|-------|--------|---------|-----------|-------|
+| {{STEP_NUMBER}} | {{STEP_TITLE}} | {{STATUS}} | {{STARTED}} | {{COMPLETED}} | {{NOTES}} |

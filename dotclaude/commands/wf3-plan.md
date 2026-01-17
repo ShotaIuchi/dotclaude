@@ -81,71 +81,9 @@ Spec から以下を抽出：
 
 ### 5. Plan の作成
 
-```markdown
-# Plan: <work-id>
+**テンプレート参照:** `~/.claude/templates/02_PLAN.md` を読み込んで使用してください。
 
-> Spec: [01_SPEC.md](./01_SPEC.md)
-> Created: <timestamp>
-> Last Updated: <timestamp>
-
-## Implementation Steps
-
-### Step 1: <タイトル>
-
-**目的:** <このステップで達成すること>
-
-**対象ファイル:**
-- `<file1>`
-- `<file2>`
-
-**作業内容:**
-1. <タスク1>
-2. <タスク2>
-
-**完了条件:**
-- [ ] <条件1>
-- [ ] <条件2>
-
-**見積もり:** <small/medium/large>
-
----
-
-### Step 2: <タイトル>
-
-**目的:** <このステップで達成すること>
-
-**対象ファイル:**
-- `<file3>`
-
-**作業内容:**
-1. <タスク1>
-
-**完了条件:**
-- [ ] <条件1>
-
-**依存:** Step 1
-
-**見積もり:** <small/medium/large>
-
----
-
-## Summary
-
-| Step | Title | Status | Notes |
-|------|-------|--------|-------|
-| 1 | <title1> | pending | |
-| 2 | <title2> | pending | |
-
-## Risk Assessment
-
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| <risk1> | <high/medium/low> | <high/medium/low> | <対策> |
-
-## Notes
-
-<実装時の注意点>
-```
+テンプレートのプレースホルダを調査結果と Spec の内容で置換します。
 
 ### 6. ユーザーとの確認
 

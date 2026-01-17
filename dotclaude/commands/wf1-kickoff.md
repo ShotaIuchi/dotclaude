@@ -57,38 +57,9 @@ gh issue view "$issue_number" --json number,title,body,labels,assignees,mileston
 
 3. `00_KICKOFF.md` を作成
 
-```markdown
-# Kickoff: <work-id>
+**テンプレート参照:** `~/.claude/templates/00_KICKOFF.md` を読み込んで使用してください。
 
-> Issue: #<issue_number>
-> Created: <timestamp>
-> Revision: 1
-
-## Goal
-
-<対話で決定した目標>
-
-## Success Criteria
-
-- [ ] <条件1>
-- [ ] <条件2>
-
-## Constraints
-
-- <制約1>
-
-## Non-goals
-
-- <スコープ外1>
-
-## Dependencies
-
-- <依存1>
-
-## Notes
-
-<補足>
-```
+テンプレートのプレースホルダを対話で決定した内容で置換します。
 
 #### update
 
@@ -96,6 +67,7 @@ gh issue view "$issue_number" --json number,title,body,labels,assignees,mileston
 2. ユーザーと対話して変更点を確認
 3. `00_KICKOFF.md` を更新
 4. `05_REVISIONS.md` に履歴を追記
+   - **テンプレート参照:** `~/.claude/templates/05_REVISIONS.md` を読み込んで使用
 5. state.json の `kickoff.revision` をインクリメント
 
 #### revise "<指示>"

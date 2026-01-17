@@ -57,65 +57,9 @@ Kickoff の内容に基づいて関連コードを調査：
 
 ### 4. Spec の作成
 
-```markdown
-# Spec: <work-id>
+**テンプレート参照:** `~/.claude/templates/01_SPEC.md` を読み込んで使用してください。
 
-> Kickoff: [00_KICKOFF.md](./00_KICKOFF.md)
-> Created: <timestamp>
-> Last Updated: <timestamp>
-
-## Overview
-
-<Kickoff の Goal を元に、変更の概要を記述>
-
-## Affected Components
-
-| Component | Impact | Notes |
-|-----------|--------|-------|
-| <component1> | <high/medium/low> | <notes> |
-
-## Detailed Changes
-
-### <変更1のタイトル>
-
-<変更内容の詳細>
-
-**Before:**
-```
-<変更前のコード/仕様>
-```
-
-**After:**
-```
-<変更後のコード/仕様>
-```
-
-## API Changes
-
-<API の変更がある場合は詳細を記述>
-
-## Data Changes
-
-<データ構造の変更がある場合は詳細を記述>
-
-## UI Changes
-
-<UI の変更がある場合は詳細を記述>
-
-## Test Strategy
-
-- Unit Tests: <ユニットテストの方針>
-- Integration Tests: <統合テストの方針>
-- Manual Tests: <手動テストの方針>
-
-## Rollback Plan
-
-<問題発生時のロールバック手順>
-
-## References
-
-- <参考資料>
-```
+テンプレートのプレースホルダを調査結果と Kickoff の内容で置換します。
 
 ### 5. 整合性の確認
 

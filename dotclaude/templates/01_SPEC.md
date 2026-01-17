@@ -65,6 +65,22 @@
 |-----------|--------|-------|
 | {{COMPONENT_1}} | {{IMPACT_1}} | {{NOTES_1}} |
 
+## Detailed Changes
+
+<!-- 変更内容の詳細（Before/After 形式） -->
+
+### {{CHANGE_TITLE}}
+
+**Before:**
+```
+{{BEFORE_CODE_OR_SPEC}}
+```
+
+**After:**
+```
+{{AFTER_CODE_OR_SPEC}}
+```
+
 ## API Changes
 
 <!-- API の変更がある場合 -->
@@ -79,6 +95,13 @@
 
 <!-- UI の変更がある場合 -->
 {{UI_CHANGES}}
+
+## Test Strategy
+
+<!-- テスト戦略 -->
+- **Unit Tests:** {{UNIT_TEST_STRATEGY}}
+- **Integration Tests:** {{INTEGRATION_TEST_STRATEGY}}
+- **Manual Tests:** {{MANUAL_TEST_STRATEGY}}
 
 ## Assumptions
 

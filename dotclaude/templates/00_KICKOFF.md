@@ -1,7 +1,6 @@
 # Kickoff: {{WORK_ID}}
 
 > Issue: #{{ISSUE_NUMBER}}
-> Owner: {{OWNER}}
 > Created: {{CREATED_AT}}
 > Revision: {{REVISION}}
 
