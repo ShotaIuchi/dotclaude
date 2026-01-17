@@ -117,16 +117,14 @@ ln -s /path/to/dotclaude/dotclaude .claude
 ## リポジトリ構成
 
 ```
-dotclaude/                 # このリポジトリ
+dotclaude/                 # リポジトリルート
 ├── dotclaude/             # ~/.claude にリンクする対象
-│   └── commands/          # スラッシュコマンド定義
-├── guides/                # アーキテクチャガイド
-│   ├── android/
-│   ├── ios/
-│   └── kmp/
-├── examples/              # 設定ファイル例
-├── scripts/               # シェルスクリプト
-├── templates/             # ドキュメントテンプレート
+│   ├── commands/          # スラッシュコマンド定義
+│   ├── guides/            # アーキテクチャガイド
+│   ├── examples/          # 設定ファイル例
+│   ├── scripts/           # シェルスクリプト
+│   └── templates/         # ドキュメントテンプレート
+├── .gitignore
 └── README.md
 ```
 
@@ -215,7 +213,7 @@ Kickoff の更新時は、`05_REVISIONS.md` に履歴を残します。
 
 ## テンプレート
 
-`templates/` ディレクトリに各ドキュメントのテンプレートがあります。
+`dotclaude/templates/` ディレクトリに各ドキュメントのテンプレートがあります。
 プロジェクトに合わせてカスタマイズしてください。
 
 ### テンプレート設計思想
