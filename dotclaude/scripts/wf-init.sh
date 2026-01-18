@@ -13,10 +13,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/wf-utils.sh"
 source "${SCRIPT_DIR}/wf-state.sh"
 
-/**
- * WF システムをプロジェクトに初期化
- * @param $1 プロジェクトルート（オプション）
- */
+#
+# WF システムをプロジェクトに初期化
+# @param $1 プロジェクトルート（オプション）
+#
 wf_init_project() {
     local project_root="${1:-$(wf_get_project_root)}"
 
@@ -67,10 +67,10 @@ wf_init_project() {
     wf_success "WF システムの初期化が完了しました"
 }
 
-/**
- * デフォルトの config.json を作成
- * @param $1 プロジェクトルート
- */
+#
+# デフォルトの config.json を作成
+# @param $1 プロジェクトルート
+#
 wf_create_default_config() {
     local project_root="$1"
     local config_path="${project_root}/${WF_DIR}/config.json"
@@ -99,11 +99,11 @@ wf_create_default_config() {
 EOF
 }
 
-/**
- * デフォルトブランチを検出
- * @param $1 プロジェクトルート
- * @return デフォルトブランチ名
- */
+#
+# デフォルトブランチを検出
+# @param $1 プロジェクトルート
+# @return デフォルトブランチ名
+#
 wf_detect_default_branch() {
     local project_root="$1"
 
@@ -131,10 +131,10 @@ wf_detect_default_branch() {
     echo "main"
 }
 
-/**
- * .gitignore を更新して local.json を除外
- * @param $1 プロジェクトルート
- */
+#
+# .gitignore を更新して local.json を除外
+# @param $1 プロジェクトルート
+#
 wf_update_gitignore() {
     local project_root="$1"
     local gitignore_path="${project_root}/.gitignore"
@@ -160,12 +160,12 @@ wf_update_gitignore() {
     wf_info ".gitignore に ${entry} を追加しました"
 }
 
-/**
- * work 用のドキュメントディレクトリを作成
- * @param $1 work-id
- * @param $2 プロジェクトルート（オプション）
- * @return 作成したディレクトリパス
- */
+#
+# work 用のドキュメントディレクトリを作成
+# @param $1 work-id
+# @param $2 プロジェクトルート（オプション）
+# @return 作成したディレクトリパス
+#
 wf_create_work_docs_dir() {
     local work_id="$1"
     local project_root="${2:-$(wf_get_project_root)}"
@@ -182,13 +182,13 @@ wf_create_work_docs_dir() {
     echo "$docs_dir"
 }
 
-/**
- * worktree を作成
- * @param $1 work-id
- * @param $2 ブランチ名
- * @param $3 プロジェクトルート（オプション）
- * @return worktree パス
- */
+#
+# worktree を作成
+# @param $1 work-id
+# @param $2 ブランチ名
+# @param $3 プロジェクトルート（オプション）
+# @return worktree パス
+#
 wf_create_worktree() {
     local work_id="$1"
     local branch="$2"
@@ -236,11 +236,11 @@ wf_create_worktree() {
     echo "$worktree_path"
 }
 
-/**
- * worktree を削除
- * @param $1 worktree パス
- * @param $2 プロジェクトルート（オプション）
- */
+#
+# worktree を削除
+# @param $1 worktree パス
+# @param $2 プロジェクトルート（オプション）
+#
 wf_remove_worktree() {
     local worktree_path="$1"
     local project_root="${2:-$(wf_get_project_root)}"
