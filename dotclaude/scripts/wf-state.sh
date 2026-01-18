@@ -377,3 +377,87 @@ wf_advance_phase() {
     wf_update_work_field "$work_id" ".current" "$new_current" "$project_root"
     wf_update_work_field "$work_id" ".next" "$new_next" "$project_root"
 }
+
+# ==============================================================================
+# エージェント管理関数
+# ==============================================================================
+
+#
+# エージェントセッションを記録
+# @param $1 work-id
+# @param $2 エージェント名
+# @param $3 ステータス（running | completed | failed）
+# @param $4 プロジェクトルート（オプション）
+#
+wf_record_agent_session() {
+    local work_id="$1"
+    local agent_name="$2"
+    local status="$3"
+    local project_root="${4:-$(wf_get_project_root)}"
+
+    local timestamp
+    timestamp=$(wf_get_timestamp)
+
+    # agents オブジェクトが存在しない場合は初期化
+    local current_state
+    current_state=$(wf_read_state "$project_root")
+
+    local has_agents
+    has_agents=$(echo "$current_state" | jq -r ".works[\"${work_id}\"].agents // empty")
+
+    if [ -z "$has_agents" ]; then
+        wf_state_set ".works[\"${work_id}\"].agents = {\"last_used\": null, \"sessions\": {}}" "$project_root"
+    fi
+
+    # last_used を更新
+    wf_state_set ".works[\"${work_id}\"].agents.last_used = \"${agent_name}\"" "$project_root"
+
+    # セッション情報を更新
+    local session_data
+    session_data=$(cat << EOF
+{"status": "${status}", "last_run": "${timestamp}"}
+EOF
+)
+    wf_state_set ".works[\"${work_id}\"].agents.sessions[\"${agent_name}\"] = ${session_data}" "$project_root"
+}
+
+#
+# エージェントセッションのステータスを取得
+# @param $1 work-id
+# @param $2 エージェント名
+# @param $3 プロジェクトルート（オプション）
+# @return ステータス
+#
+wf_get_agent_status() {
+    local work_id="$1"
+    local agent_name="$2"
+    local project_root="${3:-$(wf_get_project_root)}"
+
+    wf_state_get ".works[\"${work_id}\"].agents.sessions[\"${agent_name}\"].status" "$project_root"
+}
+
+#
+# 最後に使用したエージェントを取得
+# @param $1 work-id
+# @param $2 プロジェクトルート（オプション）
+# @return エージェント名
+#
+wf_get_last_agent() {
+    local work_id="$1"
+    local project_root="${2:-$(wf_get_project_root)}"
+
+    wf_state_get ".works[\"${work_id}\"].agents.last_used" "$project_root"
+}
+
+#
+# エージェントセッション一覧を取得
+# @param $1 work-id
+# @param $2 プロジェクトルート（オプション）
+# @return セッション一覧（JSON）
+#
+wf_list_agent_sessions() {
+    local work_id="$1"
+    local project_root="${2:-$(wf_get_project_root)}"
+
+    wf_read_state "$project_root" | jq ".works[\"${work_id}\"].agents.sessions // {}"
+}

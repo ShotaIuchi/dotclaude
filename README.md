@@ -80,6 +80,12 @@ ln -s /path/to/dotclaude/dotclaude .claude
 | `/wf6-verify` | テスト・ビルド検証 |
 | `/wf6-verify pr` | 検証後にPR作成 |
 
+### エージェント
+
+| コマンド | 説明 |
+|---------|------|
+| `/agent <name> [params]` | サブエージェントを直接呼び出し |
+
 ## ワークフロー
 
 ### 基本フロー
@@ -119,6 +125,7 @@ ln -s /path/to/dotclaude/dotclaude .claude
 ```
 dotclaude/                 # リポジトリルート
 ├── dotclaude/             # ~/.claude にリンクする対象
+│   ├── agents/            # サブエージェント定義
 │   ├── commands/          # スラッシュコマンド定義
 │   ├── guides/            # アーキテクチャガイド
 │   ├── examples/          # 設定ファイル例
@@ -190,6 +197,55 @@ your-project/
   }
 }
 ```
+
+## サブエージェント
+
+Claude Code の Task ツールを活用した専門特化型のエージェント群です。
+ワークフローコマンドと連携して動作するほか、`/agent` コマンドで直接呼び出すこともできます。
+
+### ワークフロー支援型
+
+| エージェント | 用途 | 呼び出し元 |
+|-------------|------|-----------|
+| `research` | Issue 背景調査、関連コード特定 | wf1-kickoff |
+| `spec-writer` | 仕様書ドラフト作成 | wf2-spec |
+| `planner` | 実装計画立案 | wf3-plan |
+| `implementer` | 1ステップ実装支援 | wf5-implement |
+
+### タスク特化型
+
+| エージェント | 用途 |
+|-------------|------|
+| `reviewer` | コードレビュー |
+| `test-writer` | テスト作成 |
+| `refactor` | リファクタリング提案 |
+| `doc-writer` | ドキュメント作成 |
+
+### プロジェクト分析型
+
+| エージェント | 用途 |
+|-------------|------|
+| `codebase` | コードベース調査 |
+| `dependency` | 依存関係分析 |
+| `impact` | 影響範囲特定 |
+
+### エージェントの使用例
+
+```bash
+# Issue 背景調査
+/agent research issue=123
+
+# コードベース調査
+/agent codebase query="認証フローの実装箇所"
+
+# コードレビュー
+/agent reviewer files="src/auth/*.ts"
+
+# 影響範囲分析
+/agent impact target="src/utils/format.ts"
+```
+
+詳細は `dotclaude/agents/README.md` を参照してください。
 
 ## 重要な制約
 
