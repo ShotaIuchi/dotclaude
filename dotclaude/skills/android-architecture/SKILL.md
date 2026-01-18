@@ -1,6 +1,15 @@
 ---
 name: Android Architecture
 description: This skill should be used when implementing Android features, creating ViewModels, setting up Repositories, using Hilt, implementing Jetpack Compose, or following MVVM/UDF patterns on Android.
+references:
+  - path: ../../references/common/clean-architecture.md
+  - path: ../../references/common/testing-strategy.md
+  - path: ../../references/kotlin/coroutines.md
+  - path: ../../references/android/architecture.md
+external:
+  - id: android-arch-guide
+  - id: jetpack-compose-docs
+  - id: hilt-docs
 ---
 
 # Android Architecture
@@ -56,4 +65,7 @@ app/src/main/java/com/example/app/
 
 ## 詳細リファレンス
 
-より詳しい実装例やベストプラクティスは [references/ARCHITECTURE.md](references/ARCHITECTURE.md) を参照。
+- [クリーンアーキテクチャガイド](../../references/common/clean-architecture.md)
+- [テスト戦略ガイド](../../references/common/testing-strategy.md)
+- [Kotlin Coroutines ガイド](../../references/kotlin/coroutines.md)
+- [Android アーキテクチャ詳細](../../references/android/architecture.md)

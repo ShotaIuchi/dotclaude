@@ -1,0 +1,124 @@
+# 外部URL一元管理
+# SKILL.md の external セクションから id で参照
+
+# Android 関連
+android-arch-guide:
+  url: https://developer.android.com/topic/architecture
+  label: Android Architecture Guide (公式)
+
+jetpack-compose-docs:
+  url: https://developer.android.com/jetpack/compose
+  label: Jetpack Compose Documentation (公式)
+
+android-ui-layer:
+  url: https://developer.android.com/topic/architecture/ui-layer
+  label: Android UI Layer Guide
+
+android-data-layer:
+  url: https://developer.android.com/topic/architecture/data-layer
+  label: Android Data Layer Guide
+
+android-domain-layer:
+  url: https://developer.android.com/topic/architecture/domain-layer
+  label: Android Domain Layer Guide
+
+hilt-docs:
+  url: https://developer.android.com/training/dependency-injection/hilt-android
+  label: Hilt Dependency Injection
+
+room-docs:
+  url: https://developer.android.com/training/data-storage/room
+  label: Room Persistence Library
+
+# Kotlin 関連
+kotlin-coroutines:
+  url: https://kotlinlang.org/docs/coroutines-overview.html
+  label: Kotlin Coroutines (公式)
+
+kotlin-flow:
+  url: https://kotlinlang.org/docs/flow.html
+  label: Kotlin Flow (公式)
+
+kmp-docs:
+  url: https://kotlinlang.org/docs/multiplatform.html
+  label: Kotlin Multiplatform (公式)
+
+compose-multiplatform:
+  url: https://www.jetbrains.com/lp/compose-multiplatform/
+  label: Compose Multiplatform (JetBrains)
+
+# iOS 関連
+swift-concurrency:
+  url: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/
+  label: Swift Concurrency (公式)
+
+swiftui-docs:
+  url: https://developer.apple.com/documentation/swiftui/
+  label: SwiftUI Documentation (Apple)
+
+combine-docs:
+  url: https://developer.apple.com/documentation/combine
+  label: Combine Framework (Apple)
+
+swift-data:
+  url: https://developer.apple.com/documentation/swiftdata
+  label: SwiftData (Apple)
+
+# AWS 関連
+aws-sam-docs:
+  url: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html
+  label: AWS SAM Developer Guide (公式)
+
+aws-lambda-docs:
+  url: https://docs.aws.amazon.com/lambda/latest/dg/welcome.html
+  label: AWS Lambda Developer Guide (公式)
+
+aws-api-gateway:
+  url: https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html
+  label: Amazon API Gateway Developer Guide
+
+aws-dynamodb:
+  url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html
+  label: Amazon DynamoDB Developer Guide
+
+aws-cloudformation:
+  url: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
+  label: AWS CloudFormation User Guide
+
+lambda-powertools-python:
+  url: https://docs.powertools.aws.dev/lambda/python/latest/
+  label: AWS Lambda Powertools for Python
+
+# テスト関連
+junit5-docs:
+  url: https://junit.org/junit5/docs/current/user-guide/
+  label: JUnit 5 User Guide
+
+mockk-docs:
+  url: https://mockk.io/
+  label: MockK (Kotlin Mocking Library)
+
+kotest-docs:
+  url: https://kotest.io/docs/framework/framework.html
+  label: Kotest Framework
+
+turbine-docs:
+  url: https://github.com/cashapp/turbine
+  label: Turbine (Flow Testing)
+
+xctest-docs:
+  url: https://developer.apple.com/documentation/xctest
+  label: XCTest (Apple)
+
+# 設計パターン・原則
+clean-architecture-book:
+  url: https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html
+  label: Clean Architecture (Robert C. Martin)
+
+solid-principles:
+  url: https://en.wikipedia.org/wiki/SOLID
+  label: SOLID Principles (Wikipedia)
+
+dependency-injection:
+  url: https://en.wikipedia.org/wiki/Dependency_injection
+  label: Dependency Injection (Wikipedia)

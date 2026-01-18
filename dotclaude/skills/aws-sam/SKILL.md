@@ -1,6 +1,13 @@
 ---
 name: AWS SAM
 description: AWS SAMを使用したサーバーレスアプリケーションの開発、Lambda関数の実装、テンプレート設計、ローカルテスト、デプロイメント時に参照するスキル。
+references:
+  - path: ../../references/aws/sam-template.md
+external:
+  - id: aws-sam-docs
+  - id: aws-lambda-docs
+  - id: aws-api-gateway
+  - id: lambda-powertools-python
 ---
 
 # AWS SAM (Serverless Application Model)
@@ -72,13 +79,4 @@ project/
 
 ## 詳細リファレンス
 
-より詳しい実装例やベストプラクティスは [references/ARCHITECTURE.md](references/ARCHITECTURE.md) を参照。
-
-- SAM テンプレート構造
-- リソースタイプ詳細
-- Lambda 関数の設計パターン
-- API Gateway 統合
-- Lambda Layers
-- IAM とセキュリティ
-- ローカル開発とテスト
-- CI/CD パイプライン
+- [AWS SAM テンプレートとベストプラクティス](../../references/aws/sam-template.md)
