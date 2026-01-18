@@ -110,11 +110,22 @@ echo "   Uncommitted changes: $(git status --porcelain | wc -l | tr -d ' ')"
 ### 5. worktree 情報（有効な場合）
 
 ```bash
-if [ "$(jq -r '.worktree.enabled' .wf/config.json)" = "true" ]; then
-  worktree_path=$(jq -r ".works[\"$work_id\"].worktree_path // empty" .wf/local.json)
-  if [ -n "$worktree_path" ]; then
+if [ -f ".wf/config.json" ] && [ "$(jq -r '.worktree.enabled // false' .wf/config.json)" = "true" ]; then
+  # local.json の存在確認
+  if [ ! -f ".wf/local.json" ]; then
     echo ""
-    echo "🌳 Worktree: $worktree_path"
+    echo "⚠️  worktree が有効ですが local.json が見つかりません"
+    echo ""
+    echo "現在の worktree 一覧:"
+    git worktree list
+    echo ""
+    echo "/wf0-restore を実行して worktree を再構成してください"
+  else
+    worktree_path=$(jq -r ".works[\"$work_id\"].worktree_path // empty" .wf/local.json)
+    if [ -n "$worktree_path" ]; then
+      echo ""
+      echo "🌳 Worktree: $worktree_path"
+    fi
   fi
 fi
 ```

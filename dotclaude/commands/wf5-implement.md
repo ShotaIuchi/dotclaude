@@ -154,9 +154,39 @@ fi
 
 ### 10. コミット
 
+コミット種別を決定：
+
+```bash
+# config.json からコミット設定を確認
+if [ -f ".wf/config.json" ]; then
+  type_detection=$(jq -r '.commit.type_detection // "auto"' .wf/config.json)
+  default_type=$(jq -r '.commit.default_type // "feat"' .wf/config.json)
+else
+  type_detection="auto"
+  default_type="feat"
+fi
+
+# コミット種別の決定
+if [ "$type_detection" = "auto" ]; then
+  # Plan のステップ内容から推測
+  # bug/fix/修正/バグ などのキーワードがあれば fix
+  # それ以外は feat
+  commit_type="<auto_detected_type>"
+else
+  commit_type="$default_type"
+fi
+```
+
+**種別自動検出のルール（type_detection=auto）:**
+- ステップタイトルや目的に `bug`, `fix`, `修正`, `バグ` が含まれる → `fix`
+- `refactor`, `リファクタ` が含まれる → `refactor`
+- `test`, `テスト` が含まれる → `test`
+- `doc`, `ドキュメント` が含まれる → `docs`
+- それ以外 → `feat`
+
 ```bash
 git add <changed_files>
-git commit -m "feat(<scope>): <description>
+git commit -m "$commit_type(<scope>): <description>
 
 Step <n>/<total>: <step_title>
 Work: <work_id>

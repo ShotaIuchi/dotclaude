@@ -1,0 +1,23 @@
+{
+  "commit": {
+    "type_detection": "auto",
+    "default_type": "feat",
+    "type_map": {
+      "bug": "fix",
+      "feature": "feat",
+      "refactor": "refactor",
+      "docs": "docs",
+      "test": "test",
+      "chore": "chore"
+    }
+  },
+  "verify": {
+    "test": "npm test",
+    "build": "npm run build",
+    "lint": "npm run lint"
+  },
+  "worktree": {
+    "enabled": false,
+    "root_dir": ".worktrees"
+  }
+}

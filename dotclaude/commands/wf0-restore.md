@@ -18,7 +18,15 @@
 
 $ARGUMENTS を解析して work-id を取得し、以下の処理を実行してください。
 
-### 1. work-id の解決
+### 1. 前提条件チェック
+
+```bash
+# 必要なコマンドの存在確認
+command -v jq >/dev/null || { echo "ERROR: jq が必要です"; exit 1; }
+command -v git >/dev/null || { echo "ERROR: git が必要です"; exit 1; }
+```
+
+### 2. work-id の解決
 
 ```bash
 # 引数があれば使用
@@ -37,13 +45,13 @@ if [ -z "$work_id" ]; then
 fi
 ```
 
-### 2. リモートの最新情報を取得
+### 3. リモートの最新情報を取得
 
 ```bash
 git fetch --all --prune
 ```
 
-### 3. ブランチの復元
+### 4. ブランチの復元
 
 state.json から作業情報を取得：
 
@@ -69,7 +77,7 @@ else
 fi
 ```
 
-### 4. worktree の復元（オプション）
+### 5. worktree の復元（オプション）
 
 `config.worktree.enabled` が `true` の場合：
 
@@ -87,14 +95,14 @@ jq ".works[\"$work_id\"].worktree_path = \"$worktree_path\"" .wf/local.json > .w
 mv .wf/local.json.tmp .wf/local.json
 ```
 
-### 5. active_work の更新
+### 6. active_work の更新
 
 ```bash
 jq ".active_work = \"$work_id\"" .wf/state.json > .wf/state.json.tmp
 mv .wf/state.json.tmp .wf/state.json
 ```
 
-### 6. 状態表示
+### 7. 状態表示
 
 ```
 ✅ ワークスペースを復元しました

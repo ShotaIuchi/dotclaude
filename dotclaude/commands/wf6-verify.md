@@ -43,19 +43,30 @@ fi
 プロジェクトのテストを実行：
 
 ```bash
-# package.json の存在確認
-if [ -f "package.json" ]; then
-  npm test
+# config.json に test コマンドが定義されている場合はそれを使用
+if [ -f ".wf/config.json" ]; then
+  test_cmd=$(jq -r '.verify.test // empty' .wf/config.json)
+  if [ -n "$test_cmd" ]; then
+    eval "$test_cmd"
+  fi
 fi
 
-# pytest の存在確認
-if [ -f "pytest.ini" ] || [ -f "pyproject.toml" ]; then
-  pytest
-fi
+# config.json にコマンドがない場合はフォールバック
+if [ -z "$test_cmd" ]; then
+  # package.json の存在確認
+  if [ -f "package.json" ]; then
+    npm test
+  fi
 
-# go.mod の存在確認
-if [ -f "go.mod" ]; then
-  go test ./...
+  # pytest の存在確認
+  if [ -f "pytest.ini" ] || [ -f "pyproject.toml" ]; then
+    pytest
+  fi
+
+  # go.mod の存在確認
+  if [ -f "go.mod" ]; then
+    go test ./...
+  fi
 fi
 ```
 
@@ -80,43 +91,65 @@ Failed Tests:
 プロジェクトのビルドを実行：
 
 ```bash
-# Node.js
-if [ -f "package.json" ]; then
-  npm run build
+# config.json に build コマンドが定義されている場合はそれを使用
+if [ -f ".wf/config.json" ]; then
+  build_cmd=$(jq -r '.verify.build // empty' .wf/config.json)
+  if [ -n "$build_cmd" ]; then
+    eval "$build_cmd"
+  fi
 fi
 
-# Go
-if [ -f "go.mod" ]; then
-  go build ./...
-fi
+# config.json にコマンドがない場合はフォールバック
+if [ -z "$build_cmd" ]; then
+  # Node.js
+  if [ -f "package.json" ]; then
+    npm run build
+  fi
 
-# Rust
-if [ -f "Cargo.toml" ]; then
-  cargo build
+  # Go
+  if [ -f "go.mod" ]; then
+    go build ./...
+  fi
+
+  # Rust
+  if [ -f "Cargo.toml" ]; then
+    cargo build
+  fi
 fi
 ```
 
 ### 4. Lint/Format チェック
 
 ```bash
-# ESLint
-if [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ]; then
-  npm run lint
+# config.json に lint コマンドが定義されている場合はそれを使用
+if [ -f ".wf/config.json" ]; then
+  lint_cmd=$(jq -r '.verify.lint // empty' .wf/config.json)
+  if [ -n "$lint_cmd" ]; then
+    eval "$lint_cmd"
+  fi
 fi
 
-# Prettier
-if [ -f ".prettierrc" ]; then
-  npm run format:check
-fi
+# config.json にコマンドがない場合はフォールバック
+if [ -z "$lint_cmd" ]; then
+  # ESLint
+  if [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ]; then
+    npm run lint
+  fi
 
-# Black (Python)
-if [ -f "pyproject.toml" ]; then
-  black --check .
-fi
+  # Prettier
+  if [ -f ".prettierrc" ]; then
+    npm run format:check
+  fi
 
-# golangci-lint
-if [ -f ".golangci.yml" ]; then
-  golangci-lint run
+  # Black (Python)
+  if [ -f "pyproject.toml" ]; then
+    black --check .
+  fi
+
+  # golangci-lint
+  if [ -f ".golangci.yml" ]; then
+    golangci-lint run
+  fi
 fi
 ```
 

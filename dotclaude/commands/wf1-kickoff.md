@@ -39,7 +39,8 @@ revisions_path="$docs_dir/05_REVISIONS.md"
 work-id から Issue 番号を抽出して情報取得：
 
 ```bash
-issue_number=$(echo "$work_id" | sed 's/^[A-Z]*-\([0-9]*\)-.*/\1/')
+# ハイフン以外の任意文字に対応（feat-123-..., F1-123-..., FEAT-123-... 等）
+issue_number=$(echo "$work_id" | sed 's/^[^-]*-\([0-9]*\)-.*/\1/')
 gh issue view "$issue_number" --json number,title,body,labels,assignees,milestone
 ```
 

@@ -11,34 +11,27 @@
 
 ## Steps
 
-<!-- 実装ステップをシンプルに記載 -->
+<!-- 必要なステップ数だけ以下を繰り返す（目安: 5-10ステップ） -->
 
-### Step 1: {{STEP_1_TITLE}}
+### Step {{N}}: {{STEP_TITLE}}
 
-- **目的:** {{STEP_1_GOAL}}
+- **目的:** {{STEP_GOAL}}
 - **Files:** `{{FILE_1}}`, `{{FILE_2}}`
 - **Tasks:**
-  - {{TASK_1_1}}
-  - {{TASK_1_2}}
-- **Done when:** {{DONE_CRITERIA_1}}
-- **Size:** {{SIZE_1}}
+  - {{TASK_1}}
+  - {{TASK_2}}
+- **Done when:** {{DONE_CRITERIA}}
+- **Size:** {{SIZE}}
+- **Depends on:** {{DEPENDS_ON}}
 
-### Step 2: {{STEP_2_TITLE}}
-
-- **目的:** {{STEP_2_GOAL}}
-- **Files:** `{{FILE_3}}`
-- **Tasks:**
-  - {{TASK_2_1}}
-- **Done when:** {{DONE_CRITERIA_2}}
-- **Size:** {{SIZE_2}}
-- **Depends on:** Step 1
+<!-- ステップ数に応じて上記を繰り返す -->
 
 ## Progress
 
 | Step | Title | Status |
 |------|-------|--------|
-| 1 | {{STEP_1_TITLE}} | pending |
-| 2 | {{STEP_2_TITLE}} | pending |
+<!-- ステップ数に応じて行を追加 -->
+| {{N}} | {{STEP_TITLE}} | pending |
 
 ## Risks
 
