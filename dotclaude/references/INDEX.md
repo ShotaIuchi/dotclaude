@@ -8,9 +8,8 @@ skills/ から参照される共有リファレンスの索引。
 
 ```
 references/
-├── INDEX.md                    # この索引
-├── common/                     # 全 skill 共通
-│   ├── index.md               # 構成・優先順位・外部リンク
+├── INDEX.md                    # この索引 + 設計原則リンク
+├── common/                     # 全 skill 共通（index.md なし）
 │   ├── clean-architecture.md
 │   └── testing-strategy.md
 ├── kotlin/                     # Kotlin/Android/KMP 共通
@@ -30,13 +29,24 @@ references/
 
 ---
 
+## 設計原則（外部リンク）
+
+全スキル共通で参照すべき設計原則の原典。
+
+| 原則 | リンク | 優先度 |
+|------|--------|--------|
+| Clean Architecture | [The Clean Architecture (Robert C. Martin)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) | ★★★ 原典 |
+| SOLID Principles | [SOLID (Wikipedia)](https://en.wikipedia.org/wiki/SOLID) | ★★ 基礎知識 |
+| Dependency Injection | [Dependency Injection (Wikipedia)](https://en.wikipedia.org/wiki/Dependency_injection) | ★★ 基礎知識 |
+
+---
+
 ## カテゴリ別索引
 
 ### common/ - 共通リファレンス
 
 | ファイル | 説明 | 関連スキル |
 |---------|------|-----------|
-| [index.md](common/index.md) | 構成・優先順位・外部リンク | 全て |
 | [clean-architecture.md](common/clean-architecture.md) | クリーンアーキテクチャの原則とパターン | android, ios, kmp |
 | [testing-strategy.md](common/testing-strategy.md) | テスト戦略とベストプラクティス | android, ios, kmp |
 
