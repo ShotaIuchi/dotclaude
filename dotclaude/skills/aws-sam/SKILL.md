@@ -2,7 +2,7 @@
 name: AWS SAM
 description: AWS SAMを使用したサーバーレスアプリケーションの開発、Lambda関数の実装、テンプレート設計、ローカルテスト、デプロイメント時に参照するスキル。
 references:
-  - path: ../../references/aws/sam-template.md
+  - path: ../../references/services/aws/sam-template.md
 external:
   - id: aws-sam-docs
   - id: aws-lambda-docs
@@ -79,4 +79,4 @@ project/
 
 ## 詳細リファレンス
 
-- [AWS SAM テンプレートとベストプラクティス](../../references/aws/sam-template.md)
+- [AWS SAM テンプレートとベストプラクティス](../../references/services/aws/sam-template.md)

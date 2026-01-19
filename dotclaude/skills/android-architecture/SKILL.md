@@ -4,8 +4,8 @@ description: This skill should be used when implementing Android features, creat
 references:
   - path: ../../references/common/clean-architecture.md
   - path: ../../references/common/testing-strategy.md
-  - path: ../../references/kotlin/coroutines.md
-  - path: ../../references/android/architecture.md
+  - path: ../../references/languages/kotlin/coroutines.md
+  - path: ../../references/platforms/android/architecture.md
 external:
   - id: android-arch-guide
   - id: jetpack-compose-docs
@@ -67,5 +67,5 @@ app/src/main/java/com/example/app/
 
 - [クリーンアーキテクチャガイド](../../references/common/clean-architecture.md)
 - [テスト戦略ガイド](../../references/common/testing-strategy.md)
-- [Kotlin Coroutines ガイド](../../references/kotlin/coroutines.md)
-- [Android アーキテクチャ詳細](../../references/android/architecture.md)
+- [Kotlin Coroutines ガイド](../../references/languages/kotlin/coroutines.md)
+- [Android アーキテクチャ詳細](../../references/platforms/android/architecture.md)

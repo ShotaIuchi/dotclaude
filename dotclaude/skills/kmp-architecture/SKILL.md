@@ -4,8 +4,8 @@ description: This skill should be used when implementing KMP features, creating 
 references:
   - path: ../../references/common/clean-architecture.md
   - path: ../../references/common/testing-strategy.md
-  - path: ../../references/kotlin/coroutines.md
-  - path: ../../references/kotlin/kmp-architecture.md
+  - path: ../../references/languages/kotlin/coroutines.md
+  - path: ../../references/languages/kotlin/kmp-architecture.md
 external:
   - id: kmp-docs
   - id: compose-multiplatform
@@ -66,5 +66,5 @@ actual class PlatformContext
 
 - [クリーンアーキテクチャガイド](../../references/common/clean-architecture.md)
 - [テスト戦略ガイド](../../references/common/testing-strategy.md)
-- [Kotlin Coroutines ガイド](../../references/kotlin/coroutines.md)
-- [KMP アーキテクチャ詳細](../../references/kotlin/kmp-architecture.md)
+- [Kotlin Coroutines ガイド](../../references/languages/kotlin/coroutines.md)
+- [KMP アーキテクチャ詳細](../../references/languages/kotlin/kmp-architecture.md)

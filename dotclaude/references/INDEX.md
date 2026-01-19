@@ -9,22 +9,25 @@ skills/ から参照される共有リファレンスの索引。
 ```
 references/
 ├── INDEX.md                    # この索引 + 設計原則リンク
-├── common/                     # 全 skill 共通（index.md なし）
+├── common/                     # 全カテゴリ共通（ルートに残す）
 │   ├── clean-architecture.md
 │   └── testing-strategy.md
-├── kotlin/                     # Kotlin/Android/KMP 共通
-│   ├── index.md
-│   ├── coroutines.md
-│   └── kmp-architecture.md
-├── android/                    # Android 固有
-│   ├── index.md
-│   └── architecture.md
-├── ios/                        # iOS 固有
-│   ├── index.md
-│   └── architecture.md
-└── aws/                        # AWS 関連
-    ├── index.md
-    └── sam-template.md
+├── platforms/                  # プラットフォーム
+│   ├── android/
+│   │   ├── index.md
+│   │   └── architecture.md
+│   └── ios/
+│       ├── index.md
+│       └── architecture.md
+├── languages/                  # 言語
+│   └── kotlin/
+│       ├── index.md
+│       ├── coroutines.md
+│       └── kmp-architecture.md
+└── services/                   # クラウドサービス
+    └── aws/
+        ├── index.md
+        └── sam-template.md
 ```
 
 ---
@@ -50,34 +53,34 @@ references/
 | [clean-architecture.md](common/clean-architecture.md) | クリーンアーキテクチャの原則とパターン | android, ios, kmp |
 | [testing-strategy.md](common/testing-strategy.md) | テスト戦略とベストプラクティス | android, ios, kmp |
 
-### kotlin/ - Kotlin 関連
+### platforms/android/ - Android 固有
 
 | ファイル | 説明 | 関連スキル |
 |---------|------|-----------|
-| [index.md](kotlin/index.md) | 構成・優先順位・外部リンク | android, kmp |
-| [coroutines.md](kotlin/coroutines.md) | Kotlin Coroutines ベストプラクティス | android, kmp |
-| [kmp-architecture.md](kotlin/kmp-architecture.md) | Kotlin Multiplatform アーキテクチャ | kmp |
+| [index.md](platforms/android/index.md) | 構成・優先順位・外部リンク | android |
+| [architecture.md](platforms/android/architecture.md) | Android MVVM/UDF アーキテクチャ詳細 | android |
 
-### android/ - Android 固有
-
-| ファイル | 説明 | 関連スキル |
-|---------|------|-----------|
-| [index.md](android/index.md) | 構成・優先順位・外部リンク | android |
-| [architecture.md](android/architecture.md) | Android MVVM/UDF アーキテクチャ詳細 | android |
-
-### ios/ - iOS 固有
+### platforms/ios/ - iOS 固有
 
 | ファイル | 説明 | 関連スキル |
 |---------|------|-----------|
-| [index.md](ios/index.md) | 構成・優先順位・外部リンク | ios |
-| [architecture.md](ios/architecture.md) | iOS SwiftUI/MVVM アーキテクチャ詳細 | ios |
+| [index.md](platforms/ios/index.md) | 構成・優先順位・外部リンク | ios |
+| [architecture.md](platforms/ios/architecture.md) | iOS SwiftUI/MVVM アーキテクチャ詳細 | ios |
 
-### aws/ - AWS 関連
+### languages/kotlin/ - Kotlin 関連
 
 | ファイル | 説明 | 関連スキル |
 |---------|------|-----------|
-| [index.md](aws/index.md) | 構成・優先順位・外部リンク | aws-sam |
-| [sam-template.md](aws/sam-template.md) | AWS SAM テンプレートと実装パターン | aws-sam |
+| [index.md](languages/kotlin/index.md) | 構成・優先順位・外部リンク | android, kmp |
+| [coroutines.md](languages/kotlin/coroutines.md) | Kotlin Coroutines ベストプラクティス | android, kmp |
+| [kmp-architecture.md](languages/kotlin/kmp-architecture.md) | Kotlin Multiplatform アーキテクチャ | kmp |
+
+### services/aws/ - AWS 関連
+
+| ファイル | 説明 | 関連スキル |
+|---------|------|-----------|
+| [index.md](services/aws/index.md) | 構成・優先順位・外部リンク | aws-sam |
+| [sam-template.md](services/aws/sam-template.md) | AWS SAM テンプレートと実装パターン | aws-sam |
 
 ---
 
@@ -87,40 +90,40 @@ references/
 
 ```yaml
 references:
-  - path: ../references/android/index.md          # まず index.md を参照
+  - path: ../references/platforms/android/index.md   # まず index.md を参照
   - path: ../references/common/clean-architecture.md
   - path: ../references/common/testing-strategy.md
-  - path: ../references/kotlin/coroutines.md
-  - path: ../references/android/architecture.md
+  - path: ../references/languages/kotlin/coroutines.md
+  - path: ../references/platforms/android/architecture.md
 ```
 
 ### ios-architecture
 
 ```yaml
 references:
-  - path: ../references/ios/index.md              # まず index.md を参照
+  - path: ../references/platforms/ios/index.md       # まず index.md を参照
   - path: ../references/common/clean-architecture.md
   - path: ../references/common/testing-strategy.md
-  - path: ../references/ios/architecture.md
+  - path: ../references/platforms/ios/architecture.md
 ```
 
 ### kmp-architecture
 
 ```yaml
 references:
-  - path: ../references/kotlin/index.md           # まず index.md を参照
+  - path: ../references/languages/kotlin/index.md    # まず index.md を参照
   - path: ../references/common/clean-architecture.md
   - path: ../references/common/testing-strategy.md
-  - path: ../references/kotlin/coroutines.md
-  - path: ../references/kotlin/kmp-architecture.md
+  - path: ../references/languages/kotlin/coroutines.md
+  - path: ../references/languages/kotlin/kmp-architecture.md
 ```
 
 ### aws-sam
 
 ```yaml
 references:
-  - path: ../references/aws/index.md              # まず index.md を参照
-  - path: ../references/aws/sam-template.md
+  - path: ../references/services/aws/index.md        # まず index.md を参照
+  - path: ../references/services/aws/sam-template.md
 ```
 
 ---
@@ -134,13 +137,22 @@ references:
 name: Skill Name
 description: ...
 references:
-  - path: ../references/{category}/index.md       # まず index.md を参照
-  - path: ../references/{category}/{file}.md      # 詳細ファイル
+  - path: ../references/{group}/{category}/index.md  # まず index.md を参照
+  - path: ../references/{group}/{category}/{file}.md # 詳細ファイル
 ---
 ```
 
 ### 相対パスの規則
 
-- SKILL.md からの相対パス: `../references/{category}/{file}.md`
+- SKILL.md からの相対パス: `../references/{group}/{category}/{file}.md`
 - 全てのパスは SKILL.md を起点とする
 - 各カテゴリの index.md で外部リンクと優先順位を確認可能
+
+### グループ分類
+
+| グループ | 説明 | 例 |
+|---------|------|-----|
+| common/ | 全カテゴリ共通 | clean-architecture, testing-strategy |
+| platforms/ | プラットフォーム固有 | android, ios |
+| languages/ | プログラミング言語固有 | kotlin |
+| services/ | クラウドサービス固有 | aws |
