@@ -24,6 +24,21 @@ AI（Claude Code）と人間が同じ状態・同じ成果物を見て作業す�
 
 ### インストール
 
+#### 方法1: amu を使用（推奨）
+
+[amu](https://github.com/ShotaIuchi/amu) を使うと、複数の dotclaude 設定を簡単に管理できます。
+
+```bash
+# 1. このリポジトリをクローン
+git clone https://github.com/your-org/dotclaude.git
+
+# 2. ~/.claude ディレクトリで amu add を実行
+cd ~/.claude
+amu add /path/to/dotclaude/dotclaude
+```
+
+#### 方法2: シンボリックリンク
+
 ```bash
 # 1. このリポジトリをクローン
 git clone https://github.com/your-org/dotclaude.git
