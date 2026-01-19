@@ -1,6 +1,6 @@
-# dotclaude 憲法（CONSTITUTION）
+# 憲法（CONSTITUTION）
 
-このファイルは dotclaude に対する**絶対的なルール**を定義する。
+このファイルは**絶対的なルール**を定義する。
 新規追加・変更時は必ず遵守すること。違反は即座に修正。
 
 ---
@@ -18,30 +18,10 @@
 - 既存のグループディレクトリに配置
 - 新グループが必要な場合、先にこの憲法を更新
 
-### references/ 構造
-```
-references/
-├── common/          # 全カテゴリ共通
-├── platforms/       # プラットフォーム（android, ios, web, desktop）
-├── languages/       # プログラミング言語（kotlin, swift, typescript）
-└── services/        # クラウドサービス（aws, gcp, azure）
-```
+### 構造定義の委譲
 
-### skills/ 構造
-```
-skills/
-└── {skill-name}/
-    └── SKILL.md     # 必須
-```
-
-### agents/ 構造
-```
-agents/
-├── _base/           # 共通制約・コンテキスト
-├── analysis/        # 分析系エージェント
-├── workflow/        # ワークフロー系エージェント
-└── task/            # タスク系エージェント
-```
+各ディレクトリの具体的な構造は、そのディレクトリ内の INDEX.md または README.md で定義する。
+憲法では原則のみを規定し、実装詳細は各ディレクトリに委譲する。
 
 ---
 
@@ -49,21 +29,8 @@ agents/
 
 ファイル追加時、関連ドキュメントを同時に作成・更新する。
 
-### 必須ドキュメント
-
-| 追加対象 | 必須ドキュメント |
-|---------|-----------------|
-| 新カテゴリ（references/{group}/{category}/） | index.md |
-| 新スキル（skills/{name}/） | SKILL.md |
-| 新エージェント（agents/{type}/{name}/） | AGENT.md |
-| 新コマンド（commands/） | ファイル先頭にコメントで説明 |
-
-### 更新必須
-
-| 追加対象 | 更新対象 |
-|---------|---------|
-| references/ 内のファイル | references/INDEX.md |
-| skills/ 内のスキル | 参照する references のパス |
+- 新しいカテゴリやモジュールを追加する場合、説明ドキュメントを同時作成
+- 既存の索引やリストがある場合、同時に更新
 
 ---
 
@@ -71,35 +38,14 @@ agents/
 
 既存の命名パターンに従う。新しい命名規則を導入しない。
 
-### ファイル名
-- ケバブケース: `clean-architecture.md`, `sam-template.md`
-- index ファイル: `index.md`（大文字は INDEX.md のみ）
-
-### ディレクトリ名
-- ケバブケース: `android-architecture/`, `aws-sam/`
-- 単数形: `platform/` ではなく `platforms/`（グループは複数形）
-
-### frontmatter
-```yaml
----
-name: 英語タイトル
-description: 英語説明（Claude が参照するため）
-references:
-  - path: 相対パス
----
-```
+- ファイル名・ディレクトリ名はケバブケース
+- 既存の命名慣習を踏襲
 
 ---
 
 ## 第4条: 依存関係の完結
 
 ファイル追加時、全ての依存関係を同時に解決する。
-
-### チェックリスト
-- [ ] 参照先ファイルが存在するか
-- [ ] 相対パスが正しいか
-- [ ] 参照元（INDEX.md, SKILL.md）を更新したか
-- [ ] 壊れたリンクがないか
 
 ### 禁止
 - 存在しないファイルへの参照
