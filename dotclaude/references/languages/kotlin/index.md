@@ -30,8 +30,8 @@ Coroutines、Flow、マルチプラットフォームアーキテクチャを定
 
 ## 関連リファレンス
 
-- [../common/clean-architecture.md](../common/clean-architecture.md) - 共通アーキテクチャ原則
-- [../common/testing-strategy.md](../common/testing-strategy.md) - テスト戦略
+- [clean-architecture.md](../../common/clean-architecture.md) - 共通アーキテクチャ原則
+- [testing-strategy.md](../../common/testing-strategy.md) - テスト戦略
 
 ---
 
