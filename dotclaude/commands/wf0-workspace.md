@@ -5,27 +5,44 @@
 ## 使用方法
 
 ```
-/wf0-workspace issue=<number>
+/wf0-workspace github=<number>
+/wf0-workspace jira=<jira-id> [title="タイトル"]
+/wf0-workspace local=<id> title="タイトル" [type=<TYPE>]
 ```
 
 ## 引数
 
-- `issue`: GitHub Issue 番号（必須）
+以下のいずれか1つを指定（排他的）：
+
+- `github`: GitHub Issue 番号
+- `jira`: Jira チケット ID（例: `ABC-123`）
+- `local`: ローカルID（任意の文字列）
+
+オプション引数：
+
+- `title`: タイトル（jira/local で必須、github では無視）
+- `type`: 作業タイプ（local のみ。FEAT/FIX/REFACTOR/CHORE/RFC。デフォルト: FEAT）
 
 ## 処理内容
 
-$ARGUMENTS を解析して issue 番号を取得し、以下の処理を実行してください。
+$ARGUMENTS を解析して ID 情報を取得し、以下の処理を実行してください。
 
 ### 1. 前提条件の確認
 
 ```bash
-# jq, gh が利用可能か確認
+# jq が利用可能か確認
 command -v jq >/dev/null || echo "ERROR: jq が必要です"
-command -v gh >/dev/null || echo "ERROR: gh が必要です"
-gh auth status || echo "ERROR: gh auth login を実行してください"
+
+# github モードの場合のみ gh を確認
+if [ -n "$github" ]; then
+  command -v gh >/dev/null || echo "ERROR: gh が必要です"
+  gh auth status || echo "ERROR: gh auth login を実行してください"
+fi
 ```
 
-### 2. GitHub Issue 情報の取得
+### 2. ID情報の取得と work-id の生成
+
+#### 2a. github モードの場合
 
 ```bash
 gh issue view <issue_number> --json number,title,labels,body
@@ -35,6 +52,18 @@ gh issue view <issue_number> --json number,title,labels,body
 - **TYPE**: ラベルから判定（feature/enhancement→FEAT, bug→FIX, refactor→REFACTOR, chore→CHORE, rfc→RFC）
 - **slug**: タイトルから生成（小文字、英数字とハイフンのみ、最大40文字）
 - **work-id**: `<TYPE>-<issue>-<slug>` 形式
+
+#### 2b. jira モードの場合
+
+- **TYPE**: Jira ID のプレフィックスをそのまま使用、または title から推測
+- **slug**: title から生成（小文字、英数字とハイフンのみ、最大40文字）
+- **work-id**: `JIRA-<jira-id>-<slug>` 形式（例: `JIRA-ABC-123-add-login`）
+
+#### 2c. local モードの場合
+
+- **TYPE**: 引数で指定（デフォルト: FEAT）
+- **slug**: title から生成（小文字、英数字とハイフンのみ、最大40文字）
+- **work-id**: `<TYPE>-<local-id>-<slug>` 形式（例: `FEAT-myid-add-feature`）
 
 ### 3. ベースブランチの選択
 
@@ -75,6 +104,11 @@ mkdir -p docs/wf/<work-id>/
     "<work-id>": {
       "current": "wf0-workspace",
       "next": "wf1-kickoff",
+      "source": {
+        "type": "github|jira|local",
+        "id": "<原ID>",
+        "title": "<タイトル>"
+      },
       "git": {
         "base": "<base_branch>",
         "branch": "<feature_branch>"
@@ -116,4 +150,6 @@ Docs: docs/wf/<work-id>/
 
 - 既存の作業がある場合は警告を表示
 - ブランチ名が既に存在する場合はエラー
-- Issue が見つからない場合はエラー
+- github モード: Issue が見つからない場合はエラー
+- jira/local モード: title が未指定の場合はエラー
+- github/jira/local は排他的（複数指定はエラー）
