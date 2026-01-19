@@ -1,8 +1,6 @@
-# Commit Guard Rule
+# Commit Guard Rule [MUST]
 
-## 優先順位（MUST）
-
-## 前提（MUST）
+## 前提
 
 commit を行う前に、以下のいずれかの場所に schema が存在することを確認する：
 
