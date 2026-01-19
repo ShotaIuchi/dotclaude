@@ -84,7 +84,27 @@ jq ".works[\"$work_id\"].current = \"wf2-spec\"" .wf/state.json > tmp && mv tmp 
 jq ".works[\"$work_id\"].next = \"wf3-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
 
-### 7. 完了メッセージ
+### 7. コミット
+
+Spec ドキュメントの変更をコミット：
+
+```bash
+# 新規作成の場合
+git add "$spec_path" .wf/state.json
+git commit -m "docs(wf): create spec <work-id>
+
+Work: <work-id>
+"
+
+# update の場合
+git add "$spec_path" .wf/state.json
+git commit -m "docs(wf): update spec <work-id>
+
+Work: <work-id>
+"
+```
+
+### 8. 完了メッセージ
 
 ```
 ✅ Spec ドキュメントを作成しました

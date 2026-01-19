@@ -100,7 +100,28 @@ jq ".works[\"$work_id\"].kickoff.revision = <new_revision>" .wf/state.json > tmp
 jq ".works[\"$work_id\"].kickoff.last_updated = \"<timestamp>\"" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
 
-### 5. 壁打ち対話のガイド
+### 5. コミット
+
+Kickoff ドキュメントの変更をコミット：
+
+```bash
+# 新規作成の場合
+git add "$kickoff_path" .wf/state.json
+git commit -m "docs(wf): create kickoff <work-id>
+
+Work: <work-id>
+"
+
+# update/revise の場合
+git add "$kickoff_path" "$revisions_path" .wf/state.json
+git commit -m "docs(wf): update kickoff <work-id>
+
+Revision: <new_revision>
+Work: <work-id>
+"
+```
+
+### 6. 壁打ち対話のガイド
 
 Kickoff 作成時は以下の観点でユーザーと対話：
 
@@ -127,7 +148,7 @@ Kickoff 作成時は以下の観点でユーザーと対話：
 - 他の作業に依存していますか？
 - 外部サービスや API に依存していますか？
 
-### 6. 完了メッセージ
+### 7. 完了メッセージ
 
 ```
 ✅ Kickoff ドキュメントを作成しました

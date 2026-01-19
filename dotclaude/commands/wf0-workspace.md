@@ -133,7 +133,19 @@ git worktree add .worktrees/<branch-name> <branch>
 
 `local.json` に worktree パスを記録。
 
-### 9. 完了メッセージ
+### 9. コミット
+
+ワークスペースの初期状態をコミット：
+
+```bash
+git add .wf/state.json docs/wf/<work-id>/
+git commit -m "docs(wf): create workspace <work-id>
+
+Source: <source_type> #<source_id>
+"
+```
+
+### 10. 完了メッセージ
 
 ```
 ✅ ワークスペースを作成しました

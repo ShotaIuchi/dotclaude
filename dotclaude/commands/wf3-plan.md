@@ -113,7 +113,29 @@ jq ".works[\"$work_id\"].next = \"wf4-review\"" .wf/state.json > tmp && mv tmp .
 jq ".works[\"$work_id\"].plan = {\"total_steps\": <n>, \"current_step\": 0, \"steps\": {}}" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
 
-### 8. 完了メッセージ
+### 8. コミット
+
+Plan ドキュメントの変更をコミット：
+
+```bash
+# 新規作成の場合
+git add "$plan_path" .wf/state.json
+git commit -m "docs(wf): create plan <work-id>
+
+Steps: <n>
+Work: <work-id>
+"
+
+# update の場合
+git add "$plan_path" .wf/state.json
+git commit -m "docs(wf): update plan <work-id>
+
+Steps: <n>
+Work: <work-id>
+"
+```
+
+### 9. 完了メッセージ
 
 ```
 ✅ Plan ドキュメントを作成しました
