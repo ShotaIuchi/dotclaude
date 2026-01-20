@@ -5,10 +5,12 @@
 commit を行う前に、以下のいずれかの場所に schema が存在することを確認する：
 
 **プロジェクト固有（優先）:**
+- `docs/rules/git.md`
 - `docs/rules/commit.schema.md`
 - `docs/rules/commit.md`
 
 **グローバル（フォールバック）:**
+- `.claude/rules/git.md`
 - `.claude/rules/commit.schema.md`
 - `.claude/rules/commit.md`
 
