@@ -1,4 +1,8 @@
-# Commit Guard Rule [MUST]
+---
+priority: MUST
+---
+
+# Commit Guard Rule
 
 ## 前提
 
