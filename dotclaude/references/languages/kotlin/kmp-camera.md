@@ -13,8 +13,10 @@ KMP/CMP でのカメラ機能実装のベストプラクティス。OS ネイテ
 5. [ViewModel と UiState](#viewmodel-と-uistate)
 6. [QR / 画像解析](#qr--画像解析)
 7. [判断基準表](#判断基準表)
-8. [パーミッション管理](#パーミッション管理)
-9. [ベストプラクティス一覧](#ベストプラクティス一覧)
+8. [リアルタイム解析](#リアルタイム解析)
+9. [パーミッション管理](#パーミッション管理)
+10. [ベストプラクティス一覧](#ベストプラクティス一覧)
+11. [エージェント向けタスク分解](#エージェント向けタスク分解)
 
 ---
 
@@ -1061,6 +1063,347 @@ private fun ByteArray.toNSData(): NSData {
 
 ---
 
+## リアルタイム解析
+
+カメラプレビュー中にフレームを解析する場合の実装パターン。QR スキャナーなどで使用。
+
+### 設計のポイント
+
+1. **解析頻度の制御**
+   - 全フレーム解析は不要（CPU/バッテリー消費大）
+   - 100-500ms 間隔で十分
+
+2. **バックグラウンドスレッドで解析**
+   - UI スレッドをブロックしない
+   - 解析結果のみ UI スレッドに返す
+
+3. **共通化の範囲**
+   - 解析ロジック呼び出し・結果処理は KMP
+   - フレーム取得は OS ネイティブ
+
+### RealtimeAnalyzer expect/actual
+
+```kotlin
+// commonMain/kotlin/com/example/shared/analysis/RealtimeAnalyzer.kt
+
+/**
+ * リアルタイム解析（expect 宣言）
+ */
+expect class RealtimeAnalyzer {
+    /**
+     * 解析開始
+     * @param onResult 解析結果コールバック（メインスレッドで呼ばれる）
+     */
+    fun start(onResult: (AnalysisResult) -> Unit)
+
+    /**
+     * 解析停止
+     */
+    fun stop()
+
+    /**
+     * 解析中かどうか
+     */
+    val isAnalyzing: Boolean
+}
+```
+
+### Android 実装（CameraX ImageAnalysis）
+
+```kotlin
+// androidMain/kotlin/com/example/shared/analysis/RealtimeAnalyzer.android.kt
+
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.common.InputImage
+import kotlinx.coroutines.*
+import java.util.concurrent.Executors
+
+/**
+ * Android リアルタイム解析実装
+ */
+actual class RealtimeAnalyzer(
+    private val lifecycleOwner: LifecycleOwner,
+    private val cameraProvider: ProcessCameraProvider
+) {
+    private val executor = Executors.newSingleThreadExecutor()
+    private val scanner = BarcodeScanning.getClient()
+    private var imageAnalysis: ImageAnalysis? = null
+    private var resultCallback: ((AnalysisResult) -> Unit)? = null
+
+    private var _isAnalyzing = false
+    actual val isAnalyzing: Boolean get() = _isAnalyzing
+
+    // スロットリング用
+    private var lastAnalysisTime = 0L
+    private val analysisIntervalMs = 200L
+
+    actual fun start(onResult: (AnalysisResult) -> Unit) {
+        resultCallback = onResult
+        _isAnalyzing = true
+
+        imageAnalysis = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+            .also { analysis ->
+                analysis.setAnalyzer(executor) { imageProxy ->
+                    processImage(imageProxy)
+                }
+            }
+
+        // CameraProvider にバインド
+        cameraProvider.bindToLifecycle(
+            lifecycleOwner,
+            CameraSelector.DEFAULT_BACK_CAMERA,
+            imageAnalysis
+        )
+    }
+
+    actual fun stop() {
+        _isAnalyzing = false
+        imageAnalysis?.let { cameraProvider.unbind(it) }
+        imageAnalysis = null
+        resultCallback = null
+    }
+
+    @androidx.camera.core.ExperimentalGetImage
+    private fun processImage(imageProxy: ImageProxy) {
+        val currentTime = System.currentTimeMillis()
+
+        // スロットリング: 一定間隔でのみ解析
+        if (currentTime - lastAnalysisTime < analysisIntervalMs) {
+            imageProxy.close()
+            return
+        }
+        lastAnalysisTime = currentTime
+
+        val mediaImage = imageProxy.image
+        if (mediaImage == null) {
+            imageProxy.close()
+            return
+        }
+
+        val inputImage = InputImage.fromMediaImage(
+            mediaImage,
+            imageProxy.imageInfo.rotationDegrees
+        )
+
+        scanner.process(inputImage)
+            .addOnSuccessListener { barcodes ->
+                if (barcodes.isNotEmpty()) {
+                    val barcode = barcodes.first()
+                    val result = when (barcode.format) {
+                        Barcode.FORMAT_QR_CODE ->
+                            AnalysisResult.QrCode(barcode.rawValue ?: "")
+                        else ->
+                            AnalysisResult.Barcode(
+                                format = barcode.format.toBarcodeFormat(),
+                                value = barcode.rawValue ?: ""
+                            )
+                    }
+                    // メインスレッドでコールバック
+                    MainScope().launch {
+                        resultCallback?.invoke(result)
+                    }
+                }
+            }
+            .addOnCompleteListener {
+                imageProxy.close()
+            }
+    }
+}
+```
+
+### iOS 実装（AVCaptureVideoDataOutput）
+
+```kotlin
+// iosMain/kotlin/com/example/shared/analysis/RealtimeAnalyzer.ios.kt
+
+import kotlinx.cinterop.*
+import platform.AVFoundation.*
+import platform.CoreMedia.*
+import platform.Vision.*
+import platform.darwin.*
+
+/**
+ * iOS リアルタイム解析実装
+ */
+actual class RealtimeAnalyzer(
+    private val captureSession: AVCaptureSession
+) {
+    private var videoOutput: AVCaptureVideoDataOutput? = null
+    private var resultCallback: ((AnalysisResult) -> Unit)? = null
+    private val processingQueue = dispatch_queue_create(
+        "com.example.analysis",
+        null
+    )
+
+    private var _isAnalyzing = false
+    actual val isAnalyzing: Boolean get() = _isAnalyzing
+
+    // スロットリング用
+    private var lastAnalysisTime: ULong = 0UL
+    private val analysisIntervalNs: ULong = 200_000_000UL  // 200ms
+
+    actual fun start(onResult: (AnalysisResult) -> Unit) {
+        resultCallback = onResult
+        _isAnalyzing = true
+
+        val output = AVCaptureVideoDataOutput().apply {
+            setSampleBufferDelegate(
+                SampleBufferDelegate(),
+                processingQueue
+            )
+            alwaysDiscardsLateVideoFrames = true
+        }
+
+        if (captureSession.canAddOutput(output)) {
+            captureSession.addOutput(output)
+            videoOutput = output
+        }
+    }
+
+    actual fun stop() {
+        _isAnalyzing = false
+        videoOutput?.let { captureSession.removeOutput(it) }
+        videoOutput = null
+        resultCallback = null
+    }
+
+    private inner class SampleBufferDelegate :
+        NSObject(), AVCaptureVideoDataOutputSampleBufferDelegateProtocol {
+
+        override fun captureOutput(
+            output: AVCaptureOutput,
+            didOutputSampleBuffer: CMSampleBufferRef?,
+            fromConnection: AVCaptureConnection
+        ) {
+            val sampleBuffer = didOutputSampleBuffer ?: return
+
+            // スロットリング
+            val currentTime = clock_gettime_nsec_np(CLOCK_MONOTONIC)
+            if (currentTime - lastAnalysisTime < analysisIntervalNs) {
+                return
+            }
+            lastAnalysisTime = currentTime
+
+            val pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) ?: return
+
+            val request = VNDetectBarcodesRequest { request, error ->
+                if (error != null) return@VNDetectBarcodesRequest
+
+                val results = request?.results?.filterIsInstance<VNBarcodeObservation>()
+                if (results.isNullOrEmpty()) return@VNDetectBarcodesRequest
+
+                val observation = results.first()
+                val result = when (observation.symbology) {
+                    VNBarcodeSymbologyQR ->
+                        AnalysisResult.QrCode(observation.payloadStringValue ?: "")
+                    else ->
+                        AnalysisResult.Barcode(
+                            format = observation.symbology.toBarcodeFormat(),
+                            value = observation.payloadStringValue ?: ""
+                        )
+                }
+
+                // メインスレッドでコールバック
+                dispatch_async(dispatch_get_main_queue()) {
+                    resultCallback?.invoke(result)
+                }
+            }
+
+            val handler = VNImageRequestHandler(pixelBuffer, NSDictionary())
+            handler.performRequests(listOf(request), null)
+        }
+    }
+}
+```
+
+### ViewModel での使用例
+
+```kotlin
+// commonMain/kotlin/com/example/shared/presentation/scanner/ScannerViewModel.kt
+
+/**
+ * QR スキャナー ViewModel
+ */
+class ScannerViewModel(
+    private val realtimeAnalyzer: RealtimeAnalyzer,
+    private val coroutineScope: CoroutineScope
+) {
+    private val _uiState = MutableStateFlow(ScannerUiState())
+    val uiState: StateFlow<ScannerUiState> = _uiState.asStateFlow()
+
+    private val _events = Channel<ScannerEvent>(Channel.BUFFERED)
+    val events: Flow<ScannerEvent> = _events.receiveAsFlow()
+
+    /**
+     * スキャン開始
+     */
+    fun startScanning() {
+        if (realtimeAnalyzer.isAnalyzing) return
+
+        _uiState.update { it.copy(isScanning = true) }
+
+        realtimeAnalyzer.start { result ->
+            when (result) {
+                is AnalysisResult.QrCode -> {
+                    // QR 検出時は自動停止
+                    stopScanning()
+                    coroutineScope.launch {
+                        _events.send(ScannerEvent.QrDetected(result.content))
+                    }
+                }
+                is AnalysisResult.Barcode -> {
+                    stopScanning()
+                    coroutineScope.launch {
+                        _events.send(ScannerEvent.BarcodeDetected(
+                            result.format,
+                            result.value
+                        ))
+                    }
+                }
+                else -> { /* 検出なし、継続 */ }
+            }
+        }
+    }
+
+    /**
+     * スキャン停止
+     */
+    fun stopScanning() {
+        realtimeAnalyzer.stop()
+        _uiState.update { it.copy(isScanning = false) }
+    }
+
+    fun onCleared() {
+        stopScanning()
+    }
+}
+
+data class ScannerUiState(
+    val isScanning: Boolean = false,
+    val permissionState: PermissionState = PermissionState.NOT_REQUESTED
+)
+
+sealed interface ScannerEvent {
+    data class QrDetected(val content: String) : ScannerEvent
+    data class BarcodeDetected(val format: BarcodeFormat, val value: String) : ScannerEvent
+}
+```
+
+### パフォーマンス注意点
+
+| 項目 | 推奨値 | 理由 |
+|------|--------|------|
+| 解析間隔 | 100-500ms | CPU/バッテリー節約 |
+| バックプレッシャー | KEEP_ONLY_LATEST | メモリ節約 |
+| 解析スレッド | 専用スレッド | UI ブロック防止 |
+| 解析停止 | 検出成功時 | 重複検出防止 |
+
+---
+
 ## パーミッション管理
 
 ### CameraPermission expect/actual
@@ -1207,3 +1550,121 @@ actual class CameraPermission {
 
 - [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)
 - [expect/actual declarations](https://kotlinlang.org/docs/multiplatform-expect-actual.html)
+
+---
+
+## エージェント向けタスク分解
+
+### 写真撮影機能 チェックリスト
+
+#### Phase 1: 共通モデル定義
+
+- [ ] `CameraResult` sealed interface を作成
+  - Success, Error, Cancelled
+- [ ] `CameraConfig` data class を作成
+  - CameraFacing, FlashMode, AspectRatio
+- [ ] `CameraError` sealed interface を作成
+- [ ] `PermissionState` enum を作成
+
+#### Phase 2: CameraController expect/actual
+
+- [ ] `CameraController` expect 宣言を作成
+  - startPreview(), stopPreview(), capture(), switchCamera(), setFlashMode(), release()
+- [ ] Android actual 実装（CameraX）
+  - ProcessCameraProvider, ImageCapture, Preview
+- [ ] iOS actual 実装（AVFoundation）
+  - AVCaptureSession, AVCapturePhotoOutput, PhotoCaptureDelegate
+
+#### Phase 3: パーミッション管理
+
+- [ ] `CameraPermission` expect 宣言を作成
+  - checkPermission(), requestPermission()
+- [ ] Android actual 実装
+  - ContextCompat.checkSelfPermission, ActivityResultLauncher
+- [ ] iOS actual 実装
+  - AVCaptureDevice.authorizationStatusForMediaType
+
+#### Phase 4: ViewModel
+
+- [ ] `CameraUiState` data class を作成
+  - isFlashOn, isFrontCamera, isCapturing, permissionState, error
+- [ ] `CameraEvent` sealed interface を作成
+  - CaptureComplete, ShowError, NavigateToSettings
+- [ ] `CameraViewModel` を作成
+  - onShutterClick(), onToggleFlash(), onSwitchCamera(), onPermissionResult()
+
+#### Phase 5: DI 設定
+
+- [ ] カメラモジュールを Koin に登録
+- [ ] プラットフォーム固有の依存を platformModule に追加
+
+---
+
+### QR/バーコード解析機能 チェックリスト
+
+#### Phase 1: 共通モデル定義
+
+- [ ] `AnalysisResult` sealed interface を作成
+  - QrCode, Barcode, Text, Error, NotFound
+- [ ] `BarcodeFormat` enum を作成
+
+#### Phase 2: ImageAnalyzer expect/actual
+
+- [ ] `ImageAnalyzer` expect 宣言を作成
+  - analyze(imageData: ByteArray): AnalysisResult
+- [ ] Android actual 実装（ML Kit）
+  - BarcodeScannerOptions, BarcodeScanning.getClient()
+- [ ] iOS actual 実装（Vision）
+  - VNDetectBarcodesRequest, VNImageRequestHandler
+
+---
+
+### リアルタイム解析機能 チェックリスト
+
+#### Phase 1: RealtimeAnalyzer expect/actual
+
+- [ ] `RealtimeAnalyzer` expect 宣言を作成
+  - start(onResult), stop(), isAnalyzing
+- [ ] Android actual 実装（CameraX ImageAnalysis）
+  - ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
+  - スロットリング実装（200ms 間隔）
+- [ ] iOS actual 実装（AVCaptureVideoDataOutput）
+  - AVCaptureVideoDataOutputSampleBufferDelegateProtocol
+  - dispatch_queue_create で専用キュー
+
+#### Phase 2: ScannerViewModel
+
+- [ ] `ScannerUiState` data class を作成
+- [ ] `ScannerEvent` sealed interface を作成
+- [ ] `ScannerViewModel` を作成
+  - startScanning(), stopScanning()
+  - 検出成功時の自動停止
+
+#### Phase 3: パフォーマンス最適化
+
+- [ ] スロットリング間隔の調整（100-500ms）
+- [ ] バックプレッシャー戦略の確認
+- [ ] メモリリークの確認（コールバック解放）
+
+---
+
+### 実装時の注意点
+
+1. **expect/actual の対応確認**
+   - コンストラクタ引数がプラットフォームで異なる場合は Factory パターンを検討
+   - 共通 interface + DI で依存注入も可
+
+2. **ライフサイクル管理**
+   - Android: LifecycleOwner との連携
+   - iOS: deinit での明示的リソース解放
+
+3. **テスト戦略**
+   - commonTest で ViewModel テスト（FakeCameraController 使用）
+   - プラットフォーム固有コードは統合テストで確認
+
+---
+
+## 関連ドキュメント
+
+- [kmp-architecture.md](kmp-architecture.md) - KMP 全体のアーキテクチャ
+- [kmp-auth.md](kmp-auth.md) - 認証実装ベストプラクティス
