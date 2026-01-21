@@ -13,6 +13,7 @@ Coroutines、Flow、マルチプラットフォームアーキテクチャを定
 |----------|------|--------|
 | [coroutines.md](coroutines.md) | Kotlin Coroutines ベストプラクティス | ★★★ 非同期処理の基盤 |
 | [kmp-architecture.md](kmp-architecture.md) | Kotlin Multiplatform アーキテクチャ | ★★★ KMP 設計の基盤 |
+| [kmp-auth.md](kmp-auth.md) | KMP 認証ベストプラクティス | ★★★ 認証の基盤 |
 | [kmp-camera.md](kmp-camera.md) | KMP カメラ実装ガイド | ★★☆ デバイス機能 |
 
 ---
