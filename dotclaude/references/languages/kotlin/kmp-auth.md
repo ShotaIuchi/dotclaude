@@ -1113,12 +1113,73 @@ class IosTokenStore : TokenStore {
         SecItemDelete(query)
     }
 
-    // 拡張関数（省略：NSData ↔ ByteArray、Map → CFDictionary）
-
     companion object {
         private const val KEY_SESSION = "com.example.shared.session"
     }
 }
+
+/**
+ * ByteArray → NSData 変換
+ */
+@OptIn(ExperimentalForeignApi::class)
+private fun ByteArray.toNSData(): NSData {
+    return usePinned { pinned ->
+        NSData.dataWithBytes(pinned.addressOf(0), size.toULong())
+    }
+}
+
+/**
+ * NSData → ByteArray 変換
+ */
+@OptIn(ExperimentalForeignApi::class)
+private fun NSData.toByteArray(): ByteArray {
+    return ByteArray(length.toInt()).apply {
+        usePinned { pinned ->
+            memcpy(pinned.addressOf(0), bytes, length)
+        }
+    }
+}
+
+/**
+ * Map → CFDictionary 変換
+ *
+ * Keychain API に渡す CFDictionary を生成
+ */
+@OptIn(ExperimentalForeignApi::class)
+private fun Map<CFStringRef?, Any?>.toCFDictionary(): CFDictionaryRef? {
+    val keys = this.keys.toList()
+    val values = this.values.map { value ->
+        when (value) {
+            is String -> CFBridgingRetain(value as NSString)
+            is NSData -> CFBridgingRetain(value)
+            is Boolean -> if (value) kCFBooleanTrue else kCFBooleanFalse
+            else -> value as CFTypeRef?
+        }
+    }
+
+    return memScoped {
+        val keysArray = allocArrayOf(*keys.toTypedArray())
+        val valuesArray = allocArrayOf(*values.toTypedArray())
+
+        CFDictionaryCreate(
+            kCFAllocatorDefault,
+            keysArray.reinterpret(),
+            valuesArray.reinterpret(),
+            keys.size.toLong(),
+            null,
+            null
+        )
+    }
+}
+```
+
+```kotlin
+// iosMain - 必要な import 文
+import kotlinx.cinterop.*
+import platform.CoreFoundation.*
+import platform.Foundation.*
+import platform.Security.*
+import platform.darwin.memcpy
 ```
 
 ### DI 設定（Koin）
