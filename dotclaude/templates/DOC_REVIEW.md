@@ -3,41 +3,41 @@
 > Reviewed: {{date}}
 > Original: {{file_path}}
 
-## Summary
+## 概要 (Summary)
 
-<!-- Describe the purpose and role of the document -->
+<!-- ドキュメントの目的と役割を記述 -->
 
-## Evaluation
+## 評価 (Evaluation)
 
-### Quality
+### 品質 (Quality)
 
-- [ ] **Completeness**: Necessary information is covered
-- [ ] **Clarity**: Understandable for readers
-- [ ] **Consistency**: Terms and style are unified
+- [ ] **完全性 (Completeness)**: 必要な情報が網羅されている
+- [ ] **明確性 (Clarity)**: 読者にとって分かりやすい
+- [ ] **一貫性 (Consistency)**: 用語・スタイルが統一されている
 
-### Technical Accuracy
+### 技術的正確性 (Technical Accuracy)
 
-- [ ] **Correct information**: Content is accurate
-- [ ] **Up-to-date content**: Information is current
+- [ ] **情報の正確性 (Correct information)**: 記載内容が正確
+- [ ] **最新性 (Up-to-date content)**: 情報が最新の状態
 
-## Improvements
+## 改善点 (Improvements)
 
-### High Priority
+### 優先度高 (High Priority)
 
-| # | Location | Issue | Suggestion |
-|---|----------|-------|------------|
+| # | 箇所 | 問題 | 提案 |
+|---|------|------|------|
 | 1 | | | |
 
-### Medium Priority
+### 優先度中 (Medium Priority)
 
-| # | Location | Issue | Suggestion |
-|---|----------|-------|------------|
+| # | 箇所 | 問題 | 提案 |
+|---|------|------|------|
 | 1 | | | |
 
-### Future Considerations
+### 将来の検討事項 (Future Considerations)
 
 -
 
-## Overall Assessment
+## 総評 (Overall Assessment)
 
-<!-- Describe overall evaluation and recommendations -->
+<!-- 総合的な評価とレコメンデーションを記述 -->
