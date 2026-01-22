@@ -6,10 +6,82 @@ Compose Multiplatform UI implementation and SwiftUI integration in Kotlin Multip
 
 ---
 
-## Common UI Components
+## Data Models
+
+Define the UI models used throughout the screen components.
+
+```kotlin
+// commonMain/kotlin/com/example/shared/ui/model/UiModels.kt
+
+/**
+ * UI model for displaying user information
+ */
+data class UserUiModel(
+    val id: String,
+    val displayName: String,
+    val formattedJoinDate: String
+)
+
+/**
+ * Error actions available to the user
+ */
+enum class ErrorAction {
+    RETRY,
+    DISMISS,
+    NAVIGATE_BACK
+}
+
+/**
+ * UI error representation
+ */
+data class UiError(
+    val message: String,
+    val action: ErrorAction = ErrorAction.RETRY
+)
+
+/**
+ * UI state for user list screen
+ */
+data class UserListUiState(
+    val users: List<UserUiModel> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: UiError? = null
+) {
+    val showEmptyState: Boolean get() = !isLoading && error == null && users.isEmpty()
+    val showContent: Boolean get() = !isLoading && error == null && users.isNotEmpty()
+}
+
+/**
+ * Events emitted by UserListViewModel
+ */
+sealed interface UserListEvent {
+    data class NavigateToDetail(val userId: String) : UserListEvent
+    data class ShowSnackbar(val message: String) : UserListEvent
+}
+```
+
+---
+
+## Screen Components
+
+Screen-level composables that connect to ViewModels and handle navigation.
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/ui/userlist/UserListScreen.kt
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.example.shared.ui.model.*
 
 /**
  * User list screen (Compose Multiplatform)
@@ -136,10 +208,25 @@ fun UserCard(
 
 ---
 
-## Common Components
+## Reusable Components
+
+Common UI components that can be shared across multiple screens.
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/ui/component/ErrorContent.kt
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.example.shared.ui.model.ErrorAction
+import com.example.shared.ui.model.UiError
 
 /**
  * Error display component
@@ -228,11 +315,54 @@ fun LoadingContent(
 
 ## SwiftUI Integration (When Using SwiftUI on iOS)
 
+When integrating Kotlin Multiplatform code with SwiftUI, you need:
+
+1. **SKIE (Swift Kotlin Interface Enhancer)**: Generates Swift-friendly APIs from Kotlin code, including `onEnum` for sealed class pattern matching
+2. **kotlinx-coroutines-core**: Provides `MainScope()` for managing coroutines on the main thread
+
+### Dependencies
+
+Add SKIE to your `build.gradle.kts`:
+
+```kotlin
+plugins {
+    id("co.touchlab.skie") version "0.6.1"
+}
+
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+        }
+    }
+}
+```
+
+### ViewModelFactory
+
+```kotlin
+// commonMain/kotlin/com/example/shared/ui/ViewModelFactory.kt
+
+import kotlinx.coroutines.CoroutineScope
+
+/**
+ * Factory for creating ViewModels with proper CoroutineScope injection
+ */
+class ViewModelFactory {
+    fun createUserListViewModel(coroutineScope: CoroutineScope): UserListViewModel {
+        // Inject dependencies (repository, use cases, etc.)
+        return UserListViewModel(coroutineScope)
+    }
+}
+```
+
+### SwiftUI View
+
 ```swift
 // iOS/Sources/UserListView.swift
 
 import SwiftUI
-import Shared
+import Shared  // Kotlin shared module
 
 /**
  * SwiftUI UserListScreen
@@ -328,7 +458,76 @@ class UserListViewModelWrapper: ObservableObject {
 
 ## Best Practices
 
-- UI can be Compose Multiplatform or platform-native
-- Place ViewModel in commonMain for sharing
-- Design components to be previewable
-- Use wrapper class for SwiftUI integration
+### UI Strategy Selection
+
+**UI can be Compose Multiplatform or platform-native**
+
+- Use Compose Multiplatform when you want maximum code sharing and consistent UI across platforms
+- Use platform-native (SwiftUI/UIKit) when you need platform-specific UX patterns or better native integration
+
+### ViewModel Placement
+
+**Place ViewModel in commonMain for sharing**
+
+```kotlin
+// commonMain/kotlin/com/example/shared/viewmodel/UserListViewModel.kt
+class UserListViewModel(private val scope: CoroutineScope) {
+    // Business logic shared across iOS and Android
+}
+```
+
+This allows both platforms to share the same business logic while implementing platform-specific UI.
+
+### Previewable Design
+
+**Design components to be previewable**
+
+Separate state-dependent content from ViewModel-dependent screens:
+
+```kotlin
+// Screen: Depends on ViewModel (not previewable directly)
+@Composable
+fun UserListScreen(viewModel: UserListViewModel) { ... }
+
+// Content: Takes state as parameter (previewable)
+@Composable
+fun UserListContent(
+    uiState: UserListUiState,
+    onUserClick: (String) -> Unit,
+    onRetryClick: () -> Unit
+) { ... }
+
+// Preview
+@Preview
+@Composable
+fun UserListContentPreview() {
+    UserListContent(
+        uiState = UserListUiState(users = listOf(sampleUser)),
+        onUserClick = {},
+        onRetryClick = {}
+    )
+}
+```
+
+### SwiftUI Integration Pattern
+
+**Use wrapper class for SwiftUI integration**
+
+The `ObservableObject` wrapper pattern converts Kotlin Flows to SwiftUI's reactive model:
+
+```swift
+@MainActor
+class ViewModelWrapper: ObservableObject {
+    @Published private(set) var state: UiState
+    private let kotlinViewModel: KotlinViewModel
+
+    // Observe Kotlin Flow and update @Published property
+    private func observeState() {
+        Task {
+            for await state in kotlinViewModel.uiState {
+                self.state = state
+            }
+        }
+    }
+}
+```

@@ -2,6 +2,8 @@
 
 Dependency injection patterns using Koin in Kotlin Multiplatform.
 
+> **Supported Version**: Koin 3.5.x (compatible with Kotlin 1.9+, KMP targets: Android, iOS, Desktop, Web)
+
 > **Related Documentation**: [KMP Architecture Guide](./kmp-architecture.md) | [Koin Official](https://insert-koin.io/docs/reference/koin-mp/kmp/)
 
 ---
@@ -41,6 +43,13 @@ val sharedModule = module {
         GetUserDetailUseCase(
             userRepository = get(),
             postRepository = get()
+        )
+    }
+
+    // PostRepository (required by GetUserDetailUseCase)
+    single<PostRepository> {
+        PostRepositoryImpl(
+            remoteDataSource = get()
         )
     }
 
@@ -196,6 +205,8 @@ class MyApplication : Application() {
 
 ```swift
 // iOS initialization (AppDelegate or App)
+// Note: Kotlin/Native exports functions with "do" prefix for Swift compatibility
+// initKoinIos() in Kotlin becomes doInitKoinIos() in Swift
 @main
 struct MyApp: App {
     init() {
@@ -248,9 +259,129 @@ class ViewModelFactory : KoinComponent {
 
 ---
 
+## Error Handling and Debugging
+
+```kotlin
+// Enable Koin logging for debugging
+fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
+    startKoin {
+        // Enable detailed logging in debug builds
+        printLogger(Level.DEBUG)
+        appDeclaration()
+        modules(
+            sharedModule,
+            platformModule
+        )
+    }
+
+// Safe dependency resolution with error handling
+class SafeKoinComponent : KoinComponent {
+
+    // Nullable injection (returns null if not found)
+    inline fun <reified T : Any> getOrNull(): T? = getKoin().getOrNull()
+
+    // Injection with default fallback
+    inline fun <reified T : Any> getOrDefault(default: T): T =
+        getKoin().getOrNull() ?: default
+}
+
+// Verify all dependencies at startup (debug only)
+fun verifyKoinConfiguration() {
+    if (BuildConfig.DEBUG) {
+        try {
+            getKoin().checkModules()
+        } catch (e: Exception) {
+            // Log missing dependencies
+            println("Koin configuration error: ${e.message}")
+        }
+    }
+}
+```
+
+---
+
+## Testing with Koin
+
+```kotlin
+// testMain/kotlin/com/example/shared/di/TestModule.kt
+
+/**
+ * Test module with Fake implementations
+ */
+val testModule = module {
+    // Override real repository with Fake
+    single<UserRepository> {
+        FakeUserRepository()
+    }
+
+    single<AnalyticsRepository> {
+        FakeAnalyticsRepository()
+    }
+}
+
+/**
+ * Fake implementation for testing
+ */
+class FakeUserRepository : UserRepository {
+    private val users = mutableListOf<User>()
+
+    override suspend fun getUsers(): List<User> = users
+
+    override suspend fun getUserById(id: String): User? =
+        users.find { it.id == id }
+
+    // Test helper methods
+    fun addUser(user: User) { users.add(user) }
+    fun clear() { users.clear() }
+}
+
+/**
+ * Test setup with Koin
+ */
+class UserListViewModelTest {
+
+    @BeforeTest
+    fun setup() {
+        startKoin {
+            modules(testModule)
+        }
+    }
+
+    @AfterTest
+    fun tearDown() {
+        stopKoin()
+    }
+
+    @Test
+    fun `test get users returns expected list`() = runTest {
+        val fakeRepo = get<UserRepository>() as FakeUserRepository
+        fakeRepo.addUser(User(id = "1", name = "Test User"))
+
+        val viewModel = UserListViewModel(
+            getUsersUseCase = get(),
+            coroutineScope = this
+        )
+
+        assertEquals(1, viewModel.users.value.size)
+    }
+}
+```
+
+---
+
 ## Best Practices
 
-- Define common modules in sharedModule
-- Define platform-specific modules in platformModule
-- Create ViewModels through Factory
-- Enable Fake injection for testing
+- **Define common modules in sharedModule**: Keep platform-agnostic dependencies (repositories, use cases, utilities) in the shared module to maximize code reuse across platforms.
+
+- **Define platform-specific modules in platformModule**: Use `expect/actual` pattern for dependencies that require platform-specific implementations (HTTP clients, database drivers, file systems).
+
+- **Create ViewModels through Factory**: Centralize ViewModel creation to ensure consistent dependency injection and simplify testing.
+
+- **Enable Fake injection for testing**: Create test modules that override real implementations with Fakes, allowing isolated unit testing without network or database dependencies.
+
+- **Use appropriate scopes**:
+  - `single` for singletons (repositories, database)
+  - `factory` for new instances each time (use cases, presenters)
+  - `scoped` for lifecycle-bound instances
+
+- **Verify configuration early**: Call `checkModules()` during development to catch missing dependencies at startup rather than runtime.

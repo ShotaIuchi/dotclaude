@@ -4,6 +4,30 @@ Best practices for MVVM / UDF / Repository patterns based on Google's official A
 
 ---
 
+## Document Info
+
+| Item | Value |
+|------|-------|
+| Version | 1.0.0 |
+| Last Updated | 2026-01-22 |
+| Author | Android Architecture Team |
+
+### Target Library Versions
+
+| Library | Version | Notes |
+|---------|---------|-------|
+| Kotlin | 1.9.x | Language version |
+| Compose BOM | 2024.02.00+ | UI framework |
+| Hilt | 2.50+ | Dependency injection |
+| Room | 2.6.x | Local database |
+| Retrofit | 2.9.x | Network client |
+| Coroutines | 1.8.x | Async processing |
+| Lifecycle | 2.7.x | ViewModel, LiveData |
+
+> **Note**: Update this section when upgrading library versions to ensure documentation accuracy.
+
+---
+
 ## Table of Contents
 
 1. [Architecture Overview](#architecture-overview)
@@ -288,9 +312,196 @@ private fun UserListContent(
 }
 ```
 
+### Navigation with Navigation Compose
+
+```kotlin
+/**
+ * Navigation destinations
+ */
+sealed class Screen(val route: String) {
+    object UserList : Screen("user_list")
+    object UserDetail : Screen("user_detail/{userId}") {
+        fun createRoute(userId: String) = "user_detail/$userId"
+    }
+    object Settings : Screen("settings")
+}
+
+/**
+ * App navigation graph
+ */
+@Composable
+fun AppNavigation(
+    navController: NavHostController = rememberNavController(),
+    startDestination: String = Screen.UserList.route
+) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
+        composable(Screen.UserList.route) {
+            UserListScreen(
+                onNavigateToDetail = { userId ->
+                    navController.navigate(Screen.UserDetail.createRoute(userId))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.UserDetail.route,
+            arguments = listOf(
+                navArgument("userId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+            UserDetailScreen(
+                userId = userId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+    }
+}
+
+/**
+ * Type-safe navigation with arguments
+ */
+@Composable
+fun UserDetailScreen(
+    userId: String,
+    onNavigateBack: () -> Unit,
+    viewModel: UserDetailViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Handle back navigation events
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is UserDetailEvent.NavigateBack -> onNavigateBack()
+            }
+        }
+    }
+
+    UserDetailContent(
+        uiState = uiState,
+        onBackClick = viewModel::onBackClick
+    )
+}
+
+/**
+ * Bottom navigation integration
+ */
+@Composable
+fun MainScreen() {
+    val navController = rememberNavController()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = currentRoute == Screen.UserList.route,
+                    onClick = {
+                        navController.navigate(Screen.UserList.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    icon = { Icon(Icons.Default.People, contentDescription = "Users") },
+                    label = { Text("Users") }
+                )
+                NavigationBarItem(
+                    selected = currentRoute == Screen.Settings.route,
+                    onClick = {
+                        navController.navigate(Screen.Settings.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                    label = { Text("Settings") }
+                )
+            }
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            AppNavigation(navController = navController)
+        }
+    }
+}
+
+/**
+ * Deep link handling
+ */
+@Composable
+fun AppNavigationWithDeepLinks(
+    navController: NavHostController = rememberNavController()
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.UserList.route
+    ) {
+        composable(
+            route = Screen.UserDetail.route,
+            arguments = listOf(
+                navArgument("userId") { type = NavType.StringType }
+            ),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "https://example.com/user/{userId}" },
+                navDeepLink { uriPattern = "app://example.com/user/{userId}" }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+            UserDetailScreen(
+                userId = userId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+    }
+}
+```
+
 ---
 
 ## Domain Layer
+
+> **Note**: The Domain Layer is optional. Consider the following guidelines when deciding whether to include it.
+
+### When to Use Domain Layer
+
+| Use Case | Domain Layer | Reason |
+|----------|--------------|--------|
+| Simple CRUD apps | Skip | Direct Repository calls are sufficient |
+| Single data source | Skip | No need for data orchestration |
+| Complex business rules | Include | Encapsulate reusable logic |
+| Multiple data sources | Include | Combine and transform data |
+| Shared logic across ViewModels | Include | Avoid code duplication |
+| Analytics/logging with data ops | Include | Side effects with business operations |
+
+### Decision Criteria
+
+**Skip Domain Layer when:**
+- App is primarily read/write operations with minimal transformation
+- Each screen uses only one Repository
+- No business logic beyond data mapping
+
+**Include Domain Layer when:**
+- Multiple ViewModels share the same business logic
+- Data from multiple sources needs to be combined
+- Complex validation or transformation rules exist
+- Side effects (analytics, caching) are coupled with business operations
 
 ### UseCase
 
@@ -1194,6 +1405,103 @@ fun AppException.toUiError(): UiError {
 }
 ```
 
+### Retry Strategy with Exponential Backoff
+
+```kotlin
+/**
+ * Retry policy configuration
+ */
+data class RetryPolicy(
+    val maxRetries: Int = 3,
+    val initialDelayMs: Long = 1000,
+    val maxDelayMs: Long = 30000,
+    val multiplier: Double = 2.0,
+    val retryOn: (Throwable) -> Boolean = { it.isRetryable() }
+)
+
+/**
+ * Check if exception is retryable
+ */
+fun Throwable.isRetryable(): Boolean {
+    return when (this) {
+        is IOException -> true
+        is SocketTimeoutException -> true
+        is HttpException -> code() in 500..599 || code() == 429
+        else -> false
+    }
+}
+
+/**
+ * Flow extension for retry with exponential backoff
+ */
+fun <T> Flow<T>.retryWithBackoff(
+    policy: RetryPolicy = RetryPolicy()
+): Flow<T> = retryWhen { cause, attempt ->
+    if (attempt >= policy.maxRetries || !policy.retryOn(cause)) {
+        false
+    } else {
+        val delayMs = (policy.initialDelayMs * policy.multiplier.pow(attempt.toDouble()))
+            .toLong()
+            .coerceAtMost(policy.maxDelayMs)
+
+        Timber.d("Retry attempt ${attempt + 1}/${policy.maxRetries} after ${delayMs}ms")
+        delay(delayMs)
+        true
+    }
+}
+
+/**
+ * Suspend function wrapper for retry with exponential backoff
+ */
+suspend fun <T> retryWithBackoff(
+    policy: RetryPolicy = RetryPolicy(),
+    block: suspend () -> T
+): Result<T> {
+    var lastException: Throwable? = null
+    var currentDelay = policy.initialDelayMs
+
+    repeat(policy.maxRetries + 1) { attempt ->
+        try {
+            return Result.success(block())
+        } catch (e: Throwable) {
+            lastException = e
+
+            if (attempt == policy.maxRetries || !policy.retryOn(e)) {
+                return Result.failure(e)
+            }
+
+            Timber.d("Retry attempt ${attempt + 1}/${policy.maxRetries} after ${currentDelay}ms")
+            delay(currentDelay)
+            currentDelay = (currentDelay * policy.multiplier).toLong()
+                .coerceAtMost(policy.maxDelayMs)
+        }
+    }
+
+    return Result.failure(lastException ?: IllegalStateException("Retry failed"))
+}
+
+/**
+ * Repository usage example
+ */
+class UserRepositoryImpl @Inject constructor(
+    private val api: UserApi,
+    private val retryPolicy: RetryPolicy
+) : UserRepository {
+
+    override suspend fun createUser(user: User): Result<User> {
+        return retryWithBackoff(retryPolicy) {
+            api.createUser(user.toRequest()).toDomain()
+        }
+    }
+
+    override fun getUsers(): Flow<List<User>> {
+        return flow {
+            emit(api.getUsers().map { it.toDomain() })
+        }.retryWithBackoff(retryPolicy)
+    }
+}
+```
+
 ---
 
 ## Testing Strategy
@@ -1425,7 +1733,7 @@ class UserListScreenTest {
     fun `displays user list when loaded`() {
         // Given
         val users = listOf(
-            UserUiModel(id = "1", displayName = "Alice", avatarUrl = null, formattedJoinDate = "2024/01/01")
+            UserUiModel(id = "1", displayName = "Alice", avatarUrl = null, formattedJoinDate = "2026/01/15")
         )
         val uiState = UserListUiState(users = users)
 
@@ -1449,7 +1757,7 @@ class UserListScreenTest {
         // Given
         var clickedUserId: String? = null
         val users = listOf(
-            UserUiModel(id = "1", displayName = "Alice", avatarUrl = null, formattedJoinDate = "2024/01/01")
+            UserUiModel(id = "1", displayName = "Alice", avatarUrl = null, formattedJoinDate = "2026/01/15")
         )
         val uiState = UserListUiState(users = users)
 
@@ -1468,6 +1776,159 @@ class UserListScreenTest {
 
         // Then
         assertThat(clickedUserId).isEqualTo("1")
+    }
+}
+```
+
+### Instrumented Tests (E2E)
+
+Instrumented tests run on actual devices or emulators and test the full integration of components.
+
+#### Compose Integration Test with Hilt
+
+```kotlin
+/**
+ * End-to-end test for User List flow
+ */
+@HiltAndroidTest
+@UninstallModules(DataSourceModule::class)
+class UserListE2ETest {
+
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
+    val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @Inject
+    lateinit var fakeUserRepository: FakeUserRepository
+
+    @Before
+    fun setup() {
+        hiltRule.inject()
+    }
+
+    @Test
+    fun userListFlow_displayUsersAndNavigateToDetail() {
+        // Given
+        fakeUserRepository.setUsers(listOf(
+            User(id = "1", name = "Alice", email = "alice@example.com")
+        ))
+
+        // When - Navigate to user list
+        composeTestRule.onNodeWithText("Users").performClick()
+
+        // Then - User list is displayed
+        composeTestRule.waitUntil {
+            composeTestRule.onAllNodesWithText("Alice").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("Alice").assertIsDisplayed()
+
+        // When - Click on user
+        composeTestRule.onNodeWithText("Alice").performClick()
+
+        // Then - Navigate to detail screen
+        composeTestRule.onNodeWithText("alice@example.com").assertIsDisplayed()
+    }
+}
+
+/**
+ * Test module providing fake dependencies
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+object FakeDataSourceModule {
+
+    @Provides
+    @Singleton
+    fun provideFakeUserRepository(): UserRepository = FakeUserRepository()
+}
+```
+
+#### UI Automator for Cross-App Testing
+
+```kotlin
+/**
+ * UI Automator test for system interactions
+ */
+@RunWith(AndroidJUnit4::class)
+class SystemInteractionTest {
+
+    private lateinit var device: UiDevice
+
+    @Before
+    fun setup() {
+        device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+
+        // Launch the app
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val intent = context.packageManager.getLaunchIntentForPackage("com.example.app")
+        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        context.startActivity(intent)
+
+        // Wait for app to launch
+        device.wait(Until.hasObject(By.pkg("com.example.app").depth(0)), 5000)
+    }
+
+    @Test
+    fun testNotificationPermissionFlow() {
+        // Click on enable notifications button
+        device.findObject(UiSelector().text("Enable Notifications")).click()
+
+        // Handle system permission dialog
+        val allowButton = device.findObject(UiSelector().text("Allow"))
+        if (allowButton.exists()) {
+            allowButton.click()
+        }
+
+        // Verify permission granted state
+        device.wait(Until.hasObject(By.text("Notifications Enabled")), 3000)
+    }
+
+    @Test
+    fun testDeepLinkNavigation() {
+        // Simulate deep link
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("app://example.com/user/123"))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+
+        // Verify deep link destination
+        device.wait(Until.hasObject(By.textContains("User Details")), 3000)
+    }
+}
+```
+
+#### Screenshot Testing
+
+```kotlin
+/**
+ * Screenshot test for visual regression
+ */
+class UserListScreenshotTest {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @Test
+    fun userListScreen_lightTheme_snapshot() {
+        composeTestRule.setContent {
+            AppTheme(darkTheme = false) {
+                UserListContent(
+                    uiState = UserListUiState(
+                        users = listOf(
+                            UserUiModel("1", "Alice", null, "2026/01/15"),
+                            UserUiModel("2", "Bob", null, "2026/01/10")
+                        )
+                    ),
+                    onUserClick = {},
+                    onRetryClick = {}
+                )
+            }
+        }
+
+        // Using Paparazzi or similar library for screenshot comparison
+        composeTestRule.onRoot().captureToImage()
     }
 }
 ```
@@ -1646,6 +2107,272 @@ com.{company}.{app}
 
 ---
 
+## Security
+
+### Overview
+
+Security is a critical aspect of Android app development. This section covers essential security practices for data protection, authentication, and code obfuscation.
+
+### Data Encryption
+
+```kotlin
+/**
+ * Encrypted SharedPreferences for sensitive data
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+object SecurityModule {
+
+    @Provides
+    @Singleton
+    fun provideEncryptedSharedPreferences(
+        @ApplicationContext context: Context
+    ): SharedPreferences {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+
+        return EncryptedSharedPreferences.create(
+            context,
+            "secure_prefs",
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
+}
+
+/**
+ * Secure token storage
+ */
+class SecureTokenStorage @Inject constructor(
+    private val encryptedPrefs: SharedPreferences
+) {
+    companion object {
+        private const val KEY_ACCESS_TOKEN = "access_token"
+        private const val KEY_REFRESH_TOKEN = "refresh_token"
+    }
+
+    fun saveTokens(accessToken: String, refreshToken: String) {
+        encryptedPrefs.edit {
+            putString(KEY_ACCESS_TOKEN, accessToken)
+            putString(KEY_REFRESH_TOKEN, refreshToken)
+        }
+    }
+
+    fun getAccessToken(): String? = encryptedPrefs.getString(KEY_ACCESS_TOKEN, null)
+
+    fun getRefreshToken(): String? = encryptedPrefs.getString(KEY_REFRESH_TOKEN, null)
+
+    fun clearTokens() {
+        encryptedPrefs.edit {
+            remove(KEY_ACCESS_TOKEN)
+            remove(KEY_REFRESH_TOKEN)
+        }
+    }
+}
+```
+
+### Authentication Token Management
+
+```kotlin
+/**
+ * OkHttp Interceptor for automatic token refresh
+ */
+class AuthInterceptor @Inject constructor(
+    private val tokenStorage: SecureTokenStorage,
+    private val authRepository: Provider<AuthRepository>
+) : Interceptor {
+
+    private val lock = Mutex()
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val originalRequest = chain.request()
+
+        // Skip auth for login/register endpoints
+        if (originalRequest.url.encodedPath.contains("/auth/")) {
+            return chain.proceed(originalRequest)
+        }
+
+        val accessToken = tokenStorage.getAccessToken()
+            ?: return chain.proceed(originalRequest)
+
+        val authenticatedRequest = originalRequest.newBuilder()
+            .header("Authorization", "Bearer $accessToken")
+            .build()
+
+        val response = chain.proceed(authenticatedRequest)
+
+        // Handle 401 Unauthorized
+        if (response.code == 401) {
+            response.close()
+            return runBlocking {
+                refreshTokenAndRetry(chain, originalRequest)
+            }
+        }
+
+        return response
+    }
+
+    private suspend fun refreshTokenAndRetry(
+        chain: Interceptor.Chain,
+        originalRequest: Request
+    ): Response {
+        return lock.withLock {
+            val refreshToken = tokenStorage.getRefreshToken()
+                ?: throw AuthException.SessionExpired()
+
+            val result = authRepository.get().refreshToken(refreshToken)
+
+            when (result) {
+                is Result.Success -> {
+                    tokenStorage.saveTokens(
+                        result.data.accessToken,
+                        result.data.refreshToken
+                    )
+
+                    val newRequest = originalRequest.newBuilder()
+                        .header("Authorization", "Bearer ${result.data.accessToken}")
+                        .build()
+
+                    chain.proceed(newRequest)
+                }
+                is Result.Failure -> {
+                    tokenStorage.clearTokens()
+                    throw AuthException.SessionExpired()
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Authenticator for automatic retry after token refresh
+ */
+class TokenAuthenticator @Inject constructor(
+    private val tokenStorage: SecureTokenStorage,
+    private val authRepository: Provider<AuthRepository>
+) : Authenticator {
+
+    override fun authenticate(route: Route?, response: Response): Request? {
+        // Prevent infinite retry loops
+        if (response.request.header("X-Retry-Count")?.toIntOrNull() ?: 0 >= 3) {
+            return null
+        }
+
+        val newToken = runBlocking {
+            refreshToken()
+        } ?: return null
+
+        return response.request.newBuilder()
+            .header("Authorization", "Bearer $newToken")
+            .header("X-Retry-Count", "1")
+            .build()
+    }
+
+    private suspend fun refreshToken(): String? {
+        val refreshToken = tokenStorage.getRefreshToken() ?: return null
+        val result = authRepository.get().refreshToken(refreshToken)
+
+        return when (result) {
+            is Result.Success -> {
+                tokenStorage.saveTokens(
+                    result.data.accessToken,
+                    result.data.refreshToken
+                )
+                result.data.accessToken
+            }
+            is Result.Failure -> null
+        }
+    }
+}
+```
+
+### ProGuard / R8 Configuration
+
+```proguard
+# proguard-rules.pro
+
+# Keep data classes used with serialization
+-keepclassmembers class * {
+    @kotlinx.serialization.Serializable <fields>;
+}
+
+# Keep Retrofit service interfaces
+-keep,allowobfuscation interface * {
+    @retrofit2.http.* <methods>;
+}
+
+# Keep Room entities
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
+-keepclassmembers @androidx.room.Entity class * {
+    <fields>;
+}
+
+# Keep Hilt generated classes
+-keep class dagger.hilt.** { *; }
+-keep class * extends dagger.hilt.android.internal.managers.ComponentSupplier { *; }
+
+# Obfuscate class names for security
+-repackageclasses ''
+-allowaccessmodification
+
+# Remove logging in release builds
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+}
+
+# Remove Timber logging in release
+-assumenosideeffects class timber.log.Timber {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+}
+```
+
+### Security Best Practices Checklist
+
+- [ ] Use `EncryptedSharedPreferences` for sensitive data
+- [ ] Never hardcode API keys or secrets in code
+- [ ] Use Android Keystore for cryptographic keys
+- [ ] Implement certificate pinning for API calls
+- [ ] Enable ProGuard/R8 obfuscation in release builds
+- [ ] Remove debug logs in production
+- [ ] Validate all user inputs on both client and server
+- [ ] Use HTTPS for all network communications
+- [ ] Implement token refresh with secure storage
+- [ ] Handle authentication errors gracefully
+
+### Certificate Pinning
+
+```kotlin
+/**
+ * OkHttp certificate pinning
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+object NetworkSecurityModule {
+
+    @Provides
+    @Singleton
+    fun provideSecureOkHttpClient(): OkHttpClient {
+        val certificatePinner = CertificatePinner.Builder()
+            .add("api.example.com", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+            .add("api.example.com", "sha256/BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=")
+            .build()
+
+        return OkHttpClient.Builder()
+            .certificatePinner(certificatePinner)
+            .build()
+    }
+}
+```
+
+---
+
 ## Best Practices Checklist
 
 ### ViewModel
@@ -1710,6 +2437,10 @@ com.{company}.{app}
 ---
 
 ## References
+
+> **Note**: These links point to official Google documentation. URLs may change over time.
+> Please verify link validity periodically and report any broken links.
+> Last verified: 2026-01-22
 
 - [Android Architecture Guide](https://developer.android.com/topic/architecture)
 - [Guide to app architecture](https://developer.android.com/topic/architecture/intro)

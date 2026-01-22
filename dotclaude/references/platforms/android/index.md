@@ -13,9 +13,13 @@ Defines MVVM, UDF (Unidirectional Data Flow), and Repository patterns.
 |------|-------------|----------|
 | [architecture.md](architecture.md) | Android MVVM/UDF architecture details | ★★★ Official guide compliant |
 
+> **Note**: Additional reference files (e.g., compose.md, navigation.md, testing.md) may be added as the documentation expands.
+
 ---
 
 ## External Links
+
+> **Priority Legend**: ★★★ = Essential (must read), ★★ = Recommended, ★ = Optional
 
 ### Official Documentation (Highest Priority)
 - [Android Architecture Guide (Official)](https://developer.android.com/topic/architecture) - ★★★ Most Important
@@ -40,4 +44,4 @@ Defines MVVM, UDF (Unidirectional Data Flow), and Repository patterns.
 
 ## Related Skills
 
-- android-architecture
+- **android-architecture**: Use when implementing Android features, creating ViewModels, setting up Repositories, using Hilt, implementing Jetpack Compose, or following MVVM/UDF patterns on Android.

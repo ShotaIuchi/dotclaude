@@ -65,8 +65,14 @@ actual fun getPlatformName(): String =
 ```kotlin
 // commonMain/kotlin/com/example/shared/core/network/NetworkMonitor.kt
 
+import kotlinx.coroutines.flow.Flow
+
 /**
  * Network state monitoring (expect declaration)
+ *
+ * Note: The actual implementations may require platform-specific
+ * constructor parameters (e.g., Context on Android). These are
+ * typically provided via dependency injection (DI) frameworks like Koin.
  */
 expect class NetworkMonitor {
     fun isOnline(): Boolean
@@ -82,6 +88,9 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 /**
  * Android implementation
@@ -128,11 +137,18 @@ actual class NetworkMonitor(
 ```kotlin
 // iosMain/kotlin/com/example/shared/core/network/NetworkMonitor.ios.kt
 
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import platform.Network.*
 import platform.darwin.dispatch_get_main_queue
 
 /**
  * iOS implementation
+ *
+ * Note: The nw_path_monitor must be properly cancelled when no longer needed.
+ * When using with coroutines, the awaitClose block handles cancellation.
+ * For non-Flow usage, ensure cancel() is called to prevent resource leaks.
  */
 actual class NetworkMonitor {
     private val monitor = nw_path_monitor_create()
@@ -160,6 +176,14 @@ actual class NetworkMonitor {
         awaitClose {
             nw_path_monitor_cancel(monitor)
         }
+    }
+
+    /**
+     * Cancel the network monitor and release resources.
+     * Call this when the monitor is no longer needed.
+     */
+    fun cancel() {
+        nw_path_monitor_cancel(monitor)
     }
 }
 ```
@@ -196,7 +220,67 @@ import platform.Foundation.NSUUID
 /**
  * iOS implementation
  */
-actual fun randomUUID(): String = NSUUID().UUIDString()
+actual fun randomUUID(): String = NSUUID().UUIDString
+```
+
+---
+
+## Desktop (JVM) Implementation Example
+
+```kotlin
+// jvmMain/kotlin/com/example/shared/core/platform/Platform.jvm.kt
+
+/**
+ * Desktop/JVM implementation
+ */
+actual class Platform actual constructor() {
+    actual val name: String = "JVM"
+    actual val version: String = System.getProperty("java.version") ?: "unknown"
+}
+
+actual fun getPlatformName(): String = "JVM ${System.getProperty("java.version")}"
+```
+
+```kotlin
+// jvmMain/kotlin/com/example/shared/core/network/NetworkMonitor.jvm.kt
+
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import java.net.InetSocketAddress
+import java.net.Socket
+
+/**
+ * Desktop/JVM implementation
+ */
+actual class NetworkMonitor {
+    actual fun isOnline(): Boolean {
+        return try {
+            Socket().use { socket ->
+                socket.connect(InetSocketAddress("8.8.8.8", 53), 1500)
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    actual fun observeNetworkState(): Flow<Boolean> = callbackFlow {
+        // Simple polling-based implementation for JVM
+        // For production, consider using a more sophisticated approach
+        val checkInterval = 5000L
+        var running = true
+
+        kotlinx.coroutines.launch {
+            while (running) {
+                trySend(isOnline())
+                kotlinx.coroutines.delay(checkInterval)
+            }
+        }
+
+        awaitClose { running = false }
+    }
+}
 ```
 
 ---
@@ -207,3 +291,21 @@ actual fun randomUUID(): String = NSUUID().UUIDString()
 - Design common interfaces first
 - Follow platform Best Practices for actual implementations
 - Prepare Fake implementations for testing in commonTest
+
+### Error Handling
+
+- Use `runCatching` or `Result` types for operations that may fail
+- Define common exception types in `commonMain` for cross-platform error handling
+- Wrap platform-specific exceptions in common exception types
+
+### Testing Strategy
+
+- Create `Fake` implementations in `commonTest` for unit testing
+- Use interface-based design to enable easy mocking
+- Test actual implementations separately in platform-specific test source sets
+
+### Performance Considerations
+
+- Avoid blocking calls in `actual` implementations; prefer suspending functions
+- Use platform-native APIs for performance-critical operations
+- Consider lazy initialization for expensive platform resources

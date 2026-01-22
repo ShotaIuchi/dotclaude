@@ -107,6 +107,51 @@ Presentation Layer → Domain Layer → Data Layer
 
 ## Presentation Layer
 
+### iOS Version Selection Guide
+
+When choosing between `@Observable` (iOS 17+) and `ObservableObject` (iOS 15+), consider the following:
+
+| Minimum iOS Version | Recommended Approach | Rationale |
+|---------------------|----------------------|-----------|
+| iOS 17+ | `@Observable` | Best performance, less boilerplate, property-level observation |
+| iOS 15-16 | `ObservableObject` | Required for backward compatibility |
+| iOS 15+ with conditional support | Both patterns | Use `#available` checks or separate implementations |
+
+**Decision Guide:**
+
+1. **New Projects (iOS 17+ target)**: Use `@Observable` exclusively
+2. **Existing Projects (iOS 15+ target)**: Continue with `ObservableObject` until minimum target is raised
+3. **Libraries/SDKs**: Provide both implementations or use `ObservableObject` for maximum compatibility
+
+**Migration Path (iOS 15 → iOS 17+):**
+
+```swift
+// Step 1: Define protocol for ViewModel interface
+protocol UserListViewModelProtocol {
+    var uiState: UserListUiState { get }
+    func loadUsers()
+}
+
+// Step 2: Create @Observable implementation for iOS 17+
+@available(iOS 17.0, *)
+@Observable
+final class UserListViewModelV2: UserListViewModelProtocol { ... }
+
+// Step 3: Keep ObservableObject for iOS 15-16
+final class UserListViewModelLegacy: ObservableObject, UserListViewModelProtocol { ... }
+
+// Step 4: Factory method for version-appropriate ViewModel
+func makeUserListViewModel() -> any UserListViewModelProtocol {
+    if #available(iOS 17.0, *) {
+        return UserListViewModelV2(...)
+    } else {
+        return UserListViewModelLegacy(...)
+    }
+}
+```
+
+---
+
 ### ViewModel (iOS 17+ @Observable)
 
 ```swift
@@ -796,6 +841,41 @@ final class UserRepository: UserRepositoryProtocol {
 
 ### Local DataSource (SwiftData / iOS 17+)
 
+**Migration from CoreData:**
+
+If migrating from CoreData to SwiftData, follow these steps:
+
+1. **Assess compatibility**: SwiftData requires iOS 17+. Consider maintaining CoreData for older iOS versions.
+
+2. **Model conversion**: Convert `NSManagedObject` subclasses to `@Model` classes:
+   ```swift
+   // CoreData (before)
+   @objc(UserMO)
+   class UserMO: NSManagedObject {
+       @NSManaged var id: String
+       @NSManaged var name: String
+   }
+
+   // SwiftData (after)
+   @Model
+   final class UserEntity {
+       @Attribute(.unique) var id: String
+       var name: String
+   }
+   ```
+
+3. **Migration strategy options**:
+   - **Clean migration**: Delete old data, start fresh (suitable for cache-only data)
+   - **Export/import**: Read all CoreData, write to SwiftData on first launch
+   - **Coexistence**: Run both stacks during transition period
+
+4. **Lightweight migration**: SwiftData handles simple schema changes automatically.
+   For complex migrations, implement `SchemaMigrationPlan`.
+
+5. **Testing**: Verify data integrity after migration with unit tests.
+
+For detailed guidance, see [WWDC23 - Migrate to SwiftData](https://developer.apple.com/videos/play/wwdc2023/10189/).
+
 ```swift
 import Foundation
 import SwiftData
@@ -1343,7 +1423,69 @@ final class DependencyContainer {
             getUsersUseCase: makeGetUsersUseCase()
         )
     }
+
+    // MARK: - Testing Support
+
+    /**
+     * Reset cached dependencies (for testing only)
+     *
+     * Call this in test tearDown to ensure clean state between tests.
+     */
+    func resetForTesting() {
+        cachedUserRepository = nil
+        cachedAnalyticsRepository = nil
+    }
+
+    /**
+     * Override specific dependency (for testing only)
+     *
+     * Allows injection of fakes/mocks for specific dependencies.
+     */
+    func override<T>(dependency: WritableKeyPath<DependencyContainer, T?>, with value: T) {
+        self[keyPath: dependency] = value
+    }
 }
+
+/**
+ * Multi-module DI Architecture
+ *
+ * For large applications with multiple modules, consider this structure:
+ *
+ * ```
+ * // Core module - shared dependencies
+ * protocol CoreDependencies {
+ *     var networkClient: NetworkClientProtocol { get }
+ *     var analyticsRepository: AnalyticsRepositoryProtocol { get }
+ * }
+ *
+ * // Feature module - feature-specific dependencies
+ * protocol UserFeatureDependencies: CoreDependencies {
+ *     var userRepository: UserRepositoryProtocol { get }
+ * }
+ *
+ * // Module-specific container
+ * final class UserFeatureContainer: UserFeatureDependencies {
+ *     private let core: CoreDependencies
+ *
+ *     init(core: CoreDependencies) {
+ *         self.core = core
+ *     }
+ *
+ *     var networkClient: NetworkClientProtocol { core.networkClient }
+ *     var analyticsRepository: AnalyticsRepositoryProtocol { core.analyticsRepository }
+ *
+ *     lazy var userRepository: UserRepositoryProtocol = {
+ *         UserRepository(networkClient: networkClient)
+ *     }()
+ * }
+ * ```
+ *
+ * Benefits:
+ * - Clear dependency boundaries between modules
+ * - Each module can be tested independently
+ * - Prevents circular dependencies
+ * - Supports dynamic feature loading
+ */
 ```
 
 ### DI using Environment (SwiftUI)
@@ -1719,24 +1861,68 @@ func fetchUserDetail(userId: String) async throws -> UserDetail {
     )
 }
 
-// With timeout
+// With timeout (correct pattern using race)
 func fetchWithTimeout<T>(
     timeout: Duration = .seconds(30),
     operation: @escaping () async throws -> T
 ) async throws -> T {
-    try await withThrowingTaskGroup(of: T.self) { group in
+    // Use a wrapper enum to handle the race between operation and timeout
+    enum RaceResult<T> {
+        case success(T)
+        case timeout
+    }
+
+    return try await withThrowingTaskGroup(of: RaceResult<T>.self) { group in
+        // Add the main operation task
         group.addTask {
-            try await operation()
+            let result = try await operation()
+            return .success(result)
         }
 
+        // Add the timeout task
         group.addTask {
             try await Task.sleep(for: timeout)
-            throw AppError.network(.timeout)
+            return .timeout
         }
 
-        let result = try await group.next()!
+        // Wait for the first task to complete
+        guard let firstResult = try await group.next() else {
+            throw AppError.network(.unknown)
+        }
+
+        // Cancel remaining tasks
         group.cancelAll()
+
+        // Process the result
+        switch firstResult {
+        case .success(let value):
+            return value
+        case .timeout:
+            throw AppError.network(.timeout)
+        }
+    }
+}
+
+// Alternative: Using TaskGroup with explicit cancellation handling
+func fetchWithTimeoutAlternative<T>(
+    timeout: Duration = .seconds(30),
+    operation: @escaping () async throws -> T
+) async throws -> T {
+    let task = Task {
+        try await operation()
+    }
+
+    let timeoutTask = Task {
+        try await Task.sleep(for: timeout)
+        task.cancel()
+    }
+
+    do {
+        let result = try await task.value
+        timeoutTask.cancel()
         return result
+    } catch is CancellationError {
+        throw AppError.network(.timeout)
     }
 }
 ```
@@ -1976,6 +2162,57 @@ enum AppError: Error, Equatable {
         case sessionExpired
     }
 }
+
+/**
+ * Enhanced Error with underlying error for logging
+ *
+ * Design rationale:
+ * - Equatable comparison uses only the category (for UI state comparison)
+ * - Underlying error preserved for logging/debugging
+ * - Prevents information loss while maintaining testability
+ */
+struct DetailedAppError: Error {
+    let appError: AppError
+    let underlyingError: Error?
+    let context: [String: Any]
+
+    init(
+        _ appError: AppError,
+        underlying: Error? = nil,
+        context: [String: Any] = [:]
+    ) {
+        self.appError = appError
+        self.underlyingError = underlying
+        self.context = context
+    }
+
+    /// For logging - includes all details
+    var debugDescription: String {
+        var desc = "AppError: \(appError)"
+        if let underlying = underlyingError {
+            desc += "\n  Underlying: \(underlying)"
+        }
+        if !context.isEmpty {
+            desc += "\n  Context: \(context)"
+        }
+        return desc
+    }
+}
+
+extension DetailedAppError: Equatable {
+    /// Equatable compares only the AppError category
+    /// This allows UI state comparison without underlying error details
+    static func == (lhs: DetailedAppError, rhs: DetailedAppError) -> Bool {
+        lhs.appError == rhs.appError
+    }
+}
+
+// Usage in Repository:
+// throw DetailedAppError(
+//     .network(.server(code: 500)),
+//     underlying: originalError,
+//     context: ["endpoint": "/api/users", "method": "GET"]
+// )
 
 extension AppError: LocalizedError {
 
@@ -2518,17 +2755,30 @@ extension User {
 }
 ```
 
-### SwiftUI Preview Test
+### SwiftUI Snapshot Test
+
+**Recommended Library: [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing)**
+
+Setup:
+1. Add to `Package.swift`: `.package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.15.0")`
+2. Import in test files: `import SnapshotTesting`
 
 ```swift
 import XCTest
 import SwiftUI
+import SnapshotTesting
 @testable import MyApp
 
 /**
- * SwiftUI Snapshot test
+ * SwiftUI Snapshot test with swift-snapshot-testing
  */
 final class UserListContentSnapshotTests: XCTestCase {
+
+    // Set to true to record new snapshots, false to compare
+    override func invokeTest() {
+        // isRecording = true  // Uncomment to record new baselines
+        super.invokeTest()
+    }
 
     func test_loadingState() {
         let view = UserListContent(
@@ -2536,9 +2786,9 @@ final class UserListContentSnapshotTests: XCTestCase {
             onUserTap: { _ in },
             onRetryTap: {}
         )
+        .frame(width: 375, height: 667) // iPhone SE size
 
-        // Compare using snapshot library
-        // assertSnapshot(matching: view, as: .image)
+        assertSnapshot(of: view, as: .image)
     }
 
     func test_contentState() {
@@ -2556,8 +2806,9 @@ final class UserListContentSnapshotTests: XCTestCase {
             onUserTap: { _ in },
             onRetryTap: {}
         )
+        .frame(width: 375, height: 667)
 
-        // assertSnapshot(matching: view, as: .image)
+        assertSnapshot(of: view, as: .image)
     }
 
     func test_errorState() {
@@ -2571,15 +2822,104 @@ final class UserListContentSnapshotTests: XCTestCase {
             onUserTap: { _ in },
             onRetryTap: {}
         )
+        .frame(width: 375, height: 667)
 
-        // assertSnapshot(matching: view, as: .image)
+        assertSnapshot(of: view, as: .image)
+    }
+
+    // Test multiple device sizes
+    func test_loadingState_iPad() {
+        let view = UserListContent(
+            uiState: UserListUiState(isLoading: true),
+            onUserTap: { _ in },
+            onRetryTap: {}
+        )
+        .frame(width: 768, height: 1024) // iPad portrait
+
+        assertSnapshot(of: view, as: .image)
+    }
+
+    // Test dark mode
+    func test_contentState_darkMode() {
+        let view = UserListContent(
+            uiState: UserListUiState(
+                users: [UserUiModel(id: "1", displayName: "Alice", avatarUrl: nil, formattedJoinDate: "2024/01/01")]
+            ),
+            onUserTap: { _ in },
+            onRetryTap: {}
+        )
+        .frame(width: 375, height: 667)
+        .environment(\.colorScheme, .dark)
+
+        assertSnapshot(of: view, as: .image)
     }
 }
 ```
 
+**Best Practices for Snapshot Testing:**
+- Store snapshots in `__Snapshots__` directory alongside test files
+- Add snapshots to version control for CI comparison
+- Use consistent frame sizes for reproducible results
+- Test both light and dark mode
+- Test accessibility sizes with `.dynamicTypeSize(.xxxLarge)`
+
 ---
 
 ## Directory Structure
+
+### Choosing the Right Structure
+
+| Project Size | Team Size | Recommended Structure |
+|--------------|-----------|----------------------|
+| Small (< 10 screens) | 1-2 developers | Simple / Flat |
+| Medium (10-30 screens) | 3-5 developers | Feature-based |
+| Large (30+ screens) | 5+ developers | Feature-based with modules |
+
+### Simple Structure (Small Projects)
+
+For small projects or prototypes, a flat structure reduces complexity:
+
+```
+MyApp/
+├── App/
+│   ├── MyApp.swift
+│   └── ContentView.swift
+│
+├── Models/                    # All domain models
+│   ├── User.swift
+│   ├── Post.swift
+│   └── AppError.swift
+│
+├── ViewModels/               # All ViewModels
+│   ├── UserListViewModel.swift
+│   └── UserDetailViewModel.swift
+│
+├── Views/                    # All Views
+│   ├── UserListScreen.swift
+│   ├── UserDetailScreen.swift
+│   └── Components/
+│       ├── UserCard.swift
+│       └── LoadingView.swift
+│
+├── Services/                 # Network, Storage, etc.
+│   ├── APIClient.swift
+│   ├── UserService.swift
+│   └── StorageService.swift
+│
+├── Utilities/
+│   └── Extensions.swift
+│
+└── Resources/
+    └── Assets.xcassets
+```
+
+**When to migrate to Feature-based:**
+- Adding more than 3 developers to the team
+- Features start overlapping and causing merge conflicts
+- Code navigation becomes difficult
+- Test files become hard to organize
+
+---
 
 ### Feature-based Structure (Recommended)
 
@@ -2797,10 +3137,55 @@ MyApp/
 
 ## References
 
-- [The Composable Architecture (TCA)](https://github.com/pointfreeco/swift-composable-architecture)
+### Official Documentation
+
 - [Swift Concurrency](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/)
 - [SwiftUI Documentation](https://developer.apple.com/documentation/swiftui/)
 - [SwiftData Documentation](https://developer.apple.com/documentation/swiftdata)
 - [Observation Framework](https://developer.apple.com/documentation/observation)
-- [WWDC23 - Discover Observation in SwiftUI](https://developer.apple.com/videos/play/wwdc2023/10149/)
-- [WWDC23 - Meet SwiftData](https://developer.apple.com/videos/play/wwdc2023/10187/)
+- [Swift Testing](https://developer.apple.com/documentation/testing) - New testing framework (iOS 18+)
+
+### WWDC Sessions
+
+**WWDC 2023:**
+- [Discover Observation in SwiftUI](https://developer.apple.com/videos/play/wwdc2023/10149/)
+- [Meet SwiftData](https://developer.apple.com/videos/play/wwdc2023/10187/)
+- [Migrate to SwiftData](https://developer.apple.com/videos/play/wwdc2023/10189/)
+- [Beyond the basics of structured concurrency](https://developer.apple.com/videos/play/wwdc2023/10170/)
+
+**WWDC 2024:**
+- [What's new in SwiftUI](https://developer.apple.com/videos/play/wwdc2024/10144/)
+- [What's new in SwiftData](https://developer.apple.com/videos/play/wwdc2024/10137/)
+- [Migrate your app to Swift 6](https://developer.apple.com/videos/play/wwdc2024/10169/)
+- [Meet Swift Testing](https://developer.apple.com/videos/play/wwdc2024/10179/)
+- [Consume noncopyable types in Swift](https://developer.apple.com/videos/play/wwdc2024/10170/)
+
+**WWDC 2025:**
+- Check [Apple Developer Videos](https://developer.apple.com/videos/) for latest sessions
+
+### Swift 6 Migration Notes
+
+Swift 6 introduces strict concurrency checking by default. Key considerations:
+
+1. **Sendable compliance**: All types crossing concurrency boundaries must be `Sendable`
+2. **@MainActor enforcement**: UI-related code requires explicit `@MainActor` annotation
+3. **Data race safety**: Compiler enforces absence of data races at compile time
+
+```swift
+// Swift 6 compliant ViewModel
+@MainActor
+@Observable
+final class UserListViewModel: Sendable {
+    // All properties must be Sendable or isolated to MainActor
+    private(set) var uiState = UserListUiState()
+    ...
+}
+```
+
+For migration guidance, see [Migrating to Swift 6](https://www.swift.org/migration/documentation/migrationguide/).
+
+### Community Resources
+
+- [The Composable Architecture (TCA)](https://github.com/pointfreeco/swift-composable-architecture)
+- [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing)
+- [Swift Async Algorithms](https://github.com/apple/swift-async-algorithms)

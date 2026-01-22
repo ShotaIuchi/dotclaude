@@ -232,13 +232,14 @@ Basic structure of `libs.versions.toml`:
 
 ```toml
 [versions]
-kotlin = "..."               # Refer to latest stable
-kotlinx-coroutines = "..."
-kotlinx-datetime = "..."
-kotlinx-serialization = "..."
-ktor = "..."
-sqldelight = "..."
-koin = "..."
+# Example versions as of 2024 - always check official sites for latest stable versions
+kotlin = "2.0.0"               # https://kotlinlang.org/docs/releases.html
+kotlinx-coroutines = "1.8.1"   # https://github.com/Kotlin/kotlinx.coroutines/releases
+kotlinx-datetime = "0.6.0"     # https://github.com/Kotlin/kotlinx-datetime/releases
+kotlinx-serialization = "1.6.3" # https://github.com/Kotlin/kotlinx.serialization/releases
+ktor = "2.3.11"                # https://ktor.io/changelog/
+sqldelight = "2.0.2"           # https://github.com/cashapp/sqldelight/releases
+koin = "3.5.6"                 # https://github.com/InsertKoinIO/koin/releases
 
 [libraries]
 # Coroutines
@@ -397,6 +398,22 @@ class UserRepositoryImpl(
             .map { it.toDomain() }
     }
 
+    /**
+     * Create a new user
+     *
+     * Error Handling Pattern:
+     * - Uses Kotlin's Result type via runCatching for safe error propagation
+     * - Caller should handle Result with fold(), getOrNull(), or onSuccess/onFailure
+     *
+     * Example usage:
+     * ```kotlin
+     * repository.createUser(user)
+     *     .onSuccess { createdUser -> /* handle success */ }
+     *     .onFailure { error -> /* handle error, e.g., show UI message */ }
+     * ```
+     *
+     * For comprehensive error handling patterns, see: [kmp-error-handling.md](./kmp-error-handling.md)
+     */
     override suspend fun createUser(user: User): Result<User> {
         return runCatching {
             // Create on remote
@@ -463,6 +480,25 @@ class UserRepositoryImpl(
  * User list screen ViewModel
  *
  * Manages UI state and invokes business logic
+ *
+ * Lifecycle Management:
+ * - Android: CoroutineScope is provided by Jetpack ViewModel's viewModelScope
+ * - iOS: Scope should be created in Swift and cancelled in deinit:
+ *   ```swift
+ *   class UserListViewModelWrapper: ObservableObject {
+ *       private let scope = MainScope() // From kotlinx.coroutines
+ *       let viewModel: UserListViewModel
+ *
+ *       init(getUsersUseCase: GetUsersUseCase) {
+ *           viewModel = UserListViewModel(getUsersUseCase: getUsersUseCase, coroutineScope: scope)
+ *       }
+ *
+ *       deinit {
+ *           scope.cancel() // Important: Cancel scope to prevent memory leaks
+ *           viewModel.onCleared()
+ *       }
+ *   }
+ *   ```
  */
 class UserListViewModel(
     private val getUsersUseCase: GetUsersUseCase,
@@ -726,9 +762,10 @@ project/
 ├── desktopApp/                          # Desktop app (optional)
 │   └── src/jvmMain/
 │
-└── sqldelight/                          # SQLDelight schema
-    └── com/example/shared/
-        └── AppDatabase.sq
+└── shared/
+    └── src/commonMain/sqldelight/       # SQLDelight schema (standard location)
+        └── com/example/shared/
+            └── AppDatabase.sq
 ```
 
 ---
@@ -854,6 +891,18 @@ project/
 - [ ] Common error mapping across platforms
 - [ ] Convert to UI error model
 - [ ] Implement retry mechanism
+
+---
+
+## Future Considerations
+
+The following topics are planned for future documentation updates:
+
+- **Navigation**: Compose Multiplatform navigation libraries (Voyager, Decompose) comparison and usage patterns
+- **Kotlin 2.0+**: K2 compiler adoption and new language features for KMP
+- **WebTarget**: Kotlin/JS and Kotlin/Wasm support for browser and web applications
+- **Room KMP**: Google's official Room KMP support (currently in alpha) as an alternative to SQLDelight
+- **CI/CD**: CI pipeline configuration best practices for multi-platform builds and testing
 
 ---
 

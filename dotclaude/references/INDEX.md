@@ -23,7 +23,17 @@ references/
 │   └── kotlin/
 │       ├── index.md
 │       ├── coroutines.md
-│       └── kmp-architecture.md
+│       ├── kmp-architecture.md
+│       ├── kmp-auth.md
+│       ├── kmp-camera.md
+│       ├── kmp-compose-ui.md
+│       ├── kmp-data-sqldelight.md
+│       ├── kmp-di-koin.md
+│       ├── kmp-error-handling.md
+│       ├── kmp-expect-actual.md
+│       ├── kmp-network-ktor.md
+│       ├── kmp-state-udf.md
+│       └── kmp-testing.md
 └── services/                   # Cloud services
     └── aws/
         ├── index.md
@@ -36,11 +46,11 @@ references/
 
 Authoritative sources for design principles that all skills should reference.
 
-| Principle | Link | Priority |
-|-----------|------|----------|
-| Clean Architecture | [The Clean Architecture (Robert C. Martin)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) | ★★★ Original |
-| SOLID Principles | [SOLID (Wikipedia)](https://en.wikipedia.org/wiki/SOLID) | ★★ Foundation |
-| Dependency Injection | [Dependency Injection (Wikipedia)](https://en.wikipedia.org/wiki/Dependency_injection) | ★★ Foundation |
+| Principle | Description | Link | Priority |
+|-----------|-------------|------|----------|
+| Clean Architecture | Separation of concerns through concentric layers with dependency rules pointing inward | [The Clean Architecture (Robert C. Martin)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) | ★★★ Original |
+| SOLID Principles | Five object-oriented design principles (Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) | [SOLID (Wikipedia)](https://en.wikipedia.org/wiki/SOLID) | ★★ Foundation |
+| Dependency Injection | Design pattern where objects receive dependencies from external sources rather than creating them | [Dependency Injection (Wikipedia)](https://en.wikipedia.org/wiki/Dependency_injection) | ★★ Foundation |
 
 ---
 
@@ -74,6 +84,16 @@ Authoritative sources for design principles that all skills should reference.
 | [index.md](languages/kotlin/index.md) | Structure, priority, external links | android, kmp |
 | [coroutines.md](languages/kotlin/coroutines.md) | Kotlin Coroutines best practices | android, kmp |
 | [kmp-architecture.md](languages/kotlin/kmp-architecture.md) | Kotlin Multiplatform architecture | kmp |
+| [kmp-auth.md](languages/kotlin/kmp-auth.md) | KMP authentication patterns | kmp |
+| [kmp-camera.md](languages/kotlin/kmp-camera.md) | KMP camera integration | kmp |
+| [kmp-compose-ui.md](languages/kotlin/kmp-compose-ui.md) | Compose Multiplatform UI patterns | kmp |
+| [kmp-data-sqldelight.md](languages/kotlin/kmp-data-sqldelight.md) | SQLDelight data persistence | kmp |
+| [kmp-di-koin.md](languages/kotlin/kmp-di-koin.md) | Koin dependency injection | kmp |
+| [kmp-error-handling.md](languages/kotlin/kmp-error-handling.md) | KMP error handling patterns | kmp |
+| [kmp-expect-actual.md](languages/kotlin/kmp-expect-actual.md) | Expect/actual declarations | kmp |
+| [kmp-network-ktor.md](languages/kotlin/kmp-network-ktor.md) | Ktor networking | kmp |
+| [kmp-state-udf.md](languages/kotlin/kmp-state-udf.md) | Unidirectional data flow state management | kmp |
+| [kmp-testing.md](languages/kotlin/kmp-testing.md) | KMP testing strategies | kmp |
 
 ### services/aws/ - AWS Related
 
@@ -85,6 +105,8 @@ Authoritative sources for design principles that all skills should reference.
 ---
 
 ## Reference Map by Skill
+
+> **Note**: All paths below are relative to `skills/` directory. For example, `../references/` resolves to the `references/` directory at the project root.
 
 ### android-architecture
 
@@ -116,6 +138,16 @@ references:
   - path: ../references/common/testing-strategy.md
   - path: ../references/languages/kotlin/coroutines.md
   - path: ../references/languages/kotlin/kmp-architecture.md
+  - path: ../references/languages/kotlin/kmp-auth.md
+  - path: ../references/languages/kotlin/kmp-camera.md
+  - path: ../references/languages/kotlin/kmp-compose-ui.md
+  - path: ../references/languages/kotlin/kmp-data-sqldelight.md
+  - path: ../references/languages/kotlin/kmp-di-koin.md
+  - path: ../references/languages/kotlin/kmp-error-handling.md
+  - path: ../references/languages/kotlin/kmp-expect-actual.md
+  - path: ../references/languages/kotlin/kmp-network-ktor.md
+  - path: ../references/languages/kotlin/kmp-state-udf.md
+  - path: ../references/languages/kotlin/kmp-testing.md
 ```
 
 ### aws-sam

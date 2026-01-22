@@ -47,6 +47,34 @@ It is an extension of CloudFormation and allows you to define resources such as 
 | Transform | Required | Not required |
 | Resource types | AWS::Serverless::* | AWS::* |
 
+### SAM Transform Processing
+
+SAM templates are converted to standard CloudFormation templates through the `AWS::Serverless-2016-10-31` transform. Here's what happens:
+
+**Resource Transformation Examples:**
+
+| SAM Resource | Transforms To |
+|--------------|---------------|
+| `AWS::Serverless::Function` | `AWS::Lambda::Function` + `AWS::IAM::Role` + `AWS::Lambda::Permission` (per event) |
+| `AWS::Serverless::Api` | `AWS::ApiGateway::RestApi` + `AWS::ApiGateway::Stage` + `AWS::ApiGateway::Deployment` |
+| `AWS::Serverless::SimpleTable` | `AWS::DynamoDB::Table` |
+| `AWS::Serverless::HttpApi` | `AWS::ApiGatewayV2::Api` + `AWS::ApiGatewayV2::Stage` |
+
+**SAM-Specific Features:**
+
+1. **Policy Templates** - Pre-defined IAM policies (e.g., `DynamoDBCrudPolicy`, `S3ReadPolicy`) that expand to full IAM policy documents
+2. **Globals Section** - Define default values inherited by all resources of the same type
+3. **Implicit APIs** - Functions with `Api` events automatically create API Gateway resources
+4. **Connectors** - `AWS::Serverless::Connector` generates least-privilege IAM policies between resources
+
+**Viewing Transformed Template:**
+
+```bash
+# View the expanded CloudFormation template
+sam validate --lint
+aws cloudformation get-template --stack-name my-stack --template-stage Processed
+```
+
 ---
 
 ## SAM CLI Command Reference
@@ -917,11 +945,38 @@ class AppError(Exception):
     Application error base class
     """
 
-    def __init__(self, message: str, status_code: int = 500, error_code: str = "INTERNAL_ERROR"):
+    def __init__(
+        self,
+        message: str,
+        status_code: int = 500,
+        error_code: str = "INTERNAL_ERROR",
+        cause: Exception | None = None,
+    ):
         self.message = message
         self.status_code = status_code
         self.error_code = error_code
+        self.cause = cause
         super().__init__(self.message)
+
+    @classmethod
+    def from_exception(
+        cls,
+        e: Exception,
+        message: str | None = None,
+        status_code: int = 500,
+        error_code: str = "INTERNAL_ERROR",
+    ) -> "AppError":
+        """
+        Create AppError from an existing exception, preserving the chain.
+        """
+        error = cls(
+            message=message or str(e),
+            status_code=status_code,
+            error_code=error_code,
+            cause=e,
+        )
+        # Use raise ... from e pattern when raising this error
+        return error
 
 
 class NotFoundError(AppError):
@@ -968,6 +1023,8 @@ def error_handler(func: Callable) -> Callable:
             return func(*args, **kwargs)
         except AppError as e:
             logger.warning(f"AppError: {e.error_code} - {e.message}")
+            if e.cause:
+                logger.debug(f"Caused by: {e.cause}")
             return {
                 "statusCode": e.status_code,
                 "headers": {"Content-Type": "application/json"},
@@ -982,6 +1039,8 @@ def error_handler(func: Callable) -> Callable:
             }
         except Exception as e:
             logger.exception("Unexpected error")
+            # Wrap and preserve exception chain for debugging
+            wrapped = AppError.from_exception(e)
             return {
                 "statusCode": 500,
                 "headers": {"Content-Type": "application/json"},
@@ -995,6 +1054,34 @@ def error_handler(func: Callable) -> Callable:
                 ),
             }
 
+
+def handle_external_service_error(func: Callable) -> Callable:
+    """
+    Decorator for handling external service errors with exception chaining.
+
+    Usage:
+        @handle_external_service_error
+        def call_external_api():
+            response = httpx.get(url)
+            response.raise_for_status()
+            return response.json()
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Any:
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            # Preserve original exception chain using 'from e'
+            raise AppError(
+                message=f"External service error: {str(e)}",
+                status_code=502,
+                error_code="EXTERNAL_SERVICE_ERROR",
+                cause=e,
+            ) from e
+
+    return wrapper
+
     return wrapper
 ```
 
@@ -1002,28 +1089,82 @@ def error_handler(func: Callable) -> Callable:
 
 ```python
 """
-Input validation utilities
+Input validation utilities (Pydantic v2)
 """
-from typing import Any
+from datetime import datetime
+from typing import Any, Self
 
-from pydantic import BaseModel, Field, ValidationError as PydanticValidationError
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_serializer,
+    field_validator,
+    model_validator,
+    ValidationError as PydanticValidationError,
+)
 
 
 class CreateItemRequest(BaseModel):
     """Item creation request"""
 
+    # Pydantic v2: Use model_config instead of Config class
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        str_min_length=1,
+        extra="forbid",
+    )
+
     name: str = Field(..., min_length=1, max_length=100)
     description: str | None = Field(None, max_length=500)
     price: int = Field(..., ge=0)
     category: str = Field(..., pattern=r"^[a-z_]+$")
+    tags: list[str] = Field(default_factory=list, max_length=10)
+    created_at: datetime | None = None
+
+    # Pydantic v2: field_validator with mode="before" for preprocessing
+    @field_validator("tags", mode="before")
+    @classmethod
+    def normalize_tags(cls, v: Any) -> list[str]:
+        """Normalize tags to lowercase"""
+        if isinstance(v, list):
+            return [tag.lower().strip() for tag in v if tag]
+        return v
+
+    # Pydantic v2: model_validator for cross-field validation
+    @model_validator(mode="after")
+    def validate_business_rules(self) -> Self:
+        """Validate business rules across fields"""
+        if self.category == "premium" and self.price < 1000:
+            raise ValueError("Premium items must have price >= 1000")
+        return self
+
+    # Pydantic v2: field_serializer for custom output format
+    @field_serializer("created_at")
+    def serialize_datetime(self, dt: datetime | None) -> str | None:
+        """Serialize datetime to ISO format string"""
+        return dt.isoformat() if dt else None
 
 
 class UpdateItemRequest(BaseModel):
     """Item update request"""
 
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        extra="forbid",
+    )
+
     name: str | None = Field(None, min_length=1, max_length=100)
     description: str | None = Field(None, max_length=500)
     price: int | None = Field(None, ge=0)
+
+    # Pydantic v2: Ensure at least one field is provided for update
+    @model_validator(mode="after")
+    def check_at_least_one_field(self) -> Self:
+        """Ensure at least one field is provided"""
+        if all(v is None for v in [self.name, self.description, self.price]):
+            raise ValueError("At least one field must be provided for update")
+        return self
 
 
 def validate_request(model: type[BaseModel], data: dict[str, Any]) -> BaseModel:
@@ -1031,13 +1172,13 @@ def validate_request(model: type[BaseModel], data: dict[str, Any]) -> BaseModel:
     Validate request data
     """
     try:
-        return model(**data)
+        return model.model_validate(data)  # Pydantic v2: use model_validate
     except PydanticValidationError as e:
         errors = []
         for error in e.errors():
             field = ".".join(str(loc) for loc in error["loc"])
             errors.append(f"{field}: {error['msg']}")
-        raise ValidationError("; ".join(errors))
+        raise ValidationError("; ".join(errors)) from e
 ```
 
 ---
@@ -1538,6 +1679,8 @@ Resources:
 
 ### Layer Structure
 
+**Python Layer:**
+
 ```
 layers/
 └── shared/
@@ -1551,6 +1694,31 @@ layers/
                     │   └── validation.py
                     └── requirements.txt
 ```
+
+**Node.js Layer:**
+
+```
+layers/
+└── shared/
+    └── nodejs/
+        └── node_modules/
+            ├── my-utils/
+            │   ├── index.js
+            │   ├── db.js
+            │   └── validation.js
+            └── package.json
+```
+
+**Other Runtimes:**
+
+| Runtime | Layer Path |
+|---------|------------|
+| Python | `python/` or `python/lib/python3.x/site-packages/` |
+| Node.js | `nodejs/node_modules/` |
+| Ruby | `ruby/gems/<version>/` |
+| Java | `java/lib/` |
+| .NET | `dotnet/` |
+| Custom | `bin/` (must be executable) |
 
 ### Layer Definition
 
@@ -1988,6 +2156,90 @@ Resources:
           CidrIp: 0.0.0.0/0
 ```
 
+### WAF Integration
+
+Protect your API Gateway endpoints with AWS WAF (Web Application Firewall):
+
+```yaml
+Resources:
+  # WAF Web ACL
+  ApiWafWebAcl:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub "${AWS::StackName}-api-waf"
+      Scope: REGIONAL
+      DefaultAction:
+        Allow: {}
+      Description: WAF for API Gateway
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: !Sub "${AWS::StackName}-api-waf"
+        SampledRequestsEnabled: true
+      Rules:
+        # AWS Managed Rules - Common Rule Set
+        - Name: AWSManagedRulesCommonRuleSet
+          Priority: 1
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesCommonRuleSet
+            SampledRequestsEnabled: true
+
+        # AWS Managed Rules - Known Bad Inputs
+        - Name: AWSManagedRulesKnownBadInputsRuleSet
+          Priority: 2
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesKnownBadInputsRuleSet
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesKnownBadInputsRuleSet
+            SampledRequestsEnabled: true
+
+        # Rate limiting rule
+        - Name: RateLimitRule
+          Priority: 3
+          Action:
+            Block: {}
+          Statement:
+            RateBasedStatement:
+              Limit: 2000
+              AggregateKeyType: IP
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: RateLimitRule
+            SampledRequestsEnabled: true
+
+  # Associate WAF with API Gateway
+  ApiWafAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Sub "arn:aws:apigateway:${AWS::Region}::/restapis/${MyApi}/stages/${Environment}"
+      WebACLArn: !GetAtt ApiWafWebAcl.Arn
+
+  # WAF logging (optional)
+  WafLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "aws-waf-logs-${AWS::StackName}"
+      RetentionInDays: 30
+
+  WafLoggingConfiguration:
+    Type: AWS::WAFv2::LoggingConfiguration
+    Properties:
+      LogDestinationConfigs:
+        - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:aws-waf-logs-${AWS::StackName}"
+      ResourceArn: !GetAtt ApiWafWebAcl.Arn
+```
+
 ---
 
 ## Local Development and Testing
@@ -1996,7 +2248,8 @@ Resources:
 
 ```yaml
 # docker-compose.yml
-version: "3.8"
+# Note: The 'version' field is obsolete in Docker Compose V2 and can be omitted.
+# See: https://docs.docker.com/compose/compose-file/04-version-and-name/
 services:
   dynamodb-local:
     image: amazon/dynamodb-local:latest
@@ -2059,7 +2312,6 @@ sam local start-api --env-vars env.json
 ### Event Files
 
 ```json
-// events/api-get-event.json
 {
   "httpMethod": "GET",
   "path": "/items",
@@ -2537,6 +2789,10 @@ Parameters:
 
 Resources:
   # OIDC Provider
+  # Note: AWS now automatically manages thumbprints for GitHub Actions OIDC.
+  # The ThumbprintList can be set to any valid 40-character hex string as AWS
+  # verifies the certificate chain directly. See:
+  # https://github.blog/changelog/2023-06-27-github-actions-update-on-oidc-integration-with-aws/
   GitHubOIDCProvider:
     Type: AWS::IAM::OIDCProvider
     Properties:
@@ -2544,8 +2800,8 @@ Resources:
       ClientIdList:
         - sts.amazonaws.com
       ThumbprintList:
+        # AWS ignores this value for github actions but requires a valid format
         - 6938fd4d98bab03faadb97b34396831e3780aea1
-        - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
 
   # Deploy role
   GitHubActionsRole:

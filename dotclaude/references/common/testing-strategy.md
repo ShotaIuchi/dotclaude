@@ -6,18 +6,26 @@ Cross-platform testing strategy and best practices.
 
 ## Test Pyramid
 
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '14px'}}}%%
+graph TB
+    subgraph pyramid[" "]
+        E2E["E2E Tests<br/>Few / High Cost / Slow"]
+        INT["Integration Tests<br/>Medium"]
+        UNIT["Unit Tests<br/>Many / Low Cost / Fast"]
+    end
+
+    E2E --> INT --> UNIT
+
+    style E2E fill:#ff9999,stroke:#cc0000,color:#000
+    style INT fill:#ffcc99,stroke:#cc6600,color:#000
+    style UNIT fill:#99ff99,stroke:#00cc00,color:#000
 ```
-          /\
-         /  \
-        / E2E \         ← Few / High Cost / Slow
-       /──────\
-      /        \
-     / Integration \    ← Medium
-    /────────────\
-   /              \
-  /   Unit Tests   \    ← Many / Low Cost / Fast
- /──────────────────\
-```
+
+**Test Pyramid Summary:**
+- **E2E Tests** (Top): Few tests, high cost, slow execution
+- **Integration Tests** (Middle): Moderate number, medium cost
+- **Unit Tests** (Base): Many tests, low cost, fast execution
 
 | Type | Target | Purpose |
 |------|--------|---------|
@@ -73,6 +81,21 @@ fun `loadUser updates state to success when repository returns user`() {
 }
 ```
 
+```swift
+func test_loadUser_updatesStateToSuccess_whenRepositoryReturnsUser() async {
+    // Given - Preconditions
+    let mockRepository = MockUserRepository()
+    mockRepository.stubbedResult = .success(testUser)
+    let viewModel = UserViewModel(repository: mockRepository)
+
+    // When - Execution
+    await viewModel.loadUser(id: "1")
+
+    // Then - Verification
+    XCTAssertEqual(viewModel.state, .success(testUser))
+}
+```
+
 ### Testing Edge Cases
 
 ```kotlin
@@ -94,9 +117,44 @@ class UserViewModelTest {
 }
 ```
 
+```swift
+final class UserViewModelTests: XCTestCase {
+    func test_loadUser_showsError_whenRepositoryFails() async { }
+
+    func test_loadUser_showsLoading_whileFetching() async { }
+
+    func test_loadUser_handlesEmptyResponse() async { }
+
+    func test_loadUser_handlesNetworkTimeout() async { }
+
+    func test_loadUser_cancelsPreviousRequest_onNewCall() async { }
+}
+```
+
 ---
 
 ## Mocks and Stubs
+
+### Testing Libraries
+
+Before diving into mocking patterns, ensure the following libraries are added to your project:
+
+**Kotlin/Android:**
+
+| Library | Purpose | Gradle Dependency |
+|---------|---------|-------------------|
+| MockK | Mocking framework for Kotlin | `testImplementation("io.mockk:mockk:1.13.9")` |
+| Turbine | Flow testing | `testImplementation("app.cash.turbine:turbine:1.0.0")` |
+| kotlin-test | Assertions | `testImplementation("org.jetbrains.kotlin:kotlin-test")` |
+| kotlinx-coroutines-test | Coroutine testing | `testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")` |
+
+**Swift/iOS:**
+
+| Library/Framework | Purpose | Setup |
+|-------------------|---------|-------|
+| XCTest | Built-in testing framework | Included with Xcode |
+| Swift Concurrency | async/await testing | Built-in (iOS 13+) |
+| ViewInspector | SwiftUI view testing | SPM: `https://github.com/nalexn/ViewInspector` |
 
 ### Dependency Injection
 
@@ -254,6 +312,31 @@ fun `inactive user is filtered out`() {
 }
 ```
 
+```swift
+// Flexible test data generation
+func createUser(
+    id: String = "1",
+    name: String = "Test User",
+    email: String = "test@example.com",
+    isActive: Bool = true
+) -> User {
+    User(id: id, name: name, email: email, isActive: isActive)
+}
+
+// Usage
+func test_inactiveUser_isFilteredOut() {
+    let users = [
+        createUser(id: "1", isActive: true),
+        createUser(id: "2", isActive: false),
+        createUser(id: "3", isActive: true)
+    ]
+
+    let result = filterActiveUsers(users)
+
+    XCTAssertEqual(result.count, 2)
+}
+```
+
 ---
 
 ## Integration Tests
@@ -297,6 +380,121 @@ class UserRepositoryIntegrationTest {
         // Then
         assertTrue(result.isSuccess)
         assertEquals(user, result.getOrNull())
+    }
+}
+```
+
+### iOS Integration Test (SwiftData)
+
+```swift
+import XCTest
+import SwiftData
+
+@MainActor
+final class UserRepositoryIntegrationTests: XCTestCase {
+    var container: ModelContainer!
+    var repository: UserRepository!
+
+    override func setUp() async throws {
+        // Use in-memory configuration for testing
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        container = try ModelContainer(for: UserEntity.self, configurations: config)
+
+        repository = UserRepositoryImpl(
+            localDataSource: SwiftDataUserDataSource(modelContext: container.mainContext),
+            remoteDataSource: FakeUserRemoteDataSource()
+        )
+    }
+
+    override func tearDown() async throws {
+        container = nil
+        repository = nil
+    }
+
+    func test_getUser_returnsCachedUser_whenAvailable() async throws {
+        // Given
+        let user = createUser(id: "1")
+        let entity = UserEntity(from: user)
+        container.mainContext.insert(entity)
+        try container.mainContext.save()
+
+        // When
+        let result = await repository.getUser(id: "1")
+
+        // Then
+        switch result {
+        case .success(let fetchedUser):
+            XCTAssertEqual(fetchedUser, user)
+        case .failure(let error):
+            XCTFail("Expected success but got error: \(error)")
+        }
+    }
+
+    func test_saveUser_persistsToDatabase() async throws {
+        // Given
+        let user = createUser(id: "2", name: "New User")
+
+        // When
+        let saveResult = await repository.saveUser(user)
+
+        // Then
+        XCTAssertTrue(saveResult.isSuccess)
+
+        let fetchResult = await repository.getUser(id: "2")
+        XCTAssertEqual(try? fetchResult.get(), user)
+    }
+}
+```
+
+### iOS Integration Test (Core Data)
+
+```swift
+import XCTest
+import CoreData
+
+final class UserRepositoryCoreDataTests: XCTestCase {
+    var persistentContainer: NSPersistentContainer!
+    var repository: UserRepository!
+
+    override func setUp() {
+        super.setUp()
+
+        // In-memory Core Data stack
+        persistentContainer = NSPersistentContainer(name: "AppModel")
+        let description = NSPersistentStoreDescription()
+        description.type = NSInMemoryStoreType
+        persistentContainer.persistentStoreDescriptions = [description]
+
+        persistentContainer.loadPersistentStores { _, error in
+            XCTAssertNil(error)
+        }
+
+        repository = UserRepositoryImpl(
+            localDataSource: CoreDataUserDataSource(context: persistentContainer.viewContext),
+            remoteDataSource: FakeUserRemoteDataSource()
+        )
+    }
+
+    override func tearDown() {
+        persistentContainer = nil
+        repository = nil
+        super.tearDown()
+    }
+
+    func test_getUser_returnsCachedUser() async {
+        // Given
+        let context = persistentContainer.viewContext
+        let entity = UserMO(context: context)
+        entity.id = "1"
+        entity.name = "Test User"
+        entity.email = "test@example.com"
+        try? context.save()
+
+        // When
+        let result = await repository.getUser(id: "1")
+
+        // Then
+        XCTAssertEqual(try? result.get().name, "Test User")
     }
 }
 ```
@@ -369,7 +567,28 @@ class UserListScreenTest {
 
 ### SwiftUI Test
 
+> **Note**: SwiftUI view testing uses [ViewInspector](https://github.com/nalexn/ViewInspector), a third-party library.
+
+**Adding ViewInspector to your project:**
+
 ```swift
+// Package.swift
+dependencies: [
+    .package(url: "https://github.com/nalexn/ViewInspector", from: "0.9.0")
+]
+```
+
+**Known Limitations:**
+- Cannot test views with `@EnvironmentObject` without additional setup
+- Some SwiftUI components (e.g., `NavigationStack`, `Sheet`) require special handling
+- Async state updates need `ViewHosting` for proper testing
+
+```swift
+import ViewInspector
+
+// Make your view Inspectable
+extension UserListView: Inspectable {}
+
 final class UserListViewTests: XCTestCase {
     func test_showsUserList() throws {
         let users = TestData.testUsers
@@ -378,9 +597,18 @@ final class UserListViewTests: XCTestCase {
 
         let view = UserListView(viewModel: viewModel)
 
-        // Test using ViewInspector or similar
+        // Using ViewInspector to inspect the view hierarchy
         let list = try view.inspect().list()
         XCTAssertEqual(list.count, users.count)
+    }
+
+    func test_showsLoadingIndicator() throws {
+        let viewModel = UserListViewModel()
+        viewModel.state = .loading
+
+        let view = UserListView(viewModel: viewModel)
+
+        XCTAssertNoThrow(try view.inspect().find(viewWithAccessibilityIdentifier: "loading_indicator"))
     }
 }
 ```
@@ -402,6 +630,75 @@ final class UserListViewTests: XCTestCase {
 | Domain | 90%+ |
 | Data | 80%+ |
 | Presentation | 70%+ |
+
+### Coverage Tool Configuration
+
+**Android (JaCoCo):**
+
+```kotlin
+// build.gradle.kts (app module)
+plugins {
+    id("jacoco")
+}
+
+android {
+    buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class", "**/R\$*.class", "**/BuildConfig.*",
+        "**/Manifest*.*", "**/*Test*.*", "**/Hilt_*.*"
+    )
+
+    val debugTree = fileTree("${buildDir}/tmp/kotlin-classes/debug") {
+        exclude(fileFilter)
+    }
+
+    sourceDirectories.setFrom("${project.projectDir}/src/main/kotlin")
+    classDirectories.setFrom(debugTree)
+    executionData.setFrom("${buildDir}/jacoco/testDebugUnitTest.exec")
+}
+```
+
+**iOS (Xcode Coverage):**
+
+1. Enable code coverage in your scheme:
+   - Product > Scheme > Edit Scheme
+   - Select "Test" action
+   - Check "Gather coverage for" and select targets
+
+2. View coverage in Xcode:
+   - Run tests (Cmd + U)
+   - Open Report Navigator (Cmd + 9)
+   - Select the test run and view "Coverage" tab
+
+3. Generate coverage report via command line:
+
+```bash
+# Run tests with coverage
+xcodebuild test \
+  -scheme YourApp \
+  -destination 'platform=iOS Simulator,name=iPhone 15' \
+  -enableCodeCoverage YES
+
+# Export coverage report
+xcrun xccov view --report --json \
+  ~/Library/Developer/Xcode/DerivedData/YourApp-*/Logs/Test/*.xcresult \
+  > coverage.json
+```
 
 ---
 

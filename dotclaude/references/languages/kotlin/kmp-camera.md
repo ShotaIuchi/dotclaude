@@ -152,6 +152,18 @@ sealed interface CameraResult {
      * @param imageData JPEG byte array
      * @param width Image width
      * @param height Image height
+     *
+     * Note: ByteArray in data class does not have structural equality by default.
+     * When comparing Success instances, use imageData.contentEquals(other.imageData)
+     * instead of relying on equals(). Consider overriding equals/hashCode if needed:
+     *
+     * override fun equals(other: Any?): Boolean {
+     *     if (this === other) return true
+     *     if (other !is Success) return false
+     *     return imageData.contentEquals(other.imageData) && width == other.width && height == other.height
+     * }
+     *
+     * override fun hashCode(): Int = imageData.contentHashCode() + 31 * width + 31 * 31 * height
      */
     data class Success(
         val imageData: ByteArray,
@@ -542,6 +554,8 @@ actual class CameraController {
 
     /**
      * Get camera device
+     * Note: AVCaptureDevice.devicesWithMediaType() is deprecated in iOS 10+
+     * Use AVCaptureDevice.DiscoverySession instead
      */
     private fun getCamera(facing: CameraFacing): AVCaptureDevice {
         val position = when (facing) {
@@ -549,9 +563,20 @@ actual class CameraController {
             CameraFacing.FRONT -> AVCaptureDevicePositionFront
         }
 
-        return AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
-            .filterIsInstance<AVCaptureDevice>()
-            .first { it.position == position }
+        val deviceTypes = listOf(
+            AVCaptureDeviceTypeBuiltInWideAngleCamera,
+            AVCaptureDeviceTypeBuiltInDualCamera,
+            AVCaptureDeviceTypeBuiltInTripleCamera
+        )
+
+        val discoverySession = AVCaptureDeviceDiscoverySession.discoverySessionWithDeviceTypes(
+            deviceTypes = deviceTypes,
+            mediaType = AVMediaTypeVideo,
+            position = position
+        )
+
+        return discoverySession.devices.firstOrNull() as? AVCaptureDevice
+            ?: throw IllegalStateException("No camera device found for position: $position")
     }
 
     /**
@@ -589,13 +614,15 @@ actual class CameraController {
                 return
             }
 
+            // Note: CMVideoDimensions is a C struct, accessed via useContents in K/N
+            // photoDimensions returns CMVideoDimensions which has width/height as Int32
+            // useContents { } provides access to the struct fields within the lambda
+            val dimensions = didFinishProcessingPhoto.resolvedSettings.photoDimensions
             continuation.resume(
                 CameraResult.Success(
                     imageData = data.toByteArray(),
-                    width = didFinishProcessingPhoto.resolvedSettings
-                        .photoDimensions.useContents { width },
-                    height = didFinishProcessingPhoto.resolvedSettings
-                        .photoDimensions.useContents { height }
+                    width = dimensions.useContents { width },
+                    height = dimensions.useContents { height }
                 )
             )
         }
@@ -906,13 +933,15 @@ actual class ImageAnalyzer {
 
     actual suspend fun analyze(imageData: ByteArray): AnalysisResult =
         suspendCancellableCoroutine { cont ->
-            val image = InputImage.fromByteArray(
-                imageData,
-                /* width = */ 0,  // Auto-detect
-                /* height = */ 0,
-                /* rotationDegrees = */ 0,
-                InputImage.IMAGE_FORMAT_NV21
-            )
+            // Note: InputImage.fromByteArray requires actual width/height values (not 0)
+            // For production use, prefer InputImage.fromBitmap or InputImage.fromMediaImage
+            // which can automatically determine dimensions
+            val bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
+            if (bitmap == null) {
+                cont.resume(AnalysisResult.Error("Failed to decode image data"))
+                return@suspendCancellableCoroutine
+            }
+            val image = InputImage.fromBitmap(bitmap, 0)
 
             scanner.process(image)
                 .addOnSuccessListener { barcodes ->
@@ -1012,7 +1041,9 @@ actual class ImageAnalyzer {
                 cont.resume(result)
             }
 
-            val handler = VNImageRequestHandler(ciImage, NSDictionary())
+            // Note: Use empty map [:] or appropriate options for VNImageRequestHandler
+            // NSDictionary() is valid but using mapOf() or emptyMap() is more idiomatic
+            val handler = VNImageRequestHandler(ciImage, options = emptyMap<Any?, Any>())
             handler.performRequests(listOf(request), null)
         }
 
@@ -1313,7 +1344,8 @@ actual class RealtimeAnalyzer(
                 }
             }
 
-            val handler = VNImageRequestHandler(pixelBuffer, NSDictionary())
+            // Note: Use empty map for VNImageRequestHandler options parameter
+            val handler = VNImageRequestHandler(pixelBuffer, options = emptyMap<Any?, Any>())
             handler.performRequests(listOf(request), null)
         }
     }
@@ -1535,6 +1567,59 @@ actual class CameraPermission {
 - [ ] Use ML Kit for Android, Vision for iOS
 - [ ] Consider performance for Real-time Analysis
 
+### Error Handling (Production)
+
+For production applications, implement more robust error handling:
+
+```kotlin
+// commonMain/kotlin/com/example/shared/camera/CameraException.kt
+
+/**
+ * Camera-specific exceptions for production error handling
+ */
+sealed class CameraException(message: String, cause: Throwable? = null) : Exception(message, cause) {
+    /** Camera device not available or in use by another app */
+    class DeviceUnavailable(message: String) : CameraException(message)
+
+    /** Permission denied for camera access */
+    class PermissionDenied(message: String) : CameraException(message)
+
+    /** Camera configuration failed */
+    class ConfigurationFailed(message: String, cause: Throwable? = null) : CameraException(message, cause)
+
+    /** Capture operation failed */
+    class CaptureFailed(message: String, cause: Throwable? = null) : CameraException(message, cause)
+
+    /** Camera session disconnected unexpectedly */
+    class SessionDisconnected(message: String) : CameraException(message)
+
+    /** Unknown/unexpected error */
+    class Unknown(message: String, cause: Throwable? = null) : CameraException(message, cause)
+}
+
+/**
+ * Production-ready error handling in ViewModel
+ */
+fun handleCameraError(error: CameraException): CameraError {
+    return when (error) {
+        is CameraException.PermissionDenied -> CameraError.PermissionDenied
+        is CameraException.DeviceUnavailable -> CameraError.CameraUnavailable
+        is CameraException.ConfigurationFailed,
+        is CameraException.CaptureFailed,
+        is CameraException.SessionDisconnected,
+        is CameraException.Unknown -> CameraError.CaptureError(
+            message = error.message ?: "An unexpected error occurred"
+        )
+    }
+}
+```
+
+- [ ] Define CameraException hierarchy for typed errors
+- [ ] Map platform exceptions to CameraException in actual implementations
+- [ ] Log errors appropriately (analytics, crash reporting)
+- [ ] Provide user-friendly error messages
+- [ ] Implement retry logic for recoverable errors
+
 ---
 
 ## Reference Links
@@ -1550,6 +1635,13 @@ actual class CameraPermission {
 
 - [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)
 - [expect/actual declarations](https://kotlinlang.org/docs/multiplatform-expect-actual.html)
+
+### KMP Libraries for Camera/Permissions
+
+- [moko-permissions](https://github.com/icerockdev/moko-permissions) - Runtime permissions for KMP (Camera, Location, etc.)
+- [moko-media](https://github.com/icerockdev/moko-media) - Media picking for KMP
+- [Peekaboo](https://github.com/AugustToko/Peekaboo) - Camera and image picker for Compose Multiplatform
+- [Calf](https://github.com/AugustToko/Calf) - Adaptive UI for Compose Multiplatform (includes permission handling)
 
 ---
 
@@ -1661,6 +1753,147 @@ actual class CameraPermission {
 3. **Testing strategy**
    - ViewModel tests in commonTest (using FakeCameraController)
    - Verify platform-specific code with integration tests
+
+#### FakeCameraController Implementation
+
+```kotlin
+// commonTest/kotlin/com/example/shared/camera/FakeCameraController.kt
+
+/**
+ * Fake implementation of CameraController for testing
+ */
+class FakeCameraController : CameraController {
+    var isPreviewStarted = false
+        private set
+    var captureResult: CameraResult = CameraResult.Success(
+        imageData = byteArrayOf(1, 2, 3),
+        width = 1920,
+        height = 1080
+    )
+    var shouldThrowOnCapture = false
+    var captureDelay: Long = 0L
+
+    private var currentFacing = CameraFacing.BACK
+    private var currentFlashMode = FlashMode.OFF
+
+    override suspend fun startPreview() {
+        isPreviewStarted = true
+    }
+
+    override fun stopPreview() {
+        isPreviewStarted = false
+    }
+
+    override suspend fun capture(): CameraResult {
+        if (shouldThrowOnCapture) {
+            return CameraResult.Error("Simulated capture error")
+        }
+        if (captureDelay > 0) {
+            delay(captureDelay)
+        }
+        return captureResult
+    }
+
+    override suspend fun switchCamera() {
+        currentFacing = when (currentFacing) {
+            CameraFacing.BACK -> CameraFacing.FRONT
+            CameraFacing.FRONT -> CameraFacing.BACK
+        }
+    }
+
+    override fun setFlashMode(mode: FlashMode) {
+        currentFlashMode = mode
+    }
+
+    override fun getCurrentFacing(): CameraFacing = currentFacing
+
+    override fun release() {
+        isPreviewStarted = false
+    }
+}
+```
+
+#### ViewModel Test Example
+
+```kotlin
+// commonTest/kotlin/com/example/shared/presentation/camera/CameraViewModelTest.kt
+
+class CameraViewModelTest {
+    private lateinit var fakeController: FakeCameraController
+    private lateinit var viewModel: CameraViewModel
+    private val testScope = TestScope()
+
+    @BeforeTest
+    fun setup() {
+        fakeController = FakeCameraController()
+        viewModel = CameraViewModel(fakeController, testScope)
+    }
+
+    @Test
+    fun `onShutterClick emits CaptureComplete event on success`() = testScope.runTest {
+        // Given: Permission granted and preview started
+        viewModel.onPermissionResult(granted = true)
+        advanceUntilIdle()
+
+        // When: User clicks shutter
+        viewModel.onShutterClick()
+        advanceUntilIdle()
+
+        // Then: Capture complete event is emitted
+        val events = viewModel.events.toList()
+        assertTrue(events.any { it is CameraEvent.CaptureComplete })
+
+        // And: UI state reflects capture completion
+        val state = viewModel.uiState.value
+        assertFalse(state.isCapturing)
+        assertNotNull(state.lastCapturedImage)
+    }
+
+    @Test
+    fun `onShutterClick emits ShowError event on failure`() = testScope.runTest {
+        // Given: Controller will fail on capture
+        fakeController.shouldThrowOnCapture = true
+        viewModel.onPermissionResult(granted = true)
+        advanceUntilIdle()
+
+        // When: User clicks shutter
+        viewModel.onShutterClick()
+        advanceUntilIdle()
+
+        // Then: Error event is emitted
+        val events = viewModel.events.toList()
+        assertTrue(events.any { it is CameraEvent.ShowError })
+
+        // And: UI state contains error
+        val state = viewModel.uiState.value
+        assertNotNull(state.error)
+    }
+
+    @Test
+    fun `onToggleFlash updates flash state`() = testScope.runTest {
+        // When: User toggles flash
+        viewModel.onToggleFlash()
+
+        // Then: Flash is on
+        assertTrue(viewModel.uiState.value.isFlashOn)
+
+        // When: User toggles flash again
+        viewModel.onToggleFlash()
+
+        // Then: Flash is off
+        assertFalse(viewModel.uiState.value.isFlashOn)
+    }
+
+    @Test
+    fun `canCapture is false when permission not granted`() {
+        // Given: Permission not requested
+        val state = viewModel.uiState.value
+
+        // Then: Cannot capture
+        assertFalse(state.canCapture)
+    }
+}
+```
 
 ---
 

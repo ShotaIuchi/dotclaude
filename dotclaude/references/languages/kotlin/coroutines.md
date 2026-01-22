@@ -6,6 +6,30 @@ Best practices for Kotlin Coroutines commonly used in Android/KMP.
 
 ## Basic Concepts
 
+### Structured Concurrency
+
+Structured Concurrency is a fundamental concept in Kotlin Coroutines that ensures proper lifecycle management and error propagation. Key principles:
+
+1. **Parent-Child Relationship**: Every coroutine has a parent scope, and child coroutines are tied to their parent's lifecycle.
+2. **Automatic Cancellation**: When a parent scope is cancelled, all child coroutines are automatically cancelled.
+3. **Error Propagation**: Exceptions in child coroutines propagate to the parent (unless using `SupervisorJob`).
+4. **Completion Waiting**: A parent coroutine doesn't complete until all its children complete.
+
+```kotlin
+// Structured Concurrency example
+suspend fun loadUserData(): UserData = coroutineScope {
+    // Both child coroutines are tied to this scope
+    val profile = async { fetchProfile() }
+    val settings = async { fetchSettings() }
+
+    // If either fails, the other is cancelled automatically
+    // Parent waits for both to complete
+    UserData(profile.await(), settings.await())
+}
+```
+
+**Why it matters**: Without Structured Concurrency, you risk coroutine leaks, orphaned tasks, and unpredictable error handling.
+
 ### CoroutineScope
 
 ```kotlin
@@ -31,6 +55,32 @@ class UserViewModel(
         }
     }
 }
+
+// KMP CoroutineScope creation and lifecycle management
+class KmpViewModel {
+    // Create scope with SupervisorJob for independent child failure handling
+    private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    fun doWork() {
+        viewModelScope.launch {
+            // Work here
+        }
+    }
+
+    // Must be called when ViewModel is no longer needed
+    fun onCleared() {
+        viewModelScope.cancel()
+    }
+}
+
+// Alternative: Use a scope factory for better testability
+interface ScopeProvider {
+    val scope: CoroutineScope
+}
+
+class DefaultScopeProvider : ScopeProvider {
+    override val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+}
 ```
 
 ### CoroutineContext
@@ -41,6 +91,16 @@ class UserViewModel(
 | `Dispatchers.IO` | For I/O operations (network, DB) |
 | `Dispatchers.Default` | CPU-intensive processing |
 | `Job` | Coroutine lifecycle management |
+| `CoroutineExceptionHandler` | Global exception handler for uncaught exceptions |
+
+```kotlin
+// CoroutineExceptionHandler example
+val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+    Log.e("Coroutine", "Uncaught exception: ${exception.message}")
+}
+
+val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main + exceptionHandler)
+```
 
 ---
 
@@ -94,6 +154,41 @@ fun `getUsers returns list`() = runTest {
 ---
 
 ## Flow
+
+### Required Imports
+
+```kotlin
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+```
+
+### Cold Flow vs Hot Flow
+
+Understanding the difference between Cold and Hot Flows is essential:
+
+| Type | Behavior | Examples |
+|------|----------|----------|
+| **Cold Flow** | Starts emitting when collected; each collector gets its own emission | `flow {}`, `flowOf()`, database queries |
+| **Hot Flow** | Emits regardless of collectors; collectors share emissions | `StateFlow`, `SharedFlow` |
+
+```kotlin
+// Cold Flow: Each collector triggers a new database query
+val coldFlow: Flow<List<User>> = flow {
+    emit(database.getUsers()) // Runs for each collector
+}
+
+// Hot Flow: All collectors share the same state
+val hotFlow: StateFlow<List<User>> = MutableStateFlow(emptyList())
+```
+
+**When to use which:**
+- **Cold Flow**: Data fetching, one-time operations, database observations
+- **StateFlow**: UI state, always need the latest value
+- **SharedFlow**: Events, broadcasts to multiple collectors
 
 ### Basic Flow Usage
 
@@ -193,6 +288,8 @@ val users: StateFlow<List<User>> = userRepository.observeUsers()
 
 ### try-catch Pattern
 
+> **Important**: When catching exceptions in coroutines, you must handle `CancellationException` specially. Swallowing `CancellationException` breaks coroutine cancellation.
+
 ```kotlin
 class UserViewModel : ViewModel() {
     fun loadUser(id: String) {
@@ -201,9 +298,26 @@ class UserViewModel : ViewModel() {
             try {
                 val user = userRepository.getUser(id)
                 _uiState.value = UiState.Success(user)
+            } catch (e: CancellationException) {
+                // Always rethrow CancellationException to maintain cancellation behavior
+                throw e
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
+        }
+    }
+}
+
+// Alternative: Use when expression for cleaner handling
+fun loadUserAlternative(id: String) {
+    viewModelScope.launch {
+        _uiState.value = UiState.Loading
+        try {
+            val user = userRepository.getUser(id)
+            _uiState.value = UiState.Success(user)
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            _uiState.value = UiState.Error(e.message ?: "Unknown error")
         }
     }
 }
@@ -366,6 +480,15 @@ fun `loadUser updates state`() = runTest {
 ```
 
 ### Flow Testing with Turbine
+
+Add Turbine to your test dependencies:
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    testImplementation("app.cash.turbine:turbine:1.0.0")
+}
+```
 
 ```kotlin
 @Test

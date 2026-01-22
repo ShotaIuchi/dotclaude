@@ -3,6 +3,8 @@
 Best practices for implementing authentication with KMP (Kotlin Multiplatform) + Ktor.
 A guide for implementing multiple login method support, token management, and the standard 401 -> refresh -> retry pattern.
 
+> **Tested Environment**: Ktor 2.x, Kotlin 1.9+, kotlinx.datetime 0.4+
+
 ---
 
 ## Table of Contents
@@ -129,6 +131,7 @@ A guide for implementing multiple login method support, token management, and th
 ```kotlin
 // commonMain/kotlin/com/example/shared/domain/model/Session.kt
 
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -480,11 +483,10 @@ val AuthPlugin = createClientPlugin("AuthPlugin", ::AuthPluginConfig) {
             refreshResult.isSuccess -> {
                 // Retry with new token
                 val newSession = refreshResult.getOrThrow()
-                val retryRequest = HttpRequestBuilder().apply {
-                    takeFrom(request)
+                val retryRequest = HttpRequestBuilder().takeFrom(request).apply {
                     bearerAuth(newSession.accessToken)
                 }
-                proceed(retryRequest.build())
+                proceed(retryRequest)
             }
             else -> {
                 // Refresh failed → notify session expiration
@@ -915,6 +917,8 @@ class LoginViewModel(
                     }
                 },
                 onFailure = { e ->
+                    // Note: For production, use string resources for i18n support
+                    // Example: stringResource.getString(R.string.error_invalid_credentials)
                     val errorMessage = when (e) {
                         is AuthException.InvalidCredentials ->
                             "Email address or password is incorrect"
@@ -983,8 +987,20 @@ class AndroidTokenStore(context: Context) : TokenStore {
     private val _sessionFlow = MutableStateFlow<Session?>(null)
 
     init {
-        // Load on startup
-        _sessionFlow.value = get()
+        // Load on startup (synchronous read from SharedPreferences is acceptable)
+        _sessionFlow.value = getSync()
+    }
+
+    /**
+     * Synchronous version of get() for initialization
+     * Note: SharedPreferences operations are synchronous by nature
+     */
+    private fun getSync(): Session? {
+        val sessionJson = sharedPreferences.getString(KEY_SESSION, null)
+            ?: return null
+        return runCatching {
+            json.decodeFromString<Session>(sessionJson)
+        }.getOrNull()
     }
 
     override suspend fun get(): Session? {
@@ -1034,14 +1050,17 @@ import platform.Security.*
  *
  * Uses Keychain for secure storage
  */
-class IosTokenStore : TokenStore {
+class IosTokenStore(
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
+) : TokenStore {
 
     private val json = Json { ignoreUnknownKeys = true }
     private val _sessionFlow = MutableStateFlow<Session?>(null)
 
     init {
-        // Load on startup
-        kotlinx.coroutines.runBlocking {
+        // Load on startup asynchronously to avoid blocking main thread
+        // Note: Using runBlocking on iOS main thread can cause deadlock
+        coroutineScope.launch {
             _sessionFlow.value = get()
         }
     }
@@ -1193,7 +1212,7 @@ import org.koin.dsl.module
 
 val authModule = module {
 
-    // AuthRepository
+    // AuthRepository (use lazy injection to break circular dependency)
     single<AuthRepository> {
         AuthRepositoryImpl(
             tokenStore = get(),
@@ -1210,21 +1229,25 @@ val authModule = module {
         )
     }
 
-    // HttpClient (authenticated)
+    // HttpClient (authenticated) - use lazy for authRepository to avoid circular dependency
     single(named("authenticated")) {
+        val tokenStore: TokenStore = get()
+        val authRepository: Lazy<AuthRepository> = inject()
+        val engine: HttpClientEngine = get()
         HttpClientFactory(
-            tokenStore = get(),
-            authRepository = get(),
-            engine = get()
+            tokenStore = tokenStore,
+            authRepositoryLazy = authRepository,
+            engine = engine
         ).createAuthenticatedClient()
     }
 
-    // HttpClient (unauthenticated)
+    // HttpClient (unauthenticated) - no dependency on AuthRepository
     single(named("unauthenticated")) {
+        val engine: HttpClientEngine = get()
         HttpClientFactory(
             tokenStore = get(),
-            authRepository = get(),
-            engine = get()
+            authRepositoryLazy = null,
+            engine = engine
         ).createUnauthenticatedClient()
     }
 }

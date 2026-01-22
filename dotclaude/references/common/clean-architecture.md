@@ -142,6 +142,61 @@ struct ScreenUiState {
 }
 ```
 
+### State Management Integration
+
+**Android (Kotlin):**
+
+```kotlin
+// Using StateFlow in ViewModel
+class UserListViewModel(
+    private val getUsersUseCase: GetUsersUseCase
+) : ViewModel() {
+    private val _uiState = MutableStateFlow(UserListUiState())
+    val uiState: StateFlow<UserListUiState> = _uiState.asStateFlow()
+
+    fun loadUsers() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            getUsersUseCase().fold(
+                onSuccess = { users ->
+                    _uiState.update { it.copy(items = users, isLoading = false) }
+                },
+                onFailure = { error ->
+                    _uiState.update { it.copy(errorMessage = error.message, isLoading = false) }
+                }
+            )
+        }
+    }
+}
+```
+
+**iOS (Swift):**
+
+```swift
+// Using Combine / @Published in ViewModel
+@MainActor
+final class UserListViewModel: ObservableObject {
+    @Published private(set) var uiState = UserListUiState()
+    private let getUsersUseCase: GetUsersUseCase
+
+    init(getUsersUseCase: GetUsersUseCase) {
+        self.getUsersUseCase = getUsersUseCase
+    }
+
+    func loadUsers() {
+        Task {
+            uiState.isLoading = true
+            do {
+                let users = try await getUsersUseCase.execute()
+                uiState = UserListUiState(items: users, isLoading: false)
+            } catch {
+                uiState = UserListUiState(errorMessage: error.localizedDescription, isLoading: false)
+            }
+        }
+    }
+}
+```
+
 ---
 
 ## UseCase Pattern
@@ -187,6 +242,24 @@ class RefreshDataUseCase(
             cacheRepository.clear()
             userRepository.refresh()
         }
+    }
+}
+```
+
+```swift
+// Swift
+final class RefreshDataUseCase {
+    private let userRepository: UserRepository
+    private let cacheRepository: CacheRepository
+
+    init(userRepository: UserRepository, cacheRepository: CacheRepository) {
+        self.userRepository = userRepository
+        self.cacheRepository = cacheRepository
+    }
+
+    func execute() async throws {
+        try await cacheRepository.clear()
+        try await userRepository.refresh()
     }
 }
 ```
@@ -244,6 +317,42 @@ class UserRepositoryImpl(
 }
 ```
 
+```swift
+// Swift
+final class UserRepositoryImpl: UserRepository {
+    private let remoteDataSource: UserRemoteDataSource
+    private let localDataSource: UserLocalDataSource
+
+    init(remoteDataSource: UserRemoteDataSource, localDataSource: UserLocalDataSource) {
+        self.remoteDataSource = remoteDataSource
+        self.localDataSource = localDataSource
+    }
+
+    func getUser(id: String) async throws -> User {
+        // Check local cache first
+        if let cachedUser = try await localDataSource.getUser(id: id) {
+            return cachedUser
+        }
+        let user = try await remoteDataSource.getUser(id: id)
+        try await localDataSource.saveUser(user)
+        return user
+    }
+
+    func getUsers() -> AsyncStream<[User]> {
+        AsyncStream { continuation in
+            Task {
+                // Refresh in background
+                try? await refreshUsersFromRemote()
+                for await users in localDataSource.observeUsers() {
+                    continuation.yield(users)
+                }
+                continuation.finish()
+            }
+        }
+    }
+}
+```
+
 ---
 
 ## Error Handling
@@ -295,6 +404,29 @@ override suspend fun getUser(id: String): AppResult<User> {
 }
 ```
 
+```swift
+// Swift - Map errors in Repository
+func getUser(id: String) async -> Result<User, AppError> {
+    do {
+        let user = try await remoteDataSource.getUser(id: id)
+        return .success(user)
+    } catch let error as URLError {
+        return .failure(.network(error.localizedDescription))
+    } catch let error as HTTPError {
+        switch error.statusCode {
+        case 404:
+            return .failure(.notFound(id: id))
+        case 401:
+            return .failure(.unauthorized)
+        default:
+            return .failure(.network(error.localizedDescription))
+        }
+    } catch {
+        return .failure(.unknown(error))
+    }
+}
+```
+
 ---
 
 ## Naming Conventions
@@ -330,3 +462,156 @@ override suspend fun getUser(id: String): AppResult<User> {
 - Use framework-specific types in Domain Layer
 - Swallow errors
 - God class (too many responsibilities in one class)
+
+---
+
+## Dependency Injection
+
+Dependency Injection (DI) enables testable, maintainable code by decoupling components from their dependencies.
+
+### Android (Kotlin)
+
+**Hilt** (recommended for Android):
+
+```kotlin
+@Module
+@InstallIn(SingletonComponent::class)
+object RepositoryModule {
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        remoteDataSource: UserRemoteDataSource,
+        localDataSource: UserLocalDataSource
+    ): UserRepository = UserRepositoryImpl(remoteDataSource, localDataSource)
+}
+
+@HiltViewModel
+class UserListViewModel @Inject constructor(
+    private val getUsersUseCase: GetUsersUseCase
+) : ViewModel()
+```
+
+**Koin** (lightweight alternative):
+
+```kotlin
+val appModule = module {
+    single<UserRepository> { UserRepositoryImpl(get(), get()) }
+    factory { GetUsersUseCase(get()) }
+    viewModel { UserListViewModel(get()) }
+}
+```
+
+### iOS (Swift)
+
+**Manual DI (recommended for small projects):**
+
+```swift
+// Composition Root
+final class AppDependencies {
+    lazy var userRepository: UserRepository = UserRepositoryImpl(
+        remoteDataSource: UserRemoteDataSource(),
+        localDataSource: UserLocalDataSource()
+    )
+
+    func makeUserListViewModel() -> UserListViewModel {
+        UserListViewModel(getUsersUseCase: GetUsersUseCase(userRepository: userRepository))
+    }
+}
+```
+
+**Swinject (for larger projects):**
+
+```swift
+let container = Container()
+container.register(UserRepository.self) { _ in
+    UserRepositoryImpl(
+        remoteDataSource: UserRemoteDataSource(),
+        localDataSource: UserLocalDataSource()
+    )
+}.inObjectScope(.container)
+
+container.register(UserListViewModel.self) { r in
+    UserListViewModel(getUsersUseCase: GetUsersUseCase(userRepository: r.resolve(UserRepository.self)!))
+}
+```
+
+---
+
+## Testing Strategy
+
+### Layer-Specific Testing
+
+| Layer | Test Type | Focus | Tools |
+|-------|-----------|-------|-------|
+| Presentation | Unit / UI Test | ViewModel state changes, UI behavior | JUnit, Espresso (Android) / XCTest (iOS) |
+| Domain | Unit Test | UseCase business logic | JUnit / XCTest |
+| Data | Unit / Integration Test | Repository, DataSource behavior | JUnit, MockK (Android) / XCTest (iOS) |
+
+### Testing with Fakes and Mocks
+
+**Kotlin (Android):**
+
+```kotlin
+// Fake Repository for testing
+class FakeUserRepository : UserRepository {
+    private val users = mutableListOf<User>()
+
+    override suspend fun getUser(id: String): Result<User> {
+        return users.find { it.id == id }
+            ?.let { Result.success(it) }
+            ?: Result.failure(Exception("User not found"))
+    }
+
+    fun addUser(user: User) { users.add(user) }
+}
+
+// ViewModel test
+@Test
+fun `loadUsers updates state with users`() = runTest {
+    val fakeRepository = FakeUserRepository().apply {
+        addUser(User("1", "John"))
+    }
+    val viewModel = UserListViewModel(GetUsersUseCase(fakeRepository))
+
+    viewModel.loadUsers()
+
+    assertEquals(1, viewModel.uiState.value.items.size)
+}
+```
+
+**Swift (iOS):**
+
+```swift
+// Fake Repository for testing
+final class FakeUserRepository: UserRepository {
+    private var users: [User] = []
+
+    func getUser(id: String) async throws -> User {
+        guard let user = users.first(where: { $0.id == id }) else {
+            throw AppError.notFound(id: id)
+        }
+        return user
+    }
+
+    func addUser(_ user: User) { users.append(user) }
+}
+
+// ViewModel test
+@Test
+func loadUsers_updatesStateWithUsers() async {
+    let fakeRepository = FakeUserRepository()
+    fakeRepository.addUser(User(id: "1", name: "John"))
+    let viewModel = await UserListViewModel(getUsersUseCase: GetUsersUseCase(userRepository: fakeRepository))
+
+    await viewModel.loadUsers()
+
+    #expect(viewModel.uiState.items.count == 1)
+}
+```
+
+### Testing Best Practices
+
+- **Prefer Fakes over Mocks**: Fakes provide more realistic behavior and are easier to maintain
+- **Test behavior, not implementation**: Focus on inputs and outputs, not internal details
+- **Use test fixtures**: Create reusable test data factories
+- **Isolate each layer**: Test each layer independently with fakes for dependencies
