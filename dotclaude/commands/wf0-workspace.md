@@ -1,101 +1,101 @@
 # /wf0-workspace
 
-ワークスペースを新規作成するコマンド。
+Command to create a new workspace.
 
-## 使用方法
+## Usage
 
 ```
 /wf0-workspace github=<number>
-/wf0-workspace jira=<jira-id> [title="タイトル"]
-/wf0-workspace local=<id> title="タイトル" [type=<TYPE>]
+/wf0-workspace jira=<jira-id> [title="title"]
+/wf0-workspace local=<id> title="title" [type=<TYPE>]
 ```
 
-## 引数
+## Arguments
 
-以下のいずれか1つを指定（排他的）：
+Specify one of the following (mutually exclusive):
 
-- `github`: GitHub Issue 番号
-- `jira`: Jira チケット ID（例: `ABC-123`）
-- `local`: ローカルID（任意の文字列）
+- `github`: GitHub Issue number
+- `jira`: Jira ticket ID (e.g., `ABC-123`)
+- `local`: Local ID (arbitrary string)
 
-オプション引数：
+Optional arguments:
 
-- `title`: タイトル（jira/local で必須、github では無視）
-- `type`: 作業タイプ（local のみ。FEAT/FIX/REFACTOR/CHORE/RFC。デフォルト: FEAT）
+- `title`: Title (required for jira/local, ignored for github)
+- `type`: Work type (local only. FEAT/FIX/REFACTOR/CHORE/RFC. Default: FEAT)
 
-## 処理内容
+## Processing
 
-$ARGUMENTS を解析して ID 情報を取得し、以下の処理を実行してください。
+Parse $ARGUMENTS to get ID information and execute the following processing.
 
-### 1. 前提条件の確認
+### 1. Check Prerequisites
 
 ```bash
-# jq が利用可能か確認
-command -v jq >/dev/null || echo "ERROR: jq が必要です"
+# Check if jq is available
+command -v jq >/dev/null || echo "ERROR: jq is required"
 
-# github モードの場合のみ gh を確認
+# Check gh only for github mode
 if [ -n "$github" ]; then
-  command -v gh >/dev/null || echo "ERROR: gh が必要です"
-  gh auth status || echo "ERROR: gh auth login を実行してください"
+  command -v gh >/dev/null || echo "ERROR: gh is required"
+  gh auth status || echo "ERROR: Please run gh auth login"
 fi
 ```
 
-### 2. ID情報の取得と work-id の生成
+### 2. Get ID Information and Generate work-id
 
-#### 2a. github モードの場合
+#### 2a. For github mode
 
 ```bash
 gh issue view <issue_number> --json number,title,labels,body
 ```
 
-取得した情報から以下を決定：
-- **TYPE**: ラベルから判定（feature/enhancement→FEAT, bug→FIX, refactor→REFACTOR, chore→CHORE, rfc→RFC）
-- **slug**: タイトルから生成（小文字、英数字とハイフンのみ、最大40文字）
-- **work-id**: `<TYPE>-<issue>-<slug>` 形式
+Determine from the retrieved information:
+- **TYPE**: Determine from labels (feature/enhancement→FEAT, bug→FIX, refactor→REFACTOR, chore→CHORE, rfc→RFC)
+- **slug**: Generate from title (lowercase, alphanumeric and hyphens only, max 40 characters)
+- **work-id**: `<TYPE>-<issue>-<slug>` format
 
-#### 2b. jira モードの場合
+#### 2b. For jira mode
 
-- **TYPE**: Jira ID のプレフィックスをそのまま使用、または title から推測
-- **slug**: title から生成（小文字、英数字とハイフンのみ、最大40文字）
-- **work-id**: `JIRA-<jira-id>-<slug>` 形式（例: `JIRA-ABC-123-add-login`）
+- **TYPE**: Use Jira ID prefix as-is, or infer from title
+- **slug**: Generate from title (lowercase, alphanumeric and hyphens only, max 40 characters)
+- **work-id**: `JIRA-<jira-id>-<slug>` format (e.g., `JIRA-ABC-123-add-login`)
 
-#### 2c. local モードの場合
+#### 2c. For local mode
 
-- **TYPE**: 引数で指定（デフォルト: FEAT）
-- **slug**: title から生成（小文字、英数字とハイフンのみ、最大40文字）
-- **work-id**: `<TYPE>-<local-id>-<slug>` 形式（例: `FEAT-myid-add-feature`）
+- **TYPE**: Specified in argument (default: FEAT)
+- **slug**: Generate from title (lowercase, alphanumeric and hyphens only, max 40 characters)
+- **work-id**: `<TYPE>-<local-id>-<slug>` format (e.g., `FEAT-myid-add-feature`)
 
-### 3. ベースブランチの選択
+### 3. Select Base Branch
 
-`.wf/config.json` の `default_base_branch` をデフォルトとして使用。
-存在しない場合は `main` を使用。
+Use `default_base_branch` from `.wf/config.json` as default.
+Use `main` if not present.
 
-ユーザーに確認：
-> ベースブランチ: `<branch>` でよいですか？
+Confirm with user:
+> Base branch: Is `<branch>` OK?
 
-### 4. 作業ブランチの作成
+### 4. Create Work Branch
 
 ```bash
-# ブランチ名: <prefix>/<issue>-<slug>
+# Branch name: <prefix>/<issue>-<slug>
 git checkout -b <branch_name> <base_branch>
 ```
 
-### 5. WF ディレクトリの初期化
+### 5. Initialize WF Directory
 
-`.wf/` ディレクトリがなければ作成：
+Create `.wf/` directory if it doesn't exist:
 
 ```bash
 source "$HOME/.claude/scripts/wf-init.sh"
 wf_init_project
 ```
 
-### 6. ドキュメントディレクトリの作成
+### 6. Create Document Directory
 
 ```bash
 mkdir -p docs/wf/<work-id>/
 ```
 
-### 7. state.json の更新
+### 7. Update state.json
 
 ```json
 {
@@ -106,8 +106,8 @@ mkdir -p docs/wf/<work-id>/
       "next": "wf1-kickoff",
       "source": {
         "type": "github|jira|local",
-        "id": "<原ID>",
-        "title": "<タイトル>"
+        "id": "<original_id>",
+        "title": "<title>"
       },
       "git": {
         "base": "<base_branch>",
@@ -123,19 +123,19 @@ mkdir -p docs/wf/<work-id>/
 }
 ```
 
-### 8. worktree 作成（オプション）
+### 8. Create worktree (Optional)
 
-`config.worktree.enabled` が `true` の場合：
+If `config.worktree.enabled` is `true`:
 
 ```bash
 git worktree add .worktrees/<branch-name> <branch>
 ```
 
-`local.json` に worktree パスを記録。
+Record worktree path in `local.json`.
 
-### 9. コミット
+### 9. Commit
 
-ワークスペースの初期状態をコミット：
+Commit initial workspace state:
 
 ```bash
 git add .wf/state.json docs/wf/<work-id>/
@@ -145,23 +145,23 @@ Source: <source_type> #<source_id>
 "
 ```
 
-### 10. 完了メッセージ
+### 10. Completion Message
 
 ```
-✅ ワークスペースを作成しました
+✅ Workspace created
 
 Work ID: <work-id>
 Branch: <branch_name>
 Base: <base_branch>
 Docs: docs/wf/<work-id>/
 
-次のステップ: /wf1-kickoff を実行して Kickoff ドキュメントを作成してください
+Next step: Run /wf1-kickoff to create the Kickoff document
 ```
 
-## 注意事項
+## Notes
 
-- 既存の作業がある場合は警告を表示
-- ブランチ名が既に存在する場合はエラー
-- github モード: Issue が見つからない場合はエラー
-- jira/local モード: title が未指定の場合はエラー
-- github/jira/local は排他的（複数指定はエラー）
+- Display warning if existing work exists
+- Error if branch name already exists
+- github mode: Error if Issue not found
+- jira/local mode: Error if title is not specified
+- github/jira/local are mutually exclusive (error if multiple specified)

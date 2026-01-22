@@ -1,20 +1,20 @@
-# KMP expect/actual パターン
+# KMP expect/actual Pattern
 
-プラットフォーム固有実装を共通インターフェースで抽象化するパターン。
+A pattern for abstracting platform-specific implementations behind common interfaces.
 
-> **関連ドキュメント**: [KMP Architecture Guide](./kmp-architecture.md) | [公式ドキュメント](https://kotlinlang.org/docs/multiplatform-expect-actual.html)
+> **Related Documentation**: [KMP Architecture Guide](./kmp-architecture.md) | [Official Documentation](https://kotlinlang.org/docs/multiplatform-expect-actual.html)
 
 ---
 
-## 基本的な expect/actual
+## Basic expect/actual
 
-### プラットフォーム情報
+### Platform Information
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/core/platform/Platform.kt
 
 /**
- * プラットフォーム情報（expect 宣言）
+ * Platform information (expect declaration)
  */
 expect class Platform() {
     val name: String
@@ -22,7 +22,7 @@ expect class Platform() {
 }
 
 /**
- * プラットフォーム固有のユーティリティ
+ * Platform-specific utility
  */
 expect fun getPlatformName(): String
 ```
@@ -31,7 +31,7 @@ expect fun getPlatformName(): String
 // androidMain/kotlin/com/example/shared/core/platform/Platform.android.kt
 
 /**
- * Android 実装
+ * Android implementation
  */
 actual class Platform actual constructor() {
     actual val name: String = "Android"
@@ -47,7 +47,7 @@ actual fun getPlatformName(): String = "Android ${android.os.Build.VERSION.SDK_I
 import platform.UIKit.UIDevice
 
 /**
- * iOS 実装
+ * iOS implementation
  */
 actual class Platform actual constructor() {
     actual val name: String = UIDevice.currentDevice.systemName()
@@ -60,13 +60,13 @@ actual fun getPlatformName(): String =
 
 ---
 
-## ネットワーク監視
+## Network Monitoring
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/core/network/NetworkMonitor.kt
 
 /**
- * ネットワーク状態監視（expect 宣言）
+ * Network state monitoring (expect declaration)
  */
 expect class NetworkMonitor {
     fun isOnline(): Boolean
@@ -84,7 +84,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 
 /**
- * Android 実装
+ * Android implementation
  */
 actual class NetworkMonitor(
     private val context: Context
@@ -115,7 +115,7 @@ actual class NetworkMonitor(
 
         connectivityManager.registerNetworkCallback(request, callback)
 
-        // 初期状態
+        // Initial state
         trySend(isOnline())
 
         awaitClose {
@@ -132,7 +132,7 @@ import platform.Network.*
 import platform.darwin.dispatch_get_main_queue
 
 /**
- * iOS 実装
+ * iOS implementation
  */
 actual class NetworkMonitor {
     private val monitor = nw_path_monitor_create()
@@ -166,13 +166,13 @@ actual class NetworkMonitor {
 
 ---
 
-## UUID 生成
+## UUID Generation
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/core/util/Uuid.kt
 
 /**
- * UUID 生成（expect 宣言）
+ * UUID generation (expect declaration)
  */
 expect fun randomUUID(): String
 ```
@@ -183,7 +183,7 @@ expect fun randomUUID(): String
 import java.util.UUID
 
 /**
- * Android 実装
+ * Android implementation
  */
 actual fun randomUUID(): String = UUID.randomUUID().toString()
 ```
@@ -194,16 +194,16 @@ actual fun randomUUID(): String = UUID.randomUUID().toString()
 import platform.Foundation.NSUUID
 
 /**
- * iOS 実装
+ * iOS implementation
  */
 actual fun randomUUID(): String = NSUUID().UUIDString()
 ```
 
 ---
 
-## ベストプラクティス
+## Best Practices
 
-- プラットフォーム固有の実装は最小限に
-- 共通インターフェースを先に設計
-- actual 実装はプラットフォームの Best Practice に従う
-- テスト用の Fake 実装を commonTest に用意
+- Keep platform-specific implementations to a minimum
+- Design common interfaces first
+- Follow platform Best Practices for actual implementations
+- Prepare Fake implementations for testing in commonTest

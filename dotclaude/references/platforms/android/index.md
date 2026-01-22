@@ -1,43 +1,43 @@
 # Android References
 
-## 概要
+## Overview
 
-Google 公式 Android Architecture Guide に基づく、Android アプリ開発のリファレンス。
-MVVM、UDF（Unidirectional Data Flow）、Repository パターンを中心に定義。
-
----
-
-## ファイル一覧と優先順位
-
-| ファイル | 説明 | 優先度 |
-|----------|------|--------|
-| [architecture.md](architecture.md) | Android MVVM/UDF アーキテクチャ詳細 | ★★★ 公式ガイド準拠 |
+Reference for Android app development based on Google's official Android Architecture Guide.
+Defines MVVM, UDF (Unidirectional Data Flow), and Repository patterns.
 
 ---
 
-## 外部リンク
+## File List and Priority
 
-### 公式ドキュメント（最優先）
-- [Android Architecture Guide (公式)](https://developer.android.com/topic/architecture) - ★★★ 最重要
-- [Android UI Layer Guide](https://developer.android.com/topic/architecture/ui-layer) - ★★★ UI 設計
-- [Android Data Layer Guide](https://developer.android.com/topic/architecture/data-layer) - ★★★ データ設計
-- [Android Domain Layer Guide](https://developer.android.com/topic/architecture/domain-layer) - ★★ ビジネスロジック
-
-### Jetpack ライブラリ
-- [Jetpack Compose Documentation (公式)](https://developer.android.com/jetpack/compose) - ★★★ UI フレームワーク
-- [Hilt Dependency Injection](https://developer.android.com/training/dependency-injection/hilt-android) - ★★★ DI 標準
-- [Room Persistence Library](https://developer.android.com/training/data-storage/room) - ★★★ データベース
+| File | Description | Priority |
+|------|-------------|----------|
+| [architecture.md](architecture.md) | Android MVVM/UDF architecture details | ★★★ Official guide compliant |
 
 ---
 
-## 関連リファレンス
+## External Links
 
-- [clean-architecture.md](../../common/clean-architecture.md) - 共通アーキテクチャ原則
-- [testing-strategy.md](../../common/testing-strategy.md) - テスト戦略
-- [coroutines.md](../../languages/kotlin/coroutines.md) - 非同期処理
+### Official Documentation (Highest Priority)
+- [Android Architecture Guide (Official)](https://developer.android.com/topic/architecture) - ★★★ Most Important
+- [Android UI Layer Guide](https://developer.android.com/topic/architecture/ui-layer) - ★★★ UI Design
+- [Android Data Layer Guide](https://developer.android.com/topic/architecture/data-layer) - ★★★ Data Design
+- [Android Domain Layer Guide](https://developer.android.com/topic/architecture/domain-layer) - ★★ Business Logic
+
+### Jetpack Libraries
+- [Jetpack Compose Documentation (Official)](https://developer.android.com/jetpack/compose) - ★★★ UI Framework
+- [Hilt Dependency Injection](https://developer.android.com/training/dependency-injection/hilt-android) - ★★★ DI Standard
+- [Room Persistence Library](https://developer.android.com/training/data-storage/room) - ★★★ Database
 
 ---
 
-## 関連スキル
+## Related References
+
+- [clean-architecture.md](../../common/clean-architecture.md) - Common architecture principles
+- [testing-strategy.md](../../common/testing-strategy.md) - Testing strategy
+- [coroutines.md](../../languages/kotlin/coroutines.md) - Async processing
+
+---
+
+## Related Skills
 
 - android-architecture

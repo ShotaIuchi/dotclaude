@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 #
-# WF運用システム - 状態管理
-# state.json, local.json, config.json の読み書き
+# WF Operation System - State Management
+# Read/write operations for state.json, local.json, config.json
 #
 
 set -euo pipefail
 
-# このスクリプトのディレクトリ
+# Directory of this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# wf-utils.sh を読み込み
+# Load wf-utils.sh
 source "${SCRIPT_DIR}/wf-utils.sh"
 
 #
-# config.json を読み込む
-# @param $1 プロジェクトルート（オプション）
-# @return config.json の内容
+# Read config.json
+# @param $1 Project root (optional)
+# @return Contents of config.json
 #
 wf_read_config() {
     local project_root="${1:-$(wf_get_project_root)}"
@@ -24,7 +24,7 @@ wf_read_config() {
     if wf_file_exists "$config_path"; then
         cat "$config_path"
     else
-        # デフォルト設定を返す
+        # Return default settings
         cat << 'EOF'
 {
   "default_base_branch": "main",
@@ -47,10 +47,10 @@ EOF
 }
 
 #
-# config.json から値を取得
-# @param $1 jq クエリ（例: .default_base_branch）
-# @param $2 プロジェクトルート（オプション）
-# @return 取得した値
+# Get value from config.json
+# @param $1 jq query (e.g., .default_base_branch)
+# @param $2 Project root (optional)
+# @return Retrieved value
 #
 wf_config_get() {
     local query="$1"
@@ -60,9 +60,9 @@ wf_config_get() {
 }
 
 #
-# state.json を読み込む
-# @param $1 プロジェクトルート（オプション）
-# @return state.json の内容
+# Read state.json
+# @param $1 Project root (optional)
+# @return Contents of state.json
 #
 wf_read_state() {
     local project_root="${1:-$(wf_get_project_root)}"
@@ -71,33 +71,33 @@ wf_read_state() {
     if wf_file_exists "$state_path"; then
         cat "$state_path"
     else
-        # 空の状態を返す
+        # Return empty state
         echo '{"active_work": null, "works": {}}'
     fi
 }
 
 #
-# state.json に書き込む
-# @param $1 JSON データ
-# @param $2 プロジェクトルート（オプション）
+# Write to state.json
+# @param $1 JSON data
+# @param $2 Project root (optional)
 #
 wf_write_state() {
     local data="$1"
     local project_root="${2:-$(wf_get_project_root)}"
     local state_path="${project_root}/${WF_DIR}/state.json"
 
-    # ディレクトリ作成
+    # Create directory
     mkdir -p "$(dirname "$state_path")"
 
-    # JSON を整形して書き込み
+    # Format and write JSON
     echo "$data" | jq '.' > "$state_path"
 }
 
 #
-# state.json から値を取得
-# @param $1 jq クエリ
-# @param $2 プロジェクトルート（オプション）
-# @return 取得した値
+# Get value from state.json
+# @param $1 jq query
+# @param $2 Project root (optional)
+# @return Retrieved value
 #
 wf_state_get() {
     local query="$1"
@@ -107,9 +107,9 @@ wf_state_get() {
 }
 
 #
-# state.json の値を更新
-# @param $1 jq 更新式（例: .active_work = "FEAT-123"）
-# @param $2 プロジェクトルート（オプション）
+# Update value in state.json
+# @param $1 jq update expression (e.g., .active_work = "FEAT-123")
+# @param $2 Project root (optional)
 #
 wf_state_set() {
     local update_expr="$1"
@@ -125,9 +125,9 @@ wf_state_set() {
 }
 
 #
-# active_work を取得
-# @param $1 プロジェクトルート（オプション）
-# @return active_work の値
+# Get active_work
+# @param $1 Project root (optional)
+# @return Value of active_work
 #
 wf_get_active_work() {
     local project_root="${1:-$(wf_get_project_root)}"
@@ -135,9 +135,9 @@ wf_get_active_work() {
 }
 
 #
-# active_work を設定
+# Set active_work
 # @param $1 work-id
-# @param $2 プロジェクトルート（オプション）
+# @param $2 Project root (optional)
 #
 wf_set_active_work() {
     local work_id="$1"
@@ -147,10 +147,10 @@ wf_set_active_work() {
 }
 
 #
-# work の状態を取得
+# Get work state
 # @param $1 work-id
-# @param $2 プロジェクトルート（オプション）
-# @return work の状態（JSON）
+# @param $2 Project root (optional)
+# @return Work state (JSON)
 #
 wf_get_work() {
     local work_id="$1"
@@ -160,10 +160,10 @@ wf_get_work() {
 }
 
 #
-# work の状態を設定
+# Set work state
 # @param $1 work-id
-# @param $2 work の状態（JSON）
-# @param $3 プロジェクトルート（オプション）
+# @param $2 Work state (JSON)
+# @param $3 Project root (optional)
 #
 wf_set_work() {
     local work_id="$1"
@@ -174,11 +174,11 @@ wf_set_work() {
 }
 
 #
-# work の特定フィールドを更新
+# Update specific field of work
 # @param $1 work-id
-# @param $2 フィールドパス（例: .current）
-# @param $3 値
-# @param $4 プロジェクトルート（オプション）
+# @param $2 Field path (e.g., .current)
+# @param $3 Value
+# @param $4 Project root (optional)
 #
 wf_update_work_field() {
     local work_id="$1"
@@ -186,7 +186,7 @@ wf_update_work_field() {
     local value="$3"
     local project_root="${4:-$(wf_get_project_root)}"
 
-    # 値が文字列の場合は引用符で囲む
+    # Wrap value in quotes if it's a string
     if [[ "$value" =~ ^[0-9]+$ ]] || [[ "$value" == "true" ]] || [[ "$value" == "false" ]] || [[ "$value" == "null" ]] || [[ "$value" =~ ^\{.*\}$ ]] || [[ "$value" =~ ^\[.*\]$ ]]; then
         wf_state_set ".works[\"${work_id}\"]${field} = ${value}" "$project_root"
     else
@@ -195,10 +195,10 @@ wf_update_work_field() {
 }
 
 #
-# work の current フェーズを取得
+# Get current phase of work
 # @param $1 work-id
-# @param $2 プロジェクトルート（オプション）
-# @return current フェーズ
+# @param $2 Project root (optional)
+# @return Current phase
 #
 wf_get_work_current() {
     local work_id="$1"
@@ -208,10 +208,10 @@ wf_get_work_current() {
 }
 
 #
-# work の next フェーズを取得
+# Get next phase of work
 # @param $1 work-id
-# @param $2 プロジェクトルート（オプション）
-# @return next フェーズ
+# @param $2 Project root (optional)
+# @return Next phase
 #
 wf_get_work_next() {
     local work_id="$1"
@@ -221,9 +221,9 @@ wf_get_work_next() {
 }
 
 #
-# local.json を読み込む
-# @param $1 プロジェクトルート（オプション）
-# @return local.json の内容
+# Read local.json
+# @param $1 Project root (optional)
+# @return Contents of local.json
 #
 wf_read_local() {
     local project_root="${1:-$(wf_get_project_root)}"
@@ -232,33 +232,33 @@ wf_read_local() {
     if wf_file_exists "$local_path"; then
         cat "$local_path"
     else
-        # 空の状態を返す
+        # Return empty state
         echo '{"works": {}}'
     fi
 }
 
 #
-# local.json に書き込む
-# @param $1 JSON データ
-# @param $2 プロジェクトルート（オプション）
+# Write to local.json
+# @param $1 JSON data
+# @param $2 Project root (optional)
 #
 wf_write_local() {
     local data="$1"
     local project_root="${2:-$(wf_get_project_root)}"
     local local_path="${project_root}/${WF_DIR}/local.json"
 
-    # ディレクトリ作成
+    # Create directory
     mkdir -p "$(dirname "$local_path")"
 
-    # JSON を整形して書き込み
+    # Format and write JSON
     echo "$data" | jq '.' > "$local_path"
 }
 
 #
-# local.json から値を取得
-# @param $1 jq クエリ
-# @param $2 プロジェクトルート（オプション）
-# @return 取得した値
+# Get value from local.json
+# @param $1 jq query
+# @param $2 Project root (optional)
+# @return Retrieved value
 #
 wf_local_get() {
     local query="$1"
@@ -268,9 +268,9 @@ wf_local_get() {
 }
 
 #
-# local.json の値を更新
-# @param $1 jq 更新式
-# @param $2 プロジェクトルート（オプション）
+# Update value in local.json
+# @param $1 jq update expression
+# @param $2 Project root (optional)
 #
 wf_local_set() {
     local update_expr="$1"
@@ -286,10 +286,10 @@ wf_local_set() {
 }
 
 #
-# worktree パスを取得
+# Get worktree path
 # @param $1 work-id
-# @param $2 プロジェクトルート（オプション）
-# @return worktree パス
+# @param $2 Project root (optional)
+# @return Worktree path
 #
 wf_get_worktree_path() {
     local work_id="$1"
@@ -299,10 +299,10 @@ wf_get_worktree_path() {
 }
 
 #
-# worktree パスを設定
+# Set worktree path
 # @param $1 work-id
-# @param $2 worktree パス
-# @param $3 プロジェクトルート（オプション）
+# @param $2 Worktree path
+# @param $3 Project root (optional)
 #
 wf_set_worktree_path() {
     local work_id="$1"
@@ -313,9 +313,9 @@ wf_set_worktree_path() {
 }
 
 #
-# すべての work-id を取得
-# @param $1 プロジェクトルート（オプション）
-# @return work-id のリスト（改行区切り）
+# Get all work-ids
+# @param $1 Project root (optional)
+# @return List of work-ids (newline-separated)
 #
 wf_list_works() {
     local project_root="${1:-$(wf_get_project_root)}"
@@ -324,11 +324,11 @@ wf_list_works() {
 }
 
 #
-# 新しい work を作成
+# Create new work
 # @param $1 work-id
-# @param $2 base branch
-# @param $3 feature branch
-# @param $4 プロジェクトルート（オプション）
+# @param $2 Base branch
+# @param $3 Feature branch
+# @param $4 Project root (optional)
 #
 wf_create_work() {
     local work_id="$1"
@@ -362,11 +362,11 @@ EOF
 }
 
 #
-# work のフェーズを進める
+# Advance work phase
 # @param $1 work-id
-# @param $2 新しい current フェーズ
-# @param $3 新しい next フェーズ
-# @param $4 プロジェクトルート（オプション）
+# @param $2 New current phase
+# @param $3 New next phase
+# @param $4 Project root (optional)
 #
 wf_advance_phase() {
     local work_id="$1"
@@ -379,15 +379,15 @@ wf_advance_phase() {
 }
 
 # ==============================================================================
-# エージェント管理関数
+# Agent Management Functions
 # ==============================================================================
 
 #
-# エージェントセッションを記録
+# Record agent session
 # @param $1 work-id
-# @param $2 エージェント名
-# @param $3 ステータス（running | completed | failed）
-# @param $4 プロジェクトルート（オプション）
+# @param $2 Agent name
+# @param $3 Status (running | completed | failed)
+# @param $4 Project root (optional)
 #
 wf_record_agent_session() {
     local work_id="$1"
@@ -398,7 +398,7 @@ wf_record_agent_session() {
     local timestamp
     timestamp=$(wf_get_timestamp)
 
-    # agents オブジェクトが存在しない場合は初期化
+    # Initialize agents object if it doesn't exist
     local current_state
     current_state=$(wf_read_state "$project_root")
 
@@ -409,10 +409,10 @@ wf_record_agent_session() {
         wf_state_set ".works[\"${work_id}\"].agents = {\"last_used\": null, \"sessions\": {}}" "$project_root"
     fi
 
-    # last_used を更新
+    # Update last_used
     wf_state_set ".works[\"${work_id}\"].agents.last_used = \"${agent_name}\"" "$project_root"
 
-    # セッション情報を更新
+    # Update session info
     local session_data
     session_data=$(cat << EOF
 {"status": "${status}", "last_run": "${timestamp}"}
@@ -422,11 +422,11 @@ EOF
 }
 
 #
-# エージェントセッションのステータスを取得
+# Get agent session status
 # @param $1 work-id
-# @param $2 エージェント名
-# @param $3 プロジェクトルート（オプション）
-# @return ステータス
+# @param $2 Agent name
+# @param $3 Project root (optional)
+# @return Status
 #
 wf_get_agent_status() {
     local work_id="$1"
@@ -437,10 +437,10 @@ wf_get_agent_status() {
 }
 
 #
-# 最後に使用したエージェントを取得
+# Get last used agent
 # @param $1 work-id
-# @param $2 プロジェクトルート（オプション）
-# @return エージェント名
+# @param $2 Project root (optional)
+# @return Agent name
 #
 wf_get_last_agent() {
     local work_id="$1"
@@ -450,10 +450,10 @@ wf_get_last_agent() {
 }
 
 #
-# エージェントセッション一覧を取得
+# List agent sessions
 # @param $1 work-id
-# @param $2 プロジェクトルート（オプション）
-# @return セッション一覧（JSON）
+# @param $2 Project root (optional)
+# @return Session list (JSON)
 #
 wf_list_agent_sessions() {
     local work_id="$1"

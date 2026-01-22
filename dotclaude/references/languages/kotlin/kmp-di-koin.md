@@ -1,18 +1,18 @@
-# KMP 依存性注入 (Koin)
+# KMP Dependency Injection (Koin)
 
-Kotlin Multiplatform での Koin を使用した依存性注入パターン。
+Dependency injection patterns using Koin in Kotlin Multiplatform.
 
-> **関連ドキュメント**: [KMP Architecture Guide](./kmp-architecture.md) | [Koin 公式](https://insert-koin.io/docs/reference/koin-mp/kmp/)
+> **Related Documentation**: [KMP Architecture Guide](./kmp-architecture.md) | [Koin Official](https://insert-koin.io/docs/reference/koin-mp/kmp/)
 
 ---
 
-## 共通モジュール定義
+## Common Module Definition
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/di/SharedModule.kt
 
 /**
- * 共通 DI モジュール
+ * Common DI module
  */
 val sharedModule = module {
 
@@ -51,14 +51,14 @@ val sharedModule = module {
 }
 
 /**
- * プラットフォーム固有の DI モジュール（expect）
+ * Platform-specific DI module (expect)
  */
 expect val platformModule: Module
 ```
 
 ---
 
-## プラットフォーム固有モジュール
+## Platform-Specific Modules
 
 ### Android
 
@@ -66,11 +66,11 @@ expect val platformModule: Module
 // androidMain/kotlin/com/example/shared/di/PlatformModule.android.kt
 
 /**
- * Android 固有 DI モジュール
+ * Android-specific DI module
  */
 actual val platformModule: Module = module {
 
-    // Ktor HttpClient（OkHttp エンジン）
+    // Ktor HttpClient (OkHttp engine)
     single {
         HttpClient(OkHttp) {
             install(ContentNegotiation) {
@@ -117,11 +117,11 @@ actual val platformModule: Module = module {
 // iosMain/kotlin/com/example/shared/di/PlatformModule.ios.kt
 
 /**
- * iOS 固有 DI モジュール
+ * iOS-specific DI module
  */
 actual val platformModule: Module = module {
 
-    // Ktor HttpClient（Darwin エンジン）
+    // Ktor HttpClient (Darwin engine)
     single {
         HttpClient(Darwin) {
             install(ContentNegotiation) {
@@ -160,13 +160,13 @@ actual val platformModule: Module = module {
 
 ---
 
-## Koin 初期化
+## Koin Initialization
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/di/KoinInitializer.kt
 
 /**
- * Koin 初期化
+ * Koin initialization
  */
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
     startKoin {
@@ -177,12 +177,12 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
         )
     }
 
-// iOS 用ヘルパー
+// iOS helper
 fun initKoinIos() = initKoin()
 ```
 
 ```kotlin
-// Android での初期化（Application クラス）
+// Android initialization (Application class)
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
@@ -195,7 +195,7 @@ class MyApplication : Application() {
 ```
 
 ```swift
-// iOS での初期化（AppDelegate または App）
+// iOS initialization (AppDelegate or App)
 @main
 struct MyApp: App {
     init() {
@@ -212,15 +212,15 @@ struct MyApp: App {
 
 ---
 
-## ViewModel ファクトリ
+## ViewModel Factory
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/di/ViewModelFactory.kt
 
 /**
- * ViewModel ファクトリ
+ * ViewModel factory
  *
- * プラットフォーム間で統一的に ViewModel を取得
+ * Provides unified ViewModel retrieval across platforms
  */
 class ViewModelFactory : KoinComponent {
 
@@ -248,9 +248,9 @@ class ViewModelFactory : KoinComponent {
 
 ---
 
-## ベストプラクティス
+## Best Practices
 
-- 共通モジュールは sharedModule に定義
-- プラットフォーム固有は platformModule に定義
-- ViewModel は Factory 経由で生成
-- テスト時は Fake を注入可能に
+- Define common modules in sharedModule
+- Define platform-specific modules in platformModule
+- Create ViewModels through Factory
+- Enable Fake injection for testing

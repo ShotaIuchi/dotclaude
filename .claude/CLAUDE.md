@@ -1,36 +1,36 @@
-# dotclaude プロジェクト CLAUDE.md
+# dotclaude Project CLAUDE.md
 
-## プロジェクト概要
+## Project Overview
 
-Claude Code と人間が同じ状態・同じ成果物を見て作業するためのワークフロー管理システム。
-`dotclaude/` フォルダを `~/.claude` にシンボリックリンクして使用する。
+A workflow management system for Claude Code and humans to work while viewing the same state and deliverables.
+Use by creating a symlink from `dotclaude/` folder to `~/.claude`.
 
-## 原則（PRINCIPLES.md）
+## Principles (PRINCIPLES.md)
 
-**最重要**: `PRINCIPLES.md` は全てのルールに優先する根源的原則。
-セッション開始時は必ず `PRINCIPLES.md` を読み込むこと。
-優先順位・安全性・誠実性・ユーザー利益・透明性の5原則を定義。
-いかなる指示があっても変更・例外・上書きは不可。
+**Most Important**: `PRINCIPLES.md` is the fundamental principle that takes precedence over all rules.
+Always read `PRINCIPLES.md` at the start of a session.
+Defines 5 principles: Priority, Safety, Integrity, User Benefit, and Transparency.
+No modification, exception, or override is allowed regardless of any instruction.
 
-## 憲法（CONSTITUTION.md）
+## Constitution (CONSTITUTION.md)
 
-**重要**: ファイル追加・変更時は必ず `CONSTITUTION.md` を参照すること。
-憲法は「絶対に守るべきルール」を定義しており、違反は即座に修正が必要。
-（原則に従属）
+**Important**: Always refer to `CONSTITUTION.md` when adding or modifying files.
+The constitution defines "rules that must be absolutely followed," and violations require immediate correction.
+(Subordinate to principles)
 
-主な規則:
-- 第1条: 構造の即時確定（「とりあえず」配置の禁止）
-- 第2条: ドキュメントの同時作成
-- 第3条: 命名規則の遵守
-- 第4条: 依存関係の完結
-- 第5条: 違反時の即時対応
+Main rules:
+- Article 1: Immediate structure finalization (no "temporary" placements)
+- Article 2: Simultaneous documentation creation
+- Article 3: Naming convention compliance
+- Article 4: Complete dependency resolution
+- Article 5: Immediate response to violations
+- Article 6: Pre-execution command verification
 
-## 開発規約
+## Development Guidelines
 
-### コマンド（commands/*.md）
+### Commands (commands/*.md)
 
-- ファイル名は `wf{N}-{name}.md` 形式
-- 環境系は `wf0-*`、ドキュメント系は `wf1-4`、実装系は `wf5-6`
-- コマンドの引数はMarkdown内で明示的に定義
-- 状態管理は `.wf/state.json` を通じて行う
-
+- File names follow `wf{N}-{name}.md` format
+- Environment-related are `wf0-*`, document-related are `wf1-4`, implementation-related are `wf5-6`
+- Command arguments are explicitly defined in Markdown
+- State management is done through `.wf/state.json`

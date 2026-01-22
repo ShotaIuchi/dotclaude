@@ -1,24 +1,24 @@
 # /wf6-verify
 
-実装の検証とPR作成を行うコマンド。
+Command to verify implementation and create PR.
 
-## 使用方法
+## Usage
 
 ```
-/wf6-verify [サブコマンド]
+/wf6-verify [subcommand]
 ```
 
-## サブコマンド
+## Subcommands
 
-- `(なし)`: 検証のみ実行
-- `pr`: 検証後にPR作成
-- `update`: 既存PRを更新
+- `(none)`: Run verification only
+- `pr`: Create PR after verification
+- `update`: Update existing PR
 
-## 処理内容
+## Processing
 
-$ARGUMENTS を解析して以下の処理を実行してください。
+Parse $ARGUMENTS and execute the following processing.
 
-### 1. 前提条件の確認
+### 1. Check Prerequisites
 
 ```bash
 work_id=$(jq -r '.active_work // empty' .wf/state.json)
@@ -28,22 +28,22 @@ spec_path="$docs_dir/01_SPEC.md"
 plan_path="$docs_dir/02_PLAN.md"
 log_path="$docs_dir/04_IMPLEMENT_LOG.md"
 
-# すべてのステップが完了しているか確認
+# Check if all steps are completed
 current_step=$(jq -r ".works[\"$work_id\"].plan.current_step // 0" .wf/state.json)
 total_steps=$(jq -r ".works[\"$work_id\"].plan.total_steps // 0" .wf/state.json)
 
 if [ "$current_step" -lt "$total_steps" ]; then
-  echo "⚠️ 未完了のステップがあります: $current_step/$total_steps"
-  echo "/wf5-implement を実行してください"
+  echo "⚠️ There are incomplete steps: $current_step/$total_steps"
+  echo "Please run /wf5-implement"
 fi
 ```
 
-### 2. テストの実行
+### 2. Run Tests
 
-プロジェクトのテストを実行：
+Run project tests:
 
 ```bash
-# config.json に test コマンドが定義されている場合はそれを使用
+# Use test command from config.json if defined
 if [ -f ".wf/config.json" ]; then
   test_cmd=$(jq -r '.verify.test // empty' .wf/config.json)
   if [ -n "$test_cmd" ]; then
@@ -51,26 +51,26 @@ if [ -f ".wf/config.json" ]; then
   fi
 fi
 
-# config.json にコマンドがない場合はフォールバック
+# Fallback if no command in config.json
 if [ -z "$test_cmd" ]; then
-  # package.json の存在確認
+  # Check for package.json
   if [ -f "package.json" ]; then
     npm test
   fi
 
-  # pytest の存在確認
+  # Check for pytest
   if [ -f "pytest.ini" ] || [ -f "pyproject.toml" ]; then
     pytest
   fi
 
-  # go.mod の存在確認
+  # Check for go.mod
   if [ -f "go.mod" ]; then
     go test ./...
   fi
 fi
 ```
 
-テスト結果を記録：
+Record test results:
 
 ```
 📋 Test Results
@@ -86,12 +86,12 @@ Failed Tests:
 - test_export_csv: TimeoutError
 ```
 
-### 3. ビルドの確認
+### 3. Check Build
 
-プロジェクトのビルドを実行：
+Run project build:
 
 ```bash
-# config.json に build コマンドが定義されている場合はそれを使用
+# Use build command from config.json if defined
 if [ -f ".wf/config.json" ]; then
   build_cmd=$(jq -r '.verify.build // empty' .wf/config.json)
   if [ -n "$build_cmd" ]; then
@@ -99,7 +99,7 @@ if [ -f ".wf/config.json" ]; then
   fi
 fi
 
-# config.json にコマンドがない場合はフォールバック
+# Fallback if no command in config.json
 if [ -z "$build_cmd" ]; then
   # Node.js
   if [ -f "package.json" ]; then
@@ -118,10 +118,10 @@ if [ -z "$build_cmd" ]; then
 fi
 ```
 
-### 4. Lint/Format チェック
+### 4. Lint/Format Check
 
 ```bash
-# config.json に lint コマンドが定義されている場合はそれを使用
+# Use lint command from config.json if defined
 if [ -f ".wf/config.json" ]; then
   lint_cmd=$(jq -r '.verify.lint // empty' .wf/config.json)
   if [ -n "$lint_cmd" ]; then
@@ -129,7 +129,7 @@ if [ -f ".wf/config.json" ]; then
   fi
 fi
 
-# config.json にコマンドがない場合はフォールバック
+# Fallback if no command in config.json
 if [ -z "$lint_cmd" ]; then
   # ESLint
   if [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ]; then
@@ -153,25 +153,25 @@ if [ -z "$lint_cmd" ]; then
 fi
 ```
 
-### 5. Success Criteria の確認
+### 5. Check Success Criteria
 
-Kickoff の Success Criteria と照合：
+Compare with Success Criteria from Kickoff:
 
 ```
 📋 Success Criteria Check
 ═══════════════════════════════════════
 
-Kickoff の Success Criteria:
-- [✓] CSV エクスポート機能が動作する
-- [✓] 10万件のデータでも3秒以内に完了
-- [✓] エラー時に適切なメッセージが表示される
-- [ ] ユーザーマニュアルが更新されている
+Success Criteria from Kickoff:
+- [✓] CSV export functionality works
+- [✓] Completes within 3 seconds for 100,000 records
+- [✓] Appropriate error messages are displayed on error
+- [ ] User manual is updated
 
-結果: 3/4 完了
-未完了項目があります。
+Result: 3/4 completed
+There are incomplete items.
 ```
 
-### 6. 検証結果サマリー
+### 6. Verification Summary
 
 ```
 📋 Verification Summary: <work-id>
@@ -196,33 +196,33 @@ Success Criteria: <n>/<m> completed
 Overall: <PASS / FAIL>
 ```
 
-### 7. PR 作成（pr サブコマンド）
+### 7. Create PR (pr subcommand)
 
-検証がパスした場合、PRを作成：
+If verification passes, create PR:
 
 ```bash
 branch=$(jq -r ".works[\"$work_id\"].git.branch" .wf/state.json)
 base=$(jq -r ".works[\"$work_id\"].git.base" .wf/state.json)
 
-# プッシュ
+# Push
 git push -u origin "$branch"
 
-# PR 作成
+# Create PR
 gh pr create \
   --base "$base" \
   --title "<PR title>" \
   --body "$(cat << EOF
 ## Summary
 
-<Kickoff の Goal を要約>
+<Summary of Goal from Kickoff>
 
 ## Changes
 
-<主な変更点を箇条書き>
+<Main changes as bullet points>
 
 ## Test Plan
 
-<テスト方法>
+<Testing method>
 
 ## Related Issues
 
@@ -238,52 +238,52 @@ EOF
 )"
 ```
 
-### 8. PR 更新（update サブコマンド）
+### 8. Update PR (update subcommand)
 
-既存のPRを更新：
+Update existing PR:
 
 ```bash
-# 変更をプッシュ
+# Push changes
 git push
 
-# PR の説明を更新（必要に応じて）
+# Update PR description (if needed)
 gh pr edit --body "$(cat << EOF
 ...
 EOF
 )"
 ```
 
-### 9. state.json の更新
+### 9. Update state.json
 
 ```bash
 jq ".works[\"$work_id\"].current = \"wf6-verify\"" .wf/state.json > tmp && mv tmp .wf/state.json
 jq ".works[\"$work_id\"].next = \"complete\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
-# PR 情報を記録
+# Record PR information
 jq ".works[\"$work_id\"].pr = {\"number\": <pr_number>, \"url\": \"<pr_url>\"}" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
 
-### 10. 完了メッセージ
+### 10. Completion Message
 
-#### 検証のみの場合
+#### For verification only
 
 ```
-✅ 検証が完了しました
+✅ Verification complete
 
-結果: PASS
+Result: PASS
 
 Tests: 150/150 passed
 Build: Success
 Lint: No issues
 Success Criteria: 4/4 completed
 
-PRを作成する場合: /wf6-verify pr
+To create PR: /wf6-verify pr
 ```
 
-#### PR作成の場合
+#### For PR creation
 
 ```
-✅ PR を作成しました
+✅ PR created
 
 PR: #<number>
 URL: <pr_url>
@@ -291,32 +291,32 @@ URL: <pr_url>
 Title: <title>
 Base: <base> ← <branch>
 
-次のステップ:
-- レビューを依頼してください
-- CI/CD の完了を確認してください
+Next steps:
+- Request review
+- Confirm CI/CD completion
 ```
 
-## 検証失敗時の対応
+## Handling Verification Failure
 
 ```
-❌ 検証に失敗しました
+❌ Verification failed
 
 Failed Items:
 - [ ] Tests: 2 failed
   - test_user_login
   - test_export_csv
 - [ ] Success Criteria: 1 incomplete
-  - ユーザーマニュアルの更新
+  - User manual update
 
-対応:
-1. 失敗したテストを修正
-2. 未完了の Success Criteria を対応
-3. 再度 /wf6-verify を実行
+Response:
+1. Fix failed tests
+2. Address incomplete Success Criteria
+3. Run /wf6-verify again
 ```
 
-## 注意事項
+## Notes
 
-- テスト失敗時はPR作成不可
-- ビルド失敗時はPR作成不可
-- Success Criteria の未完了項目は警告表示
-- PR作成後も検証は再実行可能
+- Cannot create PR if tests fail
+- Cannot create PR if build fails
+- Warning displayed for incomplete Success Criteria items
+- Verification can be re-run after PR creation

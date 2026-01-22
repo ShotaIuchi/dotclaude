@@ -1,54 +1,54 @@
-# dotclaude プロジェクト固有ルール
+# dotclaude Project-Specific Rules
 
-グローバル憲法（dotclaude/CONSTITUTION.md）に加えて、このプロジェクト固有のルールを定義する。
-
----
-
-## 必須ドキュメント
-
-| 追加対象 | 必須ドキュメント |
-|---------|-----------------|
-| 新カテゴリ（references/{group}/{category}/） | index.md |
-| 新スキル（skills/{name}/） | SKILL.md |
-| 新エージェント（agents/{type}/{name}/） | AGENT.md |
-| 新コマンド（commands/） | ファイル先頭にコメントで説明 |
+In addition to the global constitution (dotclaude/CONSTITUTION.md), this defines project-specific rules.
 
 ---
 
-## 更新必須
+## Required Documentation
 
-| 追加対象 | 更新対象 |
-|---------|---------|
-| references/ 内のファイル | references/INDEX.md |
-| skills/ 内のスキル | 参照する references のパス |
+| Addition Target | Required Documentation |
+|----------------|----------------------|
+| New category (references/{group}/{category}/) | index.md |
+| New skill (skills/{name}/) | SKILL.md |
+| New agent (agents/{type}/{name}/) | AGENT.md |
+| New command (commands/) | Description comment at file header |
 
 ---
 
-## 命名規則
+## Update Required
 
-### ファイル名
-- ケバブケース: `clean-architecture.md`, `sam-template.md`
-- index ファイル: `index.md`（大文字は INDEX.md のみ）
+| Addition Target | Update Target |
+|----------------|---------------|
+| Files in references/ | references/INDEX.md |
+| Skills in skills/ | Path to referenced references |
 
-### ディレクトリ名
-- ケバブケース: `android-architecture/`, `aws-sam/`
-- グループは複数形: `platforms/`, `languages/`, `services/`
+---
 
-### frontmatter 形式
+## Naming Conventions
+
+### File Names
+- kebab-case: `clean-architecture.md`, `sam-template.md`
+- index files: `index.md` (only INDEX.md uses uppercase)
+
+### Directory Names
+- kebab-case: `android-architecture/`, `aws-sam/`
+- Groups are plural: `platforms/`, `languages/`, `services/`
+
+### frontmatter Format
 ```yaml
 ---
-name: 英語タイトル
-description: 英語説明（Claude が参照するため）
+name: English title
+description: English description (for Claude to reference)
 references:
-  - path: 相対パス
+  - path: relative path
 ---
 ```
 
 ---
 
-## 依存関係チェックリスト
+## Dependency Checklist
 
-- [ ] 参照先ファイルが存在するか
-- [ ] 相対パスが正しいか
-- [ ] 参照元（INDEX.md, SKILL.md）を更新したか
-- [ ] 壊れたリンクがないか
+- [ ] Does the referenced file exist?
+- [ ] Is the relative path correct?
+- [ ] Have you updated the source (INDEX.md, SKILL.md)?
+- [ ] Are there any broken links?

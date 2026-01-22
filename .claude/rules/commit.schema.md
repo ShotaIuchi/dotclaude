@@ -1,6 +1,6 @@
 # Commit Message Schema
 
-## フォーマット
+## Format
 
 ```
 <type>: <subject>
@@ -10,41 +10,41 @@
 [footer]
 ```
 
-## Type（必須）
+## Type (Required)
 
-| Type | 用途 |
-|------|------|
-| `feat` | 新機能追加 |
-| `fix` | バグ修正 |
-| `docs` | ドキュメントのみの変更 |
-| `style` | コードの意味に影響しない変更（空白、フォーマット等） |
-| `refactor` | バグ修正でも機能追加でもないコード変更 |
-| `test` | テストの追加・修正 |
-| `chore` | ビルドプロセスやツールの変更 |
+| Type | Purpose |
+|------|---------|
+| `feat` | New feature addition |
+| `fix` | Bug fix |
+| `docs` | Documentation only changes |
+| `style` | Changes that don't affect code meaning (whitespace, formatting, etc.) |
+| `refactor` | Code changes that are neither bug fixes nor feature additions |
+| `test` | Adding or modifying tests |
+| `chore` | Build process or tool changes |
 
-## Subject（必須）
+## Subject (Required)
 
-- 50文字以内
-- 末尾にピリオドを付けない
-- 命令形で記述（日本語の場合は体言止め）
+- 50 characters or less
+- No period at the end
+- Use imperative mood (Add, Fix, Update...)
 
-## Body（任意）
+## Body (Optional)
 
-- 変更の理由や背景を記述
-- 72文字で折り返し
+- Describe the reason or background of the change
+- Wrap at 72 characters
 
-## Footer（任意）
+## Footer (Optional)
 
-- Breaking Changeの記述
-- Issue参照（例: `Closes #123`）
+- Breaking Change description
+- Issue reference (e.g., `Closes #123`)
 
-## 例
+## Example
 
 ```
-feat: wf0-nextstep コマンドを追加
+feat: Add wf0-nextstep command
 
-ワークフローの次ステップを提案する機能を実装。
-state.jsonの状態を読み取り、適切な次アクションを表示する。
+Implement feature to suggest next workflow step.
+Reads state.json status and displays appropriate next action.
 
 Closes #42
 ```

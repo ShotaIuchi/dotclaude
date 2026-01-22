@@ -1,28 +1,28 @@
 # /wf5-implement
 
-Plan の1ステップを実装するコマンド。
+Command to implement one step of the Plan.
 
-## 使用方法
+## Usage
 
 ```
 /wf5-implement [step_number]
 ```
 
-## 引数
+## Arguments
 
-- `step_number`: 実装するステップ番号（オプション）
-  - 省略時: 次の未完了ステップを自動選択
+- `step_number`: Step number to implement (optional)
+  - If omitted: Auto-select next incomplete step
 
-## 重要な制約
+## Important Constraints
 
-⚠️ **PLAN外の変更禁止**: このコマンドは Plan に記載されたステップのみを実装します。
-⚠️ **1回 = 1ステップ**: 1回の実行で1ステップのみ実装します。
+⚠️ **No Off-Plan Changes**: This command implements only the steps documented in the Plan.
+⚠️ **One Execution = One Step**: Only one step is implemented per execution.
 
-## 処理内容
+## Processing
 
-$ARGUMENTS を解析して以下の処理を実行してください。
+Parse $ARGUMENTS and execute the following processing.
 
-### 1. 前提条件の確認
+### 1. Check Prerequisites
 
 ```bash
 work_id=$(jq -r '.active_work // empty' .wf/state.json)
@@ -30,134 +30,134 @@ docs_dir="docs/wf/$work_id"
 plan_path="$docs_dir/02_PLAN.md"
 log_path="$docs_dir/04_IMPLEMENT_LOG.md"
 
-# Plan が存在するか確認
+# Check if Plan exists
 if [ ! -f "$plan_path" ]; then
-  echo "Plan ドキュメントがありません"
-  echo "/wf3-plan を先に実行してください"
+  echo "Plan document not found"
+  echo "Please run /wf3-plan first"
   exit 1
 fi
 ```
 
-### 2. 実装対象ステップの決定
+### 2. Determine Implementation Target Step
 
 ```bash
 step_number="$ARGUMENTS"
 
 if [ -z "$step_number" ]; then
-  # state.json から次のステップを取得
+  # Get next step from state.json
   current_step=$(jq -r ".works[\"$work_id\"].plan.current_step // 0" .wf/state.json)
   step_number=$((current_step + 1))
 fi
 ```
 
-### 3. Plan からステップ情報を抽出
+### 3. Extract Step Information from Plan
 
-Plan の該当ステップから以下を取得：
-- **タイトル**
-- **目的**
-- **対象ファイル**
-- **作業内容**
-- **完了条件**
-- **依存ステップ**
+Get the following from the corresponding step in Plan:
+- **Title**
+- **Purpose**
+- **Target Files**
+- **Tasks**
+- **Completion Criteria**
+- **Dependent Steps**
 
-### 4. 依存ステップの確認
+### 4. Check Dependent Steps
 
 ```bash
-# 依存ステップが完了しているか確認
+# Check if dependent steps are completed
 for dep in $dependencies; do
   dep_status=$(jq -r ".works[\"$work_id\"].plan.steps[\"$dep\"].status // \"pending\"" .wf/state.json)
   if [ "$dep_status" != "completed" ]; then
-    echo "ERROR: 依存ステップ $dep が完了していません"
+    echo "ERROR: Dependent step $dep is not completed"
     exit 1
   fi
 done
 ```
 
-### 5. 実装の開始
+### 5. Start Implementation
 
 ```
 📋 Step <n>: <title>
 ═══════════════════════════════════════
 
-目的: <goal>
+Purpose: <goal>
 
-対象ファイル:
+Target Files:
 - <file1>
 - <file2>
 
-作業内容:
+Tasks:
 1. <task1>
 2. <task2>
 
-完了条件:
+Completion Criteria:
 - [ ] <condition1>
 - [ ] <condition2>
 
 ─────────────────────────────────────────
-実装を開始します...
+Starting implementation...
 ```
 
-### 6. 実装作業
+### 6. Implementation Work
 
-Plan に記載された作業内容に従って実装：
+Implement according to the tasks documented in Plan:
 
-1. **対象ファイルの確認**
-   - 既存ファイルを読み込み
-   - 変更箇所を特定
+1. **Check Target Files**
+   - Load existing files
+   - Identify change points
 
-2. **コード変更の実施**
-   - Plan の作業内容に従う
-   - **Plan外の変更は行わない**
+2. **Make Code Changes**
+   - Follow Plan tasks
+   - **Do not make off-plan changes**
 
-3. **テストの実行**
-   - 関連するテストを実行
-   - テストが失敗した場合は修正
+3. **Run Tests**
+   - Run related tests
+   - Fix if tests fail
 
-### 7. 実装ログの記録
+### 7. Record Implementation Log
 
-`04_IMPLEMENT_LOG.md` に追記：
+Append to `04_IMPLEMENT_LOG.md`:
 
-**テンプレート参照:** `~/.claude/templates/04_IMPLEMENT_LOG.md` を読み込んで使用してください。
+**Template reference:** Load and use `~/.claude/templates/04_IMPLEMENT_LOG.md`.
 
-テンプレートのステップセクション構造に従い、実装内容を記録します。
+Record implementation content following the step section structure of the template.
 
-### 8. state.json の更新
+### 8. Update state.json
 
 ```bash
 timestamp=$(date +"%Y-%m-%dT%H:%M:%S%z")
 
-# ステップ状態を更新
+# Update step status
 jq ".works[\"$work_id\"].plan.steps[\"$step_number\"] = {\"status\": \"completed\", \"completed_at\": \"$timestamp\"}" .wf/state.json > tmp && mv tmp .wf/state.json
 
-# current_step を更新
+# Update current_step
 jq ".works[\"$work_id\"].plan.current_step = $step_number" .wf/state.json > tmp && mv tmp .wf/state.json
 
-# current/next を更新
+# Update current/next
 jq ".works[\"$work_id\"].current = \"wf5-implement\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
-# 全ステップ完了したか確認
+# Check if all steps are completed
 total_steps=$(jq -r ".works[\"$work_id\"].plan.total_steps" .wf/state.json)
 if [ "$step_number" -eq "$total_steps" ]; then
   jq ".works[\"$work_id\"].next = \"wf6-verify\"" .wf/state.json > tmp && mv tmp .wf/state.json
 fi
 ```
 
-### 9. 完了条件の確認
+### 9. Verify Completion Criteria
 
-各完了条件を確認し、すべて満たされていることを確認：
+Verify each completion criterion is satisfied:
 
 ```
-完了条件の確認:
+Completion Criteria Check:
 - [✓] <condition1>
 - [✓] <condition2>
 ```
 
-### 10. コミット
+### 10. Commit
 
-コミット種別を決定：
+Determine commit type:
 
 ```bash
-# config.json からコミット設定を確認
+# Check commit settings from config.json
 if [ -f ".wf/config.json" ]; then
   type_detection=$(jq -r '.commit.type_detection // "auto"' .wf/config.json)
   default_type=$(jq -r '.commit.default_type // "feat"' .wf/config.json)
@@ -166,23 +166,23 @@ else
   default_type="feat"
 fi
 
-# コミット種別の決定
+# Determine commit type
 if [ "$type_detection" = "auto" ]; then
-  # Plan のステップ内容から推測
-  # bug/fix/修正/バグ などのキーワードがあれば fix
-  # それ以外は feat
+  # Infer from Plan step content
+  # If keywords like bug/fix/repair/bug are present → fix
+  # Otherwise → feat
   commit_type="<auto_detected_type>"
 else
   commit_type="$default_type"
 fi
 ```
 
-**種別自動検出のルール（type_detection=auto）:**
-- ステップタイトルや目的に `bug`, `fix`, `修正`, `バグ` が含まれる → `fix`
-- `refactor`, `リファクタ` が含まれる → `refactor`
-- `test`, `テスト` が含まれる → `test`
-- `doc`, `ドキュメント` が含まれる → `docs`
-- それ以外 → `feat`
+**Type Auto-Detection Rules (type_detection=auto):**
+- Step title or purpose contains `bug`, `fix`, `repair` → `fix`
+- Contains `refactor` → `refactor`
+- Contains `test` → `test`
+- Contains `doc`, `documentation` → `docs`
+- Otherwise → `feat`
 
 ```bash
 git add <changed_files>
@@ -193,49 +193,49 @@ Work: <work_id>
 "
 ```
 
-### 11. 完了メッセージ
+### 11. Completion Message
 
 ```
-✅ Step <n> が完了しました
+✅ Step <n> completed
 
-変更ファイル:
+Changed Files:
 - <file1> (+10, -5)
 - <file2> (+3, -0)
 
-完了条件:
+Completion Criteria:
 - [✓] <condition1>
 - [✓] <condition2>
 
 Progress: <n>/<total> steps completed
 
-次のステップ:
-- 残りステップがある場合: /wf5-implement
-- 全ステップ完了: /wf6-verify
+Next step:
+- If remaining steps exist: /wf5-implement
+- All steps complete: /wf6-verify
 ```
 
-## Plan外の変更について
+## About Off-Plan Changes
 
-Plan に記載されていない変更が必要な場合：
+When changes not documented in Plan are needed:
 
-1. **軽微な修正**（タイポ、インポート追加など）
-   → 実装ログの Notes に記録して続行
+1. **Minor Fixes** (typos, adding imports, etc.)
+   → Record in Notes section of implementation log and continue
 
-2. **重要な変更**（設計変更、追加機能など）
-   → 実装を中断し、Plan の更新を提案
+2. **Significant Changes** (design changes, additional features, etc.)
+   → Interrupt implementation and suggest Plan update
    ```
-   ⚠️ Plan外の変更が必要です
+   ⚠️ Off-plan changes are needed
 
-   発見した問題:
-   - <問題の説明>
+   Discovered Issue:
+   - <issue description>
 
-   提案:
-   - /wf3-plan update で Plan を更新してください
+   Suggestion:
+   - Please update the Plan with /wf3-plan update
    ```
 
-## 注意事項
+## Notes
 
-- **1回の実行で1ステップのみ**
-- **Plan外の変更は原則禁止**
-- 依存ステップが未完了の場合はエラー
-- テスト失敗時は修正してから完了
-- コミットメッセージは Conventional Commits 形式
+- **Only one step per execution**
+- **Off-plan changes are prohibited in principle**
+- Error if dependent steps are incomplete
+- Fix test failures before completing
+- Commit messages follow Conventional Commits format

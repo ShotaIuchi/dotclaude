@@ -6,58 +6,58 @@
 
 ## Review Summary
 
-<!-- レビュー全体の所見 -->
+<!-- Overall review findings -->
 {{SUMMARY}}
 
 ## Checklist
 
-<!-- レビュー観点のチェックリスト -->
+<!-- Review perspective checklist -->
 
 ### Code Quality
-- [ ] コードスタイルがプロジェクト規約に準拠
-- [ ] 適切なエラーハンドリング
-- [ ] 不要なコメント・デバッグコードの除去
+- [ ] Code style conforms to project conventions
+- [ ] Proper error handling
+- [ ] Unnecessary comments/debug code removed
 
 ### Functionality
-- [ ] 仕様通りに動作する
-- [ ] エッジケースが考慮されている
-- [ ] パフォーマンスに問題がない
+- [ ] Works according to specification
+- [ ] Edge cases are considered
+- [ ] No performance issues
 
 ### Security
-- [ ] セキュリティ上の問題がない
-- [ ] 機密情報の適切な取り扱い
+- [ ] No security issues
+- [ ] Proper handling of sensitive information
 
 ### Testing
-- [ ] テストカバレッジが十分
-- [ ] テストが正しく動作する
+- [ ] Adequate test coverage
+- [ ] Tests work correctly
 
 ## Findings
 
-<!-- レビューで発見した問題点 -->
+<!-- Issues found during review -->
 
 ### Must Fix (Blocking)
 
-<!-- 修正必須の指摘。これが解決されるまでマージ不可 -->
+<!-- Required fixes. Cannot merge until resolved -->
 | # | Location | Issue | Suggestion |
 |---|----------|-------|------------|
 | 1 | {{LOCATION_1}} | {{ISSUE_1}} | {{SUGGESTION_1}} |
 
 ### Should Fix (Non-blocking)
 
-<!-- 修正推奨の指摘。今回のスコープで対応が望ましい -->
+<!-- Recommended fixes. Should be addressed in this scope -->
 | # | Location | Issue | Suggestion |
 |---|----------|-------|------------|
 | 1 | {{LOCATION_2}} | {{ISSUE_2}} | {{SUGGESTION_2}} |
 
 ### Nice-to-have
 
-<!-- 改善提案。次回以降でも可 -->
+<!-- Improvement suggestions. Can be addressed later -->
 - {{NICE_TO_HAVE_1}}
 - {{NICE_TO_HAVE_2}}
 
 ## Decision
 
-<!-- レビュー結果の判定 -->
+<!-- Review result determination -->
 **Status:** {{STATUS}}
 
 <!-- approved / request-changes / needs-discussion -->
@@ -67,11 +67,11 @@
 
 ## Follow-up Actions
 
-<!-- フォローアップが必要なアクション -->
+<!-- Actions that need follow-up -->
 - [ ] {{FOLLOW_UP_1}}
 - [ ] {{FOLLOW_UP_2}}
 
 ## Notes
 
-<!-- レビューコメント、補足情報 -->
+<!-- Review comments, supplementary information -->
 {{NOTES}}

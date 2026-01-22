@@ -1,43 +1,43 @@
 # Kotlin References
 
-## 概要
+## Overview
 
-Kotlin 公式ドキュメントに基づく、Kotlin 言語および KMP（Kotlin Multiplatform）開発のリファレンス。
-Coroutines、Flow、マルチプラットフォームアーキテクチャを定義。
-
----
-
-## ファイル一覧と優先順位
-
-| ファイル | 説明 | 優先度 |
-|----------|------|--------|
-| [coroutines.md](coroutines.md) | Kotlin Coroutines ベストプラクティス | ★★★ 非同期処理の基盤 |
-| [kmp-architecture.md](kmp-architecture.md) | Kotlin Multiplatform アーキテクチャ | ★★★ KMP 設計の基盤 |
-| [kmp-auth.md](kmp-auth.md) | KMP 認証ベストプラクティス | ★★★ 認証の基盤 |
-| [kmp-camera.md](kmp-camera.md) | KMP カメラ実装ガイド | ★★☆ デバイス機能 |
+Reference for Kotlin language and KMP (Kotlin Multiplatform) development based on official Kotlin documentation.
+Defines Coroutines, Flow, and multiplatform architecture patterns.
 
 ---
 
-## 外部リンク
+## File List and Priority
 
-### 公式ドキュメント（最優先）
-- [Kotlin Coroutines (公式)](https://kotlinlang.org/docs/coroutines-overview.html) - ★★★ 非同期処理
-- [Kotlin Flow (公式)](https://kotlinlang.org/docs/flow.html) - ★★★ リアクティブストリーム
-- [Kotlin Multiplatform (公式)](https://kotlinlang.org/docs/multiplatform.html) - ★★★ KMP 基礎
-
-### マルチプラットフォーム
-- [Compose Multiplatform (JetBrains)](https://www.jetbrains.com/lp/compose-multiplatform/) - ★★★ クロスプラットフォーム UI
-
----
-
-## 関連リファレンス
-
-- [clean-architecture.md](../../common/clean-architecture.md) - 共通アーキテクチャ原則
-- [testing-strategy.md](../../common/testing-strategy.md) - テスト戦略
+| File | Description | Priority |
+|------|-------------|----------|
+| [coroutines.md](coroutines.md) | Kotlin Coroutines best practices | ★★★ Foundation for async processing |
+| [kmp-architecture.md](kmp-architecture.md) | Kotlin Multiplatform architecture | ★★★ Foundation for KMP design |
+| [kmp-auth.md](kmp-auth.md) | KMP authentication best practices | ★★★ Foundation for authentication |
+| [kmp-camera.md](kmp-camera.md) | KMP camera implementation guide | ★★☆ Device functionality |
 
 ---
 
-## 関連スキル
+## External Links
 
-- android-architecture（Coroutines 部分）
+### Official Documentation (Highest Priority)
+- [Kotlin Coroutines (Official)](https://kotlinlang.org/docs/coroutines-overview.html) - ★★★ Async processing
+- [Kotlin Flow (Official)](https://kotlinlang.org/docs/flow.html) - ★★★ Reactive streams
+- [Kotlin Multiplatform (Official)](https://kotlinlang.org/docs/multiplatform.html) - ★★★ KMP basics
+
+### Multiplatform
+- [Compose Multiplatform (JetBrains)](https://www.jetbrains.com/lp/compose-multiplatform/) - ★★★ Cross-platform UI
+
+---
+
+## Related References
+
+- [clean-architecture.md](../../common/clean-architecture.md) - Common architecture principles
+- [testing-strategy.md](../../common/testing-strategy.md) - Testing strategy
+
+---
+
+## Related Skills
+
+- android-architecture (Coroutines section)
 - kmp-architecture

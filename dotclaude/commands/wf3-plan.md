@@ -1,24 +1,24 @@
 # /wf3-plan
 
-実装計画（Plan）を作成するコマンド。
+Command to create the Implementation Plan (Plan) document.
 
-## 使用方法
+## Usage
 
 ```
-/wf3-plan [サブコマンド]
+/wf3-plan [subcommand]
 ```
 
-## サブコマンド
+## Subcommands
 
-- `(なし)`: 新規作成
-- `update`: 既存の Plan を更新
-- `step <n>`: 特定ステップの詳細を表示
+- `(none)`: Create new
+- `update`: Update existing Plan
+- `step <n>`: Display details of a specific step
 
-## 処理内容
+## Processing
 
-$ARGUMENTS を解析して以下の処理を実行してください。
+Parse $ARGUMENTS and execute the following processing.
 
-### 1. 前提条件の確認
+### 1. Check Prerequisites
 
 ```bash
 work_id=$(jq -r '.active_work // empty' .wf/state.json)
@@ -27,98 +27,98 @@ kickoff_path="$docs_dir/00_KICKOFF.md"
 spec_path="$docs_dir/01_SPEC.md"
 plan_path="$docs_dir/02_PLAN.md"
 
-# Spec が存在するか確認
+# Check if Spec exists
 if [ ! -f "$spec_path" ]; then
-  echo "Spec ドキュメントがありません"
-  echo "/wf2-spec を先に実行してください"
+  echo "Spec document not found"
+  echo "Please run /wf2-spec first"
   exit 1
 fi
 ```
 
-### 2. Spec の読み込みと分析
+### 2. Load and Analyze Spec
 
 ```bash
 cat "$spec_path"
 ```
 
-Spec から以下を抽出：
+Extract from Spec:
 - Affected Components
 - Detailed Changes
 - Test Strategy
 
-### 3. コードベースの詳細調査
+### 3. Detailed Codebase Investigation
 
-実装に必要な情報を収集：
+Collect information needed for implementation:
 
-1. **対象ファイルの特定**
-   - 変更が必要なファイル
-   - 新規作成が必要なファイル
-   - テストファイル
+1. **Identify Target Files**
+   - Files that need modification
+   - Files that need to be created
+   - Test files
 
-2. **依存関係の分析**
-   - ファイル間の依存関係
-   - 変更の順序の決定
+2. **Dependency Analysis**
+   - Dependencies between files
+   - Determine order of changes
 
-3. **リスク評価**
-   - 複雑な変更箇所
-   - 副作用の可能性
+3. **Risk Assessment**
+   - Complex change points
+   - Potential side effects
 
-### 4. ステップ分割の原則
+### 4. Step Division Principles
 
-以下の原則に従ってステップを分割：
+Divide steps according to the following principles:
 
-1. **1ステップ = 1回の /wf5-implement**
-   - 1回の実装で完了できる範囲
-   - コミット単位として適切なサイズ
+1. **1 Step = 1 /wf5-implement Execution**
+   - Scope completable in one implementation
+   - Appropriate size for a commit unit
 
-2. **依存順序を考慮**
-   - 基盤となる変更を先に
-   - テストは実装と同時または直後
+2. **Consider Dependency Order**
+   - Foundational changes first
+   - Tests simultaneously with or immediately after implementation
 
-3. **リスク分散**
-   - 複雑な変更は分割
-   - ロールバックしやすい単位
+3. **Risk Distribution**
+   - Split complex changes
+   - Units that are easy to rollback
 
-### 5. Plan の作成
+### 5. Create Plan
 
-**テンプレート参照:** `~/.claude/templates/02_PLAN.md` を読み込んで使用してください。
+**Template reference:** Load and use `~/.claude/templates/02_PLAN.md`.
 
-テンプレートのプレースホルダを調査結果と Spec の内容で置換します。
+Replace template placeholders with investigation results and Spec content.
 
-**注意:** ステップは5-10個程度に分割し、02_PLAN.md の Step セクションを必要数コピーしてください。
-Progress テーブルも同様にステップ数に応じて行を追加してください。
+**Note:** Divide into approximately 5-10 steps, and copy the Step section of 02_PLAN.md as needed.
+Similarly, add rows to the Progress table according to the number of steps.
 
-### 6. ユーザーとの確認
+### 6. User Confirmation
 
-Plan を作成後、以下を確認：
+After creating Plan, confirm the following:
 
-1. **ステップ数の妥当性**
-   - 多すぎないか（目安: 5-10ステップ）
-   - 粒度は適切か
+1. **Step Count Validity**
+   - Not too many (guideline: 5-10 steps)
+   - Is granularity appropriate
 
-2. **依存関係**
-   - 順序は正しいか
-   - 並行実行可能なステップはあるか
+2. **Dependencies**
+   - Is the order correct
+   - Are there steps that can be executed in parallel
 
-3. **リスク評価**
-   - 見落としているリスクはないか
+3. **Risk Assessment**
+   - Are there overlooked risks
 
-### 7. state.json の更新
+### 7. Update state.json
 
 ```bash
 jq ".works[\"$work_id\"].current = \"wf3-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
 jq ".works[\"$work_id\"].next = \"wf4-review\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
-# ステップ情報を追加
+# Add step information
 jq ".works[\"$work_id\"].plan = {\"total_steps\": <n>, \"current_step\": 0, \"steps\": {}}" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
 
-### 8. コミット
+### 8. Commit
 
-Plan ドキュメントの変更をコミット：
+Commit Plan document changes:
 
 ```bash
-# 新規作成の場合
+# For new creation
 git add "$plan_path" .wf/state.json
 git commit -m "docs(wf): create plan <work-id>
 
@@ -126,7 +126,7 @@ Steps: <n>
 Work: <work-id>
 "
 
-# update の場合
+# For update
 git add "$plan_path" .wf/state.json
 git commit -m "docs(wf): update plan <work-id>
 
@@ -135,12 +135,12 @@ Work: <work-id>
 "
 ```
 
-### 9. 完了メッセージ
+### 9. Completion Message
 
 ```
-✅ Plan ドキュメントを作成しました
+✅ Plan document created
 
-ファイル: docs/wf/<work-id>/02_PLAN.md
+File: docs/wf/<work-id>/02_PLAN.md
 
 Implementation Steps:
 1. <step1_title> (small)
@@ -149,44 +149,44 @@ Implementation Steps:
 
 Total: 3 steps
 
-次のステップ:
-- レビューが必要な場合: /wf4-review
-- 実装を開始する場合: /wf5-implement
+Next step:
+- If review is needed: /wf4-review
+- To start implementation: /wf5-implement
 ```
 
-## step サブコマンド
+## step Subcommand
 
-特定ステップの詳細を表示：
+Display details of a specific step:
 
 ```
 /wf3-plan step 1
 ```
 
-出力：
+Output:
 ```
 📋 Step 1: <title>
 ═══════════════════════════════════════
 
-目的: <goal>
+Purpose: <goal>
 
-対象ファイル:
+Target Files:
 - <file1>
 - <file2>
 
-作業内容:
+Tasks:
 1. <task1>
 2. <task2>
 
-完了条件:
+Completion Criteria:
 - [ ] <condition1>
 - [ ] <condition2>
 
-見積もり: medium
-依存: なし
+Estimate: medium
+Dependencies: none
 ```
 
-## 注意事項
+## Notes
 
-- Spec の内容を超える変更を Plan に含めない
-- 実装順序は依存関係を厳密に考慮
-- 各ステップは単独でテスト可能な単位に
+- Do not include changes in Plan that exceed Spec content
+- Strictly consider dependencies for implementation order
+- Each step should be a unit that can be tested independently

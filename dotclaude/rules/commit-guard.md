@@ -4,47 +4,47 @@ priority: MUST
 
 # Commit Guard Rule
 
-## 前提
+## Prerequisites
 
-commit を行う前に、以下のいずれかの場所に schema が存在することを確認する：
+Before committing, verify that a schema exists in one of the following locations:
 
-**プロジェクト固有（優先）:**
+**Project-specific (priority):**
 - `docs/rules/git.md`
 - `docs/rules/commit.schema.md`
 - `docs/rules/commit.md`
 
-**グローバル（フォールバック）:**
+**Global (fallback):**
 - `.claude/rules/git.md`
 - `.claude/rules/commit.schema.md`
 - `.claude/rules/commit.md`
 
-## ガード（MUST）
+## Guard (MUST)
 
-上記のどちらの場所にも schema が存在しない場合、**いかなる理由でも `git commit` を実行してはならない**。
+If the schema does not exist in either location, **do not execute `git commit` for any reason**.
 
-その場合は以下のいずれかを行う：
+In that case, do one of the following:
 
-- schema / ルール文書を先に作成する（保存先はユーザーに選択させる）
-- ユーザーに「schema が無いため commit できない」と通知して終了
+- Create the schema/rule document first (let the user choose the save location)
+- Notify the user "Cannot commit because schema is missing" and terminate
 
-## 作成先の選択（保存先オプション）
+## Save Location Options
 
-schema が存在せず新規作成する場合、以下の選択肢をユーザーに提示する：
+When creating a new schema, present the following options to the user:
 
-| 選択肢 | パス | 用途 |
-|--------|------|------|
-| `docs/` | `docs/rules/commit.schema.md` | プロジェクト固有、リポジトリにコミット |
-| `.claude/` | `.claude/rules/commit.schema.md` | プロジェクト固有、リポジトリにコミット |
-| `~/.claude/` | `~/.claude/rules/commit.schema.md` | グローバル、全プロジェクト共通 |
+| Option | Path | Purpose |
+|--------|------|---------|
+| `docs/` | `docs/rules/commit.schema.md` | Project-specific, committed to repository |
+| `.claude/` | `.claude/rules/commit.schema.md` | Project-specific, committed to repository |
+| `~/.claude/` | `~/.claude/rules/commit.schema.md` | Global, shared across all projects |
 
-**デフォルト推奨**: `docs/` （プロジェクトのドキュメントとして管理）
+**Default recommendation**: `docs/` (managed as project documentation)
 
-## 新規作成後の動作（MUST）
+## Post-Creation Behavior (MUST)
 
-schema を新規作成した場合、**そのままコミットに進んではならない**。
+If a schema was newly created, **do not proceed to commit**.
 
-作成完了後は以下を行い、処理を終了する：
+After creation, do the following and terminate:
 
-1. 作成した schema ファイルのパスをユーザーに通知
-2. 「schema を作成しました。内容を確認後、再度コミットを依頼してください」と案内
-3. コミット処理を行わずに終了
+1. Notify the user of the created schema file path
+2. Instruct "Schema has been created. Please review the content and request commit again"
+3. Terminate without performing the commit

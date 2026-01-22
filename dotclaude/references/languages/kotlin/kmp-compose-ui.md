@@ -1,18 +1,18 @@
 # KMP Compose Multiplatform
 
-Kotlin Multiplatform での Compose Multiplatform UI 実装と SwiftUI 連携。
+Compose Multiplatform UI implementation and SwiftUI integration in Kotlin Multiplatform.
 
-> **関連ドキュメント**: [KMP Architecture Guide](./kmp-architecture.md) | [Compose Multiplatform 公式](https://www.jetbrains.com/lp/compose-multiplatform/)
+> **Related Documentation**: [KMP Architecture Guide](./kmp-architecture.md) | [Compose Multiplatform Official](https://www.jetbrains.com/lp/compose-multiplatform/)
 
 ---
 
-## 共通 UI コンポーネント
+## Common UI Components
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/ui/userlist/UserListScreen.kt
 
 /**
- * ユーザー一覧画面（Compose Multiplatform）
+ * User list screen (Compose Multiplatform)
  */
 @Composable
 fun UserListScreen(
@@ -21,7 +21,7 @@ fun UserListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // イベントの処理
+    // Event handling
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
@@ -29,7 +29,7 @@ fun UserListScreen(
                     onNavigateToDetail(event.userId)
                 }
                 is UserListEvent.ShowSnackbar -> {
-                    // Snackbar 表示
+                    // Show Snackbar
                 }
             }
         }
@@ -43,7 +43,7 @@ fun UserListScreen(
 }
 
 /**
- * ユーザー一覧のコンテンツ（プレビュー可能）
+ * User list content (previewable)
  */
 @Composable
 fun UserListContent(
@@ -82,7 +82,7 @@ fun UserListContent(
 }
 
 /**
- * ユーザーリスト
+ * User list
  */
 @Composable
 fun UserList(
@@ -104,7 +104,7 @@ fun UserList(
 }
 
 /**
- * ユーザーカード
+ * User card
  */
 @Composable
 fun UserCard(
@@ -136,13 +136,13 @@ fun UserCard(
 
 ---
 
-## 共通コンポーネント
+## Common Components
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/ui/component/ErrorContent.kt
 
 /**
- * エラー表示コンポーネント
+ * Error display component
  */
 @Composable
 fun ErrorContent(
@@ -173,19 +173,19 @@ fun ErrorContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = onRetryClick) {
-                Text("再試行")
+                Text("Retry")
             }
         }
     }
 }
 
 /**
- * 空状態表示コンポーネント
+ * Empty state display component
  */
 @Composable
 fun EmptyContent(
     modifier: Modifier = Modifier,
-    message: String = "データがありません"
+    message: String = "No data available"
 ) {
     Column(
         modifier = modifier.padding(16.dp),
@@ -209,7 +209,7 @@ fun EmptyContent(
 }
 
 /**
- * ローディングコンポーネント
+ * Loading component
  */
 @Composable
 fun LoadingContent(
@@ -226,7 +226,7 @@ fun LoadingContent(
 
 ---
 
-## SwiftUI 連携（iOS で SwiftUI を使う場合）
+## SwiftUI Integration (When Using SwiftUI on iOS)
 
 ```swift
 // iOS/Sources/UserListView.swift
@@ -235,7 +235,7 @@ import SwiftUI
 import Shared
 
 /**
- * SwiftUI での UserListScreen
+ * SwiftUI UserListScreen
  */
 struct UserListView: View {
 
@@ -253,7 +253,7 @@ struct UserListView: View {
                 onUserTap: viewModel.onUserClick,
                 onRetryTap: viewModel.onRetryClick
             )
-            .navigationTitle("ユーザー一覧")
+            .navigationTitle("User List")
             .navigationDestination(for: String.self) { userId in
                 UserDetailView(userId: userId)
             }
@@ -265,7 +265,7 @@ struct UserListView: View {
 }
 
 /**
- * Kotlin ViewModel を SwiftUI でラップ
+ * Wrap Kotlin ViewModel for SwiftUI
  */
 @MainActor
 class UserListViewModelWrapper: ObservableObject {
@@ -280,11 +280,11 @@ class UserListViewModelWrapper: ObservableObject {
     private var stateJob: Task<Void, Never>?
 
     init(factory: ViewModelFactory) {
-        // MainActor で CoroutineScope を作成
+        // Create CoroutineScope on MainActor
         let scope = MainScope()
         viewModel = factory.createUserListViewModel(coroutineScope: scope)
 
-        // State を監視
+        // Observe State
         observeState()
     }
 
@@ -300,10 +300,10 @@ class UserListViewModelWrapper: ObservableObject {
         for await event in viewModel.events {
             switch onEnum(of: event) {
             case .navigateToDetail(let e):
-                // ナビゲーション処理
+                // Navigation handling
                 break
             case .showSnackbar(let e):
-                // Snackbar 表示
+                // Show Snackbar
                 break
             }
         }
@@ -326,9 +326,9 @@ class UserListViewModelWrapper: ObservableObject {
 
 ---
 
-## ベストプラクティス
+## Best Practices
 
-- UI は Compose Multiplatform または各プラットフォームネイティブ
-- ViewModel は commonMain に配置して共有
-- プレビュー可能なコンポーネント設計
-- SwiftUI 連携時は Wrapper クラスでブリッジ
+- UI can be Compose Multiplatform or platform-native
+- Place ViewModel in commonMain for sharing
+- Design components to be previewable
+- Use wrapper class for SwiftUI integration

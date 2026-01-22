@@ -1,20 +1,20 @@
-# Commit 運用ルール
+# Commit Guidelines
 
-## 粒度
+## Granularity
 
-- 1 commit = 1 論理的変更
-- 動作する状態でのみ commit
+- 1 commit = 1 logical change
+- Commit only in a working state
 
-## レビュー観点
+## Review Perspective
 
-- commit 単位で差分が理解できるか
-- revert しやすいか
+- Can the diff be understood per commit
+- Is it easy to revert
 
-## 禁止ファイル
+## Prohibited Files
 
-以下のファイルは commit に含めない：
+The following files should not be included in commits:
 
-- `.env`, `.env.*`（環境変数・シークレット）
-- `credentials.json`, `secrets.*`（認証情報）
-- `*.pem`, `*.key`（秘密鍵）
-- `node_modules/`, `vendor/`（依存ライブラリ）
+- `.env`, `.env.*` (environment variables / secrets)
+- `credentials.json`, `secrets.*` (authentication credentials)
+- `*.pem`, `*.key` (private keys)
+- `node_modules/`, `vendor/` (dependency libraries)

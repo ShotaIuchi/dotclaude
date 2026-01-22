@@ -1,66 +1,66 @@
-# KMP カメラ実装ガイド
+# KMP Camera Implementation Guide
 
-KMP/CMP でのカメラ機能実装のベストプラクティス。OS ネイティブ機能との役割分担を明確にし、共通化すべき部分と OS に委ねる部分を整理。
-
----
-
-## 目次
-
-1. [役割分担の原則](#役割分担の原則)
-2. [依存関係図](#依存関係図)
-3. [ディレクトリ構成](#ディレクトリ構成)
-4. [expect/actual 実装](#expectactual-実装)
-5. [ViewModel と UiState](#viewmodel-と-uistate)
-6. [QR / 画像解析](#qr--画像解析)
-7. [判断基準表](#判断基準表)
-8. [リアルタイム解析](#リアルタイム解析)
-9. [パーミッション管理](#パーミッション管理)
-10. [ベストプラクティス一覧](#ベストプラクティス一覧)
-11. [エージェント向けタスク分解](#エージェント向けタスク分解)
+Best Practices for implementing camera functionality in KMP/CMP. Clarifies Role Distribution between OS native features, organizing what should be shared and what should be delegated to the OS.
 
 ---
 
-## 役割分担の原則
+## Table of Contents
 
-カメラ機能では、KMP/CMP と OS ネイティブで明確な役割分担を行う。
+1. [Principles of Role Distribution](#principles-of-role-distribution)
+2. [Dependency Diagram](#dependency-diagram)
+3. [Directory Structure](#directory-structure)
+4. [expect/actual Implementation](#expectactual-implementation)
+5. [ViewModel and UiState](#viewmodel-and-uistate)
+6. [QR / Image Analysis](#qr--image-analysis)
+7. [Decision Criteria Table](#decision-criteria-table)
+8. [Real-time Analysis](#real-time-analysis)
+9. [Permission Management](#permission-management)
+10. [Best Practices List](#best-practices-list)
+11. [Task Breakdown for Agents](#task-breakdown-for-agents)
+
+---
+
+## Principles of Role Distribution
+
+For camera functionality, establish clear Role Distribution between KMP/CMP and OS native.
 
 ```
-🧠 KMP / CMP = 「どう使うか」（UI・状態・ロジック）
-📷 OS ネイティブ = 「どう撮るか」（デバイス制御）
+🧠 KMP / CMP = "How to use" (UI, state, logic)
+📷 OS Native = "How to capture" (device control)
 ```
 
-### KMP/CMP が担当
+### KMP/CMP Responsibilities
 
-| 項目 | 説明 |
-|------|------|
-| 撮影ボタン UI | ボタン配置、押下状態 |
-| フロント/リア切替 | カメラ方向の状態管理 |
-| フラッシュ ON/OFF 状態 | フラッシュ設定の状態管理 |
-| 撮影中/完了の状態管理 | UiState での状態表現 |
-| 撮影結果の処理 | アップロード、解析、保存 |
+| Item | Description |
+|------|-------------|
+| Capture button UI | Button placement, pressed state |
+| Front/Rear switching | Camera direction state management |
+| Flash ON/OFF state | Flash setting state management |
+| Capturing/Complete state management | State representation in UiState |
+| Capture result processing | Upload, analysis, save |
 
-### OS に任せる
+### Delegate to OS
 
-| 項目 | Android | iOS |
+| Item | Android | iOS |
 |------|---------|-----|
-| カメラ起動・停止 | CameraX | AVFoundation |
-| プレビュー表示 | PreviewView | AVCaptureVideoPreviewLayer |
-| フォーカス・露出 | CameraControl | AVCaptureDevice |
-| センサー回転 | ImageAnalysis | AVCaptureConnection |
-| Surface 管理 | SurfaceProvider | CALayer |
+| Camera start/stop | CameraX | AVFoundation |
+| Preview display | PreviewView | AVCaptureVideoPreviewLayer |
+| Focus/Exposure | CameraControl | AVCaptureDevice |
+| Sensor rotation | ImageAnalysis | AVCaptureConnection |
+| Surface management | SurfaceProvider | CALayer |
 
 ---
 
-## 依存関係図
+## Dependency Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      CMP UI Layer                                    │
 │  ┌──────────────────────────────────────────────────────────────┐   │
 │  │   CameraScreen (Compose Multiplatform)                        │   │
-│  │   - 撮影ボタン                                                 │   │
-│  │   - 設定 UI（フラッシュ、カメラ切替）                           │   │
-│  │   - プレビュー領域（expect/actual）                            │   │
+│  │   - Capture button                                            │   │
+│  │   - Settings UI (Flash, Camera switching)                     │   │
+│  │   - Preview area (expect/actual)                              │   │
 │  └──────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
                                  │
@@ -69,7 +69,7 @@ KMP/CMP でのカメラ機能実装のベストプラクティス。OS ネイテ
 │                    KMP ViewModel / UseCase                           │
 │  ┌──────────────────────────────────────────────────────────────┐   │
 │  │   CameraViewModel                                             │   │
-│  │   - CameraUiState 管理                                        │   │
+│  │   - CameraUiState management                                  │   │
 │  │   - onShutterClick / onToggleFlash / onSwitchCamera           │   │
 │  └──────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
@@ -99,20 +99,20 @@ KMP/CMP でのカメラ機能実装のベストプラクティス。OS ネイテ
 
 ---
 
-## ディレクトリ構成
+## Directory Structure
 
 ```
 shared/src/
 ├── commonMain/kotlin/com/example/shared/
 │   ├── camera/
-│   │   ├── CameraController.kt        # expect 宣言
-│   │   ├── CameraResult.kt            # 共通モデル（撮影結果）
-│   │   ├── CameraConfig.kt            # 設定モデル
-│   │   └── CameraPermission.kt        # パーミッション抽象化
+│   │   ├── CameraController.kt        # expect declaration
+│   │   ├── CameraResult.kt            # Shared model (capture result)
+│   │   ├── CameraConfig.kt            # Configuration model
+│   │   └── CameraPermission.kt        # Permission abstraction
 │   │
 │   ├── analysis/
-│   │   ├── ImageAnalyzer.kt           # expect 宣言
-│   │   └── AnalysisResult.kt          # 解析結果モデル
+│   │   ├── ImageAnalyzer.kt           # expect declaration
+│   │   └── AnalysisResult.kt          # Analysis result model
 │   │
 │   └── presentation/camera/
 │       ├── CameraViewModel.kt
@@ -136,22 +136,22 @@ shared/src/
 
 ---
 
-## expect/actual 実装
+## expect/actual Implementation
 
-### 共通モデル（commonMain）
+### Shared Models (commonMain)
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/camera/CameraResult.kt
 
 /**
- * 撮影結果
+ * Capture result
  */
 sealed interface CameraResult {
     /**
-     * 撮影成功
-     * @param imageData JPEG バイト配列
-     * @param width 画像幅
-     * @param height 画像高さ
+     * Capture success
+     * @param imageData JPEG byte array
+     * @param width Image width
+     * @param height Image height
      */
     data class Success(
         val imageData: ByteArray,
@@ -160,12 +160,12 @@ sealed interface CameraResult {
     ) : CameraResult
 
     /**
-     * 撮影失敗
+     * Capture failure
      */
     data class Error(val message: String) : CameraResult
 
     /**
-     * キャンセル
+     * Cancelled
      */
     object Cancelled : CameraResult
 }
@@ -175,7 +175,7 @@ sealed interface CameraResult {
 // commonMain/kotlin/com/example/shared/camera/CameraConfig.kt
 
 /**
- * カメラ設定
+ * Camera configuration
  */
 data class CameraConfig(
     val facing: CameraFacing = CameraFacing.BACK,
@@ -197,58 +197,58 @@ enum class AspectRatio {
 }
 ```
 
-### CameraController expect 宣言
+### CameraController expect Declaration
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/camera/CameraController.kt
 
 /**
- * カメラ制御インターフェース（expect 宣言）
+ * Camera control interface (expect declaration)
  *
- * プラットフォーム固有の実装を抽象化
+ * Abstracts platform-specific implementations
  */
 expect class CameraController {
 
     /**
-     * プレビュー開始
+     * Start Preview
      */
     suspend fun startPreview()
 
     /**
-     * プレビュー停止
+     * Stop Preview
      */
     fun stopPreview()
 
     /**
-     * 写真撮影
-     * @return 撮影結果
+     * Take photo
+     * @return Capture result
      */
     suspend fun capture(): CameraResult
 
     /**
-     * カメラ切替（フロント/リア）
+     * Camera switching (Front/Rear)
      */
     suspend fun switchCamera()
 
     /**
-     * フラッシュ設定
-     * @param mode フラッシュモード
+     * Flash setting
+     * @param mode Flash mode
      */
     fun setFlashMode(mode: FlashMode)
 
     /**
-     * 現在のカメラ方向を取得
+     * Get current camera direction
      */
     fun getCurrentFacing(): CameraFacing
 
     /**
-     * リソース解放
+     * Release resources
      */
     fun release()
 }
 ```
 
-### Android actual 実装（CameraX）
+### Android actual Implementation (CameraX)
 
 ```kotlin
 // androidMain/kotlin/com/example/shared/camera/CameraController.android.kt
@@ -262,7 +262,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 /**
- * Android CameraX 実装
+ * Android CameraX implementation
  */
 actual class CameraController(
     private val context: Context,
@@ -277,7 +277,7 @@ actual class CameraController(
     private var currentFlashMode = FlashMode.OFF
 
     /**
-     * プレビュー開始
+     * Start Preview
      */
     actual suspend fun startPreview() = suspendCancellableCoroutine { cont ->
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
@@ -294,14 +294,14 @@ actual class CameraController(
     }
 
     /**
-     * プレビュー停止
+     * Stop Preview
      */
     actual fun stopPreview() {
         cameraProvider?.unbindAll()
     }
 
     /**
-     * 写真撮影
+     * Take photo
      */
     actual suspend fun capture(): CameraResult = suspendCancellableCoroutine { cont ->
         val imageCapture = imageCapture ?: run {
@@ -335,7 +335,7 @@ actual class CameraController(
     }
 
     /**
-     * カメラ切替
+     * Camera switching
      */
     actual suspend fun switchCamera() {
         currentFacing = when (currentFacing) {
@@ -346,7 +346,7 @@ actual class CameraController(
     }
 
     /**
-     * フラッシュ設定
+     * Flash setting
      */
     actual fun setFlashMode(mode: FlashMode) {
         currentFlashMode = mode
@@ -358,12 +358,12 @@ actual class CameraController(
     }
 
     /**
-     * 現在のカメラ方向
+     * Current camera direction
      */
     actual fun getCurrentFacing(): CameraFacing = currentFacing
 
     /**
-     * リソース解放
+     * Release resources
      */
     actual fun release() {
         cameraProvider?.unbindAll()
@@ -371,7 +371,7 @@ actual class CameraController(
     }
 
     /**
-     * カメラユースケースをバインド
+     * Bind camera use cases
      */
     private fun bindCameraUseCases() {
         val cameraProvider = cameraProvider ?: return
@@ -406,7 +406,7 @@ actual class CameraController(
 }
 ```
 
-### iOS actual 実装（AVFoundation）
+### iOS actual Implementation (AVFoundation)
 
 ```kotlin
 // iosMain/kotlin/com/example/shared/camera/CameraController.ios.kt
@@ -421,7 +421,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 /**
- * iOS AVFoundation 実装
+ * iOS AVFoundation implementation
  */
 actual class CameraController {
     private val captureSession = AVCaptureSession()
@@ -434,22 +434,22 @@ actual class CameraController {
     private var photoContinuation: CancellableContinuation<CameraResult>? = null
 
     /**
-     * プレビュー開始
+     * Start Preview
      */
     actual suspend fun startPreview() {
         captureSession.beginConfiguration()
 
-        // カメラデバイス取得
+        // Get camera device
         val device = getCamera(currentFacing)
         currentDevice = device
 
-        // 入力設定
+        // Configure input
         val input = AVCaptureDeviceInput.deviceInputWithDevice(device, null)
         if (captureSession.canAddInput(input)) {
             captureSession.addInput(input)
         }
 
-        // 出力設定
+        // Configure output
         val output = AVCapturePhotoOutput()
         if (captureSession.canAddOutput(output)) {
             captureSession.addOutput(output)
@@ -461,14 +461,14 @@ actual class CameraController {
     }
 
     /**
-     * プレビュー停止
+     * Stop Preview
      */
     actual fun stopPreview() {
         captureSession.stopRunning()
     }
 
     /**
-     * 写真撮影
+     * Take photo
      */
     actual suspend fun capture(): CameraResult = suspendCancellableCoroutine { cont ->
         val output = photoOutput ?: run {
@@ -480,7 +480,7 @@ actual class CameraController {
 
         val settings = AVCapturePhotoSettings()
 
-        // フラッシュ設定
+        // Flash setting
         if (output.supportedFlashModes.contains(currentFlashMode.toAVFlashMode())) {
             settings.flashMode = currentFlashMode.toAVFlashMode()
         }
@@ -489,7 +489,7 @@ actual class CameraController {
     }
 
     /**
-     * カメラ切替
+     * Camera switching
      */
     actual suspend fun switchCamera() {
         currentFacing = when (currentFacing) {
@@ -499,12 +499,12 @@ actual class CameraController {
 
         captureSession.beginConfiguration()
 
-        // 既存入力を削除
+        // Remove existing input
         captureSession.inputs.forEach { input ->
             captureSession.removeInput(input as AVCaptureInput)
         }
 
-        // 新しいカメラで入力を追加
+        // Add input with new camera
         val device = getCamera(currentFacing)
         currentDevice = device
         val input = AVCaptureDeviceInput.deviceInputWithDevice(device, null)
@@ -516,19 +516,19 @@ actual class CameraController {
     }
 
     /**
-     * フラッシュ設定
+     * Flash setting
      */
     actual fun setFlashMode(mode: FlashMode) {
         currentFlashMode = mode
     }
 
     /**
-     * 現在のカメラ方向
+     * Current camera direction
      */
     actual fun getCurrentFacing(): CameraFacing = currentFacing
 
     /**
-     * リソース解放
+     * Release resources
      */
     actual fun release() {
         captureSession.stopRunning()
@@ -541,7 +541,7 @@ actual class CameraController {
     }
 
     /**
-     * カメラデバイス取得
+     * Get camera device
      */
     private fun getCamera(facing: CameraFacing): AVCaptureDevice {
         val position = when (facing) {
@@ -555,7 +555,7 @@ actual class CameraController {
     }
 
     /**
-     * FlashMode → AVCaptureFlashMode 変換
+     * FlashMode to AVCaptureFlashMode conversion
      */
     private fun FlashMode.toAVFlashMode(): AVCaptureFlashMode {
         return when (this) {
@@ -566,7 +566,7 @@ actual class CameraController {
     }
 
     /**
-     * 写真撮影デリゲート
+     * Photo capture delegate
      */
     private inner class PhotoCaptureDelegate : NSObject(), AVCapturePhotoCaptureDelegateProtocol {
 
@@ -603,7 +603,7 @@ actual class CameraController {
 }
 
 /**
- * NSData → ByteArray 変換
+ * NSData to ByteArray conversion
  */
 private fun NSData.toByteArray(): ByteArray {
     return ByteArray(length.toInt()).apply {
@@ -616,7 +616,7 @@ private fun NSData.toByteArray(): ByteArray {
 
 ---
 
-## ViewModel と UiState
+## ViewModel and UiState
 
 ### CameraUiState
 
@@ -624,7 +624,7 @@ private fun NSData.toByteArray(): ByteArray {
 // commonMain/kotlin/com/example/shared/presentation/camera/CameraUiState.kt
 
 /**
- * カメラ画面の UI 状態
+ * Camera screen UI state
  */
 data class CameraUiState(
     val isFlashOn: Boolean = false,
@@ -635,20 +635,20 @@ data class CameraUiState(
     val permissionState: PermissionState = PermissionState.NOT_REQUESTED
 ) {
     /**
-     * 撮影可能かどうか
+     * Whether capture is possible
      */
     val canCapture: Boolean
         get() = !isCapturing && permissionState == PermissionState.GRANTED
 
     /**
-     * プレビュー表示可能かどうか
+     * Whether preview can be displayed
      */
     val showPreview: Boolean
         get() = permissionState == PermissionState.GRANTED
 }
 
 /**
- * カメラエラー
+ * Camera error
  */
 sealed interface CameraError {
     data class CaptureError(val message: String) : CameraError
@@ -657,7 +657,7 @@ sealed interface CameraError {
 }
 
 /**
- * パーミッション状態
+ * Permission state
  */
 enum class PermissionState {
     NOT_REQUESTED,
@@ -672,21 +672,21 @@ enum class PermissionState {
 // commonMain/kotlin/com/example/shared/presentation/camera/CameraEvent.kt
 
 /**
- * カメラ画面のイベント
+ * Camera screen events
  */
 sealed interface CameraEvent {
     /**
-     * 撮影完了
+     * Capture complete
      */
     data class CaptureComplete(val imageData: ByteArray) : CameraEvent
 
     /**
-     * エラー表示
+     * Show error
      */
     data class ShowError(val message: String) : CameraEvent
 
     /**
-     * 設定画面へ遷移（パーミッション拒否時）
+     * Navigate to settings (when permission denied)
      */
     object NavigateToSettings : CameraEvent
 }
@@ -698,7 +698,7 @@ sealed interface CameraEvent {
 // commonMain/kotlin/com/example/shared/presentation/camera/CameraViewModel.kt
 
 /**
- * カメラ画面の ViewModel
+ * Camera screen ViewModel
  */
 class CameraViewModel(
     private val cameraController: CameraController,
@@ -711,7 +711,7 @@ class CameraViewModel(
     val events: Flow<CameraEvent> = _events.receiveAsFlow()
 
     /**
-     * シャッターボタン押下
+     * Shutter button pressed
      */
     fun onShutterClick() {
         if (!_uiState.value.canCapture) return
@@ -748,7 +748,7 @@ class CameraViewModel(
     }
 
     /**
-     * フラッシュ切替
+     * Toggle Flash
      */
     fun onToggleFlash() {
         val newFlashState = !_uiState.value.isFlashOn
@@ -759,7 +759,7 @@ class CameraViewModel(
     }
 
     /**
-     * カメラ切替
+     * Camera switching
      */
     fun onSwitchCamera() {
         coroutineScope.launch {
@@ -771,7 +771,7 @@ class CameraViewModel(
     }
 
     /**
-     * パーミッション結果を設定
+     * Set permission result
      */
     fun onPermissionResult(granted: Boolean) {
         _uiState.update {
@@ -789,14 +789,14 @@ class CameraViewModel(
     }
 
     /**
-     * エラーを消去
+     * Dismiss error
      */
     fun onDismissError() {
         _uiState.update { it.copy(error = null) }
     }
 
     /**
-     * ViewModel 破棄
+     * ViewModel destroyed
      */
     fun onCleared() {
         cameraController.release()
@@ -806,24 +806,24 @@ class CameraViewModel(
 
 ---
 
-## QR / 画像解析
+## QR / Image Analysis
 
-### 解析結果モデル（共通）
+### Analysis Result Model (Shared)
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/analysis/AnalysisResult.kt
 
 /**
- * 画像解析結果
+ * Image analysis result
  */
 sealed interface AnalysisResult {
     /**
-     * QR コード
+     * QR Code
      */
     data class QrCode(val content: String) : AnalysisResult
 
     /**
-     * バーコード
+     * Barcode
      */
     data class Barcode(
         val format: BarcodeFormat,
@@ -831,23 +831,23 @@ sealed interface AnalysisResult {
     ) : AnalysisResult
 
     /**
-     * テキスト（OCR）
+     * Text (OCR)
      */
     data class Text(val blocks: List<String>) : AnalysisResult
 
     /**
-     * 解析失敗
+     * Analysis failed
      */
     data class Error(val message: String) : AnalysisResult
 
     /**
-     * 検出なし
+     * Not found
      */
     object NotFound : AnalysisResult
 }
 
 /**
- * バーコードフォーマット
+ * Barcode format
  */
 enum class BarcodeFormat {
     QR_CODE,
@@ -871,13 +871,13 @@ enum class BarcodeFormat {
 // commonMain/kotlin/com/example/shared/analysis/ImageAnalyzer.kt
 
 /**
- * 画像解析（expect 宣言）
+ * Image analysis (expect declaration)
  */
 expect class ImageAnalyzer {
     /**
-     * 画像を解析
-     * @param imageData JPEG/PNG バイト配列
-     * @return 解析結果
+     * Analyze image
+     * @param imageData JPEG/PNG byte array
+     * @return Analysis result
      */
     suspend fun analyze(imageData: ByteArray): AnalysisResult
 }
@@ -894,7 +894,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 /**
- * Android ML Kit 実装
+ * Android ML Kit implementation
  */
 actual class ImageAnalyzer {
 
@@ -908,7 +908,7 @@ actual class ImageAnalyzer {
         suspendCancellableCoroutine { cont ->
             val image = InputImage.fromByteArray(
                 imageData,
-                /* width = */ 0,  // 自動検出
+                /* width = */ 0,  // Auto-detect
                 /* height = */ 0,
                 /* rotationDegrees = */ 0,
                 InputImage.IMAGE_FORMAT_NV21
@@ -941,7 +941,7 @@ actual class ImageAnalyzer {
         }
 
     /**
-     * ML Kit バーコードフォーマット変換
+     * ML Kit barcode format conversion
      */
     private fun Int.toBarcodeFormat(): BarcodeFormat {
         return when (this) {
@@ -973,7 +973,7 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.resume
 
 /**
- * iOS Vision Framework 実装
+ * iOS Vision Framework implementation
  */
 actual class ImageAnalyzer {
 
@@ -1017,7 +1017,7 @@ actual class ImageAnalyzer {
         }
 
     /**
-     * Vision symbology → BarcodeFormat 変換
+     * Vision symbology to BarcodeFormat conversion
      */
     private fun String.toBarcodeFormat(): BarcodeFormat {
         return when (this) {
@@ -1037,7 +1037,7 @@ actual class ImageAnalyzer {
 }
 
 /**
- * ByteArray → NSData 変換
+ * ByteArray to NSData conversion
  */
 private fun ByteArray.toNSData(): NSData {
     return usePinned { pinned ->
@@ -1048,38 +1048,38 @@ private fun ByteArray.toNSData(): NSData {
 
 ---
 
-## 判断基準表
+## Decision Criteria Table
 
-| やりたいこと | 方針 | 備考 |
-|-------------|------|------|
-| 写真撮るだけ | ◎ 基本構成で十分 | CameraController + ViewModel |
-| QR/バーコード読み取り | ◎ 解析は OS 側 | ImageAnalyzer expect/actual |
-| OCR（文字認識） | ○ 解析は OS 側 | ML Kit / Vision Text |
-| 動画撮影 | △ 共通化最小限 | 複雑なため OS 依存大 |
-| 連続撮影（バースト） | △ OS 依存大 | CameraX / AVFoundation 個別実装 |
-| リアルタイム解析 | △ パフォーマンス考慮 | カメラプレビュー中の解析 |
-| 高度な制御（露出、ISO） | ✕ OS 別実装推奨 | プラットフォーム固有 API |
-| AR 機能 | ✕ OS 別実装推奨 | ARCore / ARKit |
+| Goal | Approach | Notes |
+|------|----------|-------|
+| Just take photos | Excellent - Basic configuration sufficient | CameraController + ViewModel |
+| QR/Barcode reading | Excellent - Analysis on OS side | ImageAnalyzer expect/actual |
+| OCR (Text recognition) | Good - Analysis on OS side | ML Kit / Vision Text |
+| Video recording | Fair - Minimal sharing | Complex, high OS dependency |
+| Burst capture | Fair - High OS dependency | CameraX / AVFoundation individual implementation |
+| Real-time Analysis | Fair - Performance consideration | Analysis during camera Preview |
+| Advanced control (exposure, ISO) | Not recommended - OS-specific implementation | Platform-specific APIs |
+| AR features | Not recommended - OS-specific implementation | ARCore / ARKit |
 
 ---
 
-## リアルタイム解析
+## Real-time Analysis
 
-カメラプレビュー中にフレームを解析する場合の実装パターン。QR スキャナーなどで使用。
+Implementation pattern for analyzing frames during camera Preview. Used for QR scanners, etc.
 
-### 設計のポイント
+### Design Points
 
-1. **解析頻度の制御**
-   - 全フレーム解析は不要（CPU/バッテリー消費大）
-   - 100-500ms 間隔で十分
+1. **Analysis frequency control**
+   - Full frame analysis is unnecessary (high CPU/battery consumption)
+   - 100-500ms interval is sufficient
 
-2. **バックグラウンドスレッドで解析**
-   - UI スレッドをブロックしない
-   - 解析結果のみ UI スレッドに返す
+2. **Analyze on background thread**
+   - Don't block UI thread
+   - Return only analysis results to UI thread
 
-3. **共通化の範囲**
-   - 解析ロジック呼び出し・結果処理は KMP
-   - フレーム取得は OS ネイティブ
+3. **Scope of sharing**
+   - Analysis logic invocation and result processing in KMP
+   - Frame acquisition is OS native
 
 ### RealtimeAnalyzer expect/actual
 
@@ -1087,28 +1087,28 @@ private fun ByteArray.toNSData(): NSData {
 // commonMain/kotlin/com/example/shared/analysis/RealtimeAnalyzer.kt
 
 /**
- * リアルタイム解析（expect 宣言）
+ * Real-time Analysis (expect declaration)
  */
 expect class RealtimeAnalyzer {
     /**
-     * 解析開始
-     * @param onResult 解析結果コールバック（メインスレッドで呼ばれる）
+     * Start analysis
+     * @param onResult Analysis result callback (called on main thread)
      */
     fun start(onResult: (AnalysisResult) -> Unit)
 
     /**
-     * 解析停止
+     * Stop analysis
      */
     fun stop()
 
     /**
-     * 解析中かどうか
+     * Whether analysis is in progress
      */
     val isAnalyzing: Boolean
 }
 ```
 
-### Android 実装（CameraX ImageAnalysis）
+### Android Implementation (CameraX ImageAnalysis)
 
 ```kotlin
 // androidMain/kotlin/com/example/shared/analysis/RealtimeAnalyzer.android.kt
@@ -1121,7 +1121,7 @@ import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 
 /**
- * Android リアルタイム解析実装
+ * Android Real-time Analysis implementation
  */
 actual class RealtimeAnalyzer(
     private val lifecycleOwner: LifecycleOwner,
@@ -1135,7 +1135,7 @@ actual class RealtimeAnalyzer(
     private var _isAnalyzing = false
     actual val isAnalyzing: Boolean get() = _isAnalyzing
 
-    // スロットリング用
+    // For throttling
     private var lastAnalysisTime = 0L
     private val analysisIntervalMs = 200L
 
@@ -1152,7 +1152,7 @@ actual class RealtimeAnalyzer(
                 }
             }
 
-        // CameraProvider にバインド
+        // Bind to CameraProvider
         cameraProvider.bindToLifecycle(
             lifecycleOwner,
             CameraSelector.DEFAULT_BACK_CAMERA,
@@ -1171,7 +1171,7 @@ actual class RealtimeAnalyzer(
     private fun processImage(imageProxy: ImageProxy) {
         val currentTime = System.currentTimeMillis()
 
-        // スロットリング: 一定間隔でのみ解析
+        // Throttling: analyze only at certain intervals
         if (currentTime - lastAnalysisTime < analysisIntervalMs) {
             imageProxy.close()
             return
@@ -1202,7 +1202,7 @@ actual class RealtimeAnalyzer(
                                 value = barcode.rawValue ?: ""
                             )
                     }
-                    // メインスレッドでコールバック
+                    // Callback on main thread
                     MainScope().launch {
                         resultCallback?.invoke(result)
                     }
@@ -1215,7 +1215,7 @@ actual class RealtimeAnalyzer(
 }
 ```
 
-### iOS 実装（AVCaptureVideoDataOutput）
+### iOS Implementation (AVCaptureVideoDataOutput)
 
 ```kotlin
 // iosMain/kotlin/com/example/shared/analysis/RealtimeAnalyzer.ios.kt
@@ -1227,7 +1227,7 @@ import platform.Vision.*
 import platform.darwin.*
 
 /**
- * iOS リアルタイム解析実装
+ * iOS Real-time Analysis implementation
  */
 actual class RealtimeAnalyzer(
     private val captureSession: AVCaptureSession
@@ -1242,7 +1242,7 @@ actual class RealtimeAnalyzer(
     private var _isAnalyzing = false
     actual val isAnalyzing: Boolean get() = _isAnalyzing
 
-    // スロットリング用
+    // For throttling
     private var lastAnalysisTime: ULong = 0UL
     private val analysisIntervalNs: ULong = 200_000_000UL  // 200ms
 
@@ -1281,7 +1281,7 @@ actual class RealtimeAnalyzer(
         ) {
             val sampleBuffer = didOutputSampleBuffer ?: return
 
-            // スロットリング
+            // Throttling
             val currentTime = clock_gettime_nsec_np(CLOCK_MONOTONIC)
             if (currentTime - lastAnalysisTime < analysisIntervalNs) {
                 return
@@ -1307,7 +1307,7 @@ actual class RealtimeAnalyzer(
                         )
                 }
 
-                // メインスレッドでコールバック
+                // Callback on main thread
                 dispatch_async(dispatch_get_main_queue()) {
                     resultCallback?.invoke(result)
                 }
@@ -1320,13 +1320,13 @@ actual class RealtimeAnalyzer(
 }
 ```
 
-### ViewModel での使用例
+### ViewModel Usage Example
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/presentation/scanner/ScannerViewModel.kt
 
 /**
- * QR スキャナー ViewModel
+ * QR Scanner ViewModel
  */
 class ScannerViewModel(
     private val realtimeAnalyzer: RealtimeAnalyzer,
@@ -1339,7 +1339,7 @@ class ScannerViewModel(
     val events: Flow<ScannerEvent> = _events.receiveAsFlow()
 
     /**
-     * スキャン開始
+     * Start scanning
      */
     fun startScanning() {
         if (realtimeAnalyzer.isAnalyzing) return
@@ -1349,7 +1349,7 @@ class ScannerViewModel(
         realtimeAnalyzer.start { result ->
             when (result) {
                 is AnalysisResult.QrCode -> {
-                    // QR 検出時は自動停止
+                    // Auto-stop on QR detection
                     stopScanning()
                     coroutineScope.launch {
                         _events.send(ScannerEvent.QrDetected(result.content))
@@ -1364,13 +1364,13 @@ class ScannerViewModel(
                         ))
                     }
                 }
-                else -> { /* 検出なし、継続 */ }
+                else -> { /* Not detected, continue */ }
             }
         }
     }
 
     /**
-     * スキャン停止
+     * Stop scanning
      */
     fun stopScanning() {
         realtimeAnalyzer.stop()
@@ -1393,18 +1393,18 @@ sealed interface ScannerEvent {
 }
 ```
 
-### パフォーマンス注意点
+### Performance Notes
 
-| 項目 | 推奨値 | 理由 |
-|------|--------|------|
-| 解析間隔 | 100-500ms | CPU/バッテリー節約 |
-| バックプレッシャー | KEEP_ONLY_LATEST | メモリ節約 |
-| 解析スレッド | 専用スレッド | UI ブロック防止 |
-| 解析停止 | 検出成功時 | 重複検出防止 |
+| Item | Recommended Value | Reason |
+|------|-------------------|--------|
+| Analysis interval | 100-500ms | CPU/Battery savings |
+| Backpressure | KEEP_ONLY_LATEST | Memory savings |
+| Analysis thread | Dedicated thread | Prevent UI blocking |
+| Stop analysis | On successful detection | Prevent duplicate detection |
 
 ---
 
-## パーミッション管理
+## Permission Management
 
 ### CameraPermission expect/actual
 
@@ -1412,17 +1412,17 @@ sealed interface ScannerEvent {
 // commonMain/kotlin/com/example/shared/camera/CameraPermission.kt
 
 /**
- * カメラパーミッション管理（expect 宣言）
+ * Camera Permission management (expect declaration)
  */
 expect class CameraPermission {
     /**
-     * パーミッション状態を確認
+     * Check permission state
      */
     fun checkPermission(): PermissionState
 
     /**
-     * パーミッションをリクエスト
-     * @param onResult 結果コールバック
+     * Request permission
+     * @param onResult Result callback
      */
     fun requestPermission(onResult: (Boolean) -> Unit)
 }
@@ -1438,7 +1438,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 
 /**
- * Android パーミッション実装
+ * Android Permission implementation
  */
 actual class CameraPermission(
     private val context: Context,
@@ -1461,7 +1461,7 @@ actual class CameraPermission(
     }
 
     /**
-     * パーミッション結果を受け取る（Activity から呼び出し）
+     * Receive permission result (called from Activity)
      */
     fun onPermissionResult(granted: Boolean) {
         resultCallback?.invoke(granted)
@@ -1477,7 +1477,7 @@ import platform.AVFoundation.*
 import platform.Foundation.*
 
 /**
- * iOS パーミッション実装
+ * iOS Permission implementation
  */
 actual class CameraPermission {
 
@@ -1502,169 +1502,169 @@ actual class CameraPermission {
 
 ---
 
-## ベストプラクティス一覧
+## Best Practices List
 
-### 役割分担
+### Role Distribution
 
-- [ ] UI・状態管理は KMP/CMP で共通化
-- [ ] カメラデバイス制御は OS ネイティブに委任
-- [ ] 画像解析は OS の ML ライブラリを使用
+- [ ] Share UI and state management with KMP/CMP
+- [ ] Delegate camera device control to OS native
+- [ ] Use OS ML libraries for image analysis
 
 ### expect/actual
 
-- [ ] CameraController を expect 宣言で抽象化
-- [ ] Android は CameraX を使用
-- [ ] iOS は AVFoundation を使用
-- [ ] 共通モデル（CameraResult 等）を commonMain に配置
+- [ ] Abstract CameraController with expect declaration
+- [ ] Use CameraX for Android
+- [ ] Use AVFoundation for iOS
+- [ ] Place shared models (CameraResult, etc.) in commonMain
 
 ### ViewModel
 
-- [ ] CameraUiState で撮影状態を管理
-- [ ] パーミッション状態を UiState に含める
-- [ ] イベント（CameraEvent）で一度きりの通知
+- [ ] Manage capture state with CameraUiState
+- [ ] Include permission state in UiState
+- [ ] One-time notifications via events (CameraEvent)
 
-### パーミッション
+### Permission
 
-- [ ] パーミッションチェックを起動時に実行
-- [ ] 拒否時は設定画面への導線を提供
-- [ ] 状態を UiState で管理
+- [ ] Execute permission check at startup
+- [ ] Provide navigation to settings when denied
+- [ ] Manage state with UiState
 
-### 画像解析
+### Image Analysis
 
-- [ ] AnalysisResult を共通モデルで定義
-- [ ] Android は ML Kit、iOS は Vision を使用
-- [ ] リアルタイム解析はパフォーマンスを考慮
+- [ ] Define AnalysisResult as shared model
+- [ ] Use ML Kit for Android, Vision for iOS
+- [ ] Consider performance for Real-time Analysis
 
 ---
 
-## 参考リンク
+## Reference Links
 
-### 公式ドキュメント
+### Official Documentation
 
 - [CameraX (Android)](https://developer.android.com/training/camerax)
 - [AVFoundation (iOS)](https://developer.apple.com/av-foundation/)
 - [ML Kit Barcode Scanning](https://developers.google.com/ml-kit/vision/barcode-scanning)
 - [Vision Framework (iOS)](https://developer.apple.com/documentation/vision)
 
-### KMP 関連
+### KMP Related
 
 - [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)
 - [expect/actual declarations](https://kotlinlang.org/docs/multiplatform-expect-actual.html)
 
 ---
 
-## エージェント向けタスク分解
+## Task Breakdown for Agents
 
-### 写真撮影機能 チェックリスト
+### Photo Capture Feature Checklist
 
-#### Phase 1: 共通モデル定義
+#### Phase 1: Shared Model Definition
 
-- [ ] `CameraResult` sealed interface を作成
+- [ ] Create `CameraResult` sealed interface
   - Success, Error, Cancelled
-- [ ] `CameraConfig` data class を作成
+- [ ] Create `CameraConfig` data class
   - CameraFacing, FlashMode, AspectRatio
-- [ ] `CameraError` sealed interface を作成
-- [ ] `PermissionState` enum を作成
+- [ ] Create `CameraError` sealed interface
+- [ ] Create `PermissionState` enum
 
 #### Phase 2: CameraController expect/actual
 
-- [ ] `CameraController` expect 宣言を作成
+- [ ] Create `CameraController` expect declaration
   - startPreview(), stopPreview(), capture(), switchCamera(), setFlashMode(), release()
-- [ ] Android actual 実装（CameraX）
+- [ ] Android actual implementation (CameraX)
   - ProcessCameraProvider, ImageCapture, Preview
-- [ ] iOS actual 実装（AVFoundation）
+- [ ] iOS actual implementation (AVFoundation)
   - AVCaptureSession, AVCapturePhotoOutput, PhotoCaptureDelegate
 
-#### Phase 3: パーミッション管理
+#### Phase 3: Permission Management
 
-- [ ] `CameraPermission` expect 宣言を作成
+- [ ] Create `CameraPermission` expect declaration
   - checkPermission(), requestPermission()
-- [ ] Android actual 実装
+- [ ] Android actual implementation
   - ContextCompat.checkSelfPermission, ActivityResultLauncher
-- [ ] iOS actual 実装
+- [ ] iOS actual implementation
   - AVCaptureDevice.authorizationStatusForMediaType
 
 #### Phase 4: ViewModel
 
-- [ ] `CameraUiState` data class を作成
+- [ ] Create `CameraUiState` data class
   - isFlashOn, isFrontCamera, isCapturing, permissionState, error
-- [ ] `CameraEvent` sealed interface を作成
+- [ ] Create `CameraEvent` sealed interface
   - CaptureComplete, ShowError, NavigateToSettings
-- [ ] `CameraViewModel` を作成
+- [ ] Create `CameraViewModel`
   - onShutterClick(), onToggleFlash(), onSwitchCamera(), onPermissionResult()
 
-#### Phase 5: DI 設定
+#### Phase 5: DI Configuration
 
-- [ ] カメラモジュールを Koin に登録
-- [ ] プラットフォーム固有の依存を platformModule に追加
+- [ ] Register camera module with Koin
+- [ ] Add platform-specific dependencies to platformModule
 
 ---
 
-### QR/バーコード解析機能 チェックリスト
+### QR/Barcode Analysis Feature Checklist
 
-#### Phase 1: 共通モデル定義
+#### Phase 1: Shared Model Definition
 
-- [ ] `AnalysisResult` sealed interface を作成
+- [ ] Create `AnalysisResult` sealed interface
   - QrCode, Barcode, Text, Error, NotFound
-- [ ] `BarcodeFormat` enum を作成
+- [ ] Create `BarcodeFormat` enum
 
 #### Phase 2: ImageAnalyzer expect/actual
 
-- [ ] `ImageAnalyzer` expect 宣言を作成
+- [ ] Create `ImageAnalyzer` expect declaration
   - analyze(imageData: ByteArray): AnalysisResult
-- [ ] Android actual 実装（ML Kit）
+- [ ] Android actual implementation (ML Kit)
   - BarcodeScannerOptions, BarcodeScanning.getClient()
-- [ ] iOS actual 実装（Vision）
+- [ ] iOS actual implementation (Vision)
   - VNDetectBarcodesRequest, VNImageRequestHandler
 
 ---
 
-### リアルタイム解析機能 チェックリスト
+### Real-time Analysis Feature Checklist
 
 #### Phase 1: RealtimeAnalyzer expect/actual
 
-- [ ] `RealtimeAnalyzer` expect 宣言を作成
+- [ ] Create `RealtimeAnalyzer` expect declaration
   - start(onResult), stop(), isAnalyzing
-- [ ] Android actual 実装（CameraX ImageAnalysis）
+- [ ] Android actual implementation (CameraX ImageAnalysis)
   - ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
-  - スロットリング実装（200ms 間隔）
-- [ ] iOS actual 実装（AVCaptureVideoDataOutput）
+  - Throttling implementation (200ms interval)
+- [ ] iOS actual implementation (AVCaptureVideoDataOutput)
   - AVCaptureVideoDataOutputSampleBufferDelegateProtocol
-  - dispatch_queue_create で専用キュー
+  - Dedicated queue with dispatch_queue_create
 
 #### Phase 2: ScannerViewModel
 
-- [ ] `ScannerUiState` data class を作成
-- [ ] `ScannerEvent` sealed interface を作成
-- [ ] `ScannerViewModel` を作成
+- [ ] Create `ScannerUiState` data class
+- [ ] Create `ScannerEvent` sealed interface
+- [ ] Create `ScannerViewModel`
   - startScanning(), stopScanning()
-  - 検出成功時の自動停止
+  - Auto-stop on successful detection
 
-#### Phase 3: パフォーマンス最適化
+#### Phase 3: Performance Optimization
 
-- [ ] スロットリング間隔の調整（100-500ms）
-- [ ] バックプレッシャー戦略の確認
-- [ ] メモリリークの確認（コールバック解放）
-
----
-
-### 実装時の注意点
-
-1. **expect/actual の対応確認**
-   - コンストラクタ引数がプラットフォームで異なる場合は Factory パターンを検討
-   - 共通 interface + DI で依存注入も可
-
-2. **ライフサイクル管理**
-   - Android: LifecycleOwner との連携
-   - iOS: deinit での明示的リソース解放
-
-3. **テスト戦略**
-   - commonTest で ViewModel テスト（FakeCameraController 使用）
-   - プラットフォーム固有コードは統合テストで確認
+- [ ] Adjust throttling interval (100-500ms)
+- [ ] Verify backpressure strategy
+- [ ] Check for memory leaks (callback release)
 
 ---
 
-## 関連ドキュメント
+### Implementation Notes
 
-- [kmp-architecture.md](kmp-architecture.md) - KMP 全体のアーキテクチャ
-- [kmp-auth.md](kmp-auth.md) - 認証実装ベストプラクティス
+1. **expect/actual correspondence verification**
+   - Consider Factory pattern when constructor arguments differ between platforms
+   - Common interface + DI for dependency injection is also viable
+
+2. **Lifecycle management**
+   - Android: Integration with LifecycleOwner
+   - iOS: Explicit resource release in deinit
+
+3. **Testing strategy**
+   - ViewModel tests in commonTest (using FakeCameraController)
+   - Verify platform-specific code with integration tests
+
+---
+
+## Related Documents
+
+- [kmp-architecture.md](kmp-architecture.md) - Overall KMP architecture
+- [kmp-auth.md](kmp-auth.md) - Authentication implementation Best Practices

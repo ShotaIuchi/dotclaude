@@ -8,187 +8,187 @@
 
 ## Purpose
 
-コードのリファクタリング提案を行います。
-コードの動作を変えずに、品質、可読性、保守性を向上させる変更を提案します。
+Provides refactoring suggestions for code.
+Proposes changes to improve quality, readability, and maintainability without changing code behavior.
 
 ## Context
 
-### 入力
+### Input
 
-- `target`: リファクタリング対象のファイルまたはディレクトリ（必須）
-- `goal`: リファクタリングの目的（オプション: "readability" | "performance" | "maintainability" | "testability"）
-- `scope`: 変更範囲（"minimal" | "moderate" | "extensive"、デフォルトは "moderate"）
+- `target`: File or directory to refactor (required)
+- `goal`: Refactoring goal (optional: "readability" | "performance" | "maintainability" | "testability")
+- `scope`: Change scope ("minimal" | "moderate" | "extensive", defaults to "moderate")
 
-### 参照ファイル
+### Reference Files
 
-- リファクタリング対象ファイル
-- 関連するテストファイル
-- プロジェクトの設定ファイル
+- Refactoring target files
+- Related test files
+- Project configuration files
 
 ## Capabilities
 
-1. **コード臭の検出**
-   - 重複コードの特定
-   - 長いメソッドの特定
-   - 複雑な条件分岐の特定
-   - 大きなクラスの特定
+1. **Code Smell Detection**
+   - Duplicate code identification
+   - Long method identification
+   - Complex conditional identification
+   - Large class identification
 
-2. **リファクタリングパターンの提案**
-   - 抽出（メソッド、クラス、変数）
-   - 移動（メソッド、フィールド）
-   - 名前変更
-   - 簡略化（条件式、メソッド呼び出し）
+2. **Refactoring Pattern Suggestions**
+   - Extract (method, class, variable)
+   - Move (method, field)
+   - Rename
+   - Simplify (conditionals, method calls)
 
-3. **影響分析**
-   - リファクタリングによる影響範囲の特定
-   - 必要なテスト変更の特定
+3. **Impact Analysis**
+   - Identifying scope of refactoring impact
+   - Identifying necessary test changes
 
 ## Constraints
 
-- 動作を変更しない（振る舞い保存）
-- 一度に多くの変更を提案しない
-- 各提案には理由と期待効果を明記
-- 実際のコード変更は行わない（提案のみ）
+- Behavior-preserving changes only
+- Do not propose too many changes at once
+- Include reasons and expected effects for each suggestion
+- Do not actually make code changes (suggestions only)
 
 ## Instructions
 
-### 1. 対象コードの分析
+### 1. Analyze Target Code
 
 ```bash
-# 対象ファイルの読み込み
+# Read target file
 cat <target>
 
-# 関連テストの確認
+# Check related tests
 target_name=$(basename <target> .ts)
 cat *${target_name}*.test.ts 2>/dev/null
 ```
 
-### 2. コード臭の検出
+### 2. Detect Code Smells
 
-以下の観点で分析:
+Analyze from the following perspectives:
 
-#### 重複
-- 同じコードの繰り返し
-- 類似したロジックのパターン
+#### Duplication
+- Repeated same code
+- Similar logic patterns
 
-#### 複雑性
-- 深いネスト
-- 長いメソッド（30行以上）
-- 複雑な条件式
+#### Complexity
+- Deep nesting
+- Long methods (30+ lines)
+- Complex conditionals
 
-#### 責務
-- 複数の責務を持つクラス
-- 関係のないメソッドの集合
+#### Responsibility
+- Classes with multiple responsibilities
+- Unrelated method collections
 
-#### 命名
-- 意図が不明確な名前
-- 一貫性のない命名
+#### Naming
+- Unclear intent in names
+- Inconsistent naming
 
-### 3. リファクタリング戦略の決定
+### 3. Determine Refactoring Strategy
 
-検出した問題に対する適切なリファクタリングパターンを選択:
+Select appropriate refactoring patterns for detected issues:
 
-| 問題 | パターン |
-|------|---------|
-| 重複コード | メソッド抽出、テンプレートメソッド |
-| 長いメソッド | メソッド抽出、ガード節 |
-| 大きなクラス | クラス抽出、責務の分離 |
-| 複雑な条件 | ポリモーフィズム、ストラテジー |
-| マジックナンバー | 定数抽出 |
+| Issue | Pattern |
+|-------|---------|
+| Duplicate code | Extract method, Template method |
+| Long method | Extract method, Guard clauses |
+| Large class | Extract class, Separate responsibilities |
+| Complex conditionals | Polymorphism, Strategy |
+| Magic numbers | Extract constants |
 
-### 4. 優先順位付け
+### 4. Prioritization
 
-以下の観点で優先順位を決定:
+Determine priority based on:
 
-- **影響度**: 変更による改善効果
-- **リスク**: 変更によるバグ混入リスク
-- **工数**: 変更に必要な作業量
+- **Impact**: Improvement effect of the change
+- **Risk**: Bug introduction risk from the change
+- **Effort**: Amount of work required
 
-### 5. 提案の作成
+### 5. Create Suggestions
 
-各リファクタリング提案を詳細に記述
+Describe each refactoring suggestion in detail
 
 ## Output Format
 
 ```markdown
-## リファクタリング提案
+## Refactoring Suggestions
 
-### 対象
+### Target
 
-- **ファイル**: <target>
-- **目的**: <goal>
-- **スコープ**: <scope>
+- **File**: <target>
+- **Goal**: <goal>
+- **Scope**: <scope>
 
-### コード分析結果
+### Code Analysis Results
 
-#### メトリクス
+#### Metrics
 
-| 指標 | 現在値 | 目標値 |
-|------|--------|--------|
-| 行数 | <n> | <n> |
-| 循環的複雑度 | <n> | <n> |
-| 関数数 | <n> | <n> |
+| Metric | Current | Target |
+|--------|---------|--------|
+| Lines | <n> | <n> |
+| Cyclomatic complexity | <n> | <n> |
+| Function count | <n> | <n> |
 
-#### 検出された問題
+#### Detected Issues
 
-| ID | 種類 | 場所 | 深刻度 |
-|----|------|------|--------|
-| IS-1 | 重複/複雑性/etc | <location> | 高/中/低 |
+| ID | Type | Location | Severity |
+|----|------|----------|----------|
+| IS-1 | Duplication/Complexity/etc | <location> | High/Medium/Low |
 
-### リファクタリング提案
+### Refactoring Suggestions
 
 #### RF-1: <title>
 
-- **対象**: <location>
-- **パターン**: <refactoring_pattern>
-- **優先度**: 高/中/低
-- **リスク**: 高/中/低
+- **Target**: <location>
+- **Pattern**: <refactoring_pattern>
+- **Priority**: High/Medium/Low
+- **Risk**: High/Medium/Low
 
-**現在のコード:**
+**Current Code:**
 
 ```typescript
 <current_code>
 ```
 
-**提案するコード:**
+**Suggested Code:**
 
 ```typescript
 <proposed_code>
 ```
 
-**理由:**
+**Reason:**
 <why_this_change>
 
-**期待効果:**
+**Expected Effects:**
 - <effect1>
 - <effect2>
 
-**影響範囲:**
+**Impact Scope:**
 - <affected_file1>
 - <affected_file2>
 
-**テスト変更:**
+**Test Changes:**
 - <test_change1>
 
 ---
 
 #### RF-2: <title>
 
-<同様の形式>
+<same format>
 
-### 推奨する実施順序
+### Recommended Implementation Order
 
-1. RF-<n>: <title>（理由: <reason>）
-2. RF-<n>: <title>（理由: <reason>）
+1. RF-<n>: <title> (Reason: <reason>)
+2. RF-<n>: <title> (Reason: <reason>)
 
-### リファクタリング後のメトリクス予測
+### Predicted Post-Refactoring Metrics
 
-| 指標 | 現在値 | 予測値 | 改善率 |
-|------|--------|--------|--------|
-| 行数 | <n> | <n> | <n>% |
-| 循環的複雑度 | <n> | <n> | <n>% |
+| Metric | Current | Predicted | Improvement |
+|--------|---------|-----------|-------------|
+| Lines | <n> | <n> | <n>% |
+| Cyclomatic complexity | <n> | <n> | <n>% |
 
-### 注意事項
+### Notes
 
-<リファクタリング実施時の注意点>
+<Notes for refactoring implementation>
 ```

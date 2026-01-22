@@ -1,52 +1,52 @@
 # Kotlin Multiplatform Architecture Guide
 
-Kotlin 公式ドキュメントおよび Google の KMP 推奨に基づく、マルチプラットフォーム開発のベストプラクティス集。
+A collection of best practices for multiplatform development based on Kotlin official documentation and Google's KMP recommendations.
 
 ---
 
-## 目次
+## Table of Contents
 
-1. [アーキテクチャ概要](#アーキテクチャ概要)
-2. [プロジェクト構成](#プロジェクト構成)
-3. [共通モジュール (shared)](#共通モジュール-shared)
-4. [ディレクトリ構造](#ディレクトリ構造)
-5. [命名規則](#命名規則)
-6. [ベストプラクティス一覧](#ベストプラクティス一覧)
+1. [Architecture Overview](#architecture-overview)
+2. [Project Structure](#project-structure)
+3. [Shared Module](#shared-module-shared)
+4. [Directory Structure](#directory-structure)
+5. [Naming Conventions](#naming-conventions)
+6. [Best Practices Checklist](#best-practices-checklist)
 
-### 詳細ドキュメント
+### Detailed Documentation
 
-| ドキュメント | 内容 |
-|-------------|------|
-| [kmp-expect-actual.md](./kmp-expect-actual.md) | expect/actual パターン |
-| [kmp-di-koin.md](./kmp-di-koin.md) | 依存性注入 (Koin) |
-| [kmp-data-sqldelight.md](./kmp-data-sqldelight.md) | データ永続化 (SQLDelight) |
-| [kmp-network-ktor.md](./kmp-network-ktor.md) | ネットワーク (Ktor) |
-| [kmp-state-udf.md](./kmp-state-udf.md) | 状態管理と UDF |
+| Document | Content |
+|----------|---------|
+| [kmp-expect-actual.md](./kmp-expect-actual.md) | expect/actual pattern |
+| [kmp-di-koin.md](./kmp-di-koin.md) | Dependency Injection (Koin) |
+| [kmp-data-sqldelight.md](./kmp-data-sqldelight.md) | Data Persistence (SQLDelight) |
+| [kmp-network-ktor.md](./kmp-network-ktor.md) | Networking (Ktor) |
+| [kmp-state-udf.md](./kmp-state-udf.md) | State Management and UDF |
 | [kmp-compose-ui.md](./kmp-compose-ui.md) | Compose Multiplatform |
-| [kmp-error-handling.md](./kmp-error-handling.md) | エラーハンドリング |
-| [kmp-testing.md](./kmp-testing.md) | テスト戦略 |
+| [kmp-error-handling.md](./kmp-error-handling.md) | Error Handling |
+| [kmp-testing.md](./kmp-testing.md) | Testing Strategy |
 
 ---
 
-## アーキテクチャ概要
+## Architecture Overview
 
-### 基本原則
+### Basic Principles
 
-1. **ビジネスロジックの共有**
-   - Domain Layer と Data Layer を共通モジュール (shared) に配置
-   - UI ロジック（ViewModel）も可能な限り共有
+1. **Share Business Logic**
+   - Place Domain Layer and Data Layer in shared module
+   - Share UI logic (ViewModel) as much as possible
 
-2. **プラットフォーム固有コードの最小化**
-   - expect/actual で抽象化し、プラットフォーム依存を限定
-   - UI は各プラットフォームのネイティブ、または Compose Multiplatform
+2. **Minimize Platform-Specific Code**
+   - Abstract with expect/actual to limit platform dependencies
+   - UI can be native per platform or Compose Multiplatform
 
-3. **単方向データフロー (UDF)**
-   - イベントは上流へ（UI → ViewModel → Repository）
-   - 状態は下流へ（Repository → ViewModel → UI）
+3. **Unidirectional Data Flow (UDF)**
+   - Events flow upstream (UI → ViewModel → Repository)
+   - State flows downstream (Repository → ViewModel → UI)
 
-4. **依存関係の方向**
-   - shared モジュールはプラットフォームモジュールに依存しない
-   - プラットフォームモジュールが shared に依存
+4. **Dependency Direction**
+   - shared module does not depend on platform modules
+   - Platform modules depend on shared
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -64,8 +64,8 @@ Kotlin 公式ドキュメントおよび Google の KMP 推奨に基づく、マ
 │  │                    Presentation Layer                        │   │
 │  │  ┌─────────────────────────────────────────────────────┐    │   │
 │  │  │   ViewModel (commonMain)                             │    │   │
-│  │  │   - UI State 管理                                    │    │   │
-│  │  │   - UseCase 呼び出し                                 │    │   │
+│  │  │   - UI State Management                              │    │   │
+│  │  │   - UseCase Invocation                               │    │   │
 │  │  └─────────────────────────────────────────────────────┘    │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 │                                 │                                    │
@@ -74,8 +74,8 @@ Kotlin 公式ドキュメントおよび Google の KMP 推奨に基づく、マ
 │  │                     Domain Layer                             │   │
 │  │  ┌─────────────────────────────────────────────────────┐    │   │
 │  │  │   UseCase / Model (commonMain)                       │    │   │
-│  │  │   - ビジネスロジック                                   │    │   │
-│  │  │   - ドメインモデル                                     │    │   │
+│  │  │   - Business Logic                                   │    │   │
+│  │  │   - Domain Models                                    │    │   │
 │  │  └─────────────────────────────────────────────────────┘    │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 │                                 │                                    │
@@ -84,7 +84,7 @@ Kotlin 公式ドキュメントおよび Google の KMP 推奨に基づく、マ
 │  │                      Data Layer                              │   │
 │  │  ┌─────────────────────────────────────────────────────┐    │   │
 │  │  │   Repository (commonMain)                            │    │   │
-│  │  │   - データアクセスの抽象化                             │    │   │
+│  │  │   - Data Access Abstraction                          │    │   │
 │  │  └─────────────────────────────────────────────────────┘    │   │
 │  │           │                              │                   │   │
 │  │           ▼                              ▼                   │   │
@@ -98,36 +98,36 @@ Kotlin 公式ドキュメントおよび Google の KMP 推奨に基づく、マ
 
 ---
 
-## プロジェクト構成
+## Project Structure
 
-### Source Set 階層
+### Source Set Hierarchy
 
 ```
 shared/
-├── commonMain/              # 全プラットフォーム共通
+├── commonMain/              # Common to all platforms
 │   └── kotlin/
 │
-├── commonTest/              # 共通テスト
+├── commonTest/              # Common tests
 │   └── kotlin/
 │
-├── androidMain/             # Android 固有
+├── androidMain/             # Android specific
 │   └── kotlin/
 │
-├── androidUnitTest/         # Android テスト
+├── androidUnitTest/         # Android tests
 │   └── kotlin/
 │
-├── iosMain/                 # iOS 共通（ARM64 + X64）
+├── iosMain/                 # iOS common (ARM64 + X64)
 │   └── kotlin/
 │
-├── iosArm64Main/            # iOS ARM64（実機）
-├── iosX64Main/              # iOS X64（シミュレータ）
-├── iosSimulatorArm64Main/   # iOS Simulator ARM64（M1/M2 Mac）
+├── iosArm64Main/            # iOS ARM64 (device)
+├── iosX64Main/              # iOS X64 (simulator)
+├── iosSimulatorArm64Main/   # iOS Simulator ARM64 (M1/M2 Mac)
 │
-└── desktopMain/             # Desktop（JVM）固有
+└── desktopMain/             # Desktop (JVM) specific
     └── kotlin/
 ```
 
-### build.gradle.kts 設定
+### build.gradle.kts Configuration
 
 ```kotlin
 plugins {
@@ -138,7 +138,7 @@ plugins {
 }
 
 kotlin {
-    // Android ターゲット
+    // Android target
     androidTarget {
         compilations.all {
             kotlinOptions {
@@ -147,7 +147,7 @@ kotlin {
         }
     }
 
-    // iOS ターゲット
+    // iOS targets
     listOf(
         iosX64(),
         iosArm64(),
@@ -159,7 +159,7 @@ kotlin {
         }
     }
 
-    // Desktop ターゲット（オプション）
+    // Desktop target (optional)
     jvm("desktop")
 
     sourceSets {
@@ -167,7 +167,7 @@ kotlin {
             // Coroutines
             implementation(libs.kotlinx.coroutines.core)
 
-            // Ktor（HTTP クライアント）
+            // Ktor (HTTP client)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
@@ -176,7 +176,7 @@ kotlin {
             implementation(libs.sqldelight.runtime)
             implementation(libs.sqldelight.coroutines.extensions)
 
-            // Koin（DI）
+            // Koin (DI)
             implementation(libs.koin.core)
 
             // DateTime
@@ -189,10 +189,10 @@ kotlin {
         }
 
         androidMain.dependencies {
-            // Android 固有の Ktor エンジン
+            // Android-specific Ktor engine
             implementation(libs.ktor.client.okhttp)
 
-            // SQLDelight Android ドライバー
+            // SQLDelight Android driver
             implementation(libs.sqldelight.android.driver)
 
             // Koin Android
@@ -200,10 +200,10 @@ kotlin {
         }
 
         iosMain.dependencies {
-            // iOS 固有の Ktor エンジン
+            // iOS-specific Ktor engine
             implementation(libs.ktor.client.darwin)
 
-            // SQLDelight iOS ドライバー
+            // SQLDelight iOS driver
             implementation(libs.sqldelight.native.driver)
         }
 
@@ -217,9 +217,9 @@ kotlin {
 }
 ```
 
-### 依存バージョン管理
+### Dependency Version Management
 
-> **Note**: 各ライブラリの最新 stable バージョンは公式サイトを参照してください:
+> **Note**: Refer to official sites for the latest stable version of each library:
 > - [Kotlin Releases](https://kotlinlang.org/docs/releases.html)
 > - [Ktor Releases](https://ktor.io/changelog/)
 > - [SQLDelight Releases](https://github.com/cashapp/sqldelight/releases)
@@ -228,11 +228,11 @@ kotlin {
 > - [kotlinx.datetime Releases](https://github.com/Kotlin/kotlinx-datetime/releases)
 > - [kotlinx.serialization Releases](https://github.com/Kotlin/kotlinx.serialization/releases)
 
-`libs.versions.toml` の基本構造:
+Basic structure of `libs.versions.toml`:
 
 ```toml
 [versions]
-kotlin = "..."               # 最新の stable を参照
+kotlin = "..."               # Refer to latest stable
 kotlinx-coroutines = "..."
 kotlinx-datetime = "..."
 kotlinx-serialization = "..."
@@ -275,7 +275,7 @@ sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 
 ---
 
-## 共通モジュール (shared)
+## Shared Module (shared)
 
 ### Domain Layer
 
@@ -283,7 +283,7 @@ sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 // commonMain/kotlin/com/example/shared/domain/model/User.kt
 
 /**
- * ドメインモデル（ビジネスロジックを含む）
+ * Domain model (contains business logic)
  */
 data class User(
     val id: String,
@@ -292,7 +292,7 @@ data class User(
     val joinedAt: Instant,
     val status: UserStatus
 ) {
-    // ドメインロジック
+    // Domain logic
     val isActive: Boolean
         get() = status == UserStatus.ACTIVE
 
@@ -314,9 +314,9 @@ enum class UserStatus {
 // commonMain/kotlin/com/example/shared/domain/repository/UserRepository.kt
 
 /**
- * ユーザーリポジトリのインターフェース
+ * User repository interface
  *
- * Domain 層はこのインターフェースに依存
+ * Domain layer depends on this interface
  */
 interface UserRepository {
     fun getUsers(): Flow<List<User>>
@@ -331,23 +331,23 @@ interface UserRepository {
 // commonMain/kotlin/com/example/shared/domain/usecase/GetUsersUseCase.kt
 
 /**
- * ユーザー一覧取得の UseCase
+ * UseCase for getting user list
  *
- * 単一のビジネスロジックをカプセル化
+ * Encapsulates a single business logic
  */
 class GetUsersUseCase(
     private val userRepository: UserRepository,
     private val analyticsRepository: AnalyticsRepository
 ) {
     /**
-     * ユーザー一覧を取得する
+     * Get user list
      *
-     * @return ユーザー一覧の Flow
+     * @return Flow of user list
      */
     operator fun invoke(): Flow<List<User>> {
         return userRepository.getUsers()
             .onEach { users ->
-                // 副作用（アナリティクス送信など）
+                // Side effects (analytics, etc.)
                 analyticsRepository.logUserListViewed(users.size)
             }
     }
@@ -360,9 +360,9 @@ class GetUsersUseCase(
 // commonMain/kotlin/com/example/shared/data/repository/UserRepositoryImpl.kt
 
 /**
- * ユーザーリポジトリの実装
+ * User repository implementation
  *
- * オフラインファースト戦略を採用
+ * Adopts offline-first strategy
  */
 class UserRepositoryImpl(
     private val localDataSource: UserLocalDataSource,
@@ -371,17 +371,17 @@ class UserRepositoryImpl(
 ) : UserRepository {
 
     /**
-     * ユーザー一覧を取得
+     * Get user list
      *
-     * オフラインファースト：
-     * 1. まずローカルキャッシュを返す
-     * 2. バックグラウンドでリモートから取得
-     * 3. 取得したデータでローカルを更新
+     * Offline-first:
+     * 1. Return local cache first
+     * 2. Fetch from remote in background
+     * 3. Update local with fetched data
      */
     override fun getUsers(): Flow<List<User>> {
         return localDataSource.getUsers()
             .onStart {
-                // バックグラウンドでリモートから同期
+                // Sync from remote in background
                 refreshUsersFromRemote()
             }
             .map { entities ->
@@ -399,11 +399,11 @@ class UserRepositoryImpl(
 
     override suspend fun createUser(user: User): Result<User> {
         return runCatching {
-            // リモートに作成
+            // Create on remote
             val response = remoteDataSource.createUser(user.toRequest())
             val createdUser = response.toDomain()
 
-            // ローカルにキャッシュ
+            // Cache locally
             localDataSource.insertUser(createdUser.toEntity())
 
             createdUser
@@ -425,7 +425,7 @@ class UserRepositoryImpl(
     }
 
     /**
-     * リモートからユーザー一覧を同期
+     * Sync user list from remote
      */
     private suspend fun refreshUsersFromRemote() {
         if (!networkMonitor.isOnline()) return
@@ -436,7 +436,7 @@ class UserRepositoryImpl(
                 remoteUsers.map { it.toEntity() }
             )
         }.onFailure { e ->
-            // ログ出力のみ、UI にはローカルデータを表示
+            // Log only, show local data to UI
             println("Failed to refresh users from remote: $e")
         }
     }
@@ -460,19 +460,19 @@ class UserRepositoryImpl(
 // commonMain/kotlin/com/example/shared/presentation/userlist/UserListViewModel.kt
 
 /**
- * ユーザー一覧画面の ViewModel
+ * User list screen ViewModel
  *
- * UI 状態の管理とビジネスロジックの呼び出しを担当
+ * Manages UI state and invokes business logic
  */
 class UserListViewModel(
     private val getUsersUseCase: GetUsersUseCase,
     private val coroutineScope: CoroutineScope
 ) {
-    // UI State（単一の状態オブジェクト）
+    // UI State (single state object)
     private val _uiState = MutableStateFlow(UserListUiState())
     val uiState: StateFlow<UserListUiState> = _uiState.asStateFlow()
 
-    // 一時的なイベント用（Snackbar、ナビゲーション等）
+    // For temporary events (Snackbar, navigation, etc.)
     private val _events = Channel<UserListEvent>(Channel.BUFFERED)
     val events: Flow<UserListEvent> = _events.receiveAsFlow()
 
@@ -483,7 +483,7 @@ class UserListViewModel(
     }
 
     /**
-     * ユーザー一覧を読み込む
+     * Load user list
      */
     fun loadUsers() {
         loadJob?.cancel()
@@ -509,7 +509,7 @@ class UserListViewModel(
     }
 
     /**
-     * ユーザーを選択する
+     * Select a user
      */
     fun onUserClick(userId: String) {
         coroutineScope.launch {
@@ -518,14 +518,14 @@ class UserListViewModel(
     }
 
     /**
-     * リトライする
+     * Retry
      */
     fun onRetryClick() {
         loadUsers()
     }
 
     /**
-     * ViewModel を破棄
+     * Dispose ViewModel
      */
     fun onCleared() {
         loadJob?.cancel()
@@ -537,16 +537,16 @@ class UserListViewModel(
 // commonMain/kotlin/com/example/shared/presentation/userlist/UserListUiState.kt
 
 /**
- * ユーザー一覧画面の UI 状態
+ * UI state for user list screen
  *
- * Immutable なデータクラスで状態を表現
+ * Represents state with immutable data class
  */
 data class UserListUiState(
     val users: List<UserUiModel> = emptyList(),
     val isLoading: Boolean = false,
     val error: UiError? = null
 ) {
-    // 派生プロパティ
+    // Derived properties
     val isEmpty: Boolean
         get() = users.isEmpty() && !isLoading && error == null
 
@@ -558,7 +558,7 @@ data class UserListUiState(
 }
 
 /**
- * UI 層で使用するユーザーモデル
+ * User model for UI layer
  */
 data class UserUiModel(
     val id: String,
@@ -568,7 +568,7 @@ data class UserUiModel(
 )
 
 /**
- * 一時的な UI イベント
+ * Temporary UI events
  */
 sealed interface UserListEvent {
     data class NavigateToDetail(val userId: String) : UserListEvent
@@ -578,34 +578,34 @@ sealed interface UserListEvent {
 
 ---
 
-## ディレクトリ構造
+## Directory Structure
 
-### 推奨構造
+### Recommended Structure
 
 ```
 project/
-├── shared/                              # 共有モジュール
+├── shared/                              # Shared module
 │   ├── build.gradle.kts
 │   │
 │   └── src/
 │       ├── commonMain/
 │       │   └── kotlin/com/example/shared/
 │       │       │
-│       │       ├── core/                # 共通コンポーネント
-│       │       │   ├── di/              # DI モジュール
+│       │       ├── core/                # Common components
+│       │       │   ├── di/              # DI modules
 │       │       │   │   ├── SharedModule.kt
 │       │       │   │   └── ViewModelFactory.kt
 │       │       │   │
-│       │       │   ├── error/           # エラー定義
+│       │       │   ├── error/           # Error definitions
 │       │       │   │   └── AppException.kt
 │       │       │   │
-│       │       │   ├── network/         # ネットワーク
+│       │       │   ├── network/         # Network
 │       │       │   │   └── NetworkMonitor.kt
 │       │       │   │
-│       │       │   ├── platform/        # プラットフォーム抽象化
+│       │       │   ├── platform/        # Platform abstraction
 │       │       │   │   └── Platform.kt
 │       │       │   │
-│       │       │   └── util/            # ユーティリティ
+│       │       │   └── util/            # Utilities
 │       │       │       ├── Uuid.kt
 │       │       │       └── DateFormatter.kt
 │       │       │
@@ -671,7 +671,7 @@ project/
 │       │       ├── presentation/
 │       │       │   └── UserListViewModelTest.kt
 │       │       │
-│       │       └── test/                # テストユーティリティ
+│       │       └── test/                # Test utilities
 │       │           ├── FakeUserRepository.kt
 │       │           ├── FakeGetUsersUseCase.kt
 │       │           └── TestUtils.kt
@@ -702,7 +702,7 @@ project/
 │               └── util/
 │                   └── Uuid.ios.kt
 │
-├── androidApp/                          # Android アプリ
+├── androidApp/                          # Android app
 │   ├── build.gradle.kts
 │   └── src/main/
 │       ├── kotlin/com/example/android/
@@ -714,7 +714,7 @@ project/
 │       │
 │       └── res/
 │
-├── iosApp/                              # iOS アプリ
+├── iosApp/                              # iOS app
 │   ├── iosApp.xcodeproj
 │   └── Sources/
 │       ├── iOSApp.swift
@@ -723,28 +723,28 @@ project/
 │           ├── UserListView.swift
 │           └── UserDetailView.swift
 │
-├── desktopApp/                          # Desktop アプリ（オプション）
+├── desktopApp/                          # Desktop app (optional)
 │   └── src/jvmMain/
 │
-└── sqldelight/                          # SQLDelight スキーマ
+└── sqldelight/                          # SQLDelight schema
     └── com/example/shared/
         └── AppDatabase.sq
 ```
 
 ---
 
-## 命名規則
+## Naming Conventions
 
-### クラス命名
+### Class Naming
 
-| 種類 | サフィックス | 例 |
-|------|-------------|-----|
+| Type | Suffix | Example |
+|------|--------|---------|
 | ViewModel | ViewModel | `UserListViewModel` |
 | UseCase | UseCase | `GetUsersUseCase` |
 | Repository Interface | Repository | `UserRepository` |
-| Repository 実装 | RepositoryImpl | `UserRepositoryImpl` |
+| Repository Implementation | RepositoryImpl | `UserRepositoryImpl` |
 | DataSource Interface | DataSource | `UserLocalDataSource` |
-| DataSource 実装 | DataSourceImpl | `UserLocalDataSourceImpl` |
+| DataSource Implementation | DataSourceImpl | `UserLocalDataSourceImpl` |
 | SQLDelight Entity | Entity | `UserEntity` |
 | API Response | Response | `UserResponse` |
 | API Request | Request | `CreateUserRequest` |
@@ -752,127 +752,127 @@ project/
 | UI Model | UiModel | `UserUiModel` |
 | Event | Event | `UserListEvent` |
 | Composable Screen | Screen | `UserListScreen` |
-| expect 実装 | .{platform} | `Platform.android.kt`, `Platform.ios.kt` |
+| expect Implementation | .{platform} | `Platform.android.kt`, `Platform.ios.kt` |
 
-### 関数命名
+### Function Naming
 
-| 種類 | パターン | 例 |
-|------|---------|-----|
-| データ取得（単一） | `get{Entity}` | `getUser(userId)` |
-| データ取得（複数） | `get{Entity}s` / `get{Entity}List` | `getUsers()` |
-| データ作成 | `create{Entity}` / `insert{Entity}` | `createUser()` |
-| データ更新 | `update{Entity}` | `updateUser()` |
-| データ削除 | `delete{Entity}` | `deleteUser()` |
-| イベントハンドラ | `on{Event}` / `on{Event}Click` | `onUserClick()` |
-| 変換 | `to{Target}` | `toDomain()`, `toEntity()`, `toUiModel()` |
-| 検証 | `is{Condition}` / `has{Property}` | `isValid()`, `hasPermission()` |
+| Type | Pattern | Example |
+|------|---------|---------|
+| Fetch single data | `get{Entity}` | `getUser(userId)` |
+| Fetch multiple data | `get{Entity}s` / `get{Entity}List` | `getUsers()` |
+| Create data | `create{Entity}` / `insert{Entity}` | `createUser()` |
+| Update data | `update{Entity}` | `updateUser()` |
+| Delete data | `delete{Entity}` | `deleteUser()` |
+| Event handler | `on{Event}` / `on{Event}Click` | `onUserClick()` |
+| Conversion | `to{Target}` | `toDomain()`, `toEntity()`, `toUiModel()` |
+| Validation | `is{Condition}` / `has{Property}` | `isValid()`, `hasPermission()` |
 
-### Source Set 命名
+### Source Set Naming
 
-| Source Set | 用途 |
-|------------|------|
-| commonMain | 全プラットフォーム共通コード |
-| commonTest | 共通テスト |
-| androidMain | Android 固有実装 |
-| iosMain | iOS 共通（全アーキテクチャ） |
-| iosArm64Main | iOS ARM64（実機） |
-| iosX64Main | iOS X64（Intel シミュレータ） |
-| iosSimulatorArm64Main | iOS Simulator ARM64（M1/M2 Mac） |
-| desktopMain | Desktop（JVM） |
+| Source Set | Purpose |
+|------------|---------|
+| commonMain | Code common to all platforms |
+| commonTest | Common tests |
+| androidMain | Android-specific implementation |
+| iosMain | iOS common (all architectures) |
+| iosArm64Main | iOS ARM64 (device) |
+| iosX64Main | iOS X64 (Intel simulator) |
+| iosSimulatorArm64Main | iOS Simulator ARM64 (M1/M2 Mac) |
+| desktopMain | Desktop (JVM) |
 
 ---
 
-## ベストプラクティス一覧
+## Best Practices Checklist
 
-### 共通モジュール (shared)
+### Shared Module (shared)
 
-- [ ] ビジネスロジック（Domain Layer）を commonMain に配置
-- [ ] データアクセス（Data Layer）を commonMain に配置
-- [ ] ViewModel を commonMain に配置
-- [ ] プラットフォーム固有コードは expect/actual で抽象化
-- [ ] UI は Compose Multiplatform または各プラットフォームネイティブ
+- [ ] Place business logic (Domain Layer) in commonMain
+- [ ] Place data access (Data Layer) in commonMain
+- [ ] Place ViewModel in commonMain
+- [ ] Abstract platform-specific code with expect/actual
+- [ ] UI uses Compose Multiplatform or native per platform
 
 ### expect/actual
 
-→ 詳細: [kmp-expect-actual.md](./kmp-expect-actual.md)
+→ Details: [kmp-expect-actual.md](./kmp-expect-actual.md)
 
-- [ ] プラットフォーム固有の実装は最小限に
-- [ ] 共通インターフェースを先に設計
-- [ ] actual 実装はプラットフォームの Best Practice に従う
-- [ ] テスト用の Fake 実装を commonTest に用意
+- [ ] Minimize platform-specific implementations
+- [ ] Design common interface first
+- [ ] actual implementations follow platform Best Practices
+- [ ] Prepare Fake implementations in commonTest for testing
 
-### 依存性注入 (Koin)
+### Dependency Injection (Koin)
 
-→ 詳細: [kmp-di-koin.md](./kmp-di-koin.md)
+→ Details: [kmp-di-koin.md](./kmp-di-koin.md)
 
-- [ ] 共通モジュールは sharedModule に定義
-- [ ] プラットフォーム固有は platformModule に定義
-- [ ] ViewModel は Factory 経由で生成
-- [ ] テスト時は Fake を注入可能に
+- [ ] Define common module in sharedModule
+- [ ] Define platform-specific in platformModule
+- [ ] Create ViewModel via Factory
+- [ ] Enable Fake injection for testing
 
-### データ永続化 (SQLDelight)
+### Data Persistence (SQLDelight)
 
-→ 詳細: [kmp-data-sqldelight.md](./kmp-data-sqldelight.md)
+→ Details: [kmp-data-sqldelight.md](./kmp-data-sqldelight.md)
 
-- [ ] スキーマは共通で定義
-- [ ] Driver は各プラットフォームで実装
-- [ ] トランザクションは適切に使用
-- [ ] Flow で変更を監視
+- [ ] Define schema commonly
+- [ ] Implement Driver per platform
+- [ ] Use transactions appropriately
+- [ ] Monitor changes with Flow
 
-### ネットワーク (Ktor)
+### Networking (Ktor)
 
-→ 詳細: [kmp-network-ktor.md](./kmp-network-ktor.md)
+→ Details: [kmp-network-ktor.md](./kmp-network-ktor.md)
 
-- [ ] HttpClient は DI で管理
-- [ ] エンジンはプラットフォーム別に設定
-- [ ] エラーハンドリングを統一
-- [ ] Serialization は kotlinx-serialization を使用
+- [ ] Manage HttpClient with DI
+- [ ] Configure engine per platform
+- [ ] Unify error handling
+- [ ] Use kotlinx-serialization for Serialization
 
-### 状態管理
+### State Management
 
-→ 詳細: [kmp-state-udf.md](./kmp-state-udf.md)
+→ Details: [kmp-state-udf.md](./kmp-state-udf.md)
 
-- [ ] UI State は単一の data class で管理
-- [ ] StateFlow で状態を公開
-- [ ] 一時的イベントは Channel を使用
-- [ ] UDF（単方向データフロー）を遵守
+- [ ] Manage UI State with single data class
+- [ ] Expose state with StateFlow
+- [ ] Use Channel for temporary events
+- [ ] Follow UDF (Unidirectional Data Flow)
 
-### テスト
+### Testing
 
-→ 詳細: [kmp-testing.md](./kmp-testing.md)
+→ Details: [kmp-testing.md](./kmp-testing.md)
 
-- [ ] commonTest でユニットテストを実装
-- [ ] Fake を優先、Mock は最小限
-- [ ] runTest で Coroutine テスト
-- [ ] テストユーティリティを共通化
+- [ ] Implement unit tests in commonTest
+- [ ] Prefer Fake, minimize Mock
+- [ ] Use runTest for Coroutine tests
+- [ ] Centralize test utilities
 
-### エラーハンドリング
+### Error Handling
 
-→ 詳細: [kmp-error-handling.md](./kmp-error-handling.md)
+→ Details: [kmp-error-handling.md](./kmp-error-handling.md)
 
-- [ ] AppException の階層を定義
-- [ ] プラットフォーム共通のエラーマッピング
-- [ ] UI 用エラーモデルに変換
-- [ ] リトライ機構の実装
+- [ ] Define AppException hierarchy
+- [ ] Common error mapping across platforms
+- [ ] Convert to UI error model
+- [ ] Implement retry mechanism
 
 ---
 
-## 参考リンク
+## Reference Links
 
-### 公式ドキュメント
+### Official Documentation
 
 - [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)
 - [Kotlin Multiplatform: Project structure](https://kotlinlang.org/docs/multiplatform-discover-project.html)
 - [expect/actual declarations](https://kotlinlang.org/docs/multiplatform-expect-actual.html)
 - [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
 
-### 公式サンプル
+### Official Samples
 
 - [Kotlin Multiplatform Samples](https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-samples.html)
 - [KMM Sample (Kotlin Multiplatform Mobile)](https://github.com/Kotlin/kmm-basic-sample)
 - [Compose Multiplatform Template](https://github.com/JetBrains/compose-multiplatform-template)
 
-### ライブラリ
+### Libraries
 
 - [Ktor](https://ktor.io/docs/getting-started-ktor-client.html)
 - [SQLDelight](https://cashapp.github.io/sqldelight/)
@@ -880,6 +880,6 @@ project/
 - [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime)
 - [kotlinx-serialization](https://github.com/Kotlin/kotlinx.serialization)
 
-### Google 公式
+### Google Official
 
 - [Android Developers: Kotlin Multiplatform](https://developer.android.com/kotlin/multiplatform)

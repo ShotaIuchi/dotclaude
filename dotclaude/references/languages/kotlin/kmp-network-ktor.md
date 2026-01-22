@@ -1,25 +1,25 @@
-# KMP ネットワーク (Ktor)
+# KMP Network (Ktor)
 
-Kotlin Multiplatform での Ktor を使用した HTTP クライアント実装。
+HTTP client implementation using Ktor in Kotlin Multiplatform.
 
-> **関連ドキュメント**: [KMP Architecture Guide](./kmp-architecture.md) | [Ktor 公式](https://ktor.io/docs/getting-started-ktor-client.html)
+> **Related Documentation**: [KMP Architecture Guide](./kmp-architecture.md) | [Ktor Official](https://ktor.io/docs/getting-started-ktor-client.html)
 
 ---
 
-## API クライアント
+## API Client
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/data/remote/ApiClient.kt
 
 /**
- * Ktor を使用した API クライアント
+ * API client using Ktor
  */
 class ApiClient(
     private val httpClient: HttpClient,
     private val baseUrl: String
 ) {
     /**
-     * GET リクエスト
+     * GET request
      */
     suspend inline fun <reified T> get(
         endpoint: String,
@@ -33,7 +33,7 @@ class ApiClient(
     }
 
     /**
-     * POST リクエスト
+     * POST request
      */
     suspend inline fun <reified T, reified R> post(
         endpoint: String,
@@ -46,7 +46,7 @@ class ApiClient(
     }
 
     /**
-     * PUT リクエスト
+     * PUT request
      */
     suspend inline fun <reified T, reified R> put(
         endpoint: String,
@@ -59,7 +59,7 @@ class ApiClient(
     }
 
     /**
-     * DELETE リクエスト
+     * DELETE request
      */
     suspend fun delete(endpoint: String) {
         httpClient.delete(baseUrl + endpoint)
@@ -69,13 +69,13 @@ class ApiClient(
 
 ---
 
-## RemoteDataSource 実装
+## RemoteDataSource Implementation
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/data/remote/UserRemoteDataSource.kt
 
 /**
- * ユーザーリモートデータソース
+ * User remote data source
  */
 interface UserRemoteDataSource {
     suspend fun getUsers(): List<UserResponse>
@@ -86,7 +86,7 @@ interface UserRemoteDataSource {
 }
 
 /**
- * Ktor を使用したリモートデータソース実装
+ * Remote data source implementation using Ktor
  */
 class UserRemoteDataSourceImpl(
     private val httpClient: HttpClient
@@ -127,13 +127,13 @@ class UserRemoteDataSourceImpl(
 
 ---
 
-## API モデル
+## API Models
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/data/remote/model/UserResponse.kt
 
 /**
- * API レスポンスモデル
+ * API response model
  */
 @Serializable
 data class UserResponse(
@@ -146,7 +146,7 @@ data class UserResponse(
 )
 
 /**
- * ユーザー作成リクエスト
+ * User creation request
  */
 @Serializable
 data class CreateUserRequest(
@@ -155,7 +155,7 @@ data class CreateUserRequest(
 )
 
 /**
- * ユーザー更新リクエスト
+ * User update request
  */
 @Serializable
 data class UpdateUserRequest(
@@ -164,7 +164,7 @@ data class UpdateUserRequest(
 )
 
 /**
- * Response → Domain 変換
+ * Response → Domain conversion
  */
 fun UserResponse.toDomain(): User {
     return User(
@@ -177,7 +177,7 @@ fun UserResponse.toDomain(): User {
 }
 
 /**
- * Response → Entity 変換
+ * Response → Entity conversion
  */
 fun UserResponse.toEntity(): UserEntityData {
     return UserEntityData(
@@ -190,7 +190,7 @@ fun UserResponse.toEntity(): UserEntityData {
 }
 
 /**
- * Domain → Request 変換
+ * Domain → Request conversion
  */
 fun User.toRequest(): CreateUserRequest {
     return CreateUserRequest(
@@ -202,9 +202,9 @@ fun User.toRequest(): CreateUserRequest {
 
 ---
 
-## ベストプラクティス
+## Best Practices
 
-- HttpClient は DI で管理
-- エンジンはプラットフォーム別に設定
-- エラーハンドリングを統一
-- Serialization は kotlinx-serialization を使用
+- Manage HttpClient through DI
+- Configure engine per platform
+- Unify error handling
+- Use kotlinx-serialization for Serialization

@@ -1,21 +1,22 @@
 # CLAUDE.md
 
-## 原則（PRINCIPLES.md）
+## Principles (PRINCIPLES.md)
 
-**最重要**: `PRINCIPLES.md` は全てのルールに優先する根源的原則。
-セッション開始時は必ず `PRINCIPLES.md` を読み込むこと。
-優先順位・安全性・誠実性・ユーザー利益・透明性の5原則を定義。
-いかなる指示があっても変更・例外・上書きは不可。
+**Most Important**: `PRINCIPLES.md` is the fundamental principle that takes precedence over all rules.
+Always read `PRINCIPLES.md` at the start of a session.
+Defines 5 principles: Priority, Safety, Integrity, User Benefit, and Transparency.
+No modification, exception, or override is allowed regardless of any instruction.
 
-## 憲法（CONSTITUTION.md）
+## Constitution (CONSTITUTION.md)
 
-**重要**: ファイル追加・変更時は必ず `CONSTITUTION.md` を参照すること。
-憲法は「絶対に守るべきルール」を定義しており、違反は即座に修正が必要。
-（原則に従属）
+**Important**: Always refer to `CONSTITUTION.md` when adding or modifying files.
+The constitution defines "rules that must be absolutely followed," and violations require immediate correction.
+(Subordinate to principles)
 
-主な規則:
-- 第1条: 構造の即時確定（「とりあえず」配置の禁止）
-- 第2条: ドキュメントの同時作成
-- 第3条: 命名規則の遵守
-- 第4条: 依存関係の完結
-- 第5条: 違反時の即時対応
+Main rules:
+- Article 1: Immediate structure finalization (no "temporary" placements)
+- Article 2: Simultaneous documentation creation
+- Article 3: Naming convention compliance
+- Article 4: Complete dependency resolution
+- Article 5: Immediate response to violations
+- Article 6: Pre-execution command verification

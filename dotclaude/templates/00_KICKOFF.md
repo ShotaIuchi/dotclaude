@@ -6,53 +6,53 @@
 
 ## Goal
 
-<!-- この作業で達成したいことを1〜2文で記述 -->
+<!-- Describe what you want to achieve with this work in 1-2 sentences -->
 {{GOAL}}
 
 ## Success Criteria
 
-<!-- 完了とみなす条件を箇条書きで列挙 -->
+<!-- List the conditions to consider this complete -->
 - [ ] {{CRITERIA_1}}
 - [ ] {{CRITERIA_2}}
 - [ ] {{CRITERIA_3}}
 
 ## Constraints
 
-<!-- 守るべき制約・非機能要件 -->
+<!-- Constraints and non-functional requirements to follow -->
 - {{CONSTRAINT_1}}
 - {{CONSTRAINT_2}}
 
 ## Non-goals
 
-<!-- 今回のスコープ外であることを明記 -->
+<!-- Explicitly state what is out of scope -->
 - {{NON_GOAL_1}}
 
 ## Dependencies
 
-<!-- 並行開発時の衝突防止のため構造化 -->
+<!-- Structured to prevent conflicts during parallel development -->
 
 ### Depends on
 
-<!-- この作業が依存する他の作業・外部要因 -->
+<!-- Other work or external factors this work depends on -->
 - {{DEPENDS_ON_1}}
 
 ### Impacts
 
-<!-- この作業が影響を与える可能性のある箇所 -->
+<!-- Areas that may be affected by this work -->
 - {{IMPACTS_1}}
 
 ### Conflicts
 
-<!-- 並行作業で衝突する可能性のある作業 -->
+<!-- Work that may conflict in parallel development -->
 - {{CONFLICTS_1}}
 
 ## Open Questions
 
-<!-- AIが勝手に決めてはいけない項目。人間の判断が必要な点を列挙 -->
+<!-- Items AI should not decide alone. List points requiring human judgment -->
 - [ ] {{QUESTION_1}}
 - [ ] {{QUESTION_2}}
 
 ## Notes
 
-<!-- 補足情報、議論メモなど -->
+<!-- Supplementary information, discussion notes, etc. -->
 {{NOTES}}

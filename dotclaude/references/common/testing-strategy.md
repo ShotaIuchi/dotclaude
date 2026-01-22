@@ -1,51 +1,51 @@
-# テスト戦略ガイド
+# Testing Strategy Guide
 
-プラットフォーム共通のテスト戦略とベストプラクティス。
+Cross-platform testing strategy and best practices.
 
 ---
 
-## テストピラミッド
+## Test Pyramid
 
 ```
           /\
          /  \
-        / E2E \         ← 少数・高コスト・遅い
+        / E2E \         ← Few / High Cost / Slow
        /──────\
       /        \
-     / 統合テスト \      ← 中程度
+     / Integration \    ← Medium
     /────────────\
    /              \
-  /  ユニットテスト  \  ← 多数・低コスト・速い
+  /   Unit Tests   \    ← Many / Low Cost / Fast
  /──────────────────\
 ```
 
-| 種類 | 対象 | 目的 |
-|------|------|------|
-| ユニットテスト | 単一のクラス/関数 | ロジックの正確性 |
-| 統合テスト | 複数のコンポーネント | コンポーネント間の連携 |
-| E2E テスト | アプリ全体 | ユーザーフローの検証 |
+| Type | Target | Purpose |
+|------|--------|---------|
+| Unit Test | Single class/function | Logic correctness |
+| Integration Test | Multiple components | Component interaction |
+| E2E Test | Entire app | User flow verification |
 
 ---
 
-## ユニットテスト
+## Unit Tests
 
-### テスト対象
+### Test Targets
 
-| レイヤー | テスト対象 | モック対象 |
-|---------|-----------|-----------|
-| ViewModel | 状態遷移・UI ロジック | UseCase, Repository |
-| UseCase | ビジネスロジック | Repository |
-| Repository | データ取得ロジック | DataSource, API |
-| Mapper | 変換ロジック | なし（純粋関数） |
+| Layer | Test Target | Mock Target |
+|-------|-------------|-------------|
+| ViewModel | State transitions / UI logic | UseCase, Repository |
+| UseCase | Business logic | Repository |
+| Repository | Data retrieval logic | DataSource, API |
+| Mapper | Transformation logic | None (pure functions) |
 
-### 命名規則
+### Naming Conventions
 
 ```kotlin
-// Kotlin: バッククォートで日本語も可
+// Kotlin: Backticks allow descriptive names
 @Test
-fun `ユーザー取得に成功した場合 Success状態になる`() { }
+fun `when user fetch succeeds then state becomes Success`() { }
 
-// または英語で
+// Or in English
 @Test
 fun loadUser_success_updatesStateToSuccess() { }
 ```
@@ -55,25 +55,25 @@ fun loadUser_success_updatesStateToSuccess() { }
 func test_loadUser_success_updatesStateToSuccess() { }
 ```
 
-### Given-When-Then パターン
+### Given-When-Then Pattern
 
 ```kotlin
 @Test
 fun `loadUser updates state to success when repository returns user`() {
-    // Given - 前提条件
+    // Given - Preconditions
     val mockRepository = mockk<UserRepository>()
     coEvery { mockRepository.getUser("1") } returns Result.success(testUser)
     val viewModel = UserViewModel(mockRepository)
 
-    // When - 実行
+    // When - Execution
     viewModel.loadUser("1")
 
-    // Then - 検証
+    // Then - Verification
     assertEquals(UiState.Success(testUser), viewModel.uiState.value)
 }
 ```
 
-### エッジケースのテスト
+### Testing Edge Cases
 
 ```kotlin
 class UserViewModelTest {
@@ -96,14 +96,14 @@ class UserViewModelTest {
 
 ---
 
-## モックとスタブ
+## Mocks and Stubs
 
-### 依存性の注入
+### Dependency Injection
 
 ```kotlin
-// プロダクションコード
+// Production code
 class UserViewModel(
-    private val getUserUseCase: GetUserUseCase  // 注入
+    private val getUserUseCase: GetUserUseCase  // Injected
 ) : ViewModel() {
     fun loadUser(id: String) {
         viewModelScope.launch {
@@ -113,14 +113,14 @@ class UserViewModel(
     }
 }
 
-// テストコード
+// Test code
 @Test
 fun `test with mock`() = runTest {
-    // モックを作成
+    // Create mock
     val mockUseCase = mockk<GetUserUseCase>()
     coEvery { mockUseCase(any()) } returns Result.success(testUser)
 
-    // モックを注入
+    // Inject mock
     val viewModel = UserViewModel(mockUseCase)
 
     viewModel.loadUser("1")
@@ -131,14 +131,14 @@ fun `test with mock`() = runTest {
 
 ### Fake vs Mock
 
-| 種類 | 説明 | 使用場面 |
-|------|------|---------|
-| Mock | 呼び出しを記録・検証 | 振る舞いの検証 |
-| Stub | 固定値を返す | 入力に対する出力の検証 |
-| Fake | 簡易実装 | 複雑なロジックのテスト |
+| Type | Description | Use Case |
+|------|-------------|----------|
+| Mock | Records and verifies calls | Behavior verification |
+| Stub | Returns fixed values | Input/output verification |
+| Fake | Simplified implementation | Testing complex logic |
 
 ```kotlin
-// Fake の例
+// Fake example
 class FakeUserRepository : UserRepository {
     private val users = mutableListOf<User>()
 
@@ -153,7 +153,7 @@ class FakeUserRepository : UserRepository {
         return Result.success(Unit)
     }
 
-    // テスト用のヘルパー
+    // Test helpers
     fun addUser(user: User) {
         users.add(user)
     }
@@ -166,7 +166,7 @@ class FakeUserRepository : UserRepository {
 
 ---
 
-## 非同期コードのテスト
+## Testing Async Code
 
 ### Kotlin Coroutines
 
@@ -207,12 +207,12 @@ func test_loadUser_success() async throws {
 
 ---
 
-## テストデータ
+## Test Data
 
-### テストフィクスチャ
+### Test Fixtures
 
 ```kotlin
-// テストデータの定義
+// Test data definition
 object TestData {
     val testUser = User(
         id = "1",
@@ -228,10 +228,10 @@ object TestData {
 }
 ```
 
-### ファクトリ関数
+### Factory Functions
 
 ```kotlin
-// 柔軟なテストデータ生成
+// Flexible test data generation
 fun createUser(
     id: String = "1",
     name: String = "Test User",
@@ -239,7 +239,7 @@ fun createUser(
     isActive: Boolean = true
 ) = User(id, name, email, isActive)
 
-// 使用例
+// Usage
 @Test
 fun `inactive user is filtered out`() {
     val users = listOf(
@@ -256,9 +256,9 @@ fun `inactive user is filtered out`() {
 
 ---
 
-## 統合テスト
+## Integration Tests
 
-### Repository の統合テスト
+### Repository Integration Test
 
 ```kotlin
 @RunWith(AndroidJUnit4::class)
@@ -268,7 +268,7 @@ class UserRepositoryIntegrationTest {
 
     @Before
     fun setup() {
-        // インメモリデータベースを使用
+        // Use in-memory database
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
             AppDatabase::class.java
@@ -303,9 +303,9 @@ class UserRepositoryIntegrationTest {
 
 ---
 
-## UI テスト
+## UI Tests
 
-### Compose UI テスト
+### Compose UI Test
 
 ```kotlin
 @RunWith(AndroidJUnit4::class)
@@ -367,7 +367,7 @@ class UserListScreenTest {
 }
 ```
 
-### SwiftUI テスト
+### SwiftUI Test
 
 ```swift
 final class UserListViewTests: XCTestCase {
@@ -378,7 +378,7 @@ final class UserListViewTests: XCTestCase {
 
         let view = UserListView(viewModel: viewModel)
 
-        // ViewInspector などを使用してテスト
+        // Test using ViewInspector or similar
         let list = try view.inspect().list()
         XCTAssertEqual(list.count, users.count)
     }
@@ -387,38 +387,38 @@ final class UserListViewTests: XCTestCase {
 
 ---
 
-## テストカバレッジ
+## Test Coverage
 
-### 優先順位
+### Priority
 
-1. **高優先度**: ビジネスロジック（UseCase, Domain Model）
-2. **中優先度**: データ取得ロジック（Repository, Mapper）
-3. **低優先度**: UI ロジック（ViewModel の状態遷移）
+1. **High Priority**: Business logic (UseCase, Domain Model)
+2. **Medium Priority**: Data retrieval logic (Repository, Mapper)
+3. **Low Priority**: UI logic (ViewModel state transitions)
 
-### カバレッジ目標
+### Coverage Targets
 
-| レイヤー | 目標カバレッジ |
-|---------|--------------|
+| Layer | Target Coverage |
+|-------|----------------|
 | Domain | 90%+ |
 | Data | 80%+ |
 | Presentation | 70%+ |
 
 ---
 
-## ベストプラクティス
+## Best Practices
 
-### DO (推奨)
+### DO (Recommended)
 
-- テストは独立して実行可能に
-- テストデータは各テストで明示的に設定
-- 一つのテストで一つの事をテスト
-- 意図が明確な命名
-- エッジケースをカバー
+- Tests should be independently executable
+- Set up test data explicitly for each test
+- Test one thing per test
+- Use clear, intention-revealing naming
+- Cover edge cases
 
-### DON'T (非推奨)
+### DON'T (Not Recommended)
 
-- テスト間の依存関係
-- 実際のネットワーク呼び出し
-- 実際のデータベースへの書き込み
-- 実装詳細のテスト（内部メソッドの呼び出し順など）
-- フレーキーテスト（結果が不安定なテスト）
+- Dependencies between tests
+- Actual network calls
+- Writing to actual databases
+- Testing implementation details (e.g., internal method call order)
+- Flaky tests (tests with unstable results)

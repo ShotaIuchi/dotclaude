@@ -1,105 +1,105 @@
-# サブエージェント体系
+# Sub-Agent System
 
-WF運用システムで使用するサブエージェントの定義と使用方法。
+Definitions and usage of sub-agents used in the WF Management System.
 
-## 概要
+## Overview
 
-サブエージェントは Claude Code の Task ツールを活用した専門特化型のエージェントです。
-各エージェントは特定のタスクに最適化されており、ワークフローコマンドから呼び出すか、
-`/agent` コマンドで直接実行できます。
+Sub-agents are specialized agents that utilize Claude Code's Task tool.
+Each agent is optimized for specific tasks and can be called from workflow commands
+or executed directly via the `/agent` command.
 
-## エージェント分類
+## Agent Classification
 
-### ワークフロー支援型（workflow/）
+### Workflow Support Type (workflow/)
 
-ワークフローコマンドと連携して動作するエージェント。
+Agents that work in conjunction with workflow commands.
 
-| エージェント | 用途 | 呼び出し元 |
-|-------------|------|-----------|
-| `research` | Issue 背景調査、関連コード特定 | wf1-kickoff |
-| `spec-writer` | 仕様書ドラフト作成 | wf2-spec |
-| `planner` | 実装計画立案 | wf3-plan |
-| `implementer` | 1ステップ実装支援 | wf5-implement |
+| Agent | Purpose | Caller |
+|-------|---------|--------|
+| `research` | Issue background research, related code identification | wf1-kickoff |
+| `spec-writer` | Specification draft creation | wf2-spec |
+| `planner` | Implementation planning | wf3-plan |
+| `implementer` | Single step implementation support | wf5-implement |
 
-### タスク特化型（task/）
+### Task-Specific Type (task/)
 
-単独で実行可能な汎用タスクエージェント。
+General-purpose task agents that can be executed standalone.
 
-| エージェント | 用途 |
-|-------------|------|
-| `reviewer` | コードレビュー |
-| `test-writer` | テスト作成 |
-| `refactor` | リファクタリング提案 |
-| `doc-writer` | ドキュメント作成 |
+| Agent | Purpose |
+|-------|---------|
+| `reviewer` | Code review |
+| `test-writer` | Test creation |
+| `refactor` | Refactoring suggestions |
+| `doc-writer` | Documentation creation |
 
-### プロジェクト分析型（analysis/）
+### Project Analysis Type (analysis/)
 
-コードベースの調査・分析を行うエージェント。
+Agents for investigating and analyzing the codebase.
 
-| エージェント | 用途 |
-|-------------|------|
-| `codebase` | コードベース調査 |
-| `dependency` | 依存関係分析 |
-| `impact` | 影響範囲特定 |
+| Agent | Purpose |
+|-------|---------|
+| `codebase` | Codebase investigation |
+| `dependency` | Dependency analysis |
+| `impact` | Impact scope identification |
 
-## 使用方法
+## Usage
 
-### ワークフローコマンド経由
+### Via Workflow Commands
 
-ワークフローコマンドが自動的に適切なエージェントを呼び出します。
+Workflow commands automatically call the appropriate agent.
 
 ```
 /wf1-kickoff
-→ research エージェントが Issue 背景を調査
+→ research agent investigates Issue background
 
 /wf2-spec
-→ spec-writer エージェントが仕様書ドラフトを作成
+→ spec-writer agent creates specification draft
 ```
 
-### 直接呼び出し
+### Direct Invocation
 
-`/agent` コマンドで任意のエージェントを直接実行できます。
+Any agent can be executed directly via the `/agent` command.
 
 ```
 /agent research issue=123
-/agent codebase query="認証フローの実装箇所"
+/agent codebase query="authentication flow implementation location"
 /agent reviewer files="src/auth/*.ts"
 ```
 
-## エージェント定義形式
+## Agent Definition Format
 
-各エージェントは以下の形式で定義されています。
+Each agent is defined in the following format.
 
 ```markdown
-# Agent: {名前}
+# Agent: {name}
 
 ## Metadata
-- **ID**: {識別子}
+- **ID**: {identifier}
 - **Base Type**: {explore | plan | bash | general}
 - **Category**: {workflow | task | analysis}
 
 ## Purpose
-{目的}
+{purpose}
 
 ## Context
-{必要な state.json / ドキュメント}
+{required state.json / documents}
 
 ## Capabilities
-{できること}
+{what it can do}
 
 ## Constraints
-{制約}
+{constraints}
 
 ## Instructions
-{実行手順}
+{execution procedure}
 
 ## Output Format
-{出力形式}
+{output format}
 ```
 
-## state.json との連携
+## Integration with state.json
 
-エージェントの実行状態は state.json に記録されます。
+Agent execution status is recorded in state.json.
 
 ```json
 {
@@ -119,14 +119,14 @@ WF運用システムで使用するサブエージェントの定義と使用方
 }
 ```
 
-## ディレクトリ構成
+## Directory Structure
 
 ```
 agents/
-├── README.md           # このファイル
+├── README.md           # This file
 ├── _base/
-│   ├── context.md      # 共通コンテキスト
-│   └── constraints.md  # 共通制約
+│   ├── context.md      # Common context
+│   └── constraints.md  # Common constraints
 ├── workflow/
 │   ├── research.md
 │   ├── spec-writer.md

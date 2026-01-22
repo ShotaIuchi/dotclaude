@@ -1,17 +1,17 @@
-# KMP データ永続化 (SQLDelight)
+# KMP Data Persistence (SQLDelight)
 
-Kotlin Multiplatform での SQLDelight を使用したローカルデータベース実装。
+Local database implementation using SQLDelight in Kotlin Multiplatform.
 
-> **関連ドキュメント**: [KMP Architecture Guide](./kmp-architecture.md) | [SQLDelight 公式](https://cashapp.github.io/sqldelight/)
+> **Related Documentation**: [KMP Architecture Guide](./kmp-architecture.md) | [SQLDelight Official](https://cashapp.github.io/sqldelight/)
 
 ---
 
-## スキーマ定義
+## Schema Definition
 
 ```sql
 -- shared/src/commonMain/sqldelight/com/example/shared/AppDatabase.sq
 
--- ユーザーテーブル
+-- User table
 CREATE TABLE UserEntity (
     id TEXT NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
@@ -20,26 +20,26 @@ CREATE TABLE UserEntity (
     status TEXT NOT NULL
 );
 
--- ユーザー一覧取得
+-- Get user list
 getUsers:
 SELECT * FROM UserEntity
 ORDER BY name ASC;
 
--- 単一ユーザー取得
+-- Get single user
 getUser:
 SELECT * FROM UserEntity
 WHERE id = ?;
 
--- ユーザー挿入/更新
+-- Insert/update user
 insertUser:
 INSERT OR REPLACE INTO UserEntity(id, name, email, joined_at, status)
 VALUES (?, ?, ?, ?, ?);
 
--- 全ユーザー削除
+-- Delete all users
 deleteAllUsers:
 DELETE FROM UserEntity;
 
--- 単一ユーザー削除
+-- Delete single user
 deleteUser:
 DELETE FROM UserEntity
 WHERE id = ?;
@@ -47,13 +47,13 @@ WHERE id = ?;
 
 ---
 
-## LocalDataSource 実装
+## LocalDataSource Implementation
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/data/local/UserLocalDataSource.kt
 
 /**
- * ユーザーローカルデータソース
+ * User local data source
  */
 interface UserLocalDataSource {
     fun getUsers(): Flow<List<UserEntity>>
@@ -65,7 +65,7 @@ interface UserLocalDataSource {
 }
 
 /**
- * SQLDelight を使用したローカルデータソース実装
+ * Local data source implementation using SQLDelight
  */
 class UserLocalDataSourceImpl(
     private val database: AppDatabase
@@ -140,7 +140,7 @@ class UserLocalDataSourceImpl(
 
 ---
 
-## Entity マッピング
+## Entity Mapping
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/data/mapper/UserMapper.kt
@@ -161,8 +161,8 @@ fun UserEntity.toDomain(): User {
 /**
  * Domain → SQLDelight Entity
  *
- * SQLDelight の生成する Entity は data class ではないため、
- * 別途 data class を定義することもある
+ * Since SQLDelight-generated Entity is not a data class,
+ * a separate data class may be defined
  */
 fun User.toEntity(): com.example.shared.data.model.UserEntityData {
     return UserEntityData(
@@ -175,7 +175,7 @@ fun User.toEntity(): com.example.shared.data.model.UserEntityData {
 }
 
 /**
- * Entity 用データクラス（挿入時に使用）
+ * Entity data class (used for insertion)
  */
 data class UserEntityData(
     val id: String,
@@ -188,9 +188,9 @@ data class UserEntityData(
 
 ---
 
-## ベストプラクティス
+## Best Practices
 
-- スキーマは共通で定義
-- Driver は各プラットフォームで実装
-- トランザクションは適切に使用
-- Flow で変更を監視
+- Define schema in common code
+- Implement Driver for each platform
+- Use transactions appropriately
+- Monitor changes with Flow

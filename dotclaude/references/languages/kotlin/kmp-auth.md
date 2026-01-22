@@ -1,51 +1,51 @@
 # KMP Authentication Best Practices Guide
 
-KMP（Kotlin Multiplatform）+ Ktor での認証実装ベストプラクティス。
-複数ログイン方式対応、トークン管理、401→refresh→retry の王道パターンを実装するためのガイド。
+Best practices for implementing authentication with KMP (Kotlin Multiplatform) + Ktor.
+A guide for implementing multiple login method support, token management, and the standard 401 -> refresh -> retry pattern.
 
 ---
 
-## 目次
+## Table of Contents
 
-1. [ゴール](#ゴール)
-2. [アーキテクチャ概要](#アーキテクチャ概要)
-3. [データモデル](#データモデル)
-4. [インターフェース定義](#インターフェース定義)
-5. [Ktor 認証プラグイン実装](#ktor-認証プラグイン実装)
-6. [複数ログイン方式の設計指針](#複数ログイン方式の設計指針)
-7. [ディレクトリ構成例](#ディレクトリ構成例)
-8. [例外設計](#例外設計)
-9. [実装コード例](#実装コード例)
-10. [エージェント向けタスク分解](#エージェント向けタスク分解)
-
----
-
-## ゴール
-
-### 達成すべき要件
-
-1. **shared モジュールで認証を完結**
-   - API 通信、トークン付与、401→refresh→retry をすべて共通コードで実装
-   - プラットフォーム固有コードは TokenStore の永続化のみ
-
-2. **ログイン方式の差分を閉じ込め**
-   - ネットワーク層は `Session` だけを見る
-   - ログイン方式の差分は `AuthRepository.login()` に集約
-   - refresh ロジックの差分は `AuthRepository.refresh()` に集約
-
-3. **Android/iOS で挙動一致**
-   - 同じビジネスロジック、同じエラーハンドリング
-   - UI 層のみプラットフォーム固有
-
-4. **並列 401 でも破綻しない**
-   - Mutex による refresh 多重発火抑止
-   - refresh 中のリクエストは待機してリトライ
+1. [Goals](#goals)
+2. [Architecture Overview](#architecture-overview)
+3. [Data Models](#data-models)
+4. [Interface Definitions](#interface-definitions)
+5. [Ktor Authentication Plugin Implementation](#ktor-authentication-plugin-implementation)
+6. [Design Guidelines for Multiple Login Methods](#design-guidelines-for-multiple-login-methods)
+7. [Directory Structure Example](#directory-structure-example)
+8. [Exception Design](#exception-design)
+9. [Implementation Code Examples](#implementation-code-examples)
+10. [Task Breakdown for Agents](#task-breakdown-for-agents)
 
 ---
 
-## アーキテクチャ概要
+## Goals
 
-### レイヤー構成
+### Requirements to Achieve
+
+1. **Complete authentication within the shared module**
+   - Implement all API communication, token attachment, and 401 -> refresh -> retry in common code
+   - Platform-specific code is limited to TokenStore persistence only
+
+2. **Encapsulate login method differences**
+   - Network layer only sees `Session`
+   - Login method differences are consolidated in `AuthRepository.login()`
+   - Refresh logic differences are consolidated in `AuthRepository.refresh()`
+
+3. **Consistent behavior on Android/iOS**
+   - Same business logic, same error handling
+   - Only UI layer is platform-specific
+
+4. **Handle concurrent 401s without breaking**
+   - Mutex prevents multiple refresh triggers
+   - Requests during refresh wait and retry
+
+---
+
+## Architecture Overview
+
+### Layer Structure
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -63,8 +63,8 @@ KMP（Kotlin Multiplatform）+ Ktor での認証実装ベストプラクティ�
 │  │                    Presentation Layer                        │   │
 │  │  ┌─────────────────────────────────────────────────────┐    │   │
 │  │  │   LoginViewModel / AuthStateViewModel               │    │   │
-│  │  │   - SessionState を監視                              │    │   │
-│  │  │   - ログイン/ログアウト操作を AuthRepository へ       │    │   │
+│  │  │   - Observes SessionState                           │    │   │
+│  │  │   - Delegates login/logout operations to AuthRepository │   │
 │  │  └─────────────────────────────────────────────────────┘    │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 │                                 │                                    │
@@ -86,16 +86,16 @@ KMP（Kotlin Multiplatform）+ Ktor での認証実装ベストプラクティ�
 │  │                                                               │   │
 │  │  ┌───────────────────┐  ┌───────────────────────────────┐   │   │
 │  │  │   TokenStore      │  │   AuthRepositoryImpl          │   │   │
-│  │  │   (expect/actual) │  │   - ログイン方式ごとの処理      │   │   │
-│  │  │   - get/save/clear│  │   - refresh ロジック           │   │   │
+│  │  │   (expect/actual) │  │   - Per-login-method processing │   │   │
+│  │  │   - get/save/clear│  │   - Refresh logic              │   │   │
 │  │  └───────────────────┘  └───────────────────────────────┘   │   │
 │  │                                │                              │   │
 │  │                                ▼                              │   │
 │  │  ┌─────────────────────────────────────────────────────┐    │   │
 │  │  │   Ktor HttpClient + AuthPlugin                      │    │   │
-│  │  │   - Authorization ヘッダー自動付与                    │    │   │
-│  │  │   - 401 検知 → refresh → retry                      │    │   │
-│  │  │   - Mutex による多重 refresh 抑止                    │    │   │
+│  │  │   - Automatic Authorization header attachment       │    │   │
+│  │  │   - 401 detection → refresh → retry                 │    │   │
+│  │  │   - Multiple refresh prevention with Mutex          │    │   │
 │  │  └─────────────────────────────────────────────────────┘    │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
@@ -110,19 +110,19 @@ KMP（Kotlin Multiplatform）+ Ktor での認証実装ベストプラクティ�
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### 責務分離
+### Separation of Responsibilities
 
-| レイヤー | 責務 |
-|---------|------|
-| **UI** | ログイン画面表示、SessionState に応じた画面遷移 |
-| **ViewModel** | SessionState 監視、ログイン操作の発火 |
-| **AuthRepository** | ログイン方式ごとの処理、refresh ロジック、SessionState 管理 |
-| **TokenStore** | トークンの永続化（プラットフォーム固有） |
-| **HttpClient + AuthPlugin** | Authorization ヘッダー付与、401→refresh→retry |
+| Layer | Responsibility |
+|-------|----------------|
+| **UI** | Login screen display, screen navigation based on SessionState |
+| **ViewModel** | SessionState observation, triggering login operations |
+| **AuthRepository** | Per-login-method processing, refresh logic, SessionState management |
+| **TokenStore** | Token persistence (platform-specific) |
+| **HttpClient + AuthPlugin** | Authorization header attachment, 401 → refresh → retry |
 
 ---
 
-## データモデル
+## Data Models
 
 ### Session
 
@@ -133,9 +133,9 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 /**
- * 認証セッション
+ * Authentication Session
  *
- * ログイン方式に関わらず、統一されたセッション情報を保持
+ * Holds unified session information regardless of login method
  */
 @Serializable
 data class Session(
@@ -147,16 +147,16 @@ data class Session(
     val scopes: Set<String> = emptySet()
 ) {
     /**
-     * アクセストークンが期限切れかどうか
+     * Whether the access token is expired
      *
-     * expiresAt が null の場合は期限切れとみなさない
+     * If expiresAt is null, it is not considered expired
      */
     fun isExpired(now: Instant = Clock.System.now()): Boolean {
         return expiresAt?.let { now >= it } ?: false
     }
 
     /**
-     * refresh 可能かどうか
+     * Whether refresh is possible
      */
     val canRefresh: Boolean
         get() = refreshToken != null
@@ -171,9 +171,9 @@ data class Session(
 import kotlinx.serialization.Serializable
 
 /**
- * 認証タイプ
+ * Authentication Type
  *
- * セッションがどの方式でログインされたかを識別
+ * Identifies which method was used to log in the session
  */
 @Serializable
 enum class AuthType {
@@ -191,14 +191,14 @@ enum class AuthType {
 // commonMain/kotlin/com/example/shared/domain/model/LoginMethod.kt
 
 /**
- * ログイン方式
+ * Login Method
  *
- * 各ログイン方式に必要なパラメータを保持する sealed class
+ * Sealed class holding parameters required for each login method
  */
 sealed class LoginMethod {
 
     /**
-     * メール/パスワード認証
+     * Email/Password Authentication
      */
     data class EmailPassword(
         val email: String,
@@ -206,14 +206,14 @@ sealed class LoginMethod {
     ) : LoginMethod()
 
     /**
-     * Google Sign-In（ID Token 方式）
+     * Google Sign-In (ID Token method)
      */
     data class GoogleIdToken(
         val idToken: String
     ) : LoginMethod()
 
     /**
-     * Apple Sign In（ID Token 方式）
+     * Apple Sign In (ID Token method)
      */
     data class AppleIdToken(
         val idToken: String,
@@ -222,16 +222,16 @@ sealed class LoginMethod {
     ) : LoginMethod()
 
     /**
-     * SSO（Authorization Code 方式）
+     * SSO (Authorization Code method)
      */
     data class SsoAuthCode(
         val provider: String,
         val authorizationCode: String,
-        val codeVerifier: String?  // PKCE 使用時
+        val codeVerifier: String?  // When using PKCE
     ) : LoginMethod()
 
     /**
-     * カスタム認証
+     * Custom Authentication
      */
     data class Custom(
         val type: String,
@@ -246,37 +246,37 @@ sealed class LoginMethod {
 // commonMain/kotlin/com/example/shared/domain/model/SessionState.kt
 
 /**
- * セッション状態
+ * Session State
  *
- * UI 層がこの状態を監視して画面遷移を決定
+ * UI layer observes this state to determine screen navigation
  */
 sealed class SessionState {
 
     /**
-     * ログアウト状態
+     * Logged out state
      */
     object LoggedOut : SessionState()
 
     /**
-     * ログイン中
+     * Logged in
      */
     data class LoggedIn(
         val session: Session
     ) : SessionState()
 
     /**
-     * トークン更新中
+     * Token refreshing
      *
-     * この状態の間は API リクエストを待機させる
+     * API requests should wait during this state
      */
     data class Refreshing(
         val session: Session
     ) : SessionState()
 
     /**
-     * セッション無効（再ログインが必要）
+     * Session invalid (re-login required)
      *
-     * refresh が失敗した場合に遷移
+     * Transitions to this state when refresh fails
      */
     data class ExpiredOrInvalid(
         val reason: String? = null
@@ -286,7 +286,7 @@ sealed class SessionState {
 
 ---
 
-## インターフェース定義
+## Interface Definitions
 
 ### TokenStore
 
@@ -296,29 +296,29 @@ sealed class SessionState {
 import kotlinx.coroutines.flow.Flow
 
 /**
- * トークン永続化ストア
+ * Token Persistence Store
  *
- * expect/actual でプラットフォーム固有の実装を提供
+ * Provides platform-specific implementation via expect/actual
  */
 interface TokenStore {
 
     /**
-     * 現在のセッションを取得
+     * Get current session
      */
     suspend fun get(): Session?
 
     /**
-     * セッションの変更を監視
+     * Observe session changes
      */
     fun flow(): Flow<Session?>
 
     /**
-     * セッションを保存
+     * Save session
      */
     suspend fun save(session: Session)
 
     /**
-     * セッションをクリア
+     * Clear session
      */
     suspend fun clear()
 }
@@ -332,43 +332,43 @@ interface TokenStore {
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * 認証リポジトリ
+ * Authentication Repository
  *
- * ログイン/ログアウト/refresh の操作と、セッション状態の管理
+ * Login/logout/refresh operations and session state management
  */
 interface AuthRepository {
 
     /**
-     * 現在のセッション状態
+     * Current session state
      */
     val sessionState: StateFlow<SessionState>
 
     /**
-     * ログイン
+     * Login
      *
-     * @param method ログイン方式と認証情報
-     * @return 成功時は Session、失敗時は例外
+     * @param method Login method and credentials
+     * @return Session on success, exception on failure
      */
     suspend fun login(method: LoginMethod): Result<Session>
 
     /**
-     * トークン更新
+     * Token refresh
      *
-     * 内部的に呼ばれることが多いが、明示的に呼ぶことも可能
+     * Often called internally, but can also be called explicitly
      *
-     * @return 成功時は新しい Session、失敗時は例外
+     * @return New Session on success, exception on failure
      */
     suspend fun refresh(): Result<Session>
 
     /**
-     * ログアウト
+     * Logout
      *
-     * サーバーへのログアウト通知とローカルセッションのクリア
+     * Server logout notification and local session clearing
      */
     suspend fun logout()
 
     /**
-     * 現在のセッションを取得
+     * Get current session
      */
     suspend fun getCurrentSession(): Session?
 }
@@ -376,25 +376,25 @@ interface AuthRepository {
 
 ---
 
-## Ktor 認証プラグイン実装
+## Ktor Authentication Plugin Implementation
 
-### 設計のポイント
+### Design Points
 
-1. **Authorization ヘッダーの自動付与**
-   - TokenStore からトークンを取得してリクエストに付与
+1. **Automatic Authorization header attachment**
+   - Retrieve token from TokenStore and attach to request
 
-2. **401 検知 → refresh → リトライ**
-   - 401 レスポンス受信時に自動で refresh を試行
-   - refresh 成功後、元のリクエストをリトライ
+2. **401 detection → refresh → retry**
+   - Automatically attempt refresh when receiving 401 response
+   - Retry original request after successful refresh
 
-3. **Mutex による多重 refresh 抑止**
-   - 並列リクエストが同時に 401 を受けても、refresh は 1 回だけ
+3. **Multiple refresh prevention with Mutex**
+   - Even if concurrent requests receive 401 simultaneously, refresh occurs only once
 
-4. **refresh API のループ防止**
-   - refresh API 自体には認証プラグインを適用しない
-   - 専用の HttpClient を使用
+4. **Refresh API loop prevention**
+   - Do not apply authentication plugin to the refresh API itself
+   - Use a dedicated HttpClient
 
-### AuthPlugin 実装
+### AuthPlugin Implementation
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/data/network/AuthPlugin.kt
@@ -409,7 +409,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * 認証プラグインの設定
+ * Authentication plugin configuration
  */
 class AuthPluginConfig {
     var tokenStore: TokenStore? = null
@@ -418,11 +418,11 @@ class AuthPluginConfig {
 }
 
 /**
- * Ktor 認証プラグイン
+ * Ktor Authentication Plugin
  *
- * - Authorization ヘッダー自動付与
+ * - Automatic Authorization header attachment
  * - 401 → refresh → retry
- * - Mutex による多重 refresh 抑止
+ * - Multiple refresh prevention with Mutex
  */
 val AuthPlugin = createClientPlugin("AuthPlugin", ::AuthPluginConfig) {
 
@@ -434,9 +434,9 @@ val AuthPlugin = createClientPlugin("AuthPlugin", ::AuthPluginConfig) {
 
     val refreshMutex = Mutex()
 
-    // リクエスト送信前: Authorization ヘッダーを付与
+    // Before sending request: attach Authorization header
     onRequest { request, _ ->
-        // refresh API には適用しない
+        // Do not apply to refresh API
         if (request.attributes.getOrNull(SkipAuthKey) == true) {
             return@onRequest
         }
@@ -447,28 +447,28 @@ val AuthPlugin = createClientPlugin("AuthPlugin", ::AuthPluginConfig) {
         }
     }
 
-    // レスポンス受信後: 401 なら refresh → retry
+    // After receiving response: if 401, refresh → retry
     on(Send) { request ->
-        // refresh API には適用しない
+        // Do not apply to refresh API
         if (request.attributes.getOrNull(SkipAuthKey) == true) {
             return@on proceed(request)
         }
 
         val originalResponse = proceed(request)
 
-        // 401 でなければそのまま返す
+        // Return as-is if not 401
         if (originalResponse.status != HttpStatusCode.Unauthorized) {
             return@on originalResponse
         }
 
-        // refresh を試行（Mutex で排他制御）
+        // Attempt refresh (with Mutex for exclusive control)
         val refreshResult = refreshMutex.withLock {
-            // 他のリクエストが既に refresh した可能性があるので再チェック
+            // Check again as another request may have already refreshed
             val currentSession = tokenStore.get()
             val originalToken = request.headers[HttpHeaders.Authorization]
                 ?.removePrefix("Bearer ")
 
-            // トークンが既に更新されていたら refresh 不要
+            // No refresh needed if token was already updated
             if (currentSession != null && currentSession.accessToken != originalToken) {
                 Result.success(currentSession)
             } else {
@@ -478,7 +478,7 @@ val AuthPlugin = createClientPlugin("AuthPlugin", ::AuthPluginConfig) {
 
         when {
             refreshResult.isSuccess -> {
-                // 新しいトークンでリトライ
+                // Retry with new token
                 val newSession = refreshResult.getOrThrow()
                 val retryRequest = HttpRequestBuilder().apply {
                     takeFrom(request)
@@ -487,7 +487,7 @@ val AuthPlugin = createClientPlugin("AuthPlugin", ::AuthPluginConfig) {
                 proceed(retryRequest.build())
             }
             else -> {
-                // refresh 失敗 → セッション期限切れを通知
+                // Refresh failed → notify session expiration
                 onSessionExpired?.invoke()
                 originalResponse
             }
@@ -496,19 +496,19 @@ val AuthPlugin = createClientPlugin("AuthPlugin", ::AuthPluginConfig) {
 }
 
 /**
- * 認証スキップ用のキー
+ * Key for skipping authentication
  */
 val SkipAuthKey = AttributeKey<Boolean>("SkipAuth")
 
 /**
- * このリクエストでは認証をスキップする
+ * Skip authentication for this request
  */
 fun HttpRequestBuilder.skipAuth() {
     attributes.put(SkipAuthKey, true)
 }
 ```
 
-### HttpClient 設定
+### HttpClient Configuration
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/data/network/HttpClientFactory.kt
@@ -521,7 +521,7 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
 /**
- * HttpClient ファクトリ
+ * HttpClient Factory
  */
 class HttpClientFactory(
     private val tokenStore: TokenStore,
@@ -529,11 +529,11 @@ class HttpClientFactory(
     private val engine: HttpClientEngine
 ) {
     /**
-     * 認証付き HttpClient を作成
+     * Create authenticated HttpClient
      */
     fun createAuthenticatedClient(): HttpClient {
         return HttpClient(engine) {
-            // JSON シリアライゼーション
+            // JSON serialization
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true
@@ -542,33 +542,33 @@ class HttpClientFactory(
                 })
             }
 
-            // ロギング（デバッグ用）
+            // Logging (for debugging)
             install(Logging) {
                 level = LogLevel.HEADERS
             }
 
-            // タイムアウト設定
+            // Timeout settings
             install(HttpTimeout) {
                 requestTimeoutMillis = 30_000
                 connectTimeoutMillis = 10_000
             }
 
-            // 認証プラグイン
+            // Authentication plugin
             install(AuthPlugin) {
                 this.tokenStore = this@HttpClientFactory.tokenStore
                 this.refreshTokens = {
                     authRepository.refresh()
                 }
                 this.onSessionExpired = {
-                    // SessionState を ExpiredOrInvalid に更新
-                    // AuthRepository 内部で処理されるため、ここでは何もしなくてよい場合も
+                    // Update SessionState to ExpiredOrInvalid
+                    // May not need to do anything here if handled within AuthRepository
                 }
             }
         }
     }
 
     /**
-     * 認証なし HttpClient を作成（refresh API 用）
+     * Create unauthenticated HttpClient (for refresh API)
      */
     fun createUnauthenticatedClient(): HttpClient {
         return HttpClient(engine) {
@@ -589,18 +589,18 @@ class HttpClientFactory(
 }
 ```
 
-### refresh API のループ防止
+### Refresh API Loop Prevention
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/data/remote/AuthRemoteDataSource.kt
 
 /**
- * 認証 API のリモートデータソース
+ * Authentication API Remote Data Source
  *
- * 重要: refresh API には認証なし HttpClient を使用する
+ * Important: Use unauthenticated HttpClient for refresh API
  */
 class AuthRemoteDataSourceImpl(
-    private val unauthenticatedClient: HttpClient,  // 認証なしクライアント
+    private val unauthenticatedClient: HttpClient,  // Unauthenticated client
     private val baseUrl: String
 ) : AuthRemoteDataSource {
 
@@ -618,29 +618,29 @@ class AuthRemoteDataSourceImpl(
         }.body()
     }
 
-    // その他のログイン方式の API も同様に unauthenticatedClient を使用
+    // Other login method APIs also use unauthenticatedClient
 }
 ```
 
 ---
 
-## 複数ログイン方式の設計指針
+## Design Guidelines for Multiple Login Methods
 
-### 原則
+### Principles
 
-1. **ネットワーク層は Session だけを見る**
-   - HttpClient は `Session.accessToken` だけを使用
-   - ログイン方式の違いを意識しない
+1. **Network layer only sees Session**
+   - HttpClient only uses `Session.accessToken`
+   - Unaware of login method differences
 
-2. **方式の差分は AuthRepository.login() に閉じ込め**
-   - `LoginMethod` の種類に応じて適切な API を呼び出す
-   - 結果を統一された `Session` に変換
+2. **Encapsulate method differences in AuthRepository.login()**
+   - Call appropriate API based on `LoginMethod` type
+   - Convert results to unified `Session`
 
-3. **refresh の差分も AuthRepository.refresh() に閉じ込め**
-   - 一部の認証方式では refresh の挙動が異なる場合がある
-   - AuthType を見て適切な refresh ロジックを実行
+3. **Encapsulate refresh differences in AuthRepository.refresh()**
+   - Some authentication methods may have different refresh behavior
+   - Execute appropriate refresh logic based on AuthType
 
-### AuthRepository 実装例
+### AuthRepository Implementation Example
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/data/repository/AuthRepositoryImpl.kt
@@ -657,7 +657,7 @@ class AuthRepositoryImpl(
     private val refreshMutex = Mutex()
 
     init {
-        // TokenStore の変更を監視して SessionState を更新
+        // Observe TokenStore changes and update SessionState
         coroutineScope.launch {
             tokenStore.flow().collect { session ->
                 _sessionState.value = when {
@@ -721,7 +721,7 @@ class AuthRepositoryImpl(
                     throw AuthException.RefreshNotSupported()
                 }
 
-                // refresh 中であることを通知
+                // Notify that refresh is in progress
                 _sessionState.value = SessionState.Refreshing(currentSession)
 
                 val response = authRemoteDataSource.refreshToken(
@@ -732,7 +732,7 @@ class AuthRepositoryImpl(
                 tokenStore.save(newSession)
                 newSession
             }.onFailure { e ->
-                // refresh 失敗時はセッション無効
+                // Session invalid on refresh failure
                 _sessionState.value = SessionState.ExpiredOrInvalid(e.message)
             }
         }
@@ -742,7 +742,7 @@ class AuthRepositoryImpl(
         runCatching {
             val session = tokenStore.get()
             if (session != null) {
-                // サーバーにログアウトを通知（失敗しても続行）
+                // Notify server of logout (continue even if fails)
                 authRemoteDataSource.logout(session.accessToken)
             }
         }
@@ -767,7 +767,7 @@ class AuthRepositoryImpl(
 
 ---
 
-## ディレクトリ構成例
+## Directory Structure Example
 
 ```
 shared/src/
@@ -789,7 +789,7 @@ shared/src/
 │   │   │   └── AuthException.kt
 │   │   │
 │   │   ├── network/
-│   │   │   ├── AuthPlugin.kt              # Ktor 認証プラグイン
+│   │   │   ├── AuthPlugin.kt              # Ktor authentication plugin
 │   │   │   └── HttpClientFactory.kt
 │   │   │
 │   │   ├── remote/
@@ -819,15 +819,15 @@ shared/src/
 
 ---
 
-## 例外設計
+## Exception Design
 
-### AuthException 階層
+### AuthException Hierarchy
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/data/auth/AuthException.kt
 
 /**
- * 認証関連の例外
+ * Authentication-related exceptions
  */
 sealed class AuthException(
     override val message: String,
@@ -835,52 +835,52 @@ sealed class AuthException(
 ) : Exception(message, cause) {
 
     /**
-     * ログインしていない
+     * Not logged in
      */
     class NotLoggedIn : AuthException("Not logged in")
 
     /**
-     * 認証情報が無効
+     * Invalid credentials
      */
     class InvalidCredentials(
         message: String = "Invalid credentials"
     ) : AuthException(message)
 
     /**
-     * トークンが無効または期限切れ
+     * Token is invalid or expired
      */
     class TokenInvalid(
         message: String = "Token is invalid or expired"
     ) : AuthException(message)
 
     /**
-     * refresh がサポートされていない
+     * Refresh is not supported
      */
     class RefreshNotSupported : AuthException("Refresh is not supported for this auth type")
 
     /**
-     * refresh に失敗（再ログインが必要）
+     * Refresh failed (re-login required)
      */
     class RefreshFailed(
         cause: Throwable? = null
     ) : AuthException("Failed to refresh token", cause)
 
     /**
-     * アカウントがロックされている
+     * Account is locked
      */
     class AccountLocked(
         message: String = "Account is locked"
     ) : AuthException(message)
 
     /**
-     * ネットワークエラー
+     * Network error
      */
     class Network(
         cause: Throwable
     ) : AuthException("Network error during authentication", cause)
 
     /**
-     * 不明なエラー
+     * Unknown error
      */
     class Unknown(
         cause: Throwable
@@ -888,7 +888,7 @@ sealed class AuthException(
 }
 ```
 
-### UI 層でのエラーハンドリング
+### Error Handling in UI Layer
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/presentation/auth/LoginViewModel.kt
@@ -917,13 +917,13 @@ class LoginViewModel(
                 onFailure = { e ->
                     val errorMessage = when (e) {
                         is AuthException.InvalidCredentials ->
-                            "メールアドレスまたはパスワードが正しくありません"
+                            "Email address or password is incorrect"
                         is AuthException.AccountLocked ->
-                            "アカウントがロックされています"
+                            "Account is locked"
                         is AuthException.Network ->
-                            "ネットワークエラーが発生しました"
+                            "A network error occurred"
                         else ->
-                            "ログインに失敗しました"
+                            "Login failed"
                     }
                     _uiState.update {
                         it.copy(isLoading = false, error = errorMessage)
@@ -943,12 +943,12 @@ data class LoginUiState(
 
 ---
 
-## 実装コード例
+## Implementation Code Examples
 
-### TokenStore（expect/actual）
+### TokenStore (expect/actual)
 
 ```kotlin
-// commonMain: interface は data/auth/TokenStore.kt で定義済み
+// commonMain: interface is already defined in data/auth/TokenStore.kt
 
 // androidMain/kotlin/com/example/shared/data/auth/TokenStore.android.kt
 
@@ -961,9 +961,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 /**
- * Android 用 TokenStore 実装
+ * Android TokenStore implementation
  *
- * EncryptedSharedPreferences を使用してセキュアに保存
+ * Uses EncryptedSharedPreferences for secure storage
  */
 class AndroidTokenStore(context: Context) : TokenStore {
 
@@ -983,7 +983,7 @@ class AndroidTokenStore(context: Context) : TokenStore {
     private val _sessionFlow = MutableStateFlow<Session?>(null)
 
     init {
-        // 起動時に読み込み
+        // Load on startup
         _sessionFlow.value = get()
     }
 
@@ -1030,9 +1030,9 @@ import platform.Foundation.*
 import platform.Security.*
 
 /**
- * iOS 用 TokenStore 実装
+ * iOS TokenStore implementation
  *
- * Keychain を使用してセキュアに保存
+ * Uses Keychain for secure storage
  */
 class IosTokenStore : TokenStore {
 
@@ -1040,7 +1040,7 @@ class IosTokenStore : TokenStore {
     private val _sessionFlow = MutableStateFlow<Session?>(null)
 
     init {
-        // 起動時に読み込み
+        // Load on startup
         kotlinx.coroutines.runBlocking {
             _sessionFlow.value = get()
         }
@@ -1066,7 +1066,7 @@ class IosTokenStore : TokenStore {
         _sessionFlow.value = null
     }
 
-    // Keychain 操作のヘルパー関数
+    // Keychain operation helper functions
     @OptIn(ExperimentalForeignApi::class)
     private fun keychainSave(key: String, value: String) {
         keychainDelete(key)
@@ -1119,7 +1119,7 @@ class IosTokenStore : TokenStore {
 }
 
 /**
- * ByteArray → NSData 変換
+ * ByteArray → NSData conversion
  */
 @OptIn(ExperimentalForeignApi::class)
 private fun ByteArray.toNSData(): NSData {
@@ -1129,7 +1129,7 @@ private fun ByteArray.toNSData(): NSData {
 }
 
 /**
- * NSData → ByteArray 変換
+ * NSData → ByteArray conversion
  */
 @OptIn(ExperimentalForeignApi::class)
 private fun NSData.toByteArray(): ByteArray {
@@ -1141,9 +1141,9 @@ private fun NSData.toByteArray(): ByteArray {
 }
 
 /**
- * Map → CFDictionary 変換
+ * Map → CFDictionary conversion
  *
- * Keychain API に渡す CFDictionary を生成
+ * Generates CFDictionary to pass to Keychain API
  */
 @OptIn(ExperimentalForeignApi::class)
 private fun Map<CFStringRef?, Any?>.toCFDictionary(): CFDictionaryRef? {
@@ -1174,7 +1174,7 @@ private fun Map<CFStringRef?, Any?>.toCFDictionary(): CFDictionaryRef? {
 ```
 
 ```kotlin
-// iosMain - 必要な import 文
+// iosMain - required imports
 import kotlinx.cinterop.*
 import platform.CoreFoundation.*
 import platform.Foundation.*
@@ -1182,7 +1182,7 @@ import platform.Security.*
 import platform.darwin.memcpy
 ```
 
-### DI 設定（Koin）
+### DI Configuration (Koin)
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/di/AuthModule.kt
@@ -1202,7 +1202,7 @@ val authModule = module {
         )
     }
 
-    // AuthRemoteDataSource（認証なしクライアントを使用）
+    // AuthRemoteDataSource (uses unauthenticated client)
     single<AuthRemoteDataSource> {
         AuthRemoteDataSourceImpl(
             unauthenticatedClient = get(named("unauthenticated")),
@@ -1210,7 +1210,7 @@ val authModule = module {
         )
     }
 
-    // HttpClient（認証付き）
+    // HttpClient (authenticated)
     single(named("authenticated")) {
         HttpClientFactory(
             tokenStore = get(),
@@ -1219,7 +1219,7 @@ val authModule = module {
         ).createAuthenticatedClient()
     }
 
-    // HttpClient（認証なし）
+    // HttpClient (unauthenticated)
     single(named("unauthenticated")) {
         HttpClientFactory(
             tokenStore = get(),
@@ -1252,96 +1252,96 @@ actual val platformAuthModule = module {
 
 ---
 
-## エージェント向けタスク分解
+## Task Breakdown for Agents
 
-### 実装ステップ チェックリスト
+### Implementation Steps Checklist
 
-#### Phase 1: データモデル定義
+#### Phase 1: Data Model Definition
 
-- [ ] `Session` data class を作成
+- [ ] Create `Session` data class
   - accessToken, refreshToken, expiresAt, authType, userId, scopes
-  - isExpired(), canRefresh プロパティ
-- [ ] `AuthType` enum を作成
-- [ ] `LoginMethod` sealed class を作成
+  - isExpired(), canRefresh properties
+- [ ] Create `AuthType` enum
+- [ ] Create `LoginMethod` sealed class
   - EmailPassword, GoogleIdToken, AppleIdToken, SsoAuthCode, Custom
-- [ ] `SessionState` sealed class を作成
+- [ ] Create `SessionState` sealed class
   - LoggedOut, LoggedIn, Refreshing, ExpiredOrInvalid
 
-#### Phase 2: インターフェース定義
+#### Phase 2: Interface Definition
 
-- [ ] `TokenStore` interface を作成
+- [ ] Create `TokenStore` interface
   - get(), flow(), save(), clear()
-- [ ] `AuthRepository` interface を作成
+- [ ] Create `AuthRepository` interface
   - sessionState, login(), refresh(), logout(), getCurrentSession()
-- [ ] `AuthRemoteDataSource` interface を作成
+- [ ] Create `AuthRemoteDataSource` interface
   - loginWithEmail(), loginWithGoogle(), loginWithApple(), loginWithSso(), refreshToken(), logout()
 
-#### Phase 3: Ktor 認証プラグイン
+#### Phase 3: Ktor Authentication Plugin
 
-- [ ] `AuthPlugin` を作成
-  - AuthPluginConfig クラス
-  - onRequest で Authorization ヘッダー付与
-  - on(Send) で 401 検知 → refresh → retry
-  - Mutex による排他制御
-- [ ] `SkipAuthKey` と `skipAuth()` 拡張関数
-- [ ] `HttpClientFactory` を作成
+- [ ] Create `AuthPlugin`
+  - AuthPluginConfig class
+  - Attach Authorization header in onRequest
+  - Detect 401 → refresh → retry in on(Send)
+  - Exclusive control with Mutex
+- [ ] `SkipAuthKey` and `skipAuth()` extension function
+- [ ] Create `HttpClientFactory`
   - createAuthenticatedClient()
   - createUnauthenticatedClient()
 
-#### Phase 4: 例外設計
+#### Phase 4: Exception Design
 
-- [ ] `AuthException` sealed class を作成
+- [ ] Create `AuthException` sealed class
   - NotLoggedIn, InvalidCredentials, TokenInvalid, RefreshNotSupported, RefreshFailed, AccountLocked, Network, Unknown
 
-#### Phase 5: TokenStore 実装（expect/actual）
+#### Phase 5: TokenStore Implementation (expect/actual)
 
-- [ ] Android: `AndroidTokenStore` を作成
-  - EncryptedSharedPreferences を使用
-- [ ] iOS: `IosTokenStore` を作成
-  - Keychain を使用
+- [ ] Android: Create `AndroidTokenStore`
+  - Use EncryptedSharedPreferences
+- [ ] iOS: Create `IosTokenStore`
+  - Use Keychain
 
-#### Phase 6: AuthRepository 実装
+#### Phase 6: AuthRepository Implementation
 
-- [ ] `AuthRepositoryImpl` を作成
-  - login() で LoginMethod に応じた API 呼び出し
-  - refresh() で Mutex 排他制御
-  - logout() でサーバー通知 + TokenStore クリア
-  - sessionState の更新ロジック
+- [ ] Create `AuthRepositoryImpl`
+  - API call based on LoginMethod in login()
+  - Mutex exclusive control in refresh()
+  - Server notification + TokenStore clear in logout()
+  - sessionState update logic
 
-#### Phase 7: API モデル & リモートデータソース
+#### Phase 7: API Models & Remote Data Source
 
-- [ ] `TokenResponse`, `LoginRequest`, `RefreshTokenRequest` を作成
-- [ ] `AuthRemoteDataSourceImpl` を作成
-  - 認証なしクライアントを使用
+- [ ] Create `TokenResponse`, `LoginRequest`, `RefreshTokenRequest`
+- [ ] Create `AuthRemoteDataSourceImpl`
+  - Use unauthenticated client
 
-#### Phase 8: DI 設定
+#### Phase 8: DI Configuration
 
-- [ ] `authModule` を作成（共通）
-- [ ] `platformAuthModule` を作成（Android/iOS）
+- [ ] Create `authModule` (common)
+- [ ] Create `platformAuthModule` (Android/iOS)
 
 #### Phase 9: ViewModel
 
-- [ ] `LoginViewModel` を作成
-- [ ] `AuthStateViewModel` を作成（SessionState 監視用）
+- [ ] Create `LoginViewModel`
+- [ ] Create `AuthStateViewModel` (for SessionState observation)
 
-#### Phase 10: テスト
+#### Phase 10: Testing
 
-- [ ] `FakeTokenStore` を作成
-- [ ] `FakeAuthRemoteDataSource` を作成
-- [ ] `AuthRepositoryImpl` のユニットテスト
-- [ ] `AuthPlugin` のユニットテスト（MockEngine 使用）
+- [ ] Create `FakeTokenStore`
+- [ ] Create `FakeAuthRemoteDataSource`
+- [ ] Unit tests for `AuthRepositoryImpl`
+- [ ] Unit tests for `AuthPlugin` (using MockEngine)
 
 ---
 
-## 参考リンク
+## Reference Links
 
-### 公式ドキュメント
+### Official Documentation
 
 - [Ktor Client Authentication](https://ktor.io/docs/auth.html)
 - [Ktor Client Plugins](https://ktor.io/docs/client-plugins.html)
 - [kotlinx.coroutines Mutex](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.sync/-mutex/)
 
-### セキュリティ
+### Security
 
 - [Android EncryptedSharedPreferences](https://developer.android.com/reference/androidx/security/crypto/EncryptedSharedPreferences)
 - [iOS Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
@@ -1353,7 +1353,7 @@ actual val platformAuthModule = module {
 
 ---
 
-## 関連ドキュメント
+## Related Documents
 
-- [kmp-architecture.md](kmp-architecture.md) - KMP 全体のアーキテクチャ
-- [coroutines.md](coroutines.md) - Kotlin Coroutines ベストプラクティス
+- [kmp-architecture.md](kmp-architecture.md) - Overall KMP architecture
+- [coroutines.md](coroutines.md) - Kotlin Coroutines Best Practices

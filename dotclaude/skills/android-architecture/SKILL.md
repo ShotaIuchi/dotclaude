@@ -14,28 +14,28 @@ external:
 
 # Android Architecture
 
-Google公式 Android Architecture Guide に基づく MVVM / UDF / Repository パターン。
+MVVM / UDF / Repository patterns based on Google's official Android Architecture Guide.
 
-## 基本原則
+## Core Principles
 
-1. **関心の分離** - UI ロジックとビジネスロジックを明確に分離
-2. **データ駆動型 UI** - UI は状態（State）を反映するだけ
-3. **単一の信頼できる情報源 (SSOT)** - Repository がデータの SSOT
-4. **単方向データフロー (UDF)** - イベントは上流へ、状態は下流へ
+1. **Separation of Concerns** - Clearly separate UI logic from business logic
+2. **Data-Driven UI** - UI only reflects state
+3. **Single Source of Truth (SSOT)** - Repository is the SSOT for data
+4. **Unidirectional Data Flow (UDF)** - Events flow upstream, state flows downstream
 
 ```
 UI Layer → Domain Layer → Data Layer
 ```
 
-## レイヤー構成
+## Layer Structure
 
-| レイヤー | 責務 | 主要コンポーネント |
-|---------|------|-------------------|
-| UI | 画面表示・ユーザー操作 | Activity, Fragment, Compose, ViewModel |
-| Domain | ビジネスロジック | UseCase |
-| Data | データ取得・永続化 | Repository, DataSource, DAO, API |
+| Layer | Responsibility | Key Components |
+|-------|----------------|----------------|
+| UI | Display and user interaction | Activity, Fragment, Compose, ViewModel |
+| Domain | Business logic | UseCase |
+| Data | Data retrieval and persistence | Repository, DataSource, DAO, API |
 
-## ディレクトリ構造
+## Directory Structure
 
 ```
 app/src/main/java/com/example/app/
@@ -54,18 +54,18 @@ app/src/main/java/com/example/app/
 └── di/                 # DI modules
 ```
 
-## 命名規則
+## Naming Conventions
 
-| 種類 | 命名パターン | 例 |
-|------|-------------|-----|
+| Type | Pattern | Example |
+|------|---------|---------|
 | ViewModel | `{Feature}ViewModel` | `UserListViewModel` |
 | UI State | `{Feature}UiState` | `UserListUiState` |
 | UseCase | `{Action}{Entity}UseCase` | `GetUsersUseCase` |
 | Repository | `{Entity}Repository` | `UserRepository` |
 
-## 詳細リファレンス
+## Detailed References
 
-- [クリーンアーキテクチャガイド](../../references/common/clean-architecture.md)
-- [テスト戦略ガイド](../../references/common/testing-strategy.md)
-- [Kotlin Coroutines ガイド](../../references/languages/kotlin/coroutines.md)
-- [Android アーキテクチャ詳細](../../references/platforms/android/architecture.md)
+- [Clean Architecture Guide](../../references/common/clean-architecture.md)
+- [Testing Strategy Guide](../../references/common/testing-strategy.md)
+- [Kotlin Coroutines Guide](../../references/languages/kotlin/coroutines.md)
+- [Android Architecture Details](../../references/platforms/android/architecture.md)

@@ -6,25 +6,25 @@
 
 ## Overview
 
-<!-- 変更の概要を1パラグラフで -->
+<!-- Summarize the changes in one paragraph -->
 {{OVERVIEW}}
 
 ## Scope
 
 ### In Scope
 
-<!-- この作業で対応する範囲 -->
+<!-- Areas covered by this work -->
 - {{IN_SCOPE_1}}
 - {{IN_SCOPE_2}}
 
 ### Out of Scope
 
-<!-- この作業では対応しない範囲 -->
+<!-- Areas not covered by this work -->
 - {{OUT_OF_SCOPE_1}}
 
 ## Users / Use-cases
 
-<!-- 対象ユーザーとユースケース -->
+<!-- Target users and use-cases -->
 
 | User | Use-case | Priority |
 |------|----------|----------|
@@ -32,19 +32,19 @@
 
 ## Functional Requirements
 
-<!-- 機能要件 -->
+<!-- Functional requirements -->
 - FR-1: {{FUNCTIONAL_REQ_1}}
 - FR-2: {{FUNCTIONAL_REQ_2}}
 
 ## Non-functional Requirements
 
-<!-- 非機能要件（パフォーマンス、セキュリティ等） -->
+<!-- Non-functional requirements (performance, security, etc.) -->
 - NFR-1: {{NON_FUNCTIONAL_REQ_1}}
 - NFR-2: {{NON_FUNCTIONAL_REQ_2}}
 
 ## Acceptance Criteria
 
-<!-- テスト可能な受け入れ条件（Given/When/Then 形式） -->
+<!-- Testable acceptance criteria (Given/When/Then format) -->
 
 ### AC-1: {{AC_1_TITLE}}
 
@@ -60,14 +60,14 @@
 
 ## Affected Components
 
-<!-- 影響を受けるコンポーネント/モジュール -->
+<!-- Components/modules affected -->
 | Component | Impact | Notes |
 |-----------|--------|-------|
 | {{COMPONENT_1}} | {{IMPACT_1}} | {{NOTES_1}} |
 
 ## Detailed Changes
 
-<!-- 変更内容の詳細（Before/After 形式） -->
+<!-- Details of changes (Before/After format) -->
 
 ### {{CHANGE_TITLE}}
 
@@ -83,39 +83,39 @@
 
 ## API Changes
 
-<!-- API の変更がある場合 -->
+<!-- If there are API changes -->
 {{API_CHANGES}}
 
 ## Data Changes
 
-<!-- データ構造・スキーマの変更がある場合 -->
+<!-- If there are data structure/schema changes -->
 {{DATA_CHANGES}}
 
 ## UI Changes
 
-<!-- UI の変更がある場合 -->
+<!-- If there are UI changes -->
 {{UI_CHANGES}}
 
 ## Test Strategy
 
-<!-- テスト戦略 -->
+<!-- Test strategy -->
 - **Unit Tests:** {{UNIT_TEST_STRATEGY}}
 - **Integration Tests:** {{INTEGRATION_TEST_STRATEGY}}
 - **Manual Tests:** {{MANUAL_TEST_STRATEGY}}
 
 ## Assumptions
 
-<!-- 仮置き事項。後で確認が必要な仮定 -->
+<!-- Tentative items. Assumptions that need to be verified later -->
 - [ ] {{ASSUMPTION_1}}
 - [ ] {{ASSUMPTION_2}}
 
 ## Open Questions
 
-<!-- AIが勝手に決めてはいけない項目。人間の判断が必要な点 -->
+<!-- Items AI should not decide alone. Points requiring human judgment -->
 - [ ] {{QUESTION_1}}
 - [ ] {{QUESTION_2}}
 
 ## References
 
-<!-- 参考資料、関連ドキュメント -->
+<!-- Reference materials, related documents -->
 - {{REFERENCE_1}}

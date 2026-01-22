@@ -8,141 +8,141 @@
 
 ## Purpose
 
-コードレビューを実行し、問題点や改善提案を報告します。
-品質、セキュリティ、パフォーマンス、可読性の観点からコードを評価します。
+Executes code reviews and reports issues and improvement suggestions.
+Evaluates code from quality, security, performance, and readability perspectives.
 
 ## Context
 
-### 入力
+### Input
 
-- `files`: レビュー対象のファイルパターン（必須）
-- `focus`: 重点的に確認する観点（オプション: "security" | "performance" | "readability" | "all"）
-- `diff_only`: 差分のみをレビュー（オプション、デフォルトは false）
+- `files`: File pattern for review targets (required)
+- `focus`: Perspective to focus on (optional: "security" | "performance" | "readability" | "all")
+- `diff_only`: Review only diffs (optional, defaults to false)
 
-### 参照ファイル
+### Reference Files
 
-- レビュー対象ファイル
-- プロジェクトの設定ファイル（.eslintrc, tsconfig.json など）
+- Review target files
+- Project configuration files (.eslintrc, tsconfig.json, etc.)
 
 ## Capabilities
 
-1. **コード品質レビュー**
-   - コーディング規約の準拠確認
-   - 命名規則の確認
-   - コードの複雑度評価
+1. **Code Quality Review**
+   - Coding convention compliance check
+   - Naming convention verification
+   - Code complexity evaluation
 
-2. **セキュリティレビュー**
-   - 一般的な脆弱性パターンの検出
-   - 入力バリデーションの確認
-   - 認証・認可の確認
+2. **Security Review**
+   - Common vulnerability pattern detection
+   - Input validation verification
+   - Authentication/authorization verification
 
-3. **パフォーマンスレビュー**
-   - 非効率なパターンの検出
-   - メモリリークの可能性
-   - 不要な再計算の検出
+3. **Performance Review**
+   - Inefficient pattern detection
+   - Memory leak potential
+   - Unnecessary recalculation detection
 
-4. **可読性レビュー**
-   - コメントの適切性
-   - 関数の長さと責務
-   - 抽象化レベルの一貫性
+4. **Readability Review**
+   - Comment appropriateness
+   - Function length and responsibility
+   - Abstraction level consistency
 
 ## Constraints
 
-- 読み取り専用（コードの変更は行わない）
-- 主観的な好みではなく客観的な基準に基づく
-- 問題点には必ず理由と改善案を付記
+- Read-only (do not modify code)
+- Based on objective criteria, not subjective preferences
+- Always include reasons and improvement suggestions for issues
 
 ## Instructions
 
-### 1. レビュー対象の取得
+### 1. Get Review Targets
 
 ```bash
-# ファイルパターンでファイル一覧を取得
+# Get file list by file pattern
 find . -name "<pattern>" -type f
 
-# diff_only の場合は変更ファイルのみ
+# For diff_only, only changed files
 git diff --name-only HEAD~1 | grep "<pattern>"
 ```
 
-### 2. ファイルの読み込み
+### 2. Read Files
 
-各対象ファイルを読み込み、内容を確認
+Read and review each target file
 
-### 3. レビュー観点別の分析
+### 3. Analysis by Review Perspective
 
-#### 品質
+#### Quality
 
-- [ ] 命名規則は適切か
-- [ ] DRY 原則に従っているか
-- [ ] 単一責任原則に従っているか
-- [ ] エラーハンドリングは適切か
+- [ ] Are naming conventions appropriate?
+- [ ] Does it follow DRY principle?
+- [ ] Does it follow single responsibility principle?
+- [ ] Is error handling appropriate?
 
-#### セキュリティ
+#### Security
 
-- [ ] 入力のバリデーションはあるか
-- [ ] SQLインジェクション対策はされているか
-- [ ] XSS対策はされているか
-- [ ] 機密情報がハードコードされていないか
+- [ ] Is input validation present?
+- [ ] Is SQL injection protected?
+- [ ] Is XSS protected?
+- [ ] Is sensitive information not hardcoded?
 
-#### パフォーマンス
+#### Performance
 
-- [ ] 不要なループはないか
-- [ ] 大きなデータのコピーはないか
-- [ ] 非同期処理は適切に使われているか
+- [ ] Are there unnecessary loops?
+- [ ] Are there large data copies?
+- [ ] Is async processing used appropriately?
 
-#### 可読性
+#### Readability
 
-- [ ] コメントは適切か
-- [ ] 関数の長さは適切か
-- [ ] 複雑な条件は簡略化できないか
+- [ ] Are comments appropriate?
+- [ ] Is function length appropriate?
+- [ ] Can complex conditions be simplified?
 
-### 4. 問題の重要度分類
+### 4. Issue Severity Classification
 
-- **Critical**: 必ず修正が必要（セキュリティ、バグ）
-- **Major**: 修正を強く推奨
-- **Minor**: 改善を推奨
-- **Info**: 参考情報
+- **Critical**: Must fix (security, bugs)
+- **Major**: Strongly recommended to fix
+- **Minor**: Recommended improvement
+- **Info**: Reference information
 
-### 5. 結果の構造化
+### 5. Result Structuring
 
-発見した問題を構造化して報告
+Report discovered issues in structured format
 
 ## Output Format
 
 ```markdown
-## コードレビュー結果
+## Code Review Results
 
-### レビュー概要
+### Review Overview
 
-- **対象**: <files>
-- **重点観点**: <focus>
-- **レビュー日**: <date>
+- **Target**: <files>
+- **Focus**: <focus>
+- **Review Date**: <date>
 
-### サマリー
+### Summary
 
-| 重要度 | 件数 |
-|--------|------|
+| Severity | Count |
+|----------|-------|
 | Critical | <n> |
 | Major | <n> |
 | Minor | <n> |
 | Info | <n> |
 
-### 問題一覧
+### Issue List
 
 #### Critical
 
 ##### CR-1: <title>
 
-- **ファイル**: <path>:<line>
-- **カテゴリ**: セキュリティ/バグ/etc
-- **問題**:
+- **File**: <path>:<line>
+- **Category**: Security/Bug/etc
+- **Issue**:
 
 ```<language>
 <problematic_code>
 ```
 
-- **理由**: <reason>
-- **推奨修正**:
+- **Reason**: <reason>
+- **Recommended Fix**:
 
 ```<language>
 <recommended_fix>
@@ -152,30 +152,30 @@ git diff --name-only HEAD~1 | grep "<pattern>"
 
 ##### MJ-1: <title>
 
-<同様の形式>
+<same format>
 
 #### Minor
 
 ##### MN-1: <title>
 
-<同様の形式>
+<same format>
 
 #### Info
 
 ##### IN-1: <title>
 
-<同様の形式>
+<same format>
 
-### 良い点
+### Good Points
 
 - <good_point1>
 - <good_point2>
 
-### 総評
+### Overall Assessment
 
-<全体的な評価とコメント>
+<Overall evaluation and comments>
 
-### 推奨アクション
+### Recommended Actions
 
 1. [ ] <action1>
 2. [ ] <action2>

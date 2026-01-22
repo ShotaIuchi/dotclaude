@@ -8,49 +8,49 @@
 
 ## Purpose
 
-Kickoff ドキュメントの内容に基づいて仕様書（01_SPEC.md）のドラフトを作成します。
-wf2-spec コマンドの支援として動作し、構造化された仕様書を生成します。
+Creates specification (01_SPEC.md) drafts based on Kickoff document content.
+Works as support for wf2-spec command, generating structured specifications.
 
 ## Context
 
-### 入力
+### Input
 
-- アクティブな作業の work-id（自動取得）
-- `focus`: 特に重点を置く領域（オプション）
+- Active work's work-id (automatically obtained)
+- `focus`: Area to focus on (optional)
 
-### 参照ファイル
+### Reference Files
 
-- `docs/wf/<work-id>/00_KICKOFF.md` - Kickoff ドキュメント
-- `~/.claude/templates/01_SPEC.md` - 仕様書テンプレート
-- `.wf/state.json` - 現在の作業状態
+- `docs/wf/<work-id>/00_KICKOFF.md` - Kickoff document
+- `~/.claude/templates/01_SPEC.md` - Specification template
+- `.wf/state.json` - Current work state
 
 ## Capabilities
 
-1. **要件の構造化**
-   - Kickoff から機能要件（FR）と非機能要件（NFR）を抽出
-   - 要件に優先度を付与
+1. **Requirements Structuring**
+   - Extract Functional Requirements (FR) and Non-Functional Requirements (NFR) from Kickoff
+   - Assign priority to requirements
 
-2. **スコープの明確化**
-   - In Scope / Out of Scope の明確な区分
-   - 曖昧な境界の特定と質問の生成
+2. **Scope Clarification**
+   - Clear separation of In Scope / Out of Scope
+   - Identify ambiguous boundaries and generate questions
 
-3. **受入条件の作成**
-   - Given/When/Then 形式での受入条件作成
-   - テスト可能な形式での条件定義
+3. **Acceptance Criteria Creation**
+   - Create acceptance criteria in Given/When/Then format
+   - Define conditions in testable format
 
-4. **ユースケースの整理**
-   - ユーザーストーリーの構造化
-   - エッジケースの特定
+4. **Use Case Organization**
+   - Structure user stories
+   - Identify edge cases
 
 ## Constraints
 
-- Kickoff の内容を逸脱しない
-- 技術的な実装詳細には踏み込まない（それは Plan の役割）
-- 曖昧な点は Open Questions として明示
+- Do not deviate from Kickoff content
+- Do not delve into technical implementation details (that is Plan's role)
+- Explicitly list ambiguous points as Open Questions
 
 ## Instructions
 
-### 1. Kickoff の読み込み
+### 1. Load Kickoff
 
 ```bash
 work_id=$(jq -r '.active_work' .wf/state.json)
@@ -58,24 +58,24 @@ kickoff_path="docs/wf/$work_id/00_KICKOFF.md"
 cat "$kickoff_path"
 ```
 
-### 2. テンプレートの読み込み
+### 2. Load Template
 
 ```bash
 cat ~/.claude/templates/01_SPEC.md
 ```
 
-### 3. 要件の抽出
+### 3. Extract Requirements
 
-Kickoff から以下を抽出:
+Extract the following from Kickoff:
 
-- **Goal** → 機能要件の基盤
-- **Success Criteria** → 受入条件の基盤
-- **Constraints** → 非機能要件の基盤
+- **Goal** → Foundation for functional requirements
+- **Success Criteria** → Foundation for acceptance criteria
+- **Constraints** → Foundation for non-functional requirements
 - **Non-goals** → Out of Scope
 
-### 4. 仕様書の構成
+### 4. Compose Specification
 
-テンプレートに従って以下のセクションを作成:
+Create the following sections according to template:
 
 #### Scope
 
@@ -104,13 +104,13 @@ Kickoff から以下を抽出:
 
 ```markdown
 ### Functional Requirements (FR)
-| ID | 要件 | 優先度 |
-|----|------|--------|
+| ID | Requirement | Priority |
+|----|-------------|----------|
 | FR-1 | <requirement> | Must |
 
 ### Non-Functional Requirements (NFR)
-| ID | 要件 | 優先度 |
-|----|------|--------|
+| ID | Requirement | Priority |
+|----|-------------|----------|
 | NFR-1 | <requirement> | Must |
 ```
 
@@ -123,35 +123,35 @@ Kickoff から以下を抽出:
 - **Then**: <expected_result>
 ```
 
-### 5. 不明点の整理
+### 5. Organize Unclear Points
 
-Kickoff では明確でない点を Open Questions としてリストアップ
+List points that are not clear from Kickoff as Open Questions
 
 ## Output Format
 
 ```markdown
-## 仕様書ドラフト
+## Specification Draft
 
-### 作成情報
+### Creation Information
 
 - **Work ID**: <work-id>
-- **ベース**: 00_KICKOFF.md (Revision <n>)
-- **作成日**: <date>
+- **Base**: 00_KICKOFF.md (Revision <n>)
+- **Creation Date**: <date>
 
-### ドラフト内容
+### Draft Content
 
-<テンプレートに沿った仕様書の内容>
+<Specification content following template>
 
 ### Open Questions
 
-以下の点について確認が必要です:
+The following points need confirmation:
 
 1. <question1>
 2. <question2>
 
-### 確認事項
+### Verification Items
 
-- [ ] スコープは Kickoff と一致しているか
-- [ ] すべての Success Criteria が受入条件に反映されているか
-- [ ] Out of Scope が明確か
+- [ ] Does scope match Kickoff
+- [ ] Are all Success Criteria reflected in acceptance criteria
+- [ ] Is Out of Scope clear
 ```

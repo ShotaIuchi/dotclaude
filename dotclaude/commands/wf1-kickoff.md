@@ -1,31 +1,31 @@
 # /wf1-kickoff
 
-Kickoff ドキュメントを作成・更新するコマンド。
+Command to create or update the Kickoff document.
 
-## 使用方法
+## Usage
 
 ```
-/wf1-kickoff [サブコマンド] [オプション]
+/wf1-kickoff [subcommand] [options]
 ```
 
-## サブコマンド
+## Subcommands
 
-- `(なし)`: 新規作成または対話モードで確認
-- `update`: 既存の Kickoff を更新
-- `revise "<指示>"`: 指示に基づいて修正
-- `chat`: 壁打ち対話モード
+- `(none)`: Create new or confirm in interactive mode
+- `update`: Update existing Kickoff
+- `revise "<instruction>"`: Revise based on instruction
+- `chat`: Brainstorming dialogue mode
 
-## 処理内容
+## Processing
 
-$ARGUMENTS を解析して以下の処理を実行してください。
+Parse $ARGUMENTS and execute the following processing.
 
-### 1. 現在の作業状態を確認
+### 1. Check Current Work Status
 
 ```bash
 work_id=$(jq -r '.active_work // empty' .wf/state.json)
 if [ -z "$work_id" ]; then
-  echo "アクティブな作業がありません"
-  echo "/wf0-workspace または /wf0-restore を実行してください"
+  echo "No active work"
+  echo "Please run /wf0-workspace or /wf0-restore"
   exit 1
 fi
 
@@ -34,85 +34,85 @@ kickoff_path="$docs_dir/00_KICKOFF.md"
 revisions_path="$docs_dir/05_REVISIONS.md"
 ```
 
-### 2. GitHub Issue 情報の取得
+### 2. Get GitHub Issue Information
 
-work-id から Issue 番号を抽出して情報取得：
+Extract Issue number from work-id and get information:
 
 ```bash
-# ハイフン以外の任意文字に対応（feat-123-..., F1-123-..., FEAT-123-... 等）
+# Handle any prefix before the number (feat-123-..., F1-123-..., FEAT-123-... etc.)
 issue_number=$(echo "$work_id" | sed 's/^[^-]*-\([0-9]*\)-.*/\1/')
 gh issue view "$issue_number" --json number,title,body,labels,assignees,milestone
 ```
 
-### 3. サブコマンド別処理
+### 3. Subcommand-Specific Processing
 
-#### 新規作成（サブコマンドなし）
+#### New Creation (no subcommand)
 
-1. Issue の内容を分析
-2. ユーザーと対話して以下を確認：
-   - Goal（目標）
-   - Success Criteria（成功条件）
-   - Constraints（制約）
-   - Non-goals（スコープ外）
-   - Dependencies（依存関係）
+1. Analyze Issue content
+2. Dialogue with user to confirm:
+   - Goal
+   - Success Criteria
+   - Constraints
+   - Non-goals
+   - Dependencies
 
-3. `00_KICKOFF.md` を作成
+3. Create `00_KICKOFF.md`
 
-**テンプレート参照:** `~/.claude/templates/00_KICKOFF.md` を読み込んで使用してください。
+**Template reference:** Load and use `~/.claude/templates/00_KICKOFF.md`.
 
-テンプレートのプレースホルダを対話で決定した内容で置換します。
+Replace template placeholders with content determined through dialogue.
 
 #### update
 
-1. 現在の `00_KICKOFF.md` を読み込み
-2. ユーザーと対話して変更点を確認
-3. `00_KICKOFF.md` を更新
-4. `05_REVISIONS.md` に履歴を追記
-   - **テンプレート参照:** `~/.claude/templates/05_REVISIONS.md` を読み込んで使用
-5. state.json の `kickoff.revision` をインクリメント
+1. Load current `00_KICKOFF.md`
+2. Dialogue with user to confirm changes
+3. Update `00_KICKOFF.md`
+4. Append history to `05_REVISIONS.md`
+   - **Template reference:** Load and use `~/.claude/templates/05_REVISIONS.md`
+5. Increment `kickoff.revision` in state.json
 
-#### revise "<指示>"
+#### revise "<instruction>"
 
-1. 現在の `00_KICKOFF.md` を読み込み
-2. 指示に基づいて自動修正
-3. 変更内容をユーザーに確認
-4. 承認されたら更新
-5. `05_REVISIONS.md` に履歴を追記
+1. Load current `00_KICKOFF.md`
+2. Auto-revise based on instruction
+3. Confirm changes with user
+4. Update if approved
+5. Append history to `05_REVISIONS.md`
 
 #### chat
 
-1. 現在の `00_KICKOFF.md` を読み込み（存在すれば）
-2. Issue 情報を表示
-3. 自由対話モードで質問や議論
-4. 対話内容は Notes セクションに反映可能
+1. Load current `00_KICKOFF.md` (if exists)
+2. Display Issue information
+3. Free dialogue mode for questions and discussion
+4. Dialogue content can be reflected in Notes section
 
-### 4. state.json の更新
+### 4. Update state.json
 
 ```bash
-# current を更新
+# Update current
 jq ".works[\"$work_id\"].current = \"wf1-kickoff\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
-# 完了後は next を更新
+# Update next after completion
 jq ".works[\"$work_id\"].next = \"wf2-spec\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
-# kickoff 情報を更新
+# Update kickoff information
 jq ".works[\"$work_id\"].kickoff.revision = <new_revision>" .wf/state.json > tmp && mv tmp .wf/state.json
 jq ".works[\"$work_id\"].kickoff.last_updated = \"<timestamp>\"" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
 
-### 5. コミット
+### 5. Commit
 
-Kickoff ドキュメントの変更をコミット：
+Commit Kickoff document changes:
 
 ```bash
-# 新規作成の場合
+# For new creation
 git add "$kickoff_path" .wf/state.json
 git commit -m "docs(wf): create kickoff <work-id>
 
 Work: <work-id>
 "
 
-# update/revise の場合
+# For update/revise
 git add "$kickoff_path" "$revisions_path" .wf/state.json
 git commit -m "docs(wf): update kickoff <work-id>
 
@@ -121,46 +121,46 @@ Work: <work-id>
 "
 ```
 
-### 6. 壁打ち対話のガイド
+### 6. Brainstorming Dialogue Guide
 
-Kickoff 作成時は以下の観点でユーザーと対話：
+When creating Kickoff, dialogue with user on the following aspects:
 
-**Goal について:**
-- この作業で何を達成したいですか？
-- なぜこの機能/修正が必要ですか？
-- ユーザーにどのような価値を提供しますか？
+**About Goal:**
+- What do you want to achieve with this work?
+- Why is this feature/fix needed?
+- What value does it provide to users?
 
-**Success Criteria について:**
-- 完了とみなす条件は何ですか？
-- どうやって成功を測定しますか？
-- 最低限達成すべきことは何ですか？
+**About Success Criteria:**
+- What conditions indicate completion?
+- How will you measure success?
+- What is the minimum that must be achieved?
 
-**Constraints について:**
-- 技術的な制約はありますか？
-- パフォーマンス要件はありますか？
-- 互換性の要件はありますか？
+**About Constraints:**
+- Are there technical constraints?
+- Are there performance requirements?
+- Are there compatibility requirements?
 
-**Non-goals について:**
-- 今回は対応しないことは何ですか？
-- 将来の課題として残すことは？
+**About Non-goals:**
+- What will not be addressed this time?
+- What will be left as future work?
 
-**Dependencies について:**
-- 他の作業に依存していますか？
-- 外部サービスや API に依存していますか？
+**About Dependencies:**
+- Does this depend on other work?
+- Are there dependencies on external services or APIs?
 
-### 7. 完了メッセージ
+### 7. Completion Message
 
 ```
-✅ Kickoff ドキュメントを作成しました
+✅ Kickoff document created
 
-ファイル: docs/wf/<work-id>/00_KICKOFF.md
+File: docs/wf/<work-id>/00_KICKOFF.md
 Revision: 1
 
-次のステップ: /wf2-spec を実行して仕様書を作成してください
+Next step: Run /wf2-spec to create the specification
 ```
 
-## 注意事項
+## Notes
 
-- 既存の内容を上書きする前に必ず確認
-- Revision 履歴は必ず保持
-- Issue の内容と矛盾がないか確認
+- Always confirm before overwriting existing content
+- Always maintain Revision history
+- Check for contradictions with Issue content

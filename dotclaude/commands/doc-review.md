@@ -1,98 +1,98 @@
 # /doc-review
 
-任意のドキュメントファイルのレビューを作成し、`<filename>.review.md` として出力するコマンド。
+Command to create a review of any document file and output as `<filename>.review.md`.
 
-## 使用方法
+## Usage
 
 ```
-/doc-review <ファイルパス>
+/doc-review <file_path>
 ```
 
-## 引数
+## Arguments
 
-- `<ファイルパス>`: レビュー対象のファイルパス（必須）
+- `<file_path>`: Path to the file to review (required)
 
-## 処理内容
+## Processing
 
-$ARGUMENTS を解析して以下の処理を実行してください。
+Parse $ARGUMENTS and execute the following processing.
 
-### 1. 引数の解析
+### 1. Parse Arguments
 
 ```
 target_file=$ARGUMENTS
 ```
 
-引数が空の場合はエラーメッセージを表示して終了：
+If argument is empty, display error message and exit:
 ```
-❌ エラー: ファイルパスを指定してください
+❌ Error: Please specify a file path
 
-使用方法: /doc-review <ファイルパス>
-例: /doc-review docs/README.md
-```
-
-### 2. ファイルの存在確認
-
-対象ファイルが存在しない場合はエラー：
-```
-❌ エラー: ファイルが見つかりません: <target_file>
+Usage: /doc-review <file_path>
+Example: /doc-review docs/README.md
 ```
 
-### 3. 出力ファイルパスの決定
+### 2. Check File Existence
+
+Error if target file does not exist:
+```
+❌ Error: File not found: <target_file>
+```
+
+### 3. Determine Output File Path
 
 ```
-# 拡張子を除いたベース名 + .review.md
-# 例: docs/guide.md → docs/guide.review.md
-# 例: src/config.yaml → src/config.review.md
+# Base name without extension + .review.md
+# Example: docs/guide.md → docs/guide.review.md
+# Example: src/config.yaml → src/config.review.md
 output_file="${target_file%.*}.review.md"
 ```
 
-### 4. 対象ファイルの読み込みと分析
+### 4. Load and Analyze Target File
 
-ファイルの内容を読み込み、以下の観点で分析：
+Load file content and analyze from the following perspectives:
 
-- **目的と役割**: このドキュメントは何のために存在するか
-- **完全性**: 必要な情報が網羅されているか
-- **明確性**: 読者にとって分かりやすいか
-- **一貫性**: 用語やスタイルが統一されているか
-- **技術的正確性**: 情報は正確で最新か
-- **改善点**: 具体的に何をどう改善すべきか
+- **Purpose and Role**: What is this document for
+- **Completeness**: Is necessary information covered
+- **Clarity**: Is it understandable for readers
+- **Consistency**: Are terms and style unified
+- **Technical Accuracy**: Is information accurate and current
+- **Improvements**: What specifically should be improved and how
 
-### 5. レビューファイルの生成
+### 5. Generate Review File
 
-**テンプレート参照:** `../templates/DOC_REVIEW.md`
+**Template reference:** `../templates/DOC_REVIEW.md`
 
-テンプレートを読み込み、以下のプレースホルダーを置換してレビューを作成：
+Load template and replace the following placeholders to create review:
 
-| プレースホルダー | 値 |
-|------------------|-----|
-| `{{filename}}` | 対象ファイルのファイル名 |
-| `{{date}}` | レビュー日（YYYY-MM-DD形式） |
-| `{{file_path}}` | 対象ファイルのパス |
+| Placeholder | Value |
+|-------------|-------|
+| `{{filename}}` | Target file name |
+| `{{date}}` | Review date (YYYY-MM-DD format) |
+| `{{file_path}}` | Target file path |
 
-### 6. レビューファイルの出力
+### 6. Output Review File
 
-生成したレビューを `output_file` に書き込む。
+Write generated review to `output_file`.
 
-### 7. 完了メッセージ
+### 7. Completion Message
 
 ```
-✅ レビューが完了しました
+✅ Review complete
 
-対象ファイル: <target_file>
-レビューファイル: <output_file>
+Target file: <target_file>
+Review file: <output_file>
 
-レビュー内容:
-- 概要: ドキュメントの目的と役割
-- 評価: 品質・技術的正確性のチェック
-- 改善点: 優先度別の具体的な提案
-- 総評: 総合的な評価
+Review content:
+- Summary: Document purpose and role
+- Evaluation: Quality and technical accuracy check
+- Improvements: Specific suggestions by priority
+- Overall Assessment: Comprehensive evaluation
 
-レビューファイルを確認し、必要に応じて改善を実施してください。
+Please review the review file and implement improvements as needed.
 ```
 
-## 注意事項
+## Notes
 
-- レビューは日本語で記述
-- 具体的かつ建設的なフィードバックを心がける
-- 改善点には「箇所」「問題」「提案」を明確に記述
-- 評価チェックリストは実際の評価結果でチェック/アンチェックする
+- Write review in the same language as the document
+- Provide specific and constructive feedback
+- For improvements, clearly describe "location", "issue", and "suggestion"
+- Check/uncheck evaluation checklist based on actual evaluation results

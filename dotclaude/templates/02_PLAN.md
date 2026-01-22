@@ -6,16 +6,16 @@
 
 ## Overview
 
-<!-- 実装方針を短く記述 -->
+<!-- Briefly describe the implementation approach -->
 {{OVERVIEW}}
 
 ## Steps
 
-<!-- 必要なステップ数だけ以下を繰り返す（目安: 5-10ステップ） -->
+<!-- Repeat the following for as many steps as needed (guideline: 5-10 steps) -->
 
 ### Step {{N}}: {{STEP_TITLE}}
 
-- **目的:** {{STEP_GOAL}}
+- **Purpose:** {{STEP_GOAL}}
 - **Files:** `{{FILE_1}}`, `{{FILE_2}}`
 - **Tasks:**
   - {{TASK_1}}
@@ -24,28 +24,28 @@
 - **Size:** {{SIZE}}
 - **Depends on:** {{DEPENDS_ON}}
 
-<!-- ステップ数に応じて上記を繰り返す -->
+<!-- Repeat the above according to the number of steps -->
 
 ## Progress
 
 | Step | Title | Status |
 |------|-------|--------|
-<!-- ステップ数に応じて行を追加 -->
+<!-- Add rows according to the number of steps -->
 | {{N}} | {{STEP_TITLE}} | pending |
 
 ## Risks
 
-<!-- 実装上のリスクと対策 -->
+<!-- Implementation risks and countermeasures -->
 | Risk | Impact | Prob | Mitigation |
 |------|--------|------|------------|
 | {{RISK_1}} | {{IMPACT_1}} | {{PROB_1}} | {{MITIGATION_1}} |
 
 ## Rollback
 
-<!-- 問題発生時のロールバック手順 -->
+<!-- Rollback procedure in case of problems -->
 {{ROLLBACK_PLAN}}
 
 ## Notes
 
-<!-- 実装時の注意点、メモ -->
+<!-- Implementation notes, memos -->
 {{NOTES}}

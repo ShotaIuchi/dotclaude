@@ -1,24 +1,24 @@
 # /wf4-review
 
-レビュー記録を作成するコマンド。Plan のレビューや実装後のコードレビューに使用。
+Command to create review records. Used for Plan review or code review after implementation.
 
-## 使用方法
+## Usage
 
 ```
-/wf4-review [サブコマンド]
+/wf4-review [subcommand]
 ```
 
-## サブコマンド
+## Subcommands
 
-- `(なし)` または `plan`: Plan のレビュー
-- `code`: 実装コードのレビュー
-- `pr`: PR の状態確認とレビュー
+- `(none)` or `plan`: Review the Plan
+- `code`: Review implementation code
+- `pr`: Check and review PR status
 
-## 処理内容
+## Processing
 
-$ARGUMENTS を解析して以下の処理を実行してください。
+Parse $ARGUMENTS and execute the following processing.
 
-### 1. 前提条件の確認
+### 1. Check Prerequisites
 
 ```bash
 work_id=$(jq -r '.active_work // empty' .wf/state.json)
@@ -26,62 +26,62 @@ docs_dir="docs/wf/$work_id"
 review_path="$docs_dir/03_REVIEW.md"
 ```
 
-### 2. Plan レビュー（デフォルト）
+### 2. Plan Review (Default)
 
-Plan の内容を確認し、以下の観点でレビュー：
+Review Plan content from the following perspectives:
 
-**チェックリスト:**
+**Checklist:**
 
-1. **完全性**
-   - [ ] すべての Spec 要件がカバーされている
-   - [ ] テスト計画が含まれている
-   - [ ] ロールバック手順が明確
+1. **Completeness**
+   - [ ] All Spec requirements are covered
+   - [ ] Test plan is included
+   - [ ] Rollback procedure is clear
 
-2. **実現可能性**
-   - [ ] 各ステップの作業量が妥当
-   - [ ] 依存関係が正しい
-   - [ ] リスクが適切に評価されている
+2. **Feasibility**
+   - [ ] Work volume for each step is reasonable
+   - [ ] Dependencies are correct
+   - [ ] Risks are properly assessed
 
-3. **品質**
-   - [ ] コーディング規約への準拠が考慮されている
-   - [ ] パフォーマンスへの影響が検討されている
-   - [ ] セキュリティが考慮されている
+3. **Quality**
+   - [ ] Coding conventions compliance is considered
+   - [ ] Performance impact is examined
+   - [ ] Security is considered
 
-レビュー結果を `03_REVIEW.md` に記録：
+Record review results in `03_REVIEW.md`:
 
-**テンプレート参照:** `~/.claude/templates/03_REVIEW.md` を読み込んで使用してください。
+**Template reference:** Load and use `~/.claude/templates/03_REVIEW.md`.
 
-テンプレートのプレースホルダをレビュー結果で置換します。
+Replace template placeholders with review results.
 
-### 3. Code レビュー
+### 3. Code Review
 
-実装済みコードのレビュー：
+Review implemented code:
 
 ```bash
-# 変更されたファイルを確認
+# Check changed files
 git diff <base_branch>...HEAD --name-only
 
-# 差分を確認
+# Check diff
 git diff <base_branch>...HEAD
 ```
 
-レビュー観点：
-- コードスタイル
-- エラーハンドリング
-- テストカバレッジ
-- セキュリティ
-- パフォーマンス
+Review perspectives:
+- Code style
+- Error handling
+- Test coverage
+- Security
+- Performance
 
-### 4. PR レビュー
+### 4. PR Review
 
-GitHub PR の状態を確認：
+Check GitHub PR status:
 
 ```bash
 branch=$(jq -r ".works[\"$work_id\"].git.branch" .wf/state.json)
 gh pr view --json number,state,reviews,checks
 ```
 
-表示内容：
+Display:
 ```
 📋 PR Review Status: <work-id>
 ═══════════════════════════════════════
@@ -101,47 +101,47 @@ Reviews:
 Comments: 5
 
 Blocking Issues:
-- Security Scan が完了していません
+- Security Scan has not completed
 
-次のアクション:
-- Security Scan の完了を待ってください
+Next Action:
+- Please wait for Security Scan to complete
 ```
 
-### 5. state.json の更新
+### 5. Update state.json
 
 ```bash
-# レビュー完了時
+# When review is complete
 jq ".works[\"$work_id\"].current = \"wf4-review\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
-# 承認された場合
+# If approved
 jq ".works[\"$work_id\"].next = \"wf5-implement\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
-# 変更要求の場合
+# If changes requested
 jq ".works[\"$work_id\"].next = \"wf3-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
 
-### 6. 完了メッセージ
+### 6. Completion Message
 
 ```
-✅ レビューが完了しました
+✅ Review complete
 
-ファイル: docs/wf/<work-id>/03_REVIEW.md
+File: docs/wf/<work-id>/03_REVIEW.md
 
-結果: <Approved / Request Changes / Needs Discussion>
+Result: <Approved / Request Changes / Needs Discussion>
 
 Findings:
 - Must Fix: 1
 - Should Fix: 2
 - Suggestions: 3
 
-次のステップ:
-- Approved: /wf5-implement を実行
-- Request Changes: 指摘事項を修正後、再度 /wf4-review
+Next step:
+- Approved: Run /wf5-implement
+- Request Changes: Fix issues and run /wf4-review again
 ```
 
-## 注意事項
+## Notes
 
-- レビュー結果は必ず記録
-- Must Fix は解決必須として扱う
-- レビュアーの名前を記録
-- 複数回のレビューは履歴として残す
+- Always record review results
+- Treat Must Fix items as mandatory to resolve
+- Record reviewer names
+- Keep history for multiple reviews

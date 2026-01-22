@@ -1,163 +1,163 @@
-# WF運用システム
+# WF Management System
 
-AI（Claude Code）と人間が同じ状態・同じ成果物を見て作業するためのワークフロー管理システム。
+A workflow management system for AI (Claude Code) and humans to work while viewing the same state and artifacts.
 
-## 概要
+## Overview
 
-このシステムは以下の課題を解決します：
+This system solves the following challenges:
 
-- **状態の共有**: AI と人間が同じ作業状態を把握
-- **成果物の一元管理**: ドキュメントとコードを紐付けて管理
-- **作業の再現性**: 別PCや別セッションでも作業を継続可能
-- **Plan外変更の防止**: 計画された作業のみを実装
+- **State Sharing**: AI and humans grasp the same work state
+- **Unified Artifact Management**: Manage documents and code in a linked manner
+- **Work Reproducibility**: Continue work on different PCs or sessions
+- **Prevention of Off-Plan Changes**: Implement only planned work
 
-## セットアップ
+## Setup
 
-### 前提条件
+### Prerequisites
 
-以下のツールが必要です：
+The following tools are required:
 
-- `bash` - シェルスクリプト実行
-- `jq` - JSON 処理
+- `bash` - Shell script execution
+- `jq` - JSON processing
 - `gh` - GitHub CLI
-- `git` - バージョン管理
+- `git` - Version control
 
-### インストール
+### Installation
 
-#### 方法1: amu を使用（推奨）
+#### Method 1: Using amu (Recommended)
 
-[amu](https://github.com/ShotaIuchi/amu) を使うと、複数の dotclaude 設定を簡単に管理できます。
+Using [amu](https://github.com/ShotaIuchi/amu) makes it easy to manage multiple dotclaude configurations.
 
 ```bash
-# 1. このリポジトリをクローン
+# 1. Clone this repository
 git clone https://github.com/your-org/dotclaude.git
 
-# 2. ~/.claude ディレクトリで amu add を実行
+# 2. Run amu add in the ~/.claude directory
 cd ~/.claude
 amu add /path/to/dotclaude/dotclaude
 ```
 
-#### 方法2: シンボリックリンク
+#### Method 2: Symbolic Link
 
 ```bash
-# 1. このリポジトリをクローン
+# 1. Clone this repository
 git clone https://github.com/your-org/dotclaude.git
 
-# 2. dotclaude を ~/.claude にシンボリックリンク（グローバル設定）
+# 2. Symlink dotclaude to ~/.claude (global configuration)
 ln -s /path/to/dotclaude/dotclaude ~/.claude
 
-# または、プロジェクト単位で利用する場合
+# Or, for per-project use
 cd your-project
 ln -s /path/to/dotclaude/dotclaude .claude
 ```
 
-### 初期化
+### Initialization
 
 ```bash
-# プロジェクトで WF システムを初期化
+# Initialize WF system in the project
 ./path/to/dotclaude/scripts/wf-init.sh
 ```
 
-これにより以下が作成されます：
+This creates the following:
 
-- `.wf/config.json` - 共有設定
-- `.wf/state.json` - 共有状態
-- `docs/wf/` - ワークフロードキュメント
-- `.gitignore` に `.wf/local.json` を追加
+- `.wf/config.json` - Shared configuration
+- `.wf/state.json` - Shared state
+- `docs/wf/` - Workflow documents
+- Adds `.wf/local.json` to `.gitignore`
 
-## コマンド一覧
+## Command List
 
-### 環境系（wf0-*）
+### Environment Commands (wf0-*)
 
-| コマンド | 説明 |
-|---------|------|
-| `/wf0-workspace issue=<n>` | 新規ワークスペース作成 |
-| `/wf0-restore [work-id]` | 既存ワークスペース復元 |
-| `/wf0-status [work-id\|all]` | 状態表示 |
+| Command | Description |
+|---------|-------------|
+| `/wf0-workspace issue=<n>` | Create new workspace |
+| `/wf0-restore [work-id]` | Restore existing workspace |
+| `/wf0-status [work-id\|all]` | Display status |
 
-### ドキュメント系（wf1-4）
+### Documentation Commands (wf1-4)
 
-| コマンド | 説明 |
-|---------|------|
-| `/wf1-kickoff` | Kickoff 作成（目標・成功条件定義） |
-| `/wf1-kickoff update` | Kickoff 更新 |
-| `/wf1-kickoff revise "<指示>"` | Kickoff 修正 |
-| `/wf1-kickoff chat` | 壁打ち対話 |
-| `/wf2-spec` | 仕様書作成 |
-| `/wf3-plan` | 実装計画作成 |
-| `/wf4-review` | レビュー記録 |
+| Command | Description |
+|---------|-------------|
+| `/wf1-kickoff` | Create Kickoff (define goals and success criteria) |
+| `/wf1-kickoff update` | Update Kickoff |
+| `/wf1-kickoff revise "<instruction>"` | Revise Kickoff |
+| `/wf1-kickoff chat` | Brainstorming dialogue |
+| `/wf2-spec` | Create specification |
+| `/wf3-plan` | Create implementation plan |
+| `/wf4-review` | Record review |
 
-### 実装系（wf5-6）
+### Implementation Commands (wf5-6)
 
-| コマンド | 説明 |
-|---------|------|
-| `/wf5-implement [step]` | Plan の1ステップ実装 |
-| `/wf6-verify` | テスト・ビルド検証 |
-| `/wf6-verify pr` | 検証後にPR作成 |
+| Command | Description |
+|---------|-------------|
+| `/wf5-implement [step]` | Implement one step of the Plan |
+| `/wf6-verify` | Test and build verification |
+| `/wf6-verify pr` | Create PR after verification |
 
-### エージェント
+### Agents
 
-| コマンド | 説明 |
-|---------|------|
-| `/agent <name> [params]` | サブエージェントを直接呼び出し |
+| Command | Description |
+|---------|-------------|
+| `/agent <name> [params]` | Directly invoke a sub-agent |
 
-## ワークフロー
+## Workflow
 
-### 基本フロー
+### Basic Flow
 
 ```
 /wf0-workspace issue=123
     ↓
-/wf1-kickoff（目標・成功条件を定義）
+/wf1-kickoff (define goals and success criteria)
     ↓
-/wf2-spec（変更仕様を策定）
+/wf2-spec (develop change specification)
     ↓
-/wf3-plan（実装ステップを計画）
+/wf3-plan (plan implementation steps)
     ↓
-/wf4-review（任意：計画レビュー）
+/wf4-review (optional: plan review)
     ↓
-/wf5-implement（1ステップずつ実装）
-    ↓ ↑ 繰り返し
-/wf6-verify pr（検証してPR作成）
+/wf5-implement (implement one step at a time)
+    ↓ ↑ repeat
+/wf6-verify pr (verify and create PR)
 ```
 
-### 作業の復元
+### Work Restoration
 
 ```bash
-# 別PCで作業を継続
+# Continue work on a different PC
 /wf0-restore FEAT-123-export-csv
 ```
 
-### Kickoff の修正
+### Kickoff Revision
 
 ```bash
-# 指示付きで修正
-/wf1-kickoff revise "スコープを縮小して、CSV エクスポートのみに絞る"
+# Revise with instructions
+/wf1-kickoff revise "Narrow the scope to CSV export only"
 ```
 
-## リポジトリ構成
+## Repository Structure
 
 ```
-dotclaude/                 # リポジトリルート
-├── dotclaude/             # ~/.claude にリンクする対象
-│   ├── agents/            # サブエージェント定義
-│   ├── commands/          # スラッシュコマンド定義
-│   ├── guides/            # アーキテクチャガイド
-│   ├── examples/          # 設定ファイル例
-│   ├── scripts/           # シェルスクリプト
-│   └── templates/         # ドキュメントテンプレート
+dotclaude/                 # Repository root
+├── dotclaude/             # Target to link to ~/.claude
+│   ├── agents/            # Sub-agent definitions
+│   ├── commands/          # Slash command definitions
+│   ├── guides/            # Architecture guides
+│   ├── examples/          # Configuration file examples
+│   ├── scripts/           # Shell scripts
+│   └── templates/         # Document templates
 ├── .gitignore
 └── README.md
 ```
 
-## ディレクトリ構成
+## Directory Structure
 
 ```
 your-project/
 ├── .wf/
-│   ├── config.json      # 共有設定（コミット対象）
-│   ├── state.json       # 共有状態（コミット対象）
-│   └── local.json       # ローカル設定（gitignore）
+│   ├── config.json      # Shared configuration (committed)
+│   ├── state.json       # Shared state (committed)
+│   └── local.json       # Local configuration (gitignored)
 ├── docs/wf/
 │   └── FEAT-123-slug/
 │       ├── 00_KICKOFF.md
@@ -166,14 +166,14 @@ your-project/
 │       ├── 03_REVIEW.md
 │       ├── 04_IMPLEMENT_LOG.md
 │       └── 05_REVISIONS.md
-└── .claude/             # dotclaude からのシンボリックリンク
-    └── commands/        # スラッシュコマンド
+└── .claude/             # Symbolic link from dotclaude
+    └── commands/        # Slash commands
         ├── wf0-workspace.md
         ├── wf0-restore.md
         └── ...
 ```
 
-## 設定ファイル
+## Configuration Files
 
 ### config.json
 
@@ -213,129 +213,129 @@ your-project/
 }
 ```
 
-## サブエージェント
+## Sub-Agents
 
-Claude Code の Task ツールを活用した専門特化型のエージェント群です。
-ワークフローコマンドと連携して動作するほか、`/agent` コマンドで直接呼び出すこともできます。
+A collection of specialized agents utilizing Claude Code's Task tool.
+They work in conjunction with workflow commands and can also be invoked directly via the `/agent` command.
 
-### ワークフロー支援型
+### Workflow Support Type
 
-| エージェント | 用途 | 呼び出し元 |
-|-------------|------|-----------|
-| `research` | Issue 背景調査、関連コード特定 | wf1-kickoff |
-| `spec-writer` | 仕様書ドラフト作成 | wf2-spec |
-| `planner` | 実装計画立案 | wf3-plan |
-| `implementer` | 1ステップ実装支援 | wf5-implement |
+| Agent | Purpose | Caller |
+|-------|---------|--------|
+| `research` | Issue background research, related code identification | wf1-kickoff |
+| `spec-writer` | Specification draft creation | wf2-spec |
+| `planner` | Implementation planning | wf3-plan |
+| `implementer` | Single step implementation support | wf5-implement |
 
-### タスク特化型
+### Task-Specific Type
 
-| エージェント | 用途 |
-|-------------|------|
-| `reviewer` | コードレビュー |
-| `test-writer` | テスト作成 |
-| `refactor` | リファクタリング提案 |
-| `doc-writer` | ドキュメント作成 |
+| Agent | Purpose |
+|-------|---------|
+| `reviewer` | Code review |
+| `test-writer` | Test creation |
+| `refactor` | Refactoring suggestions |
+| `doc-writer` | Documentation creation |
 
-### プロジェクト分析型
+### Project Analysis Type
 
-| エージェント | 用途 |
-|-------------|------|
-| `codebase` | コードベース調査 |
-| `dependency` | 依存関係分析 |
-| `impact` | 影響範囲特定 |
+| Agent | Purpose |
+|-------|---------|
+| `codebase` | Codebase investigation |
+| `dependency` | Dependency analysis |
+| `impact` | Impact scope identification |
 
-### エージェントの使用例
+### Agent Usage Examples
 
 ```bash
-# Issue 背景調査
+# Issue background research
 /agent research issue=123
 
-# コードベース調査
-/agent codebase query="認証フローの実装箇所"
+# Codebase investigation
+/agent codebase query="authentication flow implementation location"
 
-# コードレビュー
+# Code review
 /agent reviewer files="src/auth/*.ts"
 
-# 影響範囲分析
+# Impact scope analysis
 /agent impact target="src/utils/format.ts"
 ```
 
-詳細は `dotclaude/agents/README.md` を参照してください。
+See `dotclaude/agents/README.md` for details.
 
-## 重要な制約
+## Important Constraints
 
-### 1. PLAN外の変更禁止
+### 1. No Off-Plan Changes
 
-`/wf5-implement` は Plan に記載されたステップのみを実装します。
-Plan外の変更が必要な場合は、先に Plan を更新してください。
+`/wf5-implement` implements only the steps documented in the Plan.
+If changes outside the Plan are needed, update the Plan first.
 
-### 2. 1回 = 1ステップ
+### 2. One Execution = One Step
 
-`/wf5-implement` は1回の実行で1ステップのみ実装します。
-これにより、作業の進捗が明確になります。
+`/wf5-implement` implements only one step per execution.
+This makes work progress clear.
 
-### 3. 元内容を消さない
+### 3. Preserve Original Content
 
-Kickoff の更新時は、`05_REVISIONS.md` に履歴を残します。
+When updating Kickoff, record history in `05_REVISIONS.md`.
 
-### 4. Dependencies 必須
+### 4. Dependencies Required
 
-2個目以降のワークフローは、依存関係を明記してください。
+For second and subsequent workflows, clearly document dependencies.
 
-## テンプレート
+## Templates
 
-`dotclaude/templates/` ディレクトリに各ドキュメントのテンプレートがあります。
-プロジェクトに合わせてカスタマイズしてください。
+Document templates are available in the `dotclaude/templates/` directory.
+Customize them according to your project.
 
-### テンプレート設計思想
+### Template Design Philosophy
 
-テンプレートは「AIと人間の思考を揃えるためのインターフェース」として設計されています。
+Templates are designed as "interfaces to align AI and human thinking."
 
-| 原則 | 説明 |
-|------|------|
-| **必須項目は空でも枠を作る** | 抜けを可視化し、記入漏れを防止 |
-| **AIが勝手に決めてはいけない所は明示** | Open Questions セクションで人間の判断が必要な項目を列挙 |
-| **レビューで見る場所を固定** | 構造を統一し、確認箇所を明確化 |
+| Principle | Description |
+|-----------|-------------|
+| **Create frames for required items even if empty** | Visualize gaps and prevent omissions |
+| **Explicitly mark where AI should not decide alone** | List items requiring human judgment in Open Questions section |
+| **Fix review locations** | Unify structure and clarify check points |
 
-### テンプレート構成
+### Template Structure
 
-| ファイル | 役割 | 主要セクション |
-|----------|------|---------------|
-| `00_KICKOFF.md` | 目標・成功条件定義 | Goal, Success Criteria, Dependencies（構造化）, Open Questions |
-| `01_SPEC.md` | 変更仕様 | Scope（In/Out）, Users/Use-cases, Requirements（FR/NFR分離）, Acceptance Criteria（Given/When/Then） |
-| `02_PLAN.md` | 実装計画 | Overview, Steps（シンプル構造）, Risks, Rollback |
-| `03_REVIEW.md` | レビュー記録 | Review Result（Status）, Findings, Required Changes, Nice-to-have |
-| `04_IMPLEMENT_LOG.md` | 実装ログ | 日付ベースのログ形式（Step, Summary, Files, Test Result） |
-| `05_REVISIONS.md` | 変更履歴 | Revision番号ベース（Reason, Changed Sections） |
+| File | Role | Key Sections |
+|------|------|--------------|
+| `00_KICKOFF.md` | Goal and success criteria definition | Goal, Success Criteria, Dependencies (structured), Open Questions |
+| `01_SPEC.md` | Change specification | Scope (In/Out), Users/Use-cases, Requirements (FR/NFR separated), Acceptance Criteria (Given/When/Then) |
+| `02_PLAN.md` | Implementation plan | Overview, Steps (simple structure), Risks, Rollback |
+| `03_REVIEW.md` | Review record | Review Result (Status), Findings, Required Changes, Nice-to-have |
+| `04_IMPLEMENT_LOG.md` | Implementation log | Date-based log format (Step, Summary, Files, Test Result) |
+| `05_REVISIONS.md` | Change history | Revision number-based (Reason, Changed Sections) |
 
-## トラブルシューティング
+## Troubleshooting
 
-### state.json が壊れた場合
+### If state.json is corrupted
 
 ```bash
-# examples/state.json を参考に手動で修正
-# または初期化
+# Manually fix using examples/state.json as reference
+# Or initialize
 echo '{"active_work": null, "works": {}}' > .wf/state.json
 ```
 
-### ブランチが見つからない場合
+### If branch is not found
 
 ```bash
-# リモートから最新を取得
+# Fetch latest from remote
 git fetch --all --prune
-# 再度復元
+# Restore again
 /wf0-restore
 ```
 
-### worktree が残っている場合
+### If worktree remains
 
 ```bash
-# worktree を一覧表示
+# List worktrees
 git worktree list
-# 削除
+# Remove
 git worktree remove .worktrees/feat-123-slug
 ```
 
-## ライセンス
+## License
 
 MIT

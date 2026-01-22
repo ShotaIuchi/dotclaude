@@ -1,46 +1,46 @@
 # iOS Architecture Guide
 
-Apple 公式ガイドラインに基づく、SwiftUI + MVVM / State 管理のベストプラクティス集。
+Best practices for SwiftUI + MVVM / State management based on Apple's official guidelines.
 
 ---
 
-## 目次
+## Table of Contents
 
-1. [アーキテクチャ概要](#アーキテクチャ概要)
-2. [レイヤー構成](#レイヤー構成)
+1. [Architecture Overview](#architecture-overview)
+2. [Layer Structure](#layer-structure)
 3. [Presentation Layer](#presentation-layer)
 4. [Domain Layer](#domain-layer)
 5. [Data Layer](#data-layer)
-6. [依存性注入 (DI)](#依存性注入-di)
-7. [状態管理](#状態管理)
-8. [非同期処理 (async/await / Combine)](#非同期処理-asyncawait--combine)
-9. [エラーハンドリング](#エラーハンドリング)
-10. [テスト戦略](#テスト戦略)
-11. [ディレクトリ構造](#ディレクトリ構造)
-12. [命名規則](#命名規則)
-13. [ベストプラクティス一覧](#ベストプラクティス一覧)
+6. [Dependency Injection (DI)](#dependency-injection-di)
+7. [State Management](#state-management)
+8. [Async Processing (async/await / Combine)](#async-processing-asyncawait--combine)
+9. [Error Handling](#error-handling)
+10. [Testing Strategy](#testing-strategy)
+11. [Directory Structure](#directory-structure)
+12. [Naming Conventions](#naming-conventions)
+13. [Best Practices Checklist](#best-practices-checklist)
 
 ---
 
-## アーキテクチャ概要
+## Architecture Overview
 
-### 基本原則
+### Core Principles
 
-1. **関心の分離 (Separation of Concerns)**
-   - UI ロジックとビジネスロジックを明確に分離
-   - 各レイヤーは単一責任を持つ
+1. **Separation of Concerns**
+   - Clearly separate UI logic from business logic
+   - Each layer has a single responsibility
 
-2. **データ駆動型 UI (Data-driven UI)**
-   - UI は状態（State）を反映するだけ
-   - 状態変更は ViewModel 経由で行う
+2. **Data-driven UI**
+   - UI only reflects state
+   - State changes are made through ViewModel
 
-3. **単一の信頼できる情報源 (Single Source of Truth: SSOT)**
-   - データは一箇所で管理し、他はそこから取得
-   - Repository がデータの SSOT となる
+3. **Single Source of Truth (SSOT)**
+   - Data is managed in one place, others retrieve from there
+   - Repository becomes the SSOT for data
 
-4. **単方向データフロー (Unidirectional Data Flow: UDF)**
-   - イベントは上流へ（View → ViewModel → Repository）
-   - 状態は下流へ（Repository → ViewModel → View）
+4. **Unidirectional Data Flow (UDF)**
+   - Events flow upstream (View → ViewModel → Repository)
+   - State flows downstream (Repository → ViewModel → View)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -57,8 +57,8 @@ Apple 公式ガイドラインに基づく、SwiftUI + MVVM / State 管理のベ
 │                     Domain Layer (Optional)                  │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │                    Use Cases                         │   │
-│  │  - 複雑なビジネスロジックのカプセル化                    │   │
-│  │  - 複数 Repository の組み合わせ                        │   │
+│  │  - Encapsulate complex business logic                │   │
+│  │  - Combine multiple Repositories                     │   │
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
                                           │
@@ -67,9 +67,9 @@ Apple 公式ガイドラインに基づく、SwiftUI + MVVM / State 管理のベ
 │                       Data Layer                             │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │                   Repository                         │   │
-│  │  - データアクセスの抽象化                              │   │
-│  │  - キャッシュ戦略                                     │   │
-│  │  - オフライン対応                                     │   │
+│  │  - Abstract data access                              │   │
+│  │  - Caching strategy                                  │   │
+│  │  - Offline support                                   │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                    │                    │                    │
 │                    ▼                    ▼                    │
@@ -83,58 +83,58 @@ Apple 公式ガイドラインに基づく、SwiftUI + MVVM / State 管理のベ
 
 ---
 
-## レイヤー構成
+## Layer Structure
 
-### 依存関係の方向
+### Dependency Direction
 
 ```
 Presentation Layer → Domain Layer → Data Layer
 ```
 
-- 上位レイヤーは下位レイヤーに依存
-- 下位レイヤーは上位レイヤーを知らない
-- Protocol を通じて依存性を逆転（DIP）
+- Upper layers depend on lower layers
+- Lower layers don't know about upper layers
+- Invert dependencies through Protocols (DIP)
 
-### 各レイヤーの責務
+### Layer Responsibilities
 
-| レイヤー | 責務 | 主要コンポーネント |
-|---------|------|-------------------|
-| Presentation | 画面表示・ユーザー操作 | View (SwiftUI), ViewModel |
-| Domain | ビジネスロジック | UseCase, Domain Model |
-| Data | データ取得・永続化 | Repository, DataSource, API |
+| Layer | Responsibility | Main Components |
+|-------|----------------|-----------------|
+| Presentation | Screen display / User interaction | View (SwiftUI), ViewModel |
+| Domain | Business logic | UseCase, Domain Model |
+| Data | Data retrieval / Persistence | Repository, DataSource, API |
 
 ---
 
 ## Presentation Layer
 
-### ViewModel（iOS 17+ @Observable）
+### ViewModel (iOS 17+ @Observable)
 
 ```swift
 import SwiftUI
 import Observation
 
 /**
- * ユーザー一覧画面の ViewModel
+ * ViewModel for User List Screen
  *
- * UI 状態の管理とビジネスロジックの呼び出しを担当
+ * Responsible for UI state management and business logic calls
  */
 @Observable
 final class UserListViewModel {
 
-    // MARK: - 公開プロパティ
+    // MARK: - Public Properties
 
     // UI State
     private(set) var uiState = UserListUiState()
 
-    // 一時的なイベント（ナビゲーション、アラート等）
+    // Temporary events (navigation, alerts, etc.)
     private(set) var navigationEvent: UserListNavigationEvent?
 
-    // MARK: - 非公開プロパティ
+    // MARK: - Private Properties
 
     private let getUsersUseCase: GetUsersUseCaseProtocol
     private var loadTask: Task<Void, Never>?
 
-    // MARK: - 初期化
+    // MARK: - Initialization
 
     init(getUsersUseCase: GetUsersUseCaseProtocol) {
         self.getUsersUseCase = getUsersUseCase
@@ -144,10 +144,10 @@ final class UserListViewModel {
         loadTask?.cancel()
     }
 
-    // MARK: - 公開関数
+    // MARK: - Public Functions
 
     /**
-     * ユーザー一覧を読み込む
+     * Load user list
      */
     func loadUsers() {
         loadTask?.cancel()
@@ -157,27 +157,27 @@ final class UserListViewModel {
     }
 
     /**
-     * ユーザーを選択する
+     * Select a user
      */
     func onUserTap(_ userId: String) {
         navigationEvent = .detail(userId: userId)
     }
 
     /**
-     * ナビゲーションイベントを消費
+     * Consume navigation event
      */
     func consumeNavigationEvent() {
         navigationEvent = nil
     }
 
     /**
-     * リトライする
+     * Retry
      */
     func onRetryTap() {
         loadUsers()
     }
 
-    // MARK: - 非公開関数
+    // MARK: - Private Functions
 
     @MainActor
     private func performLoadUsers() async {
@@ -199,29 +199,29 @@ final class UserListViewModel {
 }
 ```
 
-### ViewModel（iOS 15-16 ObservableObject）
+### ViewModel (iOS 15-16 ObservableObject)
 
 ```swift
 import SwiftUI
 import Combine
 
 /**
- * ユーザー一覧画面の ViewModel（iOS 15-16 対応版）
+ * ViewModel for User List Screen (iOS 15-16 compatible)
  */
 final class UserListViewModel: ObservableObject {
 
-    // MARK: - 公開プロパティ
+    // MARK: - Public Properties
 
     @Published private(set) var uiState = UserListUiState()
     @Published private(set) var navigationEvent: UserListNavigationEvent?
 
-    // MARK: - 非公開プロパティ
+    // MARK: - Private Properties
 
     private let getUsersUseCase: GetUsersUseCaseProtocol
     private var cancellables = Set<AnyCancellable>()
     private var loadTask: Task<Void, Never>?
 
-    // MARK: - 初期化
+    // MARK: - Initialization
 
     init(getUsersUseCase: GetUsersUseCaseProtocol) {
         self.getUsersUseCase = getUsersUseCase
@@ -231,7 +231,7 @@ final class UserListViewModel: ObservableObject {
         loadTask?.cancel()
     }
 
-    // MARK: - 公開関数
+    // MARK: - Public Functions
 
     @MainActor
     func loadUsers() {
@@ -274,19 +274,19 @@ final class UserListViewModel: ObservableObject {
 import Foundation
 
 /**
- * ユーザー一覧画面の UI 状態
+ * UI state for User List Screen
  *
- * Immutable な構造体で状態を表現
+ * Represent state with immutable struct
  */
 struct UserListUiState: Equatable {
 
-    // MARK: - プロパティ
+    // MARK: - Properties
 
     let users: [UserUiModel]
     let isLoading: Bool
     let error: UiError?
 
-    // MARK: - 派生プロパティ
+    // MARK: - Derived Properties
 
     var isEmpty: Bool {
         users.isEmpty && !isLoading && error == nil
@@ -300,7 +300,7 @@ struct UserListUiState: Equatable {
         !users.isEmpty
     }
 
-    // MARK: - 初期化
+    // MARK: - Initialization
 
     init(
         users: [UserUiModel] = [],
@@ -312,7 +312,7 @@ struct UserListUiState: Equatable {
         self.error = error
     }
 
-    // MARK: - コピー関数
+    // MARK: - Copy Function
 
     func copy(
         users: [UserUiModel]? = nil,
@@ -328,7 +328,7 @@ struct UserListUiState: Equatable {
 }
 
 /**
- * UI 層で使用するユーザーモデル
+ * User model for UI layer
  */
 struct UserUiModel: Equatable, Identifiable {
     let id: String
@@ -338,7 +338,7 @@ struct UserUiModel: Equatable, Identifiable {
 }
 
 /**
- * ナビゲーションイベント
+ * Navigation events
  */
 enum UserListNavigationEvent: Equatable {
     case detail(userId: String)
@@ -351,17 +351,17 @@ enum UserListNavigationEvent: Equatable {
 import SwiftUI
 
 /**
- * ユーザー一覧画面
+ * User List Screen
  */
 struct UserListScreen: View {
 
-    // MARK: - プロパティ
+    // MARK: - Properties
 
     // iOS 17+: @State, iOS 15-16: @StateObject
     @State private var viewModel: UserListViewModel
     @State private var navigationPath = NavigationPath()
 
-    // MARK: - 初期化
+    // MARK: - Initialization
 
     init(viewModel: UserListViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -376,7 +376,7 @@ struct UserListScreen: View {
                 onUserTap: viewModel.onUserTap,
                 onRetryTap: viewModel.onRetryTap
             )
-            .navigationTitle("ユーザー一覧")
+            .navigationTitle("User List")
             .navigationDestination(for: String.self) { userId in
                 UserDetailScreen(userId: userId)
             }
@@ -389,7 +389,7 @@ struct UserListScreen: View {
         }
     }
 
-    // MARK: - 非公開関数
+    // MARK: - Private Functions
 
     private func handleNavigationEvent(_ event: UserListNavigationEvent?) {
         guard let event else { return }
@@ -404,11 +404,11 @@ struct UserListScreen: View {
 }
 
 /**
- * ユーザー一覧のコンテンツ（プレビュー可能）
+ * User List Content (previewable)
  */
 struct UserListContent: View {
 
-    // MARK: - プロパティ
+    // MARK: - Properties
 
     let uiState: UserListUiState
     let onUserTap: (String) -> Void
@@ -440,7 +440,7 @@ struct UserListContent: View {
 }
 
 /**
- * ユーザーリスト
+ * User List
  */
 struct UserList: View {
 
@@ -459,7 +459,7 @@ struct UserList: View {
 }
 
 /**
- * プレビュー
+ * Previews
  */
 #Preview("Loading") {
     UserListContent(
@@ -496,7 +496,7 @@ struct UserList: View {
     UserListContent(
         uiState: UserListUiState(
             error: UiError(
-                message: "通信エラーが発生しました",
+                message: "A communication error occurred",
                 action: .retry
             )
         ),
@@ -516,25 +516,25 @@ struct UserList: View {
 import Foundation
 
 /**
- * ユーザー一覧取得の UseCase Protocol
+ * UseCase Protocol for getting user list
  */
 protocol GetUsersUseCaseProtocol {
     func execute() async throws -> [User]
 }
 
 /**
- * ユーザー一覧取得の UseCase
+ * UseCase for getting user list
  *
- * 単一のビジネスロジックをカプセル化
+ * Encapsulates single business logic
  */
 final class GetUsersUseCase: GetUsersUseCaseProtocol {
 
-    // MARK: - 非公開プロパティ
+    // MARK: - Private Properties
 
     private let userRepository: UserRepositoryProtocol
     private let analyticsRepository: AnalyticsRepositoryProtocol
 
-    // MARK: - 初期化
+    // MARK: - Initialization
 
     init(
         userRepository: UserRepositoryProtocol,
@@ -544,15 +544,15 @@ final class GetUsersUseCase: GetUsersUseCaseProtocol {
         self.analyticsRepository = analyticsRepository
     }
 
-    // MARK: - 公開関数
+    // MARK: - Public Functions
 
     /**
-     * ユーザー一覧を取得する
+     * Get user list
      */
     func execute() async throws -> [User] {
         let users = try await userRepository.getUsers()
 
-        // 副作用（アナリティクス送信など）
+        // Side effects (analytics, etc.)
         await analyticsRepository.logUserListViewed(count: users.count)
 
         return users
@@ -560,7 +560,7 @@ final class GetUsersUseCase: GetUsersUseCaseProtocol {
 }
 
 /**
- * ユーザー詳細取得の UseCase
+ * UseCase for getting user detail
  */
 final class GetUserDetailUseCase {
 
@@ -576,9 +576,9 @@ final class GetUserDetailUseCase {
     }
 
     /**
-     * ユーザー詳細と投稿を取得する
+     * Get user detail and posts
      *
-     * 複数の Repository を組み合わせる例
+     * Example of combining multiple Repositories
      */
     func execute(userId: String) async throws -> UserDetail {
         async let user = userRepository.getUser(userId: userId)
@@ -599,7 +599,7 @@ final class GetUserDetailUseCase {
 import Foundation
 
 /**
- * ドメインモデル（ビジネスロジックを含む）
+ * Domain model (contains business logic)
  */
 struct User: Equatable, Identifiable {
     let id: String
@@ -608,7 +608,7 @@ struct User: Equatable, Identifiable {
     let joinedAt: Date
     let status: UserStatus
 
-    // ドメインロジック
+    // Domain logic
     var isActive: Bool {
         status == .active
     }
@@ -629,7 +629,7 @@ enum UserStatus: String, Codable {
 }
 
 /**
- * ユーザー詳細
+ * User Detail
  */
 struct UserDetail: Equatable {
     let user: User
@@ -648,9 +648,9 @@ struct UserDetail: Equatable {
 import Foundation
 
 /**
- * ユーザーリポジトリの Protocol
+ * User Repository Protocol
  *
- * Domain 層はこの Protocol に依存
+ * Domain layer depends on this Protocol
  */
 protocol UserRepositoryProtocol {
     func getUsers() async throws -> [User]
@@ -659,18 +659,18 @@ protocol UserRepositoryProtocol {
     func updateUser(_ user: User) async throws
     func deleteUser(userId: String) async throws
 
-    // リアクティブなデータストリーム（Combine）
+    // Reactive data stream (Combine)
     var usersPublisher: AnyPublisher<[User], Never> { get }
 }
 
 /**
- * ユーザーリポジトリの実装
+ * User Repository implementation
  *
- * オフラインファースト戦略を採用
+ * Adopts offline-first strategy
  */
 final class UserRepository: UserRepositoryProtocol {
 
-    // MARK: - 非公開プロパティ
+    // MARK: - Private Properties
 
     private let localDataSource: UserLocalDataSourceProtocol
     private let remoteDataSource: UserRemoteDataSourceProtocol
@@ -678,13 +678,13 @@ final class UserRepository: UserRepositoryProtocol {
 
     private let usersSubject = CurrentValueSubject<[User], Never>([])
 
-    // MARK: - 公開プロパティ
+    // MARK: - Public Properties
 
     var usersPublisher: AnyPublisher<[User], Never> {
         usersSubject.eraseToAnyPublisher()
     }
 
-    // MARK: - 初期化
+    // MARK: - Initialization
 
     init(
         localDataSource: UserLocalDataSourceProtocol,
@@ -696,22 +696,22 @@ final class UserRepository: UserRepositoryProtocol {
         self.networkMonitor = networkMonitor
     }
 
-    // MARK: - 公開関数
+    // MARK: - Public Functions
 
     /**
-     * ユーザー一覧を取得
+     * Get user list
      *
-     * オフラインファースト：
-     * 1. まずローカルキャッシュを返す
-     * 2. バックグラウンドでリモートから取得
-     * 3. 取得したデータでローカルを更新
+     * Offline-first:
+     * 1. First return local cache
+     * 2. Fetch from remote in background
+     * 3. Update local with fetched data
      */
     func getUsers() async throws -> [User] {
-        // まずローカルから取得
+        // First get from local
         let localUsers = try await localDataSource.getUsers()
         usersSubject.send(localUsers.map { $0.toDomain() })
 
-        // バックグラウンドでリモートから同期
+        // Sync from remote in background
         Task {
             await refreshUsersFromRemote()
         }
@@ -720,19 +720,19 @@ final class UserRepository: UserRepositoryProtocol {
     }
 
     /**
-     * 単一ユーザーを取得
+     * Get single user
      */
     func getUser(userId: String) async throws -> User {
-        // まずローカルから取得
+        // First get from local
         if let localUser = try? await localDataSource.getUser(userId: userId) {
-            // バックグラウンドでリモートから同期
+            // Sync from remote in background
             Task {
                 await refreshUserFromRemote(userId: userId)
             }
             return localUser.toDomain()
         }
 
-        // ローカルになければリモートから取得
+        // If not in local, get from remote
         let remoteUser = try await remoteDataSource.getUser(userId: userId)
         try await localDataSource.insertUser(remoteUser.toEntity())
 
@@ -740,14 +740,14 @@ final class UserRepository: UserRepositoryProtocol {
     }
 
     /**
-     * ユーザーを作成
+     * Create user
      */
     func createUser(_ user: User) async throws -> User {
-        // リモートに作成
+        // Create on remote
         let response = try await remoteDataSource.createUser(user.toRequest())
         let createdUser = response.toDomain()
 
-        // ローカルにキャッシュ
+        // Cache locally
         try await localDataSource.insertUser(createdUser.toEntity())
 
         return createdUser
@@ -763,10 +763,10 @@ final class UserRepository: UserRepositoryProtocol {
         try await localDataSource.deleteUser(userId: userId)
     }
 
-    // MARK: - 非公開関数
+    // MARK: - Private Functions
 
     /**
-     * リモートからユーザー一覧を同期
+     * Sync user list from remote
      */
     private func refreshUsersFromRemote() async {
         guard networkMonitor.isConnected else { return }
@@ -776,7 +776,7 @@ final class UserRepository: UserRepositoryProtocol {
             try await localDataSource.replaceAllUsers(remoteUsers.map { $0.toEntity() })
             usersSubject.send(remoteUsers.map { $0.toDomain() })
         } catch {
-            // ログ出力のみ、UI にはローカルデータを表示
+            // Log only, show local data to UI
             print("Failed to refresh users from remote: \(error)")
         }
     }
@@ -801,7 +801,7 @@ import Foundation
 import SwiftData
 
 /**
- * ユーザーローカルデータソース Protocol
+ * User Local DataSource Protocol
  */
 protocol UserLocalDataSourceProtocol {
     func getUsers() async throws -> [UserEntity]
@@ -813,7 +813,7 @@ protocol UserLocalDataSourceProtocol {
 }
 
 /**
- * SwiftData を使用したローカルデータソース
+ * Local DataSource using SwiftData
  */
 @ModelActor
 actor UserLocalDataSource: UserLocalDataSourceProtocol {
@@ -899,7 +899,7 @@ final class UserEntity {
 import Foundation
 
 /**
- * ユーザーリモートデータソース Protocol
+ * User Remote DataSource Protocol
  */
 protocol UserRemoteDataSourceProtocol {
     func getUsers() async throws -> [UserResponse]
@@ -910,21 +910,21 @@ protocol UserRemoteDataSourceProtocol {
 }
 
 /**
- * URLSession を使用したリモートデータソース
+ * Remote DataSource using URLSession
  */
 final class UserRemoteDataSource: UserRemoteDataSourceProtocol {
 
-    // MARK: - 非公開プロパティ
+    // MARK: - Private Properties
 
     private let apiClient: APIClientProtocol
 
-    // MARK: - 初期化
+    // MARK: - Initialization
 
     init(apiClient: APIClientProtocol) {
         self.apiClient = apiClient
     }
 
-    // MARK: - 公開関数
+    // MARK: - Public Functions
 
     func getUsers() async throws -> [UserResponse] {
         try await apiClient.request(
@@ -965,7 +965,7 @@ final class UserRemoteDataSource: UserRemoteDataSourceProtocol {
 }
 
 /**
- * API クライアント
+ * API Client
  */
 protocol APIClientProtocol {
     func request<T: Decodable>(
@@ -1103,7 +1103,7 @@ enum HTTPMethod: String {
 }
 
 /**
- * API レスポンスモデル
+ * API Response model
  */
 struct UserResponse: Codable {
     let id: String
@@ -1223,7 +1223,7 @@ extension DateFormatter {
     static let userJoinDate: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy/MM/dd"
-        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.locale = Locale(identifier: "en_US")
         return formatter
     }()
 }
@@ -1231,18 +1231,18 @@ extension DateFormatter {
 
 ---
 
-## 依存性注入 (DI)
+## Dependency Injection (DI)
 
-### Container パターン（シンプルな DI）
+### Container Pattern (Simple DI)
 
 ```swift
 import Foundation
 import SwiftData
 
 /**
- * 依存性コンテナ
+ * Dependency Container
  *
- * シングルトンで依存オブジェクトを管理
+ * Manage dependency objects as singleton
  */
 final class DependencyContainer {
 
@@ -1250,18 +1250,18 @@ final class DependencyContainer {
 
     static let shared = DependencyContainer()
 
-    // MARK: - 非公開プロパティ
+    // MARK: - Private Properties
 
     private let modelContainer: ModelContainer
     private let apiClient: APIClientProtocol
     private let networkMonitor: NetworkMonitorProtocol
 
-    // MARK: - キャッシュ済み依存
+    // MARK: - Cached Dependencies
 
     private var cachedUserRepository: UserRepositoryProtocol?
     private var cachedAnalyticsRepository: AnalyticsRepositoryProtocol?
 
-    // MARK: - 初期化
+    // MARK: - Initialization
 
     private init() {
         // SwiftData ModelContainer
@@ -1280,7 +1280,7 @@ final class DependencyContainer {
         networkMonitor = NetworkMonitor()
     }
 
-    // テスト用初期化
+    // Initialization for testing
     init(
         modelContainer: ModelContainer,
         apiClient: APIClientProtocol,
@@ -1346,13 +1346,13 @@ final class DependencyContainer {
 }
 ```
 
-### Environment を使用した DI（SwiftUI）
+### DI using Environment (SwiftUI)
 
 ```swift
 import SwiftUI
 
 /**
- * 依存性を Environment 経由で注入
+ * Inject dependencies via Environment
  */
 
 // Environment Key
@@ -1368,7 +1368,7 @@ extension EnvironmentValues {
 }
 
 /**
- * App での使用例
+ * Usage example in App
  */
 @main
 struct MyApp: App {
@@ -1382,7 +1382,7 @@ struct MyApp: App {
 }
 
 /**
- * View での使用例
+ * Usage example in View
  */
 struct UserListScreenWrapper: View {
 
@@ -1394,13 +1394,13 @@ struct UserListScreenWrapper: View {
 }
 ```
 
-### Protocol-based DI（テスタビリティ重視）
+### Protocol-based DI (Testability focused)
 
 ```swift
 import Foundation
 
 /**
- * 依存性プロバイダー Protocol
+ * Dependency Provider Protocol
  */
 protocol DependencyProviding {
     // DataSource
@@ -1419,7 +1419,7 @@ protocol DependencyProviding {
 }
 
 /**
- * 本番用実装
+ * Production implementation
  */
 final class ProductionDependencyProvider: DependencyProviding {
 
@@ -1451,7 +1451,7 @@ final class ProductionDependencyProvider: DependencyProviding {
 }
 
 /**
- * テスト用実装
+ * Test implementation
  */
 final class MockDependencyProvider: DependencyProviding {
 
@@ -1489,48 +1489,48 @@ final class MockDependencyProvider: DependencyProviding {
 
 ---
 
-## 状態管理
+## State Management
 
 ### @Observable vs ObservableObject
 
-| 特徴 | @Observable (iOS 17+) | ObservableObject (iOS 15+) |
-|------|----------------------|---------------------------|
-| 監視精度 | プロパティ単位 | オブジェクト全体 |
-| パフォーマンス | 高い | 低い（不要な再描画が発生しやすい） |
-| コード量 | 少ない | 多い（@Published が必要） |
-| View 側の記述 | @State | @StateObject / @ObservedObject |
+| Feature | @Observable (iOS 17+) | ObservableObject (iOS 15+) |
+|---------|----------------------|---------------------------|
+| Observation granularity | Property level | Entire object |
+| Performance | High | Low (prone to unnecessary redraws) |
+| Code amount | Less | More (@Published required) |
+| View side notation | @State | @StateObject / @ObservedObject |
 
-### 状態のスコープ
+### State Scope
 
 ```swift
 /**
- * 状態のスコープに応じた適切な管理方法
+ * Appropriate management based on state scope
  */
 
-// MARK: - 画面ローカル状態（View 内で完結）
+// MARK: - Screen Local State (contained within View)
 
 struct SearchBar: View {
 
-    // View 内のローカル状態
+    // Local state within View
     @State private var searchText = ""
 
     let onSearch: (String) -> Void
 
     var body: some View {
         HStack {
-            TextField("検索", text: $searchText)
-            Button("検索") {
+            TextField("Search", text: $searchText)
+            Button("Search") {
                 onSearch(searchText)
             }
         }
     }
 }
 
-// MARK: - 画面状態（ViewModel で管理）
+// MARK: - Screen State (managed by ViewModel)
 
 struct UserListScreen: View {
 
-    // 画面の状態は ViewModel で管理
+    // Screen state managed by ViewModel
     @State private var viewModel: UserListViewModel
 
     var body: some View {
@@ -1538,7 +1538,7 @@ struct UserListScreen: View {
     }
 }
 
-// MARK: - アプリ全体の状態（共有オブジェクト）
+// MARK: - App-wide State (shared object)
 
 @Observable
 final class AppState {
@@ -1561,11 +1561,11 @@ struct MyApp: App {
 }
 ```
 
-### Binding パターン
+### Binding Pattern
 
 ```swift
 /**
- * Binding を使った状態の共有
+ * Sharing state with Binding
  */
 
 struct ParentView: View {
@@ -1582,14 +1582,14 @@ struct ChildView: View {
     @Binding var selectedItem: String?
 
     var body: some View {
-        Button("選択") {
+        Button("Select") {
             selectedItem = "item-1"
         }
     }
 }
 
 /**
- * 読み取り専用の Binding
+ * Read-only Binding
  */
 extension Binding {
     static func readOnly(_ value: Value) -> Binding<Value> {
@@ -1601,13 +1601,13 @@ extension Binding {
 }
 ```
 
-### Reducer パターン（複雑な状態管理）
+### Reducer Pattern (Complex state management)
 
 ```swift
 /**
- * Reducer パターンによる状態管理
+ * State management with Reducer pattern
  *
- * 複雑な状態遷移を明示的に管理
+ * Explicitly manage complex state transitions
  */
 
 // Action
@@ -1670,7 +1670,7 @@ final class UserListStore {
     func dispatch(_ action: UserListAction) async {
         userListReducer(state: &state, action: action)
 
-        // 副作用の処理
+        // Handle side effects
         switch action {
         case .loadUsers, .refresh:
             do {
@@ -1689,16 +1689,16 @@ final class UserListStore {
 
 ---
 
-## 非同期処理 (async/await / Combine)
+## Async Processing (async/await / Combine)
 
-### async/await の基本
+### async/await Basics
 
 ```swift
 /**
- * async/await を使った非同期処理
+ * Async processing with async/await
  */
 
-// 基本的な非同期関数
+// Basic async function
 func fetchUser(id: String) async throws -> User {
     let response = try await apiClient.request(
         endpoint: .user(id: id),
@@ -1707,7 +1707,7 @@ func fetchUser(id: String) async throws -> User {
     return response.toDomain()
 }
 
-// 並列実行
+// Parallel execution
 func fetchUserDetail(userId: String) async throws -> UserDetail {
     async let user = userRepository.getUser(userId: userId)
     async let posts = postRepository.getPostsByUser(userId: userId)
@@ -1719,7 +1719,7 @@ func fetchUserDetail(userId: String) async throws -> UserDetail {
     )
 }
 
-// タイムアウト付き
+// With timeout
 func fetchWithTimeout<T>(
     timeout: Duration = .seconds(30),
     operation: @escaping () async throws -> T
@@ -1741,11 +1741,11 @@ func fetchWithTimeout<T>(
 }
 ```
 
-### Task の管理
+### Task Management
 
 ```swift
 /**
- * Task の適切な管理
+ * Proper Task management
  */
 @Observable
 final class UserDetailViewModel {
@@ -1760,12 +1760,12 @@ final class UserDetailViewModel {
     }
 
     deinit {
-        // ViewModel 破棄時に Task をキャンセル
+        // Cancel Task on ViewModel destruction
         loadTask?.cancel()
     }
 
     func loadUser(userId: String) {
-        // 既存の Task をキャンセル
+        // Cancel existing Task
         loadTask?.cancel()
 
         loadTask = Task {
@@ -1780,7 +1780,7 @@ final class UserDetailViewModel {
         do {
             let userDetail = try await getUserDetailUseCase.execute(userId: userId)
 
-            // キャンセルチェック
+            // Check for cancellation
             guard !Task.isCancelled else { return }
 
             uiState = uiState.copy(
@@ -1788,7 +1788,7 @@ final class UserDetailViewModel {
                 isLoading: false
             )
         } catch is CancellationError {
-            // キャンセルは無視
+            // Ignore cancellation
             return
         } catch {
             uiState = uiState.copy(
@@ -1800,25 +1800,25 @@ final class UserDetailViewModel {
 }
 ```
 
-### Combine との併用
+### Using with Combine
 
 ```swift
 import Combine
 
 /**
- * Combine を使ったリアクティブなデータストリーム
+ * Reactive data stream with Combine
  */
 
-// Publisher を使ったリアルタイム更新
+// Real-time updates with Publisher
 protocol UserRepositoryProtocol {
-    // 単発の取得
+    // One-shot retrieval
     func getUsers() async throws -> [User]
 
-    // リアルタイムストリーム
+    // Real-time stream
     var usersPublisher: AnyPublisher<[User], Never> { get }
 }
 
-// View での使用
+// Usage in View
 struct UserListScreen: View {
 
     @State private var viewModel: UserListViewModel
@@ -1835,7 +1835,7 @@ struct UserListScreen: View {
 }
 
 /**
- * async/await と Combine の変換
+ * Converting between async/await and Combine
  */
 extension Publisher where Failure == Never {
 
@@ -1875,14 +1875,14 @@ extension AsyncSequence {
 }
 ```
 
-### AsyncSequence の活用
+### Using AsyncSequence
 
 ```swift
 /**
- * AsyncSequence を使った連続データ処理
+ * Continuous data processing with AsyncSequence
  */
 
-// ページネーション
+// Pagination
 struct PaginatedUsers: AsyncSequence {
 
     typealias Element = [User]
@@ -1917,7 +1917,7 @@ struct PaginatedUsers: AsyncSequence {
     }
 }
 
-// 使用例
+// Usage
 func loadAllUsers() async throws -> [User] {
     var allUsers: [User] = []
 
@@ -1934,28 +1934,28 @@ func loadAllUsers() async throws -> [User] {
 
 ---
 
-## エラーハンドリング
+## Error Handling
 
-### エラー型の階層
+### Error Type Hierarchy
 
 ```swift
 import Foundation
 
 /**
- * アプリケーションエラーの階層
+ * Application error hierarchy
  */
 enum AppError: Error, Equatable {
 
-    // ネットワークエラー
+    // Network errors
     case network(NetworkError)
 
-    // データエラー
+    // Data errors
     case data(DataError)
 
-    // 認証エラー
+    // Auth errors
     case auth(AuthError)
 
-    // 不明なエラー
+    // Unknown error
     case unknown(String)
 
     enum NetworkError: Equatable {
@@ -1982,13 +1982,13 @@ extension AppError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .network(.noConnection):
-            return "インターネット接続がありません"
+            return "No internet connection"
         case .network(.timeout):
-            return "リクエストがタイムアウトしました"
+            return "Request timed out"
         case .network(.server(let code)):
-            return "サーバーエラー（\(code)）"
+            return "Server error (\(code))"
         case .network(.unknown):
-            return "通信エラーが発生しました"
+            return "A communication error occurred"
         case .data(.notFound(let message)):
             return message
         case .data(.validation(let message)):
@@ -1996,9 +1996,9 @@ extension AppError: LocalizedError {
         case .data(.conflict(let message)):
             return message
         case .auth(.unauthorized):
-            return "認証が必要です"
+            return "Authentication required"
         case .auth(.sessionExpired):
-            return "セッションの有効期限が切れました"
+            return "Session has expired"
         case .unknown(let message):
             return message
         }
@@ -2006,37 +2006,37 @@ extension AppError: LocalizedError {
 }
 ```
 
-### Result 型の活用
+### Using Result Type
 
 ```swift
 /**
- * Result 型を使ったエラーハンドリング
+ * Error handling with Result type
  */
 
-// 成功/失敗を明示的に表現
+// Explicitly represent success/failure
 typealias AppResult<T> = Result<T, AppError>
 
 extension Result where Failure == AppError {
 
-    // 成功時の値を取得（失敗時は nil）
+    // Get value on success (nil on failure)
     var success: Success? {
         guard case .success(let value) = self else { return nil }
         return value
     }
 
-    // 失敗時のエラーを取得（成功時は nil）
+    // Get error on failure (nil on success)
     var failure: AppError? {
         guard case .failure(let error) = self else { return nil }
         return error
     }
 
-    // map のショートハンド
+    // Shorthand for map
     func mapSuccess<T>(_ transform: (Success) -> T) -> Result<T, AppError> {
         map(transform)
     }
 }
 
-// Repository での使用
+// Usage in Repository
 func createUser(_ user: User) async -> AppResult<User> {
     do {
         let response = try await remoteDataSource.createUser(user.toRequest())
@@ -2050,7 +2050,7 @@ func createUser(_ user: User) async -> AppResult<User> {
     }
 }
 
-// ViewModel での使用
+// Usage in ViewModel
 func createUser(_ user: User) async {
     uiState = uiState.copy(isLoading: true)
 
@@ -2071,11 +2071,11 @@ func createUser(_ user: User) async {
 }
 ```
 
-### UI エラーモデル
+### UI Error Model
 
 ```swift
 /**
- * UI 用エラーモデル
+ * UI error model
  */
 struct UiError: Equatable {
     let message: String
@@ -2094,7 +2094,7 @@ enum ErrorAction: Equatable {
 }
 
 /**
- * Error → UiError 変換
+ * Error → UiError conversion
  */
 extension Error {
 
@@ -2112,27 +2112,27 @@ extension AppError {
         switch self {
         case .network(.noConnection):
             return UiError(
-                message: "インターネット接続がありません",
+                message: "No internet connection",
                 action: .retry
             )
         case .network(.timeout):
             return UiError(
-                message: "リクエストがタイムアウトしました",
+                message: "Request timed out",
                 action: .retry
             )
         case .network(.server):
             return UiError(
-                message: "サーバーエラーが発生しました",
+                message: "A server error occurred",
                 action: .retry
             )
         case .auth(.unauthorized), .auth(.sessionExpired):
             return UiError(
-                message: "ログインが必要です",
+                message: "Login required",
                 action: .login
             )
         default:
             return UiError(
-                message: errorDescription ?? "エラーが発生しました",
+                message: errorDescription ?? "An error occurred",
                 action: .dismiss
             )
         }
@@ -2140,11 +2140,11 @@ extension AppError {
 }
 ```
 
-### エラー表示コンポーネント
+### Error Display Component
 
 ```swift
 /**
- * エラー表示 View
+ * Error Display View
  */
 struct ErrorContent: View {
 
@@ -2162,7 +2162,7 @@ struct ErrorContent: View {
                 .multilineTextAlignment(.center)
 
             if error.action == .retry {
-                Button("再試行") {
+                Button("Retry") {
                     onRetryTap()
                 }
                 .buttonStyle(.borderedProminent)
@@ -2173,7 +2173,7 @@ struct ErrorContent: View {
 }
 
 /**
- * Alert 用 Modifier
+ * Alert Modifier
  */
 extension View {
 
@@ -2182,7 +2182,7 @@ extension View {
         onRetry: @escaping () -> Void = {}
     ) -> some View {
         alert(
-            "エラー",
+            "Error",
             isPresented: Binding(
                 get: { error.wrappedValue != nil },
                 set: { if !$0 { error.wrappedValue = nil } }
@@ -2190,7 +2190,7 @@ extension View {
             presenting: error.wrappedValue
         ) { uiError in
             if uiError.action == .retry {
-                Button("再試行") { onRetry() }
+                Button("Retry") { onRetry() }
             }
             Button("OK", role: .cancel) {}
         } message: { uiError in
@@ -2202,20 +2202,20 @@ extension View {
 
 ---
 
-## テスト戦略
+## Testing Strategy
 
-### テストピラミッド
+### Test Pyramid
 
 ```
          ┌─────────┐
-         │   E2E   │  ← 少数の重要フロー
+         │   E2E   │  ← Few critical flows
          │  Tests  │
          ├─────────┤
-         │ Integra-│  ← Repository、ViewModel のテスト
+         │ Integra-│  ← Repository, ViewModel tests
          │  tion   │
          ├─────────┤
-         │  Unit   │  ← UseCase、Domain Model のテスト
-         │  Tests  │     最も多く書く
+         │  Unit   │  ← UseCase, Domain Model tests
+         │  Tests  │     Write the most of these
          └─────────┘
 ```
 
@@ -2226,17 +2226,17 @@ import XCTest
 @testable import MyApp
 
 /**
- * UseCase のユニットテスト
+ * UseCase unit test
  */
 final class GetUsersUseCaseTests: XCTestCase {
 
-    // MARK: - プロパティ
+    // MARK: - Properties
 
     private var sut: GetUsersUseCase!
     private var fakeUserRepository: FakeUserRepository!
     private var fakeAnalyticsRepository: FakeAnalyticsRepository!
 
-    // MARK: - セットアップ
+    // MARK: - Setup
 
     override func setUp() {
         super.setUp()
@@ -2255,7 +2255,7 @@ final class GetUsersUseCaseTests: XCTestCase {
         super.tearDown()
     }
 
-    // MARK: - テスト
+    // MARK: - Tests
 
     func test_execute_returnsUsersFromRepository() async throws {
         // Given
@@ -2306,17 +2306,17 @@ import XCTest
 @testable import MyApp
 
 /**
- * ViewModel のテスト
+ * ViewModel test
  */
 @MainActor
 final class UserListViewModelTests: XCTestCase {
 
-    // MARK: - プロパティ
+    // MARK: - Properties
 
     private var sut: UserListViewModel!
     private var fakeGetUsersUseCase: FakeGetUsersUseCase!
 
-    // MARK: - セットアップ
+    // MARK: - Setup
 
     override func setUp() {
         super.setUp()
@@ -2330,7 +2330,7 @@ final class UserListViewModelTests: XCTestCase {
         super.tearDown()
     }
 
-    // MARK: - テスト
+    // MARK: - Tests
 
     func test_initialState_isNotLoading() {
         // Then
@@ -2347,8 +2347,8 @@ final class UserListViewModelTests: XCTestCase {
         // When
         sut.loadUsers()
 
-        // Then（すぐにローディング状態になる）
-        // 注: @Observable の更新は同期的なので、Task 開始直後に確認
+        // Then (should be loading immediately)
+        // Note: @Observable updates are synchronous, check right after Task starts
         try? await Task.sleep(for: .milliseconds(10))
         XCTAssertTrue(sut.uiState.isLoading)
     }
@@ -2364,7 +2364,7 @@ final class UserListViewModelTests: XCTestCase {
         // When
         sut.loadUsers()
 
-        // 非同期処理の完了を待つ
+        // Wait for async processing to complete
         try? await Task.sleep(for: .milliseconds(100))
 
         // Then
@@ -2407,11 +2407,11 @@ final class UserListViewModelTests: XCTestCase {
 }
 ```
 
-### Fake / Stub の作成
+### Fake / Stub Creation
 
 ```swift
 /**
- * Fake Repository（状態を持つテスト用実装）
+ * Fake Repository (test implementation with state)
  */
 final class FakeUserRepository: UserRepositoryProtocol {
 
@@ -2496,7 +2496,7 @@ final class FakeGetUsersUseCase: GetUsersUseCaseProtocol {
 }
 
 /**
- * テスト用スタブ生成
+ * Stub generator for testing
  */
 extension User {
 
@@ -2526,7 +2526,7 @@ import SwiftUI
 @testable import MyApp
 
 /**
- * SwiftUI スナップショットテスト
+ * SwiftUI Snapshot test
  */
 final class UserListContentSnapshotTests: XCTestCase {
 
@@ -2537,7 +2537,7 @@ final class UserListContentSnapshotTests: XCTestCase {
             onRetryTap: {}
         )
 
-        // スナップショットライブラリを使用して比較
+        // Compare using snapshot library
         // assertSnapshot(matching: view, as: .image)
     }
 
@@ -2564,7 +2564,7 @@ final class UserListContentSnapshotTests: XCTestCase {
         let view = UserListContent(
             uiState: UserListUiState(
                 error: UiError(
-                    message: "エラーが発生しました",
+                    message: "An error occurred",
                     action: .retry
                 )
             ),
@@ -2579,18 +2579,18 @@ final class UserListContentSnapshotTests: XCTestCase {
 
 ---
 
-## ディレクトリ構造
+## Directory Structure
 
-### Feature-based 構造（推奨）
+### Feature-based Structure (Recommended)
 
 ```
 MyApp/
 ├── App/
 │   ├── MyApp.swift                    # @main App
 │   ├── ContentView.swift
-│   └── Configuration.swift            # 環境設定
+│   └── Configuration.swift            # Environment configuration
 │
-├── Core/                              # 共通コンポーネント
+├── Core/                              # Common components
 │   ├── Data/
 │   │   ├── Network/
 │   │   │   ├── APIClient.swift
@@ -2621,9 +2621,9 @@ MyApp/
 │       ├── DateFormatter+.swift
 │       └── Extensions.swift
 │
-├── Feature/                           # 機能モジュール
+├── Feature/                           # Feature modules
 │   │
-│   ├── User/                          # ユーザー機能
+│   ├── User/                          # User feature
 │   │   ├── Data/
 │   │   │   ├── Local/
 │   │   │   │   ├── UserEntity.swift
@@ -2658,12 +2658,12 @@ MyApp/
 │   │       └── Component/
 │   │           └── UserCard.swift
 │   │
-│   ├── Auth/                          # 認証機能
+│   ├── Auth/                          # Auth feature
 │   │   ├── Data/
 │   │   ├── Domain/
 │   │   └── UI/
 │   │
-│   └── Settings/                      # 設定機能
+│   └── Settings/                      # Settings feature
 │       ├── Data/
 │       ├── Domain/
 │       └── UI/
@@ -2686,19 +2686,19 @@ MyApp/
 
 ---
 
-## 命名規則
+## Naming Conventions
 
-### ファイル・クラス命名
+### File/Class Naming
 
-| 種類 | サフィックス | 例 |
-|------|-------------|-----|
+| Type | Suffix | Example |
+|------|--------|---------|
 | SwiftUI View | Screen / View | `UserListScreen`, `UserCard` |
 | ViewModel | ViewModel | `UserListViewModel` |
 | UseCase | UseCase | `GetUsersUseCase` |
 | Repository Protocol | RepositoryProtocol | `UserRepositoryProtocol` |
-| Repository 実装 | Repository | `UserRepository` |
+| Repository Implementation | Repository | `UserRepository` |
 | DataSource Protocol | DataSourceProtocol | `UserLocalDataSourceProtocol` |
-| DataSource 実装 | DataSource | `UserLocalDataSource` |
+| DataSource Implementation | DataSource | `UserLocalDataSource` |
 | SwiftData Entity | Entity | `UserEntity` |
 | API Response | Response | `UserResponse` |
 | API Request | Request | `CreateUserRequest` |
@@ -2706,96 +2706,96 @@ MyApp/
 | UI Model | UiModel | `UserUiModel` |
 | Navigation Event | NavigationEvent | `UserListNavigationEvent` |
 
-### 関数命名
+### Function Naming
 
-| 種類 | パターン | 例 |
-|------|---------|-----|
-| データ取得（単一） | `get{Entity}` | `getUser(userId:)` |
-| データ取得（複数） | `get{Entity}s` | `getUsers()` |
-| データ作成 | `create{Entity}` / `insert{Entity}` | `createUser(_:)` |
-| データ更新 | `update{Entity}` | `updateUser(_:)` |
-| データ削除 | `delete{Entity}` | `deleteUser(userId:)` |
-| イベントハンドラ | `on{Event}Tap` / `on{Event}` | `onUserTap(_:)` |
-| 変換 | `to{Target}` | `toDomain()`, `toEntity()` |
-| 検証 | `is{Condition}` / `has{Property}` | `isValid`, `hasPermission` |
-| UseCase 実行 | `execute` | `execute()`, `execute(userId:)` |
+| Type | Pattern | Example |
+|------|---------|---------|
+| Get single data | `get{Entity}` | `getUser(userId:)` |
+| Get multiple data | `get{Entity}s` | `getUsers()` |
+| Create data | `create{Entity}` / `insert{Entity}` | `createUser(_:)` |
+| Update data | `update{Entity}` | `updateUser(_:)` |
+| Delete data | `delete{Entity}` | `deleteUser(userId:)` |
+| Event handler | `on{Event}Tap` / `on{Event}` | `onUserTap(_:)` |
+| Conversion | `to{Target}` | `toDomain()`, `toEntity()` |
+| Validation | `is{Condition}` / `has{Property}` | `isValid`, `hasPermission` |
+| UseCase execution | `execute` | `execute()`, `execute(userId:)` |
 
-### 変数命名
+### Variable Naming
 
-| 種類 | パターン | 例 |
-|------|---------|-----|
+| Type | Pattern | Example |
+|------|---------|---------|
 | Boolean | `is{State}` / `has{Property}` / `should{Action}` | `isLoading`, `hasError`, `shouldRefresh` |
-| Collection | 複数形 | `users`, `posts` |
-| Optional | 必要に応じて説明的に | `selectedUser`, `error` |
+| Collection | Plural | `users`, `posts` |
+| Optional | Descriptive as needed | `selectedUser`, `error` |
 | Closure | `on{Event}` | `onTap`, `onComplete` |
 | Publisher | `{name}Publisher` | `usersPublisher` |
 
 ---
 
-## ベストプラクティス一覧
+## Best Practices Checklist
 
 ### ViewModel
 
-- [ ] UI State は単一の構造体で管理
-- [ ] 状態は `private(set)` で読み取り専用公開
-- [ ] ナビゲーションイベントは別プロパティで管理
-- [ ] Task のキャンセル処理を実装
-- [ ] `@MainActor` で UI 更新を保証
+- [ ] Manage UI State with a single struct
+- [ ] Expose state as read-only with `private(set)`
+- [ ] Manage navigation events as separate property
+- [ ] Implement Task cancellation
+- [ ] Ensure UI updates with `@MainActor`
 
 ### Repository
 
-- [ ] Protocol を定義し、実装と分離
-- [ ] オフラインファースト戦略の採用
-- [ ] async/await でデータ取得
-- [ ] Combine Publisher でリアルタイム更新
-- [ ] DataSource の詳細を隠蔽
+- [ ] Define Protocol and separate from implementation
+- [ ] Adopt offline-first strategy
+- [ ] Use async/await for data retrieval
+- [ ] Use Combine Publisher for real-time updates
+- [ ] Hide DataSource details
 
 ### UseCase
 
-- [ ] 単一責任（1 UseCase = 1 機能）
-- [ ] Protocol を定義してテスタビリティ確保
-- [ ] 必要な場合のみ作成（シンプルな場合は Repository 直接可）
-- [ ] ビジネスロジックのみ、UI ロジックは含めない
+- [ ] Single responsibility (1 UseCase = 1 function)
+- [ ] Define Protocol for testability
+- [ ] Create only when needed (direct Repository call is fine for simple cases)
+- [ ] Business logic only, no UI logic
 
 ### SwiftUI
 
-- [ ] View と ViewModel を分離
-- [ ] Stateless / Stateful View を明確に区別
-- [ ] Preview を活用した開発
-- [ ] `.task` で非同期処理を開始
-- [ ] 再描画の最適化（@Observable の活用）
+- [ ] Separate View and ViewModel
+- [ ] Clearly distinguish Stateless / Stateful Views
+- [ ] Leverage Preview for development
+- [ ] Start async processing with `.task`
+- [ ] Optimize redraws (leverage @Observable)
 
-### 依存性注入
+### Dependency Injection
 
-- [ ] Protocol を通じて依存性を注入
-- [ ] DependencyContainer でライフサイクル管理
-- [ ] テスト用の Fake/Mock を容易に差し替え可能
-- [ ] Environment を活用した SwiftUI 統合
+- [ ] Inject dependencies through Protocols
+- [ ] Manage lifecycle with DependencyContainer
+- [ ] Enable easy replacement with Fake/Mock for testing
+- [ ] Integrate with SwiftUI using Environment
 
-### テスト
+### Testing
 
-- [ ] UseCase、ViewModel のユニットテスト必須
-- [ ] Fake を優先、Mock は最小限
-- [ ] `@MainActor` でテスト実行
-- [ ] async/await でテストを記述
+- [ ] Unit tests for UseCase and ViewModel are required
+- [ ] Prefer Fakes, minimize Mocks
+- [ ] Execute tests with `@MainActor`
+- [ ] Write tests with async/await
 
-### エラーハンドリング
+### Error Handling
 
-- [ ] アプリケーションエラーの階層を定義
-- [ ] Repository でエラーをラップ
-- [ ] UI 用エラーモデルに変換
-- [ ] リトライ機構の実装
+- [ ] Define application error hierarchy
+- [ ] Wrap errors in Repository
+- [ ] Convert to UI error model
+- [ ] Implement retry mechanism
 
-### パフォーマンス
+### Performance
 
-- [ ] `@Observable` で最小限の再描画（iOS 17+）
-- [ ] Task のキャンセル処理
-- [ ] 大量データは AsyncSequence でストリーミング
-- [ ] LazyVStack / LazyHStack の活用
+- [ ] Minimize redraws with `@Observable` (iOS 17+)
+- [ ] Implement Task cancellation
+- [ ] Stream large data with AsyncSequence
+- [ ] Leverage LazyVStack / LazyHStack
 
 ---
 
-## 参考リンク
+## References
 
 - [The Composable Architecture (TCA)](https://github.com/pointfreeco/swift-composable-architecture)
 - [Swift Concurrency](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/)

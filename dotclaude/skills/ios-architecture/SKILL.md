@@ -13,28 +13,28 @@ external:
 
 # iOS Architecture
 
-Apple 公式ガイドラインに基づく SwiftUI + MVVM / State 管理パターン。
+SwiftUI + MVVM / State management patterns based on Apple's official guidelines.
 
-## 基本原則
+## Core Principles
 
-1. **関心の分離** - UI ロジックとビジネスロジックを明確に分離
-2. **データ駆動型 UI** - UI は状態（State）を反映するだけ
-3. **単一の信頼できる情報源 (SSOT)** - Repository がデータの SSOT
-4. **単方向データフロー (UDF)** - イベントは上流へ、状態は下流へ
+1. **Separation of Concerns** - Clearly separate UI logic from business logic
+2. **Data-Driven UI** - UI only reflects state
+3. **Single Source of Truth (SSOT)** - Repository is the SSOT for data
+4. **Unidirectional Data Flow (UDF)** - Events flow upstream, state flows downstream
 
 ```
 Presentation Layer → Domain Layer → Data Layer
 ```
 
-## レイヤー構成
+## Layer Structure
 
-| レイヤー | 責務 | 主要コンポーネント |
-|---------|------|-------------------|
-| Presentation | 画面表示・ユーザー操作 | View (SwiftUI), ViewModel |
-| Domain | ビジネスロジック | UseCase, Domain Model |
-| Data | データ取得・永続化 | Repository, DataSource, API |
+| Layer | Responsibility | Key Components |
+|-------|----------------|----------------|
+| Presentation | Display and user interaction | View (SwiftUI), ViewModel |
+| Domain | Business logic | UseCase, Domain Model |
+| Data | Data retrieval and persistence | Repository, DataSource, API |
 
-## ディレクトリ構造
+## Directory Structure
 
 ```
 App/
@@ -53,17 +53,17 @@ App/
 └── DI/                 # DI Container
 ```
 
-## 命名規則
+## Naming Conventions
 
-| 種類 | 命名パターン | 例 |
-|------|-------------|-----|
+| Type | Pattern | Example |
+|------|---------|---------|
 | ViewModel | `{Feature}ViewModel` | `UserListViewModel` |
 | UI State | `{Feature}UiState` | `UserListUiState` |
 | UseCase | `{Action}{Entity}UseCase` | `GetUsersUseCase` |
 | Repository | `{Entity}Repository` | `UserRepository` |
 
-## 詳細リファレンス
+## Detailed References
 
-- [クリーンアーキテクチャガイド](../../references/common/clean-architecture.md)
-- [テスト戦略ガイド](../../references/common/testing-strategy.md)
-- [iOS アーキテクチャ詳細](../../references/platforms/ios/architecture.md)
+- [Clean Architecture Guide](../../references/common/clean-architecture.md)
+- [Testing Strategy Guide](../../references/common/testing-strategy.md)
+- [iOS Architecture Details](../../references/platforms/ios/architecture.md)

@@ -1,46 +1,46 @@
 # Android Architecture Guide
 
-Google公式 Android Architecture Guide に基づく、MVVM / UDF / Repository パターンのベストプラクティス集。
+Best practices for MVVM / UDF / Repository patterns based on Google's official Android Architecture Guide.
 
 ---
 
-## 目次
+## Table of Contents
 
-1. [アーキテクチャ概要](#アーキテクチャ概要)
-2. [レイヤー構成](#レイヤー構成)
+1. [Architecture Overview](#architecture-overview)
+2. [Layer Structure](#layer-structure)
 3. [UI Layer](#ui-layer)
 4. [Domain Layer](#domain-layer)
 5. [Data Layer](#data-layer)
-6. [依存性注入 (Hilt)](#依存性注入-hilt)
-7. [状態管理と UDF](#状態管理と-udf)
-8. [非同期処理 (Coroutines / Flow)](#非同期処理-coroutines--flow)
-9. [エラーハンドリング](#エラーハンドリング)
-10. [テスト戦略](#テスト戦略)
-11. [ディレクトリ構造](#ディレクトリ構造)
-12. [命名規則](#命名規則)
-13. [ベストプラクティス一覧](#ベストプラクティス一覧)
+6. [Dependency Injection (Hilt)](#dependency-injection-hilt)
+7. [State Management and UDF](#state-management-and-udf)
+8. [Async Processing (Coroutines / Flow)](#async-processing-coroutines--flow)
+9. [Error Handling](#error-handling)
+10. [Testing Strategy](#testing-strategy)
+11. [Directory Structure](#directory-structure)
+12. [Naming Conventions](#naming-conventions)
+13. [Best Practices Checklist](#best-practices-checklist)
 
 ---
 
-## アーキテクチャ概要
+## Architecture Overview
 
-### 基本原則
+### Core Principles
 
-1. **関心の分離 (Separation of Concerns)**
-   - UI ロジックとビジネスロジックを明確に分離
-   - 各レイヤーは単一責任を持つ
+1. **Separation of Concerns**
+   - Clearly separate UI logic from business logic
+   - Each layer has a single responsibility
 
-2. **データ駆動型 UI (Data-driven UI)**
-   - UI は状態（State）を反映するだけ
-   - 状態変更は ViewModel 経由で行う
+2. **Data-driven UI**
+   - UI only reflects state
+   - State changes are made through ViewModel
 
-3. **単一の信頼できる情報源 (Single Source of Truth: SSOT)**
-   - データは一箇所で管理し、他はそこから取得
-   - Repository がデータの SSOT となる
+3. **Single Source of Truth (SSOT)**
+   - Data is managed in one place, others retrieve from there
+   - Repository becomes the SSOT for data
 
-4. **単方向データフロー (Unidirectional Data Flow: UDF)**
-   - イベントは上流へ（UI → ViewModel → Repository）
-   - 状態は下流へ（Repository → ViewModel → UI）
+4. **Unidirectional Data Flow (UDF)**
+   - Events flow upstream (UI → ViewModel → Repository)
+   - State flows downstream (Repository → ViewModel → UI)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -57,8 +57,8 @@ Google公式 Android Architecture Guide に基づく、MVVM / UDF / Repository �
 │                     Domain Layer (Optional)                  │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │                    Use Cases                         │   │
-│  │  - 複雑なビジネスロジックのカプセル化                    │   │
-│  │  - 複数 Repository の組み合わせ                        │   │
+│  │  - Encapsulate complex business logic                │   │
+│  │  - Combine multiple Repositories                     │   │
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
                                           │
@@ -67,9 +67,9 @@ Google公式 Android Architecture Guide に基づく、MVVM / UDF / Repository �
 │                       Data Layer                             │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │                   Repository                         │   │
-│  │  - データアクセスの抽象化                              │   │
-│  │  - キャッシュ戦略                                     │   │
-│  │  - オフライン対応                                     │   │
+│  │  - Abstract data access                              │   │
+│  │  - Caching strategy                                  │   │
+│  │  - Offline support                                   │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                    │                    │                    │
 │                    ▼                    ▼                    │
@@ -82,25 +82,25 @@ Google公式 Android Architecture Guide に基づく、MVVM / UDF / Repository �
 
 ---
 
-## レイヤー構成
+## Layer Structure
 
-### 依存関係の方向
+### Dependency Direction
 
 ```
 UI Layer → Domain Layer → Data Layer
 ```
 
-- 上位レイヤーは下位レイヤーに依存
-- 下位レイヤーは上位レイヤーを知らない
-- インターフェースを通じて依存性を逆転（DIP）
+- Upper layers depend on lower layers
+- Lower layers don't know about upper layers
+- Invert dependencies through interfaces (DIP)
 
-### 各レイヤーの責務
+### Layer Responsibilities
 
-| レイヤー | 責務 | 主要コンポーネント |
-|---------|------|-------------------|
-| UI | 画面表示・ユーザー操作 | Activity, Fragment, Compose, ViewModel |
-| Domain | ビジネスロジック | UseCase |
-| Data | データ取得・永続化 | Repository, DataSource, DAO, API |
+| Layer | Responsibility | Main Components |
+|-------|----------------|-----------------|
+| UI | Screen display / User interaction | Activity, Fragment, Compose, ViewModel |
+| Domain | Business logic | UseCase |
+| Data | Data retrieval / Persistence | Repository, DataSource, DAO, API |
 
 ---
 
@@ -110,9 +110,9 @@ UI Layer → Domain Layer → Data Layer
 
 ```kotlin
 /**
- * ユーザー一覧画面の ViewModel
+ * ViewModel for User List Screen
  *
- * UI 状態の管理とビジネスロジックの呼び出しを担当
+ * Responsible for UI state management and business logic calls
  */
 @HiltViewModel
 class UserListViewModel @Inject constructor(
@@ -120,11 +120,11 @@ class UserListViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    // UI State（単一の状態オブジェクト）
+    // UI State (single state object)
     private val _uiState = MutableStateFlow(UserListUiState())
     val uiState: StateFlow<UserListUiState> = _uiState.asStateFlow()
 
-    // 一時的なイベント用（Snackbar、ナビゲーション等）
+    // For temporary events (Snackbar, navigation, etc.)
     private val _events = Channel<UserListEvent>(Channel.BUFFERED)
     val events: Flow<UserListEvent> = _events.receiveAsFlow()
 
@@ -133,7 +133,7 @@ class UserListViewModel @Inject constructor(
     }
 
     /**
-     * ユーザー一覧を読み込む
+     * Load user list
      */
     fun loadUsers() {
         viewModelScope.launch {
@@ -154,7 +154,7 @@ class UserListViewModel @Inject constructor(
     }
 
     /**
-     * ユーザーを選択する
+     * Select a user
      */
     fun onUserClick(userId: String) {
         viewModelScope.launch {
@@ -163,7 +163,7 @@ class UserListViewModel @Inject constructor(
     }
 
     /**
-     * リトライする
+     * Retry
      */
     fun onRetryClick() {
         loadUsers()
@@ -175,16 +175,16 @@ class UserListViewModel @Inject constructor(
 
 ```kotlin
 /**
- * ユーザー一覧画面の UI 状態
+ * UI state for User List Screen
  *
- * Immutable なデータクラスで状態を表現
+ * Represent state with immutable data class
  */
 data class UserListUiState(
     val users: List<UserUiModel> = emptyList(),
     val isLoading: Boolean = false,
     val error: UiError? = null
 ) {
-    // 派生プロパティ
+    // Derived properties
     val isEmpty: Boolean
         get() = users.isEmpty() && !isLoading && error == null
 
@@ -196,7 +196,7 @@ data class UserListUiState(
 }
 
 /**
- * UI 層で使用するユーザーモデル
+ * User model for UI layer
  */
 data class UserUiModel(
     val id: String,
@@ -206,7 +206,7 @@ data class UserUiModel(
 )
 
 /**
- * 一時的な UI イベント
+ * Temporary UI events
  */
 sealed interface UserListEvent {
     data class NavigateToDetail(val userId: String) : UserListEvent
@@ -218,7 +218,7 @@ sealed interface UserListEvent {
 
 ```kotlin
 /**
- * ユーザー一覧画面
+ * User List Screen
  */
 @Composable
 fun UserListScreen(
@@ -227,7 +227,7 @@ fun UserListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // イベントの処理
+    // Event handling
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
@@ -235,7 +235,7 @@ fun UserListScreen(
                     onNavigateToDetail(event.userId)
                 }
                 is UserListEvent.ShowSnackbar -> {
-                    // Snackbar 表示
+                    // Show Snackbar
                 }
             }
         }
@@ -249,7 +249,7 @@ fun UserListScreen(
 }
 
 /**
- * ユーザー一覧のコンテンツ（プレビュー可能）
+ * User List Content (previewable)
  */
 @Composable
 private fun UserListContent(
@@ -296,40 +296,40 @@ private fun UserListContent(
 
 ```kotlin
 /**
- * ユーザー一覧取得の UseCase
+ * UseCase for getting user list
  *
- * 単一のビジネスロジックをカプセル化
- * operator fun invoke() で関数のように呼び出し可能
+ * Encapsulates single business logic
+ * Can be called like a function with operator fun invoke()
  */
 class GetUsersUseCase @Inject constructor(
     private val userRepository: UserRepository,
     private val analyticsRepository: AnalyticsRepository
 ) {
     /**
-     * ユーザー一覧を取得する
+     * Get user list
      *
-     * @return ユーザー一覧の Flow
+     * @return Flow of user list
      */
     operator fun invoke(): Flow<List<User>> {
         return userRepository.getUsers()
             .onEach { users ->
-                // 副作用（アナリティクス送信など）
+                // Side effects (analytics, etc.)
                 analyticsRepository.logUserListViewed(users.size)
             }
     }
 }
 
 /**
- * ユーザー詳細取得の UseCase
+ * UseCase for getting user detail
  */
 class GetUserDetailUseCase @Inject constructor(
     private val userRepository: UserRepository,
     private val postRepository: PostRepository
 ) {
     /**
-     * ユーザー詳細と投稿を取得する
+     * Get user detail and posts
      *
-     * 複数の Repository を組み合わせる例
+     * Example of combining multiple Repositories
      */
     operator fun invoke(userId: String): Flow<UserDetail> {
         return combine(
@@ -350,7 +350,7 @@ class GetUserDetailUseCase @Inject constructor(
 
 ```kotlin
 /**
- * ドメインモデル（ビジネスロジックを含む）
+ * Domain model (contains business logic)
  */
 data class User(
     val id: String,
@@ -359,7 +359,7 @@ data class User(
     val joinedAt: Instant,
     val status: UserStatus
 ) {
-    // ドメインロジック
+    // Domain logic
     val isActive: Boolean
         get() = status == UserStatus.ACTIVE
 
@@ -385,9 +385,9 @@ enum class UserStatus {
 
 ```kotlin
 /**
- * ユーザーリポジトリのインターフェース
+ * User Repository interface
  *
- * Domain 層はこのインターフェースに依存
+ * Domain layer depends on this interface
  */
 interface UserRepository {
     fun getUsers(): Flow<List<User>>
@@ -398,9 +398,9 @@ interface UserRepository {
 }
 
 /**
- * ユーザーリポジトリの実装
+ * User Repository implementation
  *
- * オフラインファースト戦略を採用
+ * Adopts offline-first strategy
  */
 class UserRepositoryImpl @Inject constructor(
     private val localDataSource: UserLocalDataSource,
@@ -410,17 +410,17 @@ class UserRepositoryImpl @Inject constructor(
 ) : UserRepository {
 
     /**
-     * ユーザー一覧を取得
+     * Get user list
      *
-     * オフラインファースト：
-     * 1. まずローカルキャッシュを返す
-     * 2. バックグラウンドでリモートから取得
-     * 3. 取得したデータでローカルを更新
+     * Offline-first:
+     * 1. First return local cache
+     * 2. Fetch from remote in background
+     * 3. Update local with fetched data
      */
     override fun getUsers(): Flow<List<User>> {
         return localDataSource.getUsers()
             .onStart {
-                // バックグラウンドでリモートから同期
+                // Sync from remote in background
                 refreshUsersFromRemote()
             }
             .map { entities ->
@@ -430,7 +430,7 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     /**
-     * 単一ユーザーを取得
+     * Get single user
      */
     override fun getUser(userId: String): Flow<User> {
         return localDataSource.getUser(userId)
@@ -442,16 +442,16 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     /**
-     * ユーザーを作成
+     * Create user
      */
     override suspend fun createUser(user: User): Result<User> {
         return withContext(ioDispatcher) {
             runCatching {
-                // リモートに作成
+                // Create on remote
                 val response = remoteDataSource.createUser(user.toRequest())
                 val createdUser = response.toDomain()
 
-                // ローカルにキャッシュ
+                // Cache locally
                 localDataSource.insertUser(createdUser.toEntity())
 
                 createdUser
@@ -460,7 +460,7 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     /**
-     * リモートからユーザー一覧を同期
+     * Sync user list from remote
      */
     private suspend fun refreshUsersFromRemote() {
         if (!networkMonitor.isOnline()) return
@@ -471,7 +471,7 @@ class UserRepositoryImpl @Inject constructor(
                 remoteUsers.map { it.toEntity() }
             )
         }.onFailure { e ->
-            // ログ出力のみ、UI にはローカルデータを表示
+            // Log only, show local data to UI
             Timber.w(e, "Failed to refresh users from remote")
         }
     }
@@ -493,7 +493,7 @@ class UserRepositoryImpl @Inject constructor(
 
 ```kotlin
 /**
- * ユーザーローカルデータソース
+ * User Local DataSource
  */
 interface UserLocalDataSource {
     fun getUsers(): Flow<List<UserEntity>>
@@ -554,7 +554,7 @@ data class UserEntity(
 
 ```kotlin
 /**
- * ユーザーリモートデータソース
+ * User Remote DataSource
  */
 interface UserRemoteDataSource {
     suspend fun getUsers(): List<UserResponse>
@@ -565,7 +565,7 @@ interface UserRemoteDataSource {
 }
 
 /**
- * Retrofit API インターフェース
+ * Retrofit API interface
  */
 interface UserApi {
 
@@ -589,7 +589,7 @@ interface UserApi {
 }
 
 /**
- * API レスポンスモデル
+ * API response model
  */
 @Serializable
 data class UserResponse(
@@ -672,7 +672,7 @@ fun User.toUiModel(dateFormatter: DateFormatter): UserUiModel {
 
 ---
 
-## 依存性注入 (Hilt)
+## Dependency Injection (Hilt)
 
 ### Application Module
 
@@ -818,9 +818,9 @@ annotation class MainDispatcher
 
 ---
 
-## 状態管理と UDF
+## State Management and UDF
 
-### 単方向データフロー (UDF) の原則
+### Unidirectional Data Flow (UDF) Principles
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -844,13 +844,13 @@ annotation class MainDispatcher
 └────────────────────────────────────────────────────────┘
 ```
 
-### State Holder パターン
+### State Holder Pattern
 
 ```kotlin
 /**
- * 画面状態を管理する State Holder
+ * State Holder for managing screen state
  *
- * 複雑な状態管理ロジックを ViewModel から分離
+ * Separates complex state management logic from ViewModel
  */
 class UserListStateHolder(
     private val getUsersUseCase: GetUsersUseCase,
@@ -884,7 +884,7 @@ class UserListStateHolder(
 }
 
 /**
- * ユーザーからの入力イベント
+ * User input events
  */
 sealed interface UserListUserEvent {
     object LoadUsers : UserListUserEvent
@@ -893,11 +893,11 @@ sealed interface UserListUserEvent {
 }
 ```
 
-### Compose での状態ホイスティング
+### State Hoisting in Compose
 
 ```kotlin
 /**
- * Stateless な Composable（状態を持たない）
+ * Stateless Composable (holds no state)
  */
 @Composable
 fun UserCard(
@@ -917,14 +917,14 @@ fun UserCard(
 }
 
 /**
- * Stateful な Composable（状態を管理）
+ * Stateful Composable (manages state)
  */
 @Composable
 fun SearchBar(
     onSearch: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // 内部状態
+    // Internal state
     var query by rememberSaveable { mutableStateOf("") }
 
     TextField(
@@ -942,30 +942,30 @@ fun SearchBar(
 
 ---
 
-## 非同期処理 (Coroutines / Flow)
+## Async Processing (Coroutines / Flow)
 
-### Flow の使い分け
+### Flow Types
 
-| 種類 | 用途 | 特徴 |
-|------|------|------|
-| `Flow` | 一般的なデータストリーム | Cold stream |
-| `StateFlow` | UI 状態 | Hot stream、常に最新値を保持 |
-| `SharedFlow` | イベント | Hot stream、バッファリング可能 |
-| `Channel` | 一度きりのイベント | 一度だけ消費 |
+| Type | Use Case | Characteristics |
+|------|----------|-----------------|
+| `Flow` | General data streams | Cold stream |
+| `StateFlow` | UI state | Hot stream, always holds latest value |
+| `SharedFlow` | Events | Hot stream, supports buffering |
+| `Channel` | One-time events | Consumed only once |
 
-### Flow のベストプラクティス
+### Flow Best Practices
 
 ```kotlin
 /**
- * Repository での Flow 使用例
+ * Example of using Flow in Repository
  */
 class UserRepositoryImpl @Inject constructor(
     private val userDao: UserDao,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : UserRepository {
 
-    // Room の Flow はすでに IO スレッドで実行されるが、
-    // 変換処理も IO で行いたい場合は flowOn を使用
+    // Room's Flow already runs on IO thread,
+    // but use flowOn if you want transformations on IO too
     override fun getUsers(): Flow<List<User>> {
         return userDao.getUsers()
             .map { entities -> entities.map { it.toDomain() } }
@@ -978,14 +978,14 @@ class UserRepositoryImpl @Inject constructor(
 }
 
 /**
- * ViewModel での StateFlow 使用例
+ * Example of using StateFlow in ViewModel
  */
 @HiltViewModel
 class UserListViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    // stateIn で Flow を StateFlow に変換
+    // Convert Flow to StateFlow with stateIn
     val users: StateFlow<List<User>> = userRepository.getUsers()
         .stateIn(
             scope = viewModelScope,
@@ -995,22 +995,22 @@ class UserListViewModel @Inject constructor(
 }
 
 /**
- * Compose での Flow 収集
+ * Collecting Flow in Compose
  */
 @Composable
 fun UserListScreen(viewModel: UserListViewModel = hiltViewModel()) {
-    // Lifecycle-aware な収集
+    // Lifecycle-aware collection
     val users by viewModel.users.collectAsStateWithLifecycle()
 
     // ...
 }
 ```
 
-### 複数 Flow の結合
+### Combining Multiple Flows
 
 ```kotlin
 /**
- * 複数の Flow を結合する例
+ * Example of combining multiple Flows
  */
 class DashboardViewModel @Inject constructor(
     private val userRepository: UserRepository,
@@ -1038,13 +1038,13 @@ class DashboardViewModel @Inject constructor(
 
 ---
 
-## エラーハンドリング
+## Error Handling
 
-### Result 型の活用
+### Using Result Type
 
 ```kotlin
 /**
- * カスタム Result 型（詳細なエラー情報を持つ）
+ * Custom Result type (with detailed error info)
  */
 sealed interface DataResult<out T> {
     data class Success<T>(val data: T) : DataResult<T>
@@ -1053,43 +1053,43 @@ sealed interface DataResult<out T> {
 }
 
 /**
- * アプリケーション例外の階層
+ * Application exception hierarchy
  */
 sealed class AppException(
     override val message: String,
     override val cause: Throwable? = null
 ) : Exception(message, cause) {
 
-    // ネットワークエラー
+    // Network errors
     sealed class Network(message: String, cause: Throwable?) : AppException(message, cause) {
         class NoConnection(cause: Throwable? = null) : Network("No internet connection", cause)
         class Timeout(cause: Throwable? = null) : Network("Request timeout", cause)
         class Server(val code: Int, cause: Throwable? = null) : Network("Server error: $code", cause)
     }
 
-    // データエラー
+    // Data errors
     sealed class Data(message: String, cause: Throwable?) : AppException(message, cause) {
         class NotFound(message: String = "Data not found") : Data(message, null)
         class Validation(message: String) : Data(message, null)
         class Conflict(message: String) : Data(message, null)
     }
 
-    // 認証エラー
+    // Auth errors
     sealed class Auth(message: String, cause: Throwable?) : AppException(message, cause) {
         object Unauthorized : Auth("Unauthorized", null)
         object SessionExpired : Auth("Session expired", null)
     }
 
-    // 不明なエラー
+    // Unknown error
     class Unknown(cause: Throwable) : AppException("Unknown error", cause)
 }
 ```
 
-### Repository でのエラーハンドリング
+### Error Handling in Repository
 
 ```kotlin
 /**
- * Repository でのエラーハンドリング例
+ * Error handling example in Repository
  */
 class UserRepositoryImpl @Inject constructor(
     private val api: UserApi,
@@ -1107,7 +1107,7 @@ class UserRepositoryImpl @Inject constructor(
 }
 
 /**
- * API エラーマッパー
+ * API Error Mapper
  */
 class ApiErrorMapper @Inject constructor() {
 
@@ -1132,11 +1132,11 @@ class ApiErrorMapper @Inject constructor() {
 }
 ```
 
-### UI でのエラー表示
+### Error Display in UI
 
 ```kotlin
 /**
- * UI 用エラーモデル
+ * UI error model
  */
 data class UiError(
     val message: UiText,
@@ -1150,7 +1150,7 @@ sealed interface ErrorAction {
 }
 
 /**
- * 多言語対応のテキスト
+ * Localized text
  */
 sealed interface UiText {
     data class DynamicString(val value: String) : UiText
@@ -1166,7 +1166,7 @@ sealed interface UiText {
 }
 
 /**
- * AppException → UiError 変換
+ * AppException → UiError conversion
  */
 fun AppException.toUiError(): UiError {
     return when (this) {
@@ -1196,20 +1196,20 @@ fun AppException.toUiError(): UiError {
 
 ---
 
-## テスト戦略
+## Testing Strategy
 
-### テストピラミッド
+### Test Pyramid
 
 ```
          ┌─────────┐
-         │   E2E   │  ← 少数の重要フロー
+         │   E2E   │  ← Few critical flows
          │  Tests  │
          ├─────────┤
-         │ Integra-│  ← Repository、ViewModel のテスト
+         │ Integra-│  ← Repository, ViewModel tests
          │  tion   │
          ├─────────┤
-         │  Unit   │  ← UseCase、Domain Model のテスト
-         │  Tests  │     最も多く書く
+         │  Unit   │  ← UseCase, Domain Model tests
+         │  Tests  │     Write the most of these
          └─────────┘
 ```
 
@@ -1217,7 +1217,7 @@ fun AppException.toUiError(): UiError {
 
 ```kotlin
 /**
- * UseCase のユニットテスト
+ * UseCase unit test
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetUsersUseCaseTest {
@@ -1264,7 +1264,7 @@ class GetUsersUseCaseTest {
 }
 
 /**
- * Main Dispatcher を置き換えるルール
+ * Rule to replace Main Dispatcher
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainDispatcherRule(
@@ -1285,7 +1285,7 @@ class MainDispatcherRule(
 
 ```kotlin
 /**
- * ViewModel のテスト
+ * ViewModel test
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserListViewModelTest {
@@ -1315,9 +1315,9 @@ class UserListViewModelTest {
         }
 
         // Then
-        // 初期状態は Loading
+        // Initial state is Loading
         assertThat(states[0].isLoading).isTrue()
-        // データ取得後は Content
+        // After data fetch is Content
         assertThat(states[1].users).hasSize(1)
         assertThat(states[1].isLoading).isFalse()
 
@@ -1345,11 +1345,11 @@ class UserListViewModelTest {
 }
 ```
 
-### Fake / Mock の使い分け
+### Fake / Mock Usage
 
 ```kotlin
 /**
- * Fake Repository（状態を持つテスト用実装）
+ * Fake Repository (test implementation with state)
  */
 class FakeUserRepository : UserRepository {
 
@@ -1394,7 +1394,7 @@ class FakeUserRepository : UserRepository {
 
 ```kotlin
 /**
- * Compose UI テスト
+ * Compose UI test
  */
 class UserListScreenTest {
 
@@ -1474,9 +1474,9 @@ class UserListScreenTest {
 
 ---
 
-## ディレクトリ構造
+## Directory Structure
 
-### Feature-based 構造（推奨）
+### Feature-based Structure (Recommended)
 
 ```
 app/
@@ -1484,44 +1484,44 @@ app/
 │   ├── main/
 │   │   ├── java/com/example/app/
 │   │   │   │
-│   │   │   ├── core/                     # 共通コンポーネント
+│   │   │   ├── core/                     # Common components
 │   │   │   │   ├── data/
 │   │   │   │   │   ├── database/         # Room Database
 │   │   │   │   │   │   ├── AppDatabase.kt
 │   │   │   │   │   │   └── Converters.kt
-│   │   │   │   │   └── network/          # Retrofit 設定
+│   │   │   │   │   └── network/          # Retrofit setup
 │   │   │   │   │       ├── ApiClient.kt
 │   │   │   │   │       └── NetworkMonitor.kt
 │   │   │   │   │
-│   │   │   │   ├── di/                   # DI モジュール
+│   │   │   │   ├── di/                   # DI modules
 │   │   │   │   │   ├── AppModule.kt
 │   │   │   │   │   ├── DatabaseModule.kt
 │   │   │   │   │   ├── NetworkModule.kt
 │   │   │   │   │   └── DispatcherModule.kt
 │   │   │   │   │
-│   │   │   │   ├── domain/               # 共通ドメイン
+│   │   │   │   ├── domain/               # Common domain
 │   │   │   │   │   └── model/
 │   │   │   │   │       └── Result.kt
 │   │   │   │   │
-│   │   │   │   ├── ui/                   # 共通 UI
-│   │   │   │   │   ├── component/        # 共通コンポーネント
+│   │   │   │   ├── ui/                   # Common UI
+│   │   │   │   │   ├── component/        # Shared components
 │   │   │   │   │   │   ├── LoadingIndicator.kt
 │   │   │   │   │   │   ├── ErrorContent.kt
 │   │   │   │   │   │   └── EmptyContent.kt
-│   │   │   │   │   ├── theme/            # テーマ
+│   │   │   │   │   ├── theme/            # Theme
 │   │   │   │   │   │   ├── Color.kt
 │   │   │   │   │   │   ├── Theme.kt
 │   │   │   │   │   │   └── Type.kt
-│   │   │   │   │   └── navigation/       # ナビゲーション
+│   │   │   │   │   └── navigation/       # Navigation
 │   │   │   │   │       └── AppNavigation.kt
 │   │   │   │   │
-│   │   │   │   └── util/                 # ユーティリティ
+│   │   │   │   └── util/                 # Utilities
 │   │   │   │       ├── DateFormatter.kt
 │   │   │   │       └── Extensions.kt
 │   │   │   │
-│   │   │   ├── feature/                  # 機能モジュール
+│   │   │   ├── feature/                  # Feature modules
 │   │   │   │   │
-│   │   │   │   ├── user/                 # ユーザー機能
+│   │   │   │   ├── user/                 # User feature
 │   │   │   │   │   ├── data/
 │   │   │   │   │   │   ├── local/
 │   │   │   │   │   │   │   ├── UserDao.kt
@@ -1560,19 +1560,19 @@ app/
 │   │   │   │   │   └── di/
 │   │   │   │   │       └── UserModule.kt
 │   │   │   │   │
-│   │   │   │   ├── auth/                 # 認証機能
+│   │   │   │   ├── auth/                 # Auth feature
 │   │   │   │   │   ├── data/
 │   │   │   │   │   ├── domain/
 │   │   │   │   │   ├── ui/
 │   │   │   │   │   └── di/
 │   │   │   │   │
-│   │   │   │   └── settings/             # 設定機能
+│   │   │   │   └── settings/             # Settings feature
 │   │   │   │       ├── data/
 │   │   │   │       ├── domain/
 │   │   │   │       ├── ui/
 │   │   │   │       └── di/
 │   │   │   │
-│   │   │   └── App.kt                    # Application クラス
+│   │   │   └── App.kt                    # Application class
 │   │   │
 │   │   └── res/
 │   │
@@ -1590,19 +1590,19 @@ app/
 
 ---
 
-## 命名規則
+## Naming Conventions
 
-### クラス命名
+### Class Naming
 
-| 種類 | サフィックス | 例 |
-|------|-------------|-----|
+| Type | Suffix | Example |
+|------|--------|---------|
 | Activity | Activity | `UserListActivity` |
 | Fragment | Fragment | `UserListFragment` |
 | Composable Screen | Screen | `UserListScreen` |
 | ViewModel | ViewModel | `UserListViewModel` |
 | UseCase | UseCase | `GetUsersUseCase` |
 | Repository Interface | Repository | `UserRepository` |
-| Repository 実装 | RepositoryImpl | `UserRepositoryImpl` |
+| Repository Implementation | RepositoryImpl | `UserRepositoryImpl` |
 | DataSource | DataSource | `UserLocalDataSource` |
 | DAO | Dao | `UserDao` |
 | Entity (Room) | Entity | `UserEntity` |
@@ -1613,30 +1613,30 @@ app/
 | Event | Event | `UserListEvent` |
 | DI Module | Module | `UserModule` |
 
-### 関数命名
+### Function Naming
 
-| 種類 | パターン | 例 |
-|------|---------|-----|
-| データ取得（単一） | `get{Entity}` | `getUser(id)` |
-| データ取得（複数） | `get{Entity}s` / `get{Entity}List` | `getUsers()` |
-| データ作成 | `create{Entity}` / `insert{Entity}` | `createUser()` |
-| データ更新 | `update{Entity}` | `updateUser()` |
-| データ削除 | `delete{Entity}` | `deleteUser()` |
-| イベントハンドラ | `on{Event}` | `onUserClick()` |
-| 変換 | `to{Target}` | `toDomain()`, `toEntity()` |
-| 検証 | `is{Condition}` / `has{Property}` | `isValid()`, `hasPermission()` |
+| Type | Pattern | Example |
+|------|---------|---------|
+| Get single data | `get{Entity}` | `getUser(id)` |
+| Get multiple data | `get{Entity}s` / `get{Entity}List` | `getUsers()` |
+| Create data | `create{Entity}` / `insert{Entity}` | `createUser()` |
+| Update data | `update{Entity}` | `updateUser()` |
+| Delete data | `delete{Entity}` | `deleteUser()` |
+| Event handler | `on{Event}` | `onUserClick()` |
+| Conversion | `to{Target}` | `toDomain()`, `toEntity()` |
+| Validation | `is{Condition}` / `has{Property}` | `isValid()`, `hasPermission()` |
 
-### パッケージ命名
+### Package Naming
 
 ```
 com.{company}.{app}
-    .core                 # 共通コンポーネント
+    .core                 # Common components
         .data
         .domain
         .ui
         .di
         .util
-    .feature              # 機能別
+    .feature              # Feature-based
         .{feature}
             .data
             .domain
@@ -1646,70 +1646,70 @@ com.{company}.{app}
 
 ---
 
-## ベストプラクティス一覧
+## Best Practices Checklist
 
 ### ViewModel
 
-- [ ] UI State は単一の data class で管理
-- [ ] `StateFlow` で状態を公開、`MutableStateFlow` は private
-- [ ] 一時的イベントは `Channel` または `SharedFlow` を使用
-- [ ] `viewModelScope` でコルーチンを起動
-- [ ] SavedStateHandle でプロセス再生成に対応
+- [ ] Manage UI State with a single data class
+- [ ] Expose state with `StateFlow`, keep `MutableStateFlow` private
+- [ ] Use `Channel` or `SharedFlow` for temporary events
+- [ ] Launch coroutines with `viewModelScope`
+- [ ] Support process recreation with SavedStateHandle
 
 ### Repository
 
-- [ ] インターフェースを定義し、実装と分離
-- [ ] オフラインファースト戦略の採用
-- [ ] `Flow` でデータストリームを返す
-- [ ] エラーは `Result` 型でラップ
-- [ ] DataSource の詳細を隠蔽
+- [ ] Define interface and separate from implementation
+- [ ] Adopt offline-first strategy
+- [ ] Return `Flow` for data streams
+- [ ] Wrap errors with `Result` type
+- [ ] Hide DataSource details
 
 ### UseCase
 
-- [ ] 単一責任（1 UseCase = 1 機能）
-- [ ] `operator fun invoke()` で呼び出し可能に
-- [ ] 必要な場合のみ作成（シンプルな場合は Repository 直接可）
-- [ ] ビジネスロジックのみ、UI ロジックは含めない
+- [ ] Single responsibility (1 UseCase = 1 function)
+- [ ] Make callable with `operator fun invoke()`
+- [ ] Create only when needed (direct Repository call is fine for simple cases)
+- [ ] Business logic only, no UI logic
 
 ### Compose
 
-- [ ] Stateless / Stateful Composable を分離
-- [ ] Preview 可能な設計
-- [ ] `collectAsStateWithLifecycle()` で Flow を収集
-- [ ] `remember` / `rememberSaveable` の適切な使用
-- [ ] 再コンポジションの最適化
+- [ ] Separate Stateless / Stateful Composables
+- [ ] Design for Preview capability
+- [ ] Collect Flow with `collectAsStateWithLifecycle()`
+- [ ] Appropriate use of `remember` / `rememberSaveable`
+- [ ] Optimize recomposition
 
-### 依存性注入
+### Dependency Injection
 
-- [ ] Hilt を使用
-- [ ] `@Singleton` は必要な場合のみ
-- [ ] Qualifier で同一型の依存を区別
-- [ ] テスト用の差し替え可能な設計
+- [ ] Use Hilt
+- [ ] Use `@Singleton` only when necessary
+- [ ] Distinguish same-type dependencies with Qualifier
+- [ ] Design for testable dependency replacement
 
-### テスト
+### Testing
 
-- [ ] UseCase、ViewModel のユニットテスト必須
-- [ ] Fake を優先、Mock は最小限
-- [ ] `MainDispatcherRule` でテスト用 Dispatcher を設定
-- [ ] `runTest` でコルーチンテスト
+- [ ] Unit tests for UseCase and ViewModel are required
+- [ ] Prefer Fakes, minimize Mocks
+- [ ] Set up test Dispatcher with `MainDispatcherRule`
+- [ ] Use `runTest` for coroutine tests
 
-### エラーハンドリング
+### Error Handling
 
-- [ ] アプリケーション例外の階層を定義
-- [ ] Repository でエラーをラップ
-- [ ] UI 用エラーモデルに変換
-- [ ] リトライ機構の実装
+- [ ] Define application exception hierarchy
+- [ ] Wrap errors in Repository
+- [ ] Convert to UI error model
+- [ ] Implement retry mechanism
 
-### パフォーマンス
+### Performance
 
-- [ ] 適切な Dispatcher の使用（IO/Default/Main）
-- [ ] `stateIn` で Flow を StateFlow に変換時の `WhileSubscribed` 使用
-- [ ] 不要な再コンポジションの回避
-- [ ] Lazy 系コンポーネントの活用
+- [ ] Use appropriate Dispatchers (IO/Default/Main)
+- [ ] Use `WhileSubscribed` when converting Flow to StateFlow with `stateIn`
+- [ ] Avoid unnecessary recomposition
+- [ ] Leverage Lazy components
 
 ---
 
-## 参考リンク
+## References
 
 - [Android Architecture Guide](https://developer.android.com/topic/architecture)
 - [Guide to app architecture](https://developer.android.com/topic/architecture/intro)

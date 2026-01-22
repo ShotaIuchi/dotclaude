@@ -1,85 +1,85 @@
 # /wf0-restore
 
-既存のワークスペースを復元するコマンド。別PCでの作業再開や、worktree の再作成に使用。
+Command to restore an existing workspace. Used for resuming work on a different PC or recreating a worktree.
 
-## 使用方法
+## Usage
 
 ```
 /wf0-restore [work-id]
 ```
 
-## 引数
+## Arguments
 
-- `work-id`: 復元する作業のID（オプション）
-  - 省略時: `state.json` の `active_work` を使用
-  - `active_work` もない場合: 候補を提示して選択
+- `work-id`: ID of the work to restore (optional)
+  - If omitted: Use `active_work` from `state.json`
+  - If `active_work` is also not set: Present candidates for selection
 
-## 処理内容
+## Processing
 
-$ARGUMENTS を解析して work-id を取得し、以下の処理を実行してください。
+Parse $ARGUMENTS to get work-id and execute the following processing.
 
-### 1. 前提条件チェック
+### 1. Check Prerequisites
 
 ```bash
-# 必要なコマンドの存在確認
-command -v jq >/dev/null || { echo "ERROR: jq が必要です"; exit 1; }
-command -v git >/dev/null || { echo "ERROR: git が必要です"; exit 1; }
+# Check for required commands
+command -v jq >/dev/null || { echo "ERROR: jq is required"; exit 1; }
+command -v git >/dev/null || { echo "ERROR: git is required"; exit 1; }
 ```
 
-### 2. work-id の解決
+### 2. Resolve work-id
 
 ```bash
-# 引数があれば使用
+# Use argument if provided
 work_id="$ARGUMENTS"
 
-# なければ active_work を確認
+# If empty, check active_work
 if [ -z "$work_id" ]; then
   work_id=$(jq -r '.active_work // empty' .wf/state.json)
 fi
 
-# それでもなければ候補を提示
+# If still empty, present candidates
 if [ -z "$work_id" ]; then
-  echo "利用可能な work-id:"
+  echo "Available work-ids:"
   jq -r '.works | keys[]' .wf/state.json
-  # ユーザーに選択を促す
+  # Prompt user to select
 fi
 ```
 
-### 3. リモートの最新情報を取得
+### 3. Fetch Latest Information from Remote
 
 ```bash
 git fetch --all --prune
 ```
 
-### 4. ブランチの復元
+### 4. Restore Branch
 
-state.json から作業情報を取得：
+Get work information from state.json:
 
 ```bash
 branch=$(jq -r ".works[\"$work_id\"].git.branch" .wf/state.json)
 base=$(jq -r ".works[\"$work_id\"].git.base" .wf/state.json)
 ```
 
-ブランチの存在確認と復元：
+Check branch existence and restore:
 
 ```bash
-# ローカルに存在するか
+# Check if exists locally
 if git show-ref --verify --quiet "refs/heads/$branch"; then
-  echo "ローカルブランチが存在します: $branch"
+  echo "Local branch exists: $branch"
   git checkout "$branch"
-# リモートに存在するか
+# Check if exists on remote
 elif git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
-  echo "リモートブランチから作成します: $branch"
+  echo "Creating from remote branch: $branch"
   git checkout -b "$branch" "origin/$branch"
 else
-  echo "ERROR: ブランチが見つかりません: $branch"
+  echo "ERROR: Branch not found: $branch"
   exit 1
 fi
 ```
 
-### 5. worktree の復元（オプション）
+### 5. Restore worktree (Optional)
 
-`config.worktree.enabled` が `true` の場合：
+If `config.worktree.enabled` is `true`:
 
 ```bash
 worktree_root=$(jq -r '.worktree.root_dir // ".worktrees"' .wf/config.json)
@@ -87,25 +87,25 @@ worktree_path="$worktree_root/${branch//\//-}"
 
 if [ ! -d "$worktree_path" ]; then
   git worktree add "$worktree_path" "$branch"
-  echo "worktree を作成しました: $worktree_path"
+  echo "worktree created: $worktree_path"
 fi
 
-# local.json を更新
+# Update local.json
 jq ".works[\"$work_id\"].worktree_path = \"$worktree_path\"" .wf/local.json > .wf/local.json.tmp
 mv .wf/local.json.tmp .wf/local.json
 ```
 
-### 6. active_work の更新
+### 6. Update active_work
 
 ```bash
 jq ".active_work = \"$work_id\"" .wf/state.json > .wf/state.json.tmp
 mv .wf/state.json.tmp .wf/state.json
 ```
 
-### 7. 状態表示
+### 7. Display Status
 
 ```
-✅ ワークスペースを復元しました
+✅ Workspace restored
 
 Work ID: <work-id>
 Branch: <branch>
@@ -113,15 +113,15 @@ Base: <base>
 Current: <current_phase>
 Next: <next_phase>
 
-ドキュメント:
+Documents:
 - docs/wf/<work-id>/
 
-次のステップ: /<next_phase> を実行してください
+Next step: Run /<next_phase>
 ```
 
-## 注意事項
+## Notes
 
-- state.json が存在しない場合はエラー
-- 指定された work-id が state.json に存在しない場合はエラー
-- ブランチがローカルにもリモートにも存在しない場合はエラー
-- worktree のルートディレクトリは自動作成
+- Error if state.json does not exist
+- Error if specified work-id does not exist in state.json
+- Error if branch exists neither locally nor on remote
+- Worktree root directory is created automatically

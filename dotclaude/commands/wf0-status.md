@@ -1,53 +1,53 @@
 # /wf0-status
 
-現在のワークフロー状態を表示するコマンド。
+Command to display current workflow status.
 
-## 使用方法
+## Usage
 
 ```
 /wf0-status [work-id]
 ```
 
-## 引数
+## Arguments
 
-- `work-id`: 表示する作業のID（オプション）
-  - 省略時: `state.json` の `active_work` を使用
-  - `all` を指定: すべての作業を表示
+- `work-id`: ID of the work to display (optional)
+  - If omitted: Use `active_work` from `state.json`
+  - If `all` is specified: Display all works
 
-## 処理内容
+## Processing
 
-$ARGUMENTS を解析して以下の処理を実行してください。
+Parse $ARGUMENTS and execute the following processing.
 
-### 1. state.json の読み込み
+### 1. Load state.json
 
 ```bash
 if [ ! -f .wf/state.json ]; then
-  echo "WF システムが初期化されていません"
-  echo "$HOME/.claude/scripts/wf-init.sh を実行してください"
+  echo "WF system is not initialized"
+  echo "Please run $HOME/.claude/scripts/wf-init.sh"
   exit 1
 fi
 ```
 
-### 2. 表示対象の決定
+### 2. Determine Display Target
 
 ```bash
 arg="$ARGUMENTS"
 
 if [ "$arg" = "all" ]; then
-  # すべての作業を表示
+  # Display all works
   show_all=true
 elif [ -n "$arg" ]; then
-  # 指定された work-id を表示
+  # Display specified work-id
   work_id="$arg"
 else
-  # active_work を表示
+  # Display active_work
   work_id=$(jq -r '.active_work // empty' .wf/state.json)
 fi
 ```
 
-### 3. 状態表示
+### 3. Display Status
 
-#### 単一の作業を表示する場合
+#### When displaying a single work
 
 ```
 📋 WF Status: <work-id>
@@ -80,7 +80,7 @@ Created:  <created_at>
 💡 Next: /<next_phase>
 ```
 
-#### すべての作業を表示する場合
+#### When displaying all works
 
 ```
 📋 WF Status: All Works
@@ -96,9 +96,9 @@ Active: <active_work>
 Total: 2 works
 ```
 
-### 4. Git 状態の追加表示（オプション）
+### 4. Additional Git Status Display (Optional)
 
-現在のブランチ情報も表示：
+Also display current branch information:
 
 ```bash
 echo ""
@@ -107,19 +107,19 @@ echo "   Current branch: $(git rev-parse --abbrev-ref HEAD)"
 echo "   Uncommitted changes: $(git status --porcelain | wc -l | tr -d ' ')"
 ```
 
-### 5. worktree 情報（有効な場合）
+### 5. Worktree Information (If Enabled)
 
 ```bash
 if [ -f ".wf/config.json" ] && [ "$(jq -r '.worktree.enabled // false' .wf/config.json)" = "true" ]; then
-  # local.json の存在確認
+  # Check for local.json existence
   if [ ! -f ".wf/local.json" ]; then
     echo ""
-    echo "⚠️  worktree が有効ですが local.json が見つかりません"
+    echo "⚠️  worktree is enabled but local.json not found"
     echo ""
-    echo "現在の worktree 一覧:"
+    echo "Current worktree list:"
     git worktree list
     echo ""
-    echo "/wf0-restore を実行して worktree を再構成してください"
+    echo "Please run /wf0-restore to reconfigure worktree"
   else
     worktree_path=$(jq -r ".works[\"$work_id\"].worktree_path // empty" .wf/local.json)
     if [ -n "$worktree_path" ]; then
@@ -130,15 +130,15 @@ if [ -f ".wf/config.json" ] && [ "$(jq -r '.worktree.enabled // false' .wf/confi
 fi
 ```
 
-## 出力形式
+## Output Format
 
-- 情報は見やすく整形して表示
-- 重要な情報（current, next）は強調
-- ドキュメントの存在状況を確認して表示
-- フェーズの進捗を視覚的に表示
+- Format information for easy reading
+- Emphasize important information (current, next)
+- Check and display document existence status
+- Visually display phase progress
 
-## 注意事項
+## Notes
 
-- state.json が存在しない場合は初期化を促す
-- active_work が設定されていない場合はその旨を表示
-- 指定された work-id が存在しない場合はエラー
+- Prompt initialization if state.json does not exist
+- Display message if active_work is not set
+- Error if specified work-id does not exist

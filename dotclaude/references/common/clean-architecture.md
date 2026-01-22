@@ -1,44 +1,44 @@
-# クリーンアーキテクチャガイド
+# Clean Architecture Guide
 
-プラットフォーム共通のアーキテクチャ原則とパターン。
+Cross-platform architecture principles and patterns.
 
 ---
 
-## 基本原則
+## Core Principles
 
-### 1. 関心の分離 (Separation of Concerns)
+### 1. Separation of Concerns
 
-各レイヤーは単一の責務を持ち、他のレイヤーの実装詳細を知らない。
+Each layer has a single responsibility and does not know implementation details of other layers.
 
 ```
 ┌─────────────────────────────────────────┐
-│           Presentation Layer             │  ← UI・ユーザー操作
+│           Presentation Layer             │  ← UI / User Interaction
 ├─────────────────────────────────────────┤
-│             Domain Layer                 │  ← ビジネスロジック
+│             Domain Layer                 │  ← Business Logic
 ├─────────────────────────────────────────┤
-│              Data Layer                  │  ← データ取得・永続化
+│              Data Layer                  │  ← Data Retrieval / Persistence
 └─────────────────────────────────────────┘
 ```
 
-### 2. 依存関係の方向
+### 2. Dependency Direction
 
-外側のレイヤーは内側のレイヤーに依存する。逆は許されない。
+Outer layers depend on inner layers. The reverse is not permitted.
 
 ```
 Presentation → Domain ← Data
-              (依存の逆転)
+              (Dependency Inversion)
 ```
 
-### 3. 単一の信頼できる情報源 (SSOT: Single Source of Truth)
+### 3. Single Source of Truth (SSOT)
 
-データの正規化された状態は一箇所（通常 Repository）で管理される。
+Normalized data state is managed in one place (typically the Repository).
 
-### 4. 単方向データフロー (UDF: Unidirectional Data Flow)
+### 4. Unidirectional Data Flow (UDF)
 
-イベントは上流へ、状態は下流へ流れる。
+Events flow upstream, state flows downstream.
 
 ```
-UI ──(イベント)──→ ViewModel ──(状態)──→ UI
+UI ──(Event)──→ ViewModel ──(State)──→ UI
          │
          ▼
       UseCase
@@ -49,58 +49,58 @@ UI ──(イベント)──→ ViewModel ──(状態)──→ UI
 
 ---
 
-## レイヤー詳細
+## Layer Details
 
 ### Presentation Layer
 
-**責務**: ユーザーインターフェースの表示とユーザー操作のハンドリング
+**Responsibility**: Display user interface and handle user interactions
 
-| コンポーネント | 役割 |
-|--------------|------|
-| View | UI の描画（状態を反映するだけ） |
-| ViewModel | UI 状態の保持・UI ロジック |
-| UI State | UI の状態を表すデータクラス |
+| Component | Role |
+|-----------|------|
+| View | Render UI (only reflects state) |
+| ViewModel | Hold UI state / UI logic |
+| UI State | Data class representing UI state |
 
-**原則**:
-- View はロジックを持たない（状態を描画するだけ）
-- ViewModel はプラットフォーム固有の API に依存しない（可能な限り）
-- UI State は immutable なデータクラス
+**Principles**:
+- View has no logic (only renders state)
+- ViewModel does not depend on platform-specific APIs (as much as possible)
+- UI State is an immutable data class
 
 ### Domain Layer
 
-**責務**: ビジネスロジックの実装
+**Responsibility**: Implement business logic
 
-| コンポーネント | 役割 |
-|--------------|------|
-| UseCase | 単一のビジネス操作 |
-| Domain Model | ビジネスエンティティ |
-| Repository Interface | データ取得の抽象化 |
+| Component | Role |
+|-----------|------|
+| UseCase | Single business operation |
+| Domain Model | Business entities |
+| Repository Interface | Abstraction for data retrieval |
 
-**原則**:
-- UseCase は単一の操作を実行
-- Domain Model はフレームワークに依存しない
-- Repository はインターフェースとして定義
+**Principles**:
+- UseCase executes a single operation
+- Domain Model does not depend on frameworks
+- Repository is defined as an interface
 
 ### Data Layer
 
-**責務**: データの取得・永続化
+**Responsibility**: Data retrieval and persistence
 
-| コンポーネント | 役割 |
-|--------------|------|
-| Repository Impl | Repository インターフェースの実装 |
-| DataSource | データソースへのアクセス |
-| DTO/Entity | データ転送オブジェクト |
+| Component | Role |
+|-----------|------|
+| Repository Impl | Implementation of Repository interface |
+| DataSource | Access to data sources |
+| DTO/Entity | Data Transfer Objects |
 
-**原則**:
-- Repository は複数の DataSource を調整
-- DataSource はローカル/リモートで分離
-- DTO は Domain Model にマッピング
+**Principles**:
+- Repository coordinates multiple DataSources
+- DataSource is separated into local/remote
+- DTO maps to Domain Model
 
 ---
 
-## UI State パターン
+## UI State Pattern
 
-### 基本構造
+### Basic Structure
 
 ```kotlin
 // Kotlin
@@ -120,7 +120,7 @@ enum UiState<T> {
 }
 ```
 
-### 複合状態
+### Composite State
 
 ```kotlin
 // Kotlin
@@ -144,9 +144,9 @@ struct ScreenUiState {
 
 ---
 
-## UseCase パターン
+## UseCase Pattern
 
-### 単一操作の UseCase
+### Single Operation UseCase
 
 ```kotlin
 // Kotlin
@@ -174,7 +174,7 @@ final class GetUserUseCase {
 }
 ```
 
-### 複合操作の UseCase
+### Composite Operation UseCase
 
 ```kotlin
 // Kotlin
@@ -193,9 +193,9 @@ class RefreshDataUseCase(
 
 ---
 
-## Repository パターン
+## Repository Pattern
 
-### インターフェース定義（Domain Layer）
+### Interface Definition (Domain Layer)
 
 ```kotlin
 // Kotlin
@@ -215,7 +215,7 @@ protocol UserRepository {
 }
 ```
 
-### 実装（Data Layer）
+### Implementation (Data Layer)
 
 ```kotlin
 // Kotlin
@@ -226,7 +226,7 @@ class UserRepositoryImpl(
 
     override suspend fun getUser(id: String): Result<User> {
         return runCatching {
-            // ローカルキャッシュを先に確認
+            // Check local cache first
             localDataSource.getUser(id)
                 ?: remoteDataSource.getUser(id).also { user ->
                     localDataSource.saveUser(user)
@@ -237,7 +237,7 @@ class UserRepositoryImpl(
     override fun getUsers(): Flow<List<User>> {
         return localDataSource.observeUsers()
             .onStart {
-                // バックグラウンドで更新
+                // Refresh in background
                 refreshUsersFromRemote()
             }
     }
@@ -246,9 +246,9 @@ class UserRepositoryImpl(
 
 ---
 
-## エラーハンドリング
+## Error Handling
 
-### Result 型パターン
+### Result Type Pattern
 
 ```kotlin
 // Kotlin
@@ -275,10 +275,10 @@ enum AppError: Error {
 }
 ```
 
-### エラーマッピング
+### Error Mapping
 
 ```kotlin
-// Kotlin - Repository でエラーをマッピング
+// Kotlin - Map errors in Repository
 override suspend fun getUser(id: String): AppResult<User> {
     return try {
         val user = remoteDataSource.getUser(id)
@@ -297,10 +297,10 @@ override suspend fun getUser(id: String): AppResult<User> {
 
 ---
 
-## 命名規則
+## Naming Conventions
 
-| 種類 | パターン | 例 |
-|------|---------|-----|
+| Type | Pattern | Example |
+|------|---------|---------|
 | ViewModel | `{Feature}ViewModel` | `UserListViewModel` |
 | UI State | `{Feature}UiState` | `UserListUiState` |
 | UseCase | `{Action}{Entity}UseCase` | `GetUsersUseCase` |
@@ -313,20 +313,20 @@ override suspend fun getUser(id: String): AppResult<User> {
 
 ---
 
-## ベストプラクティス
+## Best Practices
 
-### DO (推奨)
+### DO (Recommended)
 
-- ViewModel は UI State を公開し、View は状態を監視
-- UseCase は単一の操作に集中
-- Repository はデータソースを抽象化
-- エラーは適切に型付けしてハンドリング
-- テスト可能な設計（依存性注入）
+- ViewModel exposes UI State, View observes state
+- UseCase focuses on a single operation
+- Repository abstracts data sources
+- Errors are properly typed and handled
+- Testable design (dependency injection)
 
-### DON'T (非推奨)
+### DON'T (Not Recommended)
 
-- View でビジネスロジックを実行
-- ViewModel で直接 API を呼び出す
-- Domain Layer でフレームワーク固有の型を使用
-- エラーを握りつぶす
-- 神クラス（一つのクラスに多くの責務）
+- Execute business logic in View
+- Call API directly from ViewModel
+- Use framework-specific types in Domain Layer
+- Swallow errors
+- God class (too many responsibilities in one class)

@@ -1,100 +1,100 @@
-# 共通制約
+# Common Constraints
 
-すべてのサブエージェントが遵守すべき制約事項。
+Constraints that all sub-agents must follow.
 
-## 基本制約
+## Basic Constraints
 
-### 1. 読み取り専用の原則（分析系）
+### 1. Read-Only Principle (Analysis Type)
 
-分析型エージェント（analysis/）は原則として読み取り専用です。
-ファイルの変更や作成は行いません。
+Analysis type agents (analysis/) are read-only by principle.
+They do not modify or create files.
 
-### 2. スコープの限定
+### 2. Scope Limitation
 
-各エージェントは定義された目的の範囲内でのみ動作します。
-スコープ外の作業が必要な場合は、呼び出し元に報告して判断を仰ぎます。
+Each agent operates only within its defined purpose.
+If work outside the scope is needed, report to the caller for judgment.
 
-### 3. 状態の一貫性
+### 3. State Consistency
 
-state.json の更新は呼び出し元のコマンドが責任を持ちます。
-エージェント単体では state.json を直接更新しません。
+The calling command is responsible for updating state.json.
+Agents do not directly update state.json on their own.
 
-## コード品質
+## Code Quality
 
-### 1. 既存パターンの尊重
+### 1. Respect Existing Patterns
 
-プロジェクトの既存コードスタイル、命名規則、アーキテクチャパターンに従います。
+Follow the project's existing code style, naming conventions, and architectural patterns.
 
-### 2. 最小変更の原則
+### 2. Minimal Change Principle
 
-目的達成に必要な最小限の変更のみを行います。
-関連しないコードの改善やリファクタリングは行いません。
+Make only the minimum changes necessary to achieve the purpose.
+Do not improve or refactor unrelated code.
 
-### 3. テストの考慮
+### 3. Test Consideration
 
-コード変更を提案する場合は、必要なテストについても言及します。
+When proposing code changes, also mention the required tests.
 
-## 出力形式
+## Output Format
 
-### 1. 構造化された出力
+### 1. Structured Output
 
-すべての出力は以下の基本構造に従います。
+All output follows this basic structure.
 
 ```markdown
-## 概要
-{簡潔な要約}
+## Summary
+{brief summary}
 
-## 詳細
-{詳細な内容}
+## Details
+{detailed content}
 
-## 次のアクション
-{推奨される次のステップ}
+## Next Actions
+{recommended next steps}
 ```
 
-### 2. ファイルパスの明示
+### 2. Explicit File Paths
 
-コードやファイルに言及する場合は、絶対パスまたはプロジェクトルートからの相対パスを明示します。
+When referring to code or files, explicitly state the absolute path or relative path from project root.
 
-### 3. 不確実性の明示
+### 3. Explicit Uncertainty
 
-推測や仮定に基づく情報は、その旨を明示します。
+Clearly indicate when information is based on assumptions or speculation.
 
-## エラー処理
+## Error Handling
 
-### 1. 失敗の報告
+### 1. Failure Reporting
 
-処理が失敗した場合は、以下を報告します:
-- 失敗した操作
-- エラーの原因（わかる範囲で）
-- 推奨される対処法
+When processing fails, report the following:
+- The operation that failed
+- The cause of the error (to the extent known)
+- Recommended remediation
 
-### 2. 部分的成功の報告
+### 2. Partial Success Reporting
 
-一部のみ成功した場合は、成功した部分と失敗した部分を明確に区別して報告します。
+When only partially successful, clearly distinguish between successful and failed parts in the report.
 
-## セキュリティ
+## Security
 
-### 1. 機密情報の取り扱い
+### 1. Handling Confidential Information
 
-パスワード、API キー、トークンなどの機密情報は出力に含めません。
-`.env` ファイルなどの機密ファイルの内容は読み取りません。
+Do not include passwords, API keys, tokens, or other confidential information in output.
+Do not read contents of confidential files such as `.env`.
 
-### 2. コマンド実行の制限
+### 2. Command Execution Restrictions
 
-任意のシェルコマンドの実行は、必要最小限に限定します。
-破壊的な操作（ファイル削除、強制プッシュなど）は行いません。
+Limit arbitrary shell command execution to the minimum necessary.
+Do not perform destructive operations (file deletion, force push, etc.).
 
-## 対話ルール
+## Interaction Rules
 
-### 1. 確認の要求
+### 1. Requesting Confirmation
 
-重要な判断や曖昧な指示については、呼び出し元に確認を要求します。
+Request confirmation from the caller for important decisions or ambiguous instructions.
 
-### 2. 進捗の報告
+### 2. Progress Reporting
 
-長時間の処理では、適宜進捗を報告します。
+Report progress periodically for long-running processes.
 
-### 3. 日本語での応答
+### 3. Response Language
 
-すべての出力は日本語で行います。
-コード内のコメントも日本語で記述します。
+All output should be in English.
+Comments in code should also be written in English.

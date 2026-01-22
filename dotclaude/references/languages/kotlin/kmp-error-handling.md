@@ -1,58 +1,58 @@
-# KMP エラーハンドリング
+# KMP Error Handling
 
-Kotlin Multiplatform での共通エラー型と UI エラー表示パターン。
+Common error types and UI error display patterns in Kotlin Multiplatform.
 
-> **関連ドキュメント**: [KMP Architecture Guide](./kmp-architecture.md)
+> **Related Documentation**: [KMP Architecture Guide](./kmp-architecture.md)
 
 ---
 
-## 共通エラー型
+## Common Error Types
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/core/error/AppException.kt
 
 /**
- * アプリケーション例外の階層
+ * Application exception hierarchy
  */
 sealed class AppException(
     override val message: String,
     override val cause: Throwable? = null
 ) : Exception(message, cause) {
 
-    // ネットワークエラー
+    // Network errors
     sealed class Network(message: String, cause: Throwable?) : AppException(message, cause) {
         class NoConnection(cause: Throwable? = null) : Network("No internet connection", cause)
         class Timeout(cause: Throwable? = null) : Network("Request timeout", cause)
         class Server(val code: Int, cause: Throwable? = null) : Network("Server error: $code", cause)
     }
 
-    // データエラー
+    // Data errors
     sealed class Data(message: String, cause: Throwable?) : AppException(message, cause) {
         class NotFound(message: String = "Data not found") : Data(message, null)
         class Validation(message: String) : Data(message, null)
         class Conflict(message: String) : Data(message, null)
     }
 
-    // 認証エラー
+    // Authentication errors
     sealed class Auth(message: String, cause: Throwable?) : AppException(message, cause) {
         object Unauthorized : Auth("Unauthorized", null)
         object SessionExpired : Auth("Session expired", null)
     }
 
-    // 不明なエラー
+    // Unknown error
     class Unknown(cause: Throwable) : AppException("Unknown error", cause)
 }
 ```
 
 ---
 
-## UI エラーモデル
+## UI Error Model
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/presentation/model/UiError.kt
 
 /**
- * UI 用エラーモデル
+ * UI error model
  */
 data class UiError(
     val message: String,
@@ -66,28 +66,28 @@ enum class ErrorAction {
 }
 
 /**
- * Throwable → UiError 変換
+ * Throwable → UiError conversion
  */
 fun Throwable.toUiError(): UiError {
     return when (this) {
         is AppException.Network.NoConnection -> UiError(
-            message = "インターネット接続がありません",
+            message = "No internet connection",
             action = ErrorAction.RETRY
         )
         is AppException.Network.Timeout -> UiError(
-            message = "リクエストがタイムアウトしました",
+            message = "Request timed out",
             action = ErrorAction.RETRY
         )
         is AppException.Network.Server -> UiError(
-            message = "サーバーエラーが発生しました（$code）",
+            message = "Server error occurred ($code)",
             action = ErrorAction.RETRY
         )
         is AppException.Auth.Unauthorized -> UiError(
-            message = "認証が必要です",
+            message = "Authentication required",
             action = ErrorAction.LOGIN
         )
         is AppException.Auth.SessionExpired -> UiError(
-            message = "セッションの有効期限が切れました",
+            message = "Session has expired",
             action = ErrorAction.LOGIN
         )
         is AppException.Data.NotFound -> UiError(
@@ -95,7 +95,7 @@ fun Throwable.toUiError(): UiError {
             action = ErrorAction.DISMISS
         )
         else -> UiError(
-            message = "エラーが発生しました",
+            message = "An error occurred",
             action = ErrorAction.DISMISS
         )
     }
@@ -104,13 +104,13 @@ fun Throwable.toUiError(): UiError {
 
 ---
 
-## Ktor エラーハンドリング
+## Ktor Error Handling
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/data/remote/ApiErrorMapper.kt
 
 /**
- * Ktor レスポンスをアプリケーション例外にマッピング
+ * Map Ktor response to application exception
  */
 class ApiErrorMapper {
 
@@ -140,9 +140,9 @@ class ApiErrorMapper {
 
 ---
 
-## ベストプラクティス
+## Best Practices
 
-- AppException の階層を定義
-- プラットフォーム共通のエラーマッピング
-- UI 用エラーモデルに変換
-- リトライ機構の実装
+- Define AppException hierarchy
+- Use common error mapping across platforms
+- Convert to UI error model
+- Implement retry mechanism

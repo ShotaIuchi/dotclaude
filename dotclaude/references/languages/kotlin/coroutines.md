@@ -1,17 +1,17 @@
-# Kotlin Coroutines ガイド
+# Kotlin Coroutines Guide
 
-Android/KMP で共通して使用する Kotlin Coroutines のベストプラクティス。
+Best practices for Kotlin Coroutines commonly used in Android/KMP.
 
 ---
 
-## 基本概念
+## Basic Concepts
 
 ### CoroutineScope
 
 ```kotlin
-// ViewModel での使用（Android）
+// Usage in ViewModel (Android)
 class UserViewModel : ViewModel() {
-    // viewModelScope は ViewModel のライフサイクルに紐づく
+    // viewModelScope is tied to the ViewModel lifecycle
     fun loadUser(id: String) {
         viewModelScope.launch {
             val user = userRepository.getUser(id)
@@ -20,7 +20,7 @@ class UserViewModel : ViewModel() {
     }
 }
 
-// KMP での使用
+// Usage in KMP
 class UserViewModel(
     private val scope: CoroutineScope
 ) {
@@ -35,18 +35,18 @@ class UserViewModel(
 
 ### CoroutineContext
 
-| 要素 | 説明 |
-|------|------|
-| `Dispatchers.Main` | UI スレッド |
-| `Dispatchers.IO` | I/O 操作用（ネットワーク、DB） |
-| `Dispatchers.Default` | CPU 集約的な処理 |
-| `Job` | コルーチンのライフサイクル管理 |
+| Element | Description |
+|---------|-------------|
+| `Dispatchers.Main` | UI thread |
+| `Dispatchers.IO` | For I/O operations (network, DB) |
+| `Dispatchers.Default` | CPU-intensive processing |
+| `Job` | Coroutine lifecycle management |
 
 ---
 
-## Dispatcher の使い分け
+## Dispatcher Selection
 
-### 基本ルール
+### Basic Rules
 
 ```kotlin
 class UserRepository(
@@ -54,22 +54,22 @@ class UserRepository(
     private val dao: UserDao,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    // I/O 操作は IO Dispatcher で実行
+    // I/O operations run on IO Dispatcher
     suspend fun getUser(id: String): User = withContext(ioDispatcher) {
         api.getUser(id)
     }
 
-    // Room/SQLDelight は自動で適切なスレッドで実行するため withContext 不要
+    // Room/SQLDelight automatically runs on appropriate thread, no withContext needed
     suspend fun getCachedUser(id: String): User? {
         return dao.getUser(id)
     }
 }
 ```
 
-### Dispatcher の注入
+### Dispatcher Injection
 
 ```kotlin
-// テスト可能にするため Dispatcher を注入
+// Inject Dispatcher for testability
 class UserRepository(
     private val api: UserApi,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -79,7 +79,7 @@ class UserRepository(
     }
 }
 
-// テストでは TestDispatcher を使用
+// Use TestDispatcher in tests
 @Test
 fun `getUsers returns list`() = runTest {
     val repository = UserRepository(
@@ -95,7 +95,7 @@ fun `getUsers returns list`() = runTest {
 
 ## Flow
 
-### 基本的な Flow の使用
+### Basic Flow Usage
 
 ```kotlin
 // Repository
@@ -117,18 +117,18 @@ class UserListViewModel(
 }
 ```
 
-### Flow 操作
+### Flow Operations
 
 ```kotlin
-// map: 各要素を変換
+// map: Transform each element
 val userNames: Flow<List<String>> = userRepository.observeUsers()
     .map { users -> users.map { it.name } }
 
-// filter: 条件に合う要素のみ
+// filter: Keep only elements matching condition
 val activeUsers: Flow<List<User>> = userRepository.observeUsers()
     .map { users -> users.filter { it.isActive } }
 
-// combine: 複数の Flow を結合
+// combine: Combine multiple Flows
 val uiState: Flow<UiState> = combine(
     userRepository.observeUsers(),
     settingsRepository.observeSettings()
@@ -136,7 +136,7 @@ val uiState: Flow<UiState> = combine(
     UiState(users = users, settings = settings)
 }
 
-// flatMapLatest: 最新の値のみ処理
+// flatMapLatest: Process only the latest value
 val searchResults: Flow<List<User>> = searchQuery
     .debounce(300)
     .flatMapLatest { query ->
@@ -148,15 +148,15 @@ val searchResults: Flow<List<User>> = searchQuery
     }
 ```
 
-### StateFlow と SharedFlow
+### StateFlow and SharedFlow
 
 ```kotlin
 class UserViewModel : ViewModel() {
-    // StateFlow: 常に最新の値を保持
+    // StateFlow: Always holds the latest value
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    // SharedFlow: イベントの発行（一度きりのイベント）
+    // SharedFlow: For event emission (one-time events)
     private val _events = MutableSharedFlow<Event>()
     val events: SharedFlow<Event> = _events.asSharedFlow()
 
@@ -168,17 +168,17 @@ class UserViewModel : ViewModel() {
 }
 ```
 
-### SharingStarted 戦略
+### SharingStarted Strategies
 
-| 戦略 | 説明 | 使用場面 |
-|------|------|---------|
-| `Eagerly` | 即座に開始、停止しない | アプリ全体で常に必要なデータ |
-| `Lazily` | 最初の購読者で開始、停止しない | 一度取得したら保持したいデータ |
-| `WhileSubscribed(timeout)` | 購読者がいる間だけ | 画面表示中のみ必要なデータ |
+| Strategy | Description | Use Case |
+|----------|-------------|----------|
+| `Eagerly` | Starts immediately, never stops | Data needed app-wide at all times |
+| `Lazily` | Starts on first subscriber, never stops | Data to keep once retrieved |
+| `WhileSubscribed(timeout)` | Only while there are subscribers | Data needed only while screen is displayed |
 
 ```kotlin
-// 推奨: WhileSubscribed(5000)
-// 画面回転時に5秒間はFlowが生き続ける
+// Recommended: WhileSubscribed(5000)
+// Flow stays alive for 5 seconds during screen rotation
 val users: StateFlow<List<User>> = userRepository.observeUsers()
     .stateIn(
         scope = viewModelScope,
@@ -189,9 +189,9 @@ val users: StateFlow<List<User>> = userRepository.observeUsers()
 
 ---
 
-## エラーハンドリング
+## Error Handling
 
-### try-catch パターン
+### try-catch Pattern
 
 ```kotlin
 class UserViewModel : ViewModel() {
@@ -209,7 +209,7 @@ class UserViewModel : ViewModel() {
 }
 ```
 
-### Result 型パターン
+### Result Type Pattern
 
 ```kotlin
 // Repository
@@ -232,7 +232,7 @@ fun loadUser(id: String) {
 }
 ```
 
-### Flow でのエラーハンドリング
+### Error Handling in Flow
 
 ```kotlin
 val users: StateFlow<UiState> = userRepository.observeUsers()
@@ -247,12 +247,12 @@ val users: StateFlow<UiState> = userRepository.observeUsers()
 
 ---
 
-## 並行処理
+## Concurrent Processing
 
-### 並列実行
+### Parallel Execution
 
 ```kotlin
-// 複数の API を並列で呼び出す
+// Call multiple APIs in parallel
 suspend fun loadDashboard(): Dashboard = coroutineScope {
     val userDeferred = async { userRepository.getCurrentUser() }
     val settingsDeferred = async { settingsRepository.getSettings() }
@@ -269,13 +269,13 @@ suspend fun loadDashboard(): Dashboard = coroutineScope {
 ### SupervisorJob
 
 ```kotlin
-// 一つの子コルーチンの失敗が他に影響しないようにする
+// Prevent one child coroutine's failure from affecting others
 class DashboardViewModel : ViewModel() {
     private val supervisorJob = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.Main + supervisorJob)
 
     fun loadAll() {
-        // 各タスクが独立して失敗を処理
+        // Each task handles failures independently
         scope.launch {
             try {
                 loadUsers()
@@ -300,19 +300,19 @@ class DashboardViewModel : ViewModel() {
 
 ---
 
-## キャンセレーション
+## Cancellation
 
-### 基本
+### Basics
 
 ```kotlin
 class SearchViewModel : ViewModel() {
     private var searchJob: Job? = null
 
     fun search(query: String) {
-        // 前の検索をキャンセル
+        // Cancel previous search
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            delay(300) // デバウンス
+            delay(300) // Debounce
             val results = searchRepository.search(query)
             _results.value = results
         }
@@ -320,7 +320,7 @@ class SearchViewModel : ViewModel() {
 }
 ```
 
-### キャンセル対応の suspend 関数
+### Cancellation-aware Suspend Functions
 
 ```kotlin
 suspend fun downloadFile(url: String): File {
@@ -332,7 +332,7 @@ suspend fun downloadFile(url: String): File {
                 val buffer = ByteArray(8192)
                 var bytesRead: Int
                 while (input.read(buffer).also { bytesRead = it } != -1) {
-                    // キャンセルをチェック
+                    // Check for cancellation
                     ensureActive()
                     output.write(buffer, 0, bytesRead)
                 }
@@ -345,9 +345,9 @@ suspend fun downloadFile(url: String): File {
 
 ---
 
-## テスト
+## Testing
 
-### runTest の使用
+### Using runTest
 
 ```kotlin
 @Test
@@ -365,7 +365,7 @@ fun `loadUser updates state`() = runTest {
 }
 ```
 
-### Turbine での Flow テスト
+### Flow Testing with Turbine
 
 ```kotlin
 @Test
@@ -375,7 +375,7 @@ fun `observeUsers emits updates`() = runTest {
     repository.observeUsers().test {
         assertEquals(emptyList<User>(), awaitItem())
 
-        // ユーザーを追加
+        // Add user
         mockDao.insert(User(id = "1", name = "Test"))
 
         assertEquals(listOf(User(id = "1", name = "Test")), awaitItem())
@@ -402,10 +402,10 @@ fun `search debounces input`() = runTest {
     advanceTimeBy(100)
     viewModel.search("abc")
 
-    // 300ms 待機前は検索されない
+    // No search before 300ms wait
     coVerify(exactly = 0) { mockRepository.search(any()) }
 
-    // 300ms 経過後
+    // After 300ms
     advanceTimeBy(300)
     coVerify(exactly = 1) { mockRepository.search("abc") }
 }
@@ -413,20 +413,20 @@ fun `search debounces input`() = runTest {
 
 ---
 
-## ベストプラクティス
+## Best Practices
 
-### DO (推奨)
+### DO (Recommended)
 
-- `viewModelScope` / 適切な CoroutineScope を使用
-- I/O 操作には `Dispatchers.IO` を使用
-- テスト用に Dispatcher を注入可能に
-- `StateFlow` で UI 状態を管理
-- `WhileSubscribed(5000)` で適切なリソース管理
+- Use `viewModelScope` / appropriate CoroutineScope
+- Use `Dispatchers.IO` for I/O operations
+- Make Dispatcher injectable for testing
+- Manage UI state with `StateFlow`
+- Use `WhileSubscribed(5000)` for proper resource management
 
-### DON'T (非推奨)
+### DON'T (Not Recommended)
 
-- `GlobalScope` の使用
-- `runBlocking` をプロダクションコードで使用
-- Dispatcher のハードコード
-- Flow の collect を Activity/Fragment で直接実行（ライフサイクルを考慮）
-- 例外を握りつぶす
+- Using `GlobalScope`
+- Using `runBlocking` in production code
+- Hardcoding Dispatchers
+- Collecting Flow directly in Activity/Fragment (consider lifecycle)
+- Swallowing exceptions

@@ -1,12 +1,12 @@
-# KMP 状態管理と UDF
+# KMP State Management and UDF
 
-Kotlin Multiplatform での単方向データフロー (UDF) と MVI パターン実装。
+Unidirectional Data Flow (UDF) and MVI pattern implementation in Kotlin Multiplatform.
 
-> **関連ドキュメント**: [KMP Architecture Guide](./kmp-architecture.md)
+> **Related Documentation**: [KMP Architecture Guide](./kmp-architecture.md)
 
 ---
 
-## 単方向データフロー (UDF) の原則
+## Unidirectional Data Flow (UDF) Principles
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -32,15 +32,15 @@ Kotlin Multiplatform での単方向データフロー (UDF) と MVI パター�
 
 ---
 
-## MVI パターン実装
+## MVI Pattern Implementation
 
-### 基底 ViewModel
+### Base ViewModel
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/presentation/mvi/MviViewModel.kt
 
 /**
- * MVI ベースの ViewModel 基底クラス
+ * MVI-based ViewModel base class
  */
 abstract class MviViewModel<State, Intent, Effect>(
     initialState: State,
@@ -53,7 +53,7 @@ abstract class MviViewModel<State, Intent, Effect>(
     val effects: Flow<Effect> = _effects.receiveAsFlow()
 
     /**
-     * Intent を処理する
+     * Process Intent
      */
     fun dispatch(intent: Intent) {
         coroutineScope.launch {
@@ -62,19 +62,19 @@ abstract class MviViewModel<State, Intent, Effect>(
     }
 
     /**
-     * Intent のハンドリング（サブクラスで実装）
+     * Intent handling (implement in subclass)
      */
     protected abstract suspend fun handleIntent(intent: Intent)
 
     /**
-     * State を更新する
+     * Update State
      */
     protected fun updateState(reducer: (State) -> State) {
         _state.update(reducer)
     }
 
     /**
-     * Side Effect を発行する
+     * Emit Side Effect
      */
     protected suspend fun emitEffect(effect: Effect) {
         _effects.send(effect)
@@ -82,13 +82,13 @@ abstract class MviViewModel<State, Intent, Effect>(
 }
 ```
 
-### Contract 定義
+### Contract Definition
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/presentation/userlist/UserListContract.kt
 
 /**
- * ユーザー一覧画面の Contract
+ * User list screen Contract
  */
 object UserListContract {
 
@@ -105,7 +105,7 @@ object UserListContract {
     }
 
     /**
-     * User Intent（ユーザーアクション）
+     * User Intent (user actions)
      */
     sealed interface Intent {
         object LoadUsers : Intent
@@ -115,7 +115,7 @@ object UserListContract {
     }
 
     /**
-     * Side Effect（一度きりのイベント）
+     * Side Effect (one-time events)
      */
     sealed interface Effect {
         data class NavigateToDetail(val userId: String) : Effect
@@ -124,13 +124,13 @@ object UserListContract {
 }
 ```
 
-### ViewModel 実装
+### ViewModel Implementation
 
 ```kotlin
 // commonMain/kotlin/com/example/shared/presentation/userlist/UserListMviViewModel.kt
 
 /**
- * MVI パターンの ViewModel 実装
+ * MVI pattern ViewModel implementation
  */
 class UserListMviViewModel(
     private val getUsersUseCase: GetUsersUseCase,
@@ -183,9 +183,9 @@ class UserListMviViewModel(
 
 ---
 
-## ベストプラクティス
+## Best Practices
 
-- UI State は単一の data class で管理
-- StateFlow で状態を公開
-- 一時的イベントは Channel を使用
-- UDF（単方向データフロー）を遵守
+- Manage UI State with a single data class
+- Expose state via StateFlow
+- Use Channel for transient events
+- Follow UDF (Unidirectional Data Flow)

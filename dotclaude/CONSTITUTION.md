@@ -1,90 +1,90 @@
-# 憲法（CONSTITUTION）
+# CONSTITUTION
 
-このファイルは**絶対的なルール**を定義する。
-新規追加・変更時は必ず遵守すること。違反は即座に修正。
+This file defines **absolute rules**.
+Always comply when adding new files or making changes. Violations must be corrected immediately.
 
-> **注意**: この憲法は `PRINCIPLES.md`（原則）に従属する。
-> 原則と矛盾する場合、原則が優先される。
-
----
-
-## 第1条: 構造の即時確定
-
-新しいファイル・ディレクトリを追加する際、その場で最終的な構造を確定する。
-
-### 禁止
-- 「とりあえず」「後で整理」という配置
-- ルート直下への新規ディレクトリ追加（グループ化されていない追加）
-- 既存構造と矛盾する階層
-
-### 必須
-- 既存のグループディレクトリに配置
-- 新グループが必要な場合、先にこの憲法を更新
-
-### 構造定義の委譲
-
-各ディレクトリに INDEX.md または README.md が存在する場合、その定義に従う。
-存在しない場合は既存ファイルの命名・配置パターンを踏襲する。
-憲法では原則のみを規定し、実装詳細は各ディレクトリに委譲する。
+> **Note**: This constitution is subordinate to `PRINCIPLES.md` (Principles).
+> If there is a conflict with the principles, the principles take precedence.
 
 ---
 
-## 第2条: ドキュメントの同時作成
+## Article 1: Immediate Structure Finalization
 
-ファイル追加時、関連ドキュメントを同時に作成・更新する。
+When adding new files or directories, finalize the structure on the spot.
 
-- 新しいカテゴリやモジュールを追加する場合、説明ドキュメントを同時作成
-- 既存の索引やリストがある場合、同時に更新
+### Prohibited
+- Placements that are "temporary" or "to be organized later"
+- Adding new directories directly under root (ungrouped additions)
+- Hierarchies that contradict existing structure
 
----
+### Required
+- Place in existing group directories
+- If a new group is needed, update this constitution first
 
-## 第3条: 命名規則の遵守
+### Delegation of Structure Definition
 
-既存の命名パターンに従う。新しい命名規則を導入しない。
-
-- 同一ディレクトリ内の既存ファイルの命名慣習を踏襲
-- 言語・フレームワークの標準規約がある場合はそれに従う
-
----
-
-## 第4条: 依存関係の完結
-
-ファイル追加時、全ての依存関係を同時に解決する。
-
-### 禁止
-- 存在しないファイルへの参照
-- 「後でパスを直す」という前提の追加
-- 他ファイルの参照を壊す移動
+If INDEX.md or README.md exists in each directory, follow its definitions.
+If not present, follow the naming and placement patterns of existing files.
+The constitution defines only principles; implementation details are delegated to each directory.
 
 ---
 
-## 第5条: 違反時の即時対応
+## Article 2: Simultaneous Documentation Creation
 
-この憲法に違反する追加・変更を発見した場合：
+When adding files, create or update related documentation simultaneously.
 
-1. **即座に修正** - 次のタスクに進む前に修正
-2. **差し戻し禁止** - 違反状態でのコミット禁止
-3. **憲法更新** - ルールが不適切な場合は先に憲法を更新
-
----
-
-## 第6条: コマンド存在の事前確認
-
-シェルコマンドを実行する前に、そのコマンドが存在するか確認する。
-
-### 禁止
-- 存在しないコマンドをそのまま実行してエラーを出す
-- 「とりあえず実行してみる」という姿勢
-
-### 必須
-- コマンドが存在しない場合、インストール方法を提示
-- ユーザーの許可を得てからインストールまたは代替手段を提案
+- When adding new categories or modules, create explanatory documentation simultaneously
+- If existing indexes or lists exist, update them simultaneously
 
 ---
 
-## 附則: 憲法の更新
+## Article 3: Naming Convention Compliance
 
-この憲法自体を更新する場合：
-1. 変更理由を明記
-2. 既存ファイルへの影響を確認
-3. 影響がある場合は同時に修正
+Follow existing naming patterns. Do not introduce new naming conventions.
+
+- Follow the naming conventions of existing files in the same directory
+- Follow standard conventions of the language/framework if applicable
+
+---
+
+## Article 4: Complete Dependency Resolution
+
+When adding files, resolve all dependencies simultaneously.
+
+### Prohibited
+- References to non-existent files
+- Additions with the assumption of "fixing paths later"
+- Moves that break references in other files
+
+---
+
+## Article 5: Immediate Response to Violations
+
+When an addition or change that violates this constitution is discovered:
+
+1. **Correct immediately** - Fix before proceeding to the next task
+2. **No rollback in violation state** - No commits in violation state
+3. **Update constitution** - If the rule is inappropriate, update the constitution first
+
+---
+
+## Article 6: Pre-Execution Command Verification
+
+Before executing a shell command, verify that the command exists.
+
+### Prohibited
+- Executing non-existent commands and generating errors
+- The attitude of "just trying to execute"
+
+### Required
+- If the command does not exist, provide installation instructions
+- Suggest installation or alternative means after obtaining user permission
+
+---
+
+## Addendum: Updating the Constitution
+
+When updating this constitution itself:
+1. Clearly state the reason for change
+2. Confirm impact on existing files
+3. If there is impact, correct simultaneously

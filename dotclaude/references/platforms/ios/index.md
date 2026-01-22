@@ -1,42 +1,42 @@
 # iOS References
 
-## 概要
+## Overview
 
-Apple 公式ガイドラインに基づく、iOS アプリ開発のリファレンス。
-SwiftUI + MVVM、State 管理、async/await を中心に定義。
-
----
-
-## ファイル一覧と優先順位
-
-| ファイル | 説明 | 優先度 |
-|----------|------|--------|
-| [architecture.md](architecture.md) | iOS SwiftUI/MVVM アーキテクチャ詳細 | ★★★ 公式ガイド準拠 |
+Reference for iOS app development based on Apple's official guidelines.
+Defines SwiftUI + MVVM, State management, and async/await patterns.
 
 ---
 
-## 外部リンク
+## File List and Priority
 
-### 公式ドキュメント（最優先）
-- [SwiftUI Documentation (Apple)](https://developer.apple.com/documentation/swiftui/) - ★★★ UI フレームワーク
-- [Swift Concurrency (公式)](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/) - ★★★ 非同期処理
-
-### フレームワーク
-- [Combine Framework (Apple)](https://developer.apple.com/documentation/combine) - ★★ リアクティブ
-- [SwiftData (Apple)](https://developer.apple.com/documentation/swiftdata) - ★★ データ永続化
-
-### テスト
-- [XCTest (Apple)](https://developer.apple.com/documentation/xctest) - ★★★ テストフレームワーク
+| File | Description | Priority |
+|------|-------------|----------|
+| [architecture.md](architecture.md) | iOS SwiftUI/MVVM architecture details | ★★★ Official guide compliant |
 
 ---
 
-## 関連リファレンス
+## External Links
 
-- [clean-architecture.md](../../common/clean-architecture.md) - 共通アーキテクチャ原則
-- [testing-strategy.md](../../common/testing-strategy.md) - テスト戦略
+### Official Documentation (Highest Priority)
+- [SwiftUI Documentation (Apple)](https://developer.apple.com/documentation/swiftui/) - ★★★ UI Framework
+- [Swift Concurrency (Official)](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/) - ★★★ Async Processing
+
+### Frameworks
+- [Combine Framework (Apple)](https://developer.apple.com/documentation/combine) - ★★ Reactive
+- [SwiftData (Apple)](https://developer.apple.com/documentation/swiftdata) - ★★ Data Persistence
+
+### Testing
+- [XCTest (Apple)](https://developer.apple.com/documentation/xctest) - ★★★ Test Framework
 
 ---
 
-## 関連スキル
+## Related References
+
+- [clean-architecture.md](../../common/clean-architecture.md) - Common architecture principles
+- [testing-strategy.md](../../common/testing-strategy.md) - Testing strategy
+
+---
+
+## Related Skills
 
 - ios-architecture

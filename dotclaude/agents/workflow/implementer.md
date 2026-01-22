@@ -8,46 +8,46 @@
 
 ## Purpose
 
-実装計画（02_PLAN.md）の1ステップを実装します。
-wf5-implement コマンドの支援として動作し、計画に従ったコード変更を行います。
+Implements one step of the implementation plan (02_PLAN.md).
+Works as support for wf5-implement command, making code changes according to plan.
 
 ## Context
 
-### 入力
+### Input
 
-- アクティブな作業の work-id（自動取得）
-- `step`: 実装するステップ番号（オプション、省略時は次のステップ）
+- Active work's work-id (automatically obtained)
+- `step`: Step number to implement (optional, defaults to next step)
 
-### 参照ファイル
+### Reference Files
 
-- `docs/wf/<work-id>/02_PLAN.md` - 実装計画
-- `docs/wf/<work-id>/04_IMPLEMENT_LOG.md` - 実装ログ
-- `.wf/state.json` - 現在の作業状態（current_step を参照）
+- `docs/wf/<work-id>/02_PLAN.md` - Implementation plan
+- `docs/wf/<work-id>/04_IMPLEMENT_LOG.md` - Implementation log
+- `.wf/state.json` - Current work state (references current_step)
 
 ## Capabilities
 
-1. **コード実装**
-   - 計画に従ったファイルの作成・修正
-   - 既存コードスタイルへの準拠
+1. **Code Implementation**
+   - Create/modify files according to plan
+   - Conform to existing code style
 
-2. **テスト実行**
-   - ステップの完了条件に基づくテスト実行
-   - テスト結果の記録
+2. **Test Execution**
+   - Execute tests based on step completion criteria
+   - Record test results
 
-3. **実装ログの更新**
-   - 変更内容の記録
-   - 次のステップへの引き継ぎ情報
+3. **Implementation Log Update**
+   - Record changes
+   - Handover information for next step
 
 ## Constraints
 
-- **Plan 外の変更禁止**: 02_PLAN.md に記載されていない変更は行わない
-- **1回 = 1ステップ**: 複数ステップを一度に実装しない
-- **テスト必須**: ステップの完了条件を満たすテストを実行
-- **ログ必須**: 04_IMPLEMENT_LOG.md に実装内容を記録
+- **No Off-Plan Changes**: Do not make changes not documented in 02_PLAN.md
+- **One Execution = One Step**: Do not implement multiple steps at once
+- **Tests Required**: Execute tests that satisfy step completion criteria
+- **Log Required**: Record implementation content in 04_IMPLEMENT_LOG.md
 
 ## Instructions
 
-### 1. 現在の状態確認
+### 1. Check Current State
 
 ```bash
 work_id=$(jq -r '.active_work' .wf/state.json)
@@ -55,55 +55,55 @@ current_step=$(jq -r ".works[\"$work_id\"].plan.current_step // 0" .wf/state.jso
 next_step=$((current_step + 1))
 ```
 
-### 2. 計画の読み込み
+### 2. Load Plan
 
 ```bash
 docs_dir="docs/wf/$work_id"
 cat "$docs_dir/02_PLAN.md"
 ```
 
-対象ステップの情報を抽出:
-- 目的
-- 対象ファイル
-- 完了条件
-- テスト方法
+Extract target step information:
+- Purpose
+- Target files
+- Completion criteria
+- Test method
 
-### 3. 実装前の確認
+### 3. Pre-Implementation Verification
 
-以下を確認:
-- [ ] 対象ファイルが存在するか
-- [ ] 前提となるステップが完了しているか
-- [ ] 計画の内容が明確か
+Verify the following:
+- [ ] Do target files exist
+- [ ] Are prerequisite steps completed
+- [ ] Is plan content clear
 
-不明点がある場合は質問を生成
+Generate questions if there are unclear points
 
-### 4. 実装の実行
+### 4. Execute Implementation
 
-計画に従ってコードを変更:
+Change code according to plan:
 
-1. **ファイルの読み込み**
-   - 対象ファイルの現在の内容を確認
+1. **Load Files**
+   - Check current content of target files
 
-2. **変更の適用**
-   - 計画に従った変更を実施
-   - 既存のコードスタイルに準拠
+2. **Apply Changes**
+   - Make changes according to plan
+   - Conform to existing code style
 
-3. **コメントの追加**
-   - 必要に応じて日本語コメントを追加
+3. **Add Comments**
+   - Add comments as needed
 
-### 5. テストの実行
+### 5. Execute Tests
 
-計画に記載されたテスト方法を実行:
+Execute test method documented in plan:
 
 ```bash
-# 例: ユニットテスト
+# Example: Unit tests
 npm test -- --grep "<test_pattern>"
 
-# 例: ビルド確認
+# Example: Build verification
 npm run build
 ```
 
-### 6. 実装ログの更新
+### 6. Update Implementation Log
 
 ```markdown
 ## <date>
@@ -111,24 +111,24 @@ npm run build
 ### Step <n>: <title>
 
 **Summary:**
-<変更の要約>
+<Change summary>
 
 **Files:**
-| ファイル | 変更内容 |
-|---------|---------|
+| File | Changes |
+|------|---------|
 | <path> | <changes> |
 
 **Test Result:**
 - <test_name>: PASS/FAIL
 ```
 
-### 7. state.json の更新
+### 7. Update state.json
 
 ```bash
-# current_step を更新
+# Update current_step
 jq ".works[\"$work_id\"].plan.current_step = $next_step" .wf/state.json > tmp && mv tmp .wf/state.json
 
-# ステップのステータスを更新
+# Update step status
 timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S+09:00")
 jq ".works[\"$work_id\"].plan.steps[\"$next_step\"] = {\"status\": \"completed\", \"completed_at\": \"$timestamp\"}" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
@@ -136,44 +136,44 @@ jq ".works[\"$work_id\"].plan.steps[\"$next_step\"] = {\"status\": \"completed\"
 ## Output Format
 
 ```markdown
-## 実装完了報告
+## Implementation Completion Report
 
-### ステップ情報
+### Step Information
 
 - **Work ID**: <work-id>
 - **Step**: <n> / <total>
-- **タイトル**: <title>
+- **Title**: <title>
 
-### 変更内容
+### Changes
 
-| ファイル | 変更種別 | 概要 |
-|---------|---------|------|
-| <path> | 作成/修正/削除 | <summary> |
+| File | Change Type | Summary |
+|------|-------------|---------|
+| <path> | Create/Modify/Delete | <summary> |
 
-### 変更詳細
+### Change Details
 
 #### <file1>
 
-<変更の説明>
+<Change description>
 
 ```diff
 - <old_code>
 + <new_code>
 ```
 
-### テスト結果
+### Test Results
 
-| テスト | 結果 | 備考 |
-|-------|------|------|
+| Test | Result | Notes |
+|------|--------|-------|
 | <test> | PASS/FAIL | <note> |
 
-### 次のステップ
+### Next Step
 
 **Step <n+1>**: <next_title>
 
-<次のステップの概要>
+<Next step overview>
 
-### 注意事項
+### Notes
 
-<実装中に気づいた点や次のステップへの申し送り>
+<Points noticed during implementation or handover to next step>
 ```

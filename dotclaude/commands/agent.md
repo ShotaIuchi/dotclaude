@@ -1,81 +1,81 @@
 # /agent
 
-サブエージェントを直接呼び出すコマンド。
+Command to directly invoke sub-agents.
 
-## 使用方法
+## Usage
 
 ```
-/agent <エージェント名> [パラメータ...]
+/agent <agent_name> [parameters...]
 ```
 
-## エージェント一覧
+## Agent List
 
-### ワークフロー支援型
+### Workflow Support Type
 
-| エージェント | 用途 |
-|-------------|------|
-| `research` | Issue 背景調査、関連コード特定 |
-| `spec-writer` | 仕様書ドラフト作成 |
-| `planner` | 実装計画立案 |
-| `implementer` | 1ステップ実装支援 |
+| Agent | Purpose |
+|-------|---------|
+| `research` | Issue background research, related code identification |
+| `spec-writer` | Specification draft creation |
+| `planner` | Implementation planning |
+| `implementer` | Single step implementation support |
 
-### タスク特化型
+### Task-Specific Type
 
-| エージェント | 用途 |
-|-------------|------|
-| `reviewer` | コードレビュー |
-| `test-writer` | テスト作成 |
-| `refactor` | リファクタリング提案 |
-| `doc-writer` | ドキュメント作成 |
+| Agent | Purpose |
+|-------|---------|
+| `reviewer` | Code review |
+| `test-writer` | Test creation |
+| `refactor` | Refactoring suggestions |
+| `doc-writer` | Documentation creation |
 
-### プロジェクト分析型
+### Project Analysis Type
 
-| エージェント | 用途 |
-|-------------|------|
-| `codebase` | コードベース調査 |
-| `dependency` | 依存関係分析 |
-| `impact` | 影響範囲特定 |
+| Agent | Purpose |
+|-------|---------|
+| `codebase` | Codebase investigation |
+| `dependency` | Dependency analysis |
+| `impact` | Impact scope identification |
 
-## 使用例
+## Usage Examples
 
 ```bash
-# Issue 背景調査
+# Issue background research
 /agent research issue=123
 
-# コードベース調査
-/agent codebase query="認証フローの実装箇所"
+# Codebase investigation
+/agent codebase query="authentication flow implementation location"
 
-# コードレビュー
+# Code review
 /agent reviewer files="src/auth/*.ts"
 
-# 依存関係分析
+# Dependency analysis
 /agent dependency package="lodash"
 
-# 影響範囲特定
+# Impact scope identification
 /agent impact target="src/utils/format.ts"
 
-# テスト作成
+# Test creation
 /agent test-writer target="src/services/user.ts"
 
-# ドキュメント作成
+# Documentation creation
 /agent doc-writer target="src/api/" type="api"
 ```
 
-## 処理内容
+## Processing
 
-$ARGUMENTS を解析して以下の処理を実行してください。
+Parse $ARGUMENTS and execute the following processing.
 
-### 1. エージェント名とパラメータの解析
+### 1. Parse Agent Name and Parameters
 
 ```bash
-# $ARGUMENTS から最初の単語をエージェント名として取得
+# Get first word from $ARGUMENTS as agent name
 agent_name=$(echo "$ARGUMENTS" | awk '{print $1}')
 params=$(echo "$ARGUMENTS" | cut -d' ' -f2-)
 ```
 
-### 2. エージェント定義の読み込み
+### 2. Load Agent Definition
 
-エージェント定義ファイルの場所:
+Agent definition file locations:
 
 ```
 ~/.claude/agents/workflow/<agent_name>.md
@@ -83,33 +83,33 @@ params=$(echo "$ARGUMENTS" | cut -d' ' -f2-)
 ~/.claude/agents/analysis/<agent_name>.md
 ```
 
-上記いずれかから該当するエージェント定義を読み込みます。
+Load the corresponding agent definition from one of the above.
 
-### 3. コンテキストの準備
+### 3. Prepare Context
 
-以下のファイルを読み込んでコンテキストを構築:
+Load the following files to build context:
 
-1. `~/.claude/agents/_base/context.md` - 共通コンテキスト
-2. `~/.claude/agents/_base/constraints.md` - 共通制約
-3. エージェント定義ファイル
+1. `~/.claude/agents/_base/context.md` - Common context
+2. `~/.claude/agents/_base/constraints.md` - Common constraints
+3. Agent definition file
 
-### 4. 現在の作業状態を確認（オプション）
+### 4. Check Current Work Status (Optional)
 
-アクティブな作業がある場合は、その情報も渡します:
+If there is active work, pass that information as well:
 
 ```bash
 work_id=$(jq -r '.active_work // empty' .wf/state.json 2>/dev/null)
 if [ -n "$work_id" ]; then
   docs_dir="docs/wf/$work_id"
-  # 関連ドキュメントも読み込み可能
+  # Can also load related documents
 fi
 ```
 
-### 5. サブエージェントの実行
+### 5. Execute Sub-Agent
 
-Claude Code の Task ツールを使用してサブエージェントを起動します。
+Use Claude Code's Task tool to launch the sub-agent.
 
-エージェントの Base Type に応じて適切な subagent_type を選択:
+Select appropriate subagent_type according to agent's Base Type:
 
 | Base Type | subagent_type |
 |-----------|---------------|
@@ -118,9 +118,9 @@ Claude Code の Task ツールを使用してサブエージェントを起動�
 | bash | Bash |
 | general | general-purpose |
 
-### 6. 実行結果の記録
+### 6. Record Execution Results
 
-アクティブな作業がある場合、state.json に実行記録を追加:
+If there is active work, add execution record to state.json:
 
 ```bash
 timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S+09:00")
@@ -128,45 +128,45 @@ jq ".works[\"$work_id\"].agents.last_used = \"$agent_name\"" .wf/state.json > tm
 jq ".works[\"$work_id\"].agents.sessions[\"$agent_name\"] = {\"status\": \"completed\", \"last_run\": \"$timestamp\"}" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
 
-### 7. 結果の表示
+### 7. Display Results
 
-エージェントの実行結果を整形して表示します。
+Format and display the agent's execution results.
 
-## パラメータ形式
+## Parameter Format
 
-パラメータは `key=value` 形式で指定します。
+Parameters are specified in `key=value` format.
 
 ```
 /agent research issue=123
-/agent codebase query="検索クエリ"
+/agent codebase query="search query"
 /agent reviewer files="src/**/*.ts" focus="security"
 ```
 
-## エラー処理
+## Error Handling
 
-### エージェントが見つからない場合
+### When Agent Not Found
 
 ```
-エラー: エージェント '<agent_name>' が見つかりません
+Error: Agent '<agent_name>' not found
 
-利用可能なエージェント:
+Available agents:
 - workflow: research, spec-writer, planner, implementer
 - task: reviewer, test-writer, refactor, doc-writer
 - analysis: codebase, dependency, impact
 ```
 
-### 必須パラメータが不足している場合
+### When Required Parameters Missing
 
 ```
-エラー: 必須パラメータが不足しています
+Error: Required parameters missing
 
-使用法: /agent <agent_name> <param>=<value>
+Usage: /agent <agent_name> <param>=<value>
 
-例: /agent research issue=123
+Example: /agent research issue=123
 ```
 
-## 注意事項
+## Notes
 
-- ワークフロー支援型エージェントは対応するワークフローコマンドから使用することを推奨
-- 分析型エージェントは読み取り専用で動作
-- 実行結果は state.json に記録される（アクティブな作業がある場合）
+- Recommended to use workflow support type agents from corresponding workflow commands
+- Analysis type agents operate in read-only mode
+- Execution results are recorded in state.json (if there is active work)

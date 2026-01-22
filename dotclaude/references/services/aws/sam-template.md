@@ -1,205 +1,205 @@
 # AWS SAM Architecture Guide
 
-AWS SAM（Serverless Application Model）を使用したサーバーレスアプリケーション開発のベストプラクティス集。
+A collection of best practices for serverless application development using AWS SAM (Serverless Application Model).
 
 ---
 
-## 目次
+## Table of Contents
 
-1. [AWS SAM 概要](#aws-sam-概要)
-2. [SAM CLI コマンドリファレンス](#sam-cli-コマンドリファレンス)
-3. [SAM テンプレート構造](#sam-テンプレート構造)
-4. [リソースタイプ](#リソースタイプ)
-5. [Lambda 関数の設計](#lambda-関数の設計)
-6. [API Gateway 統合](#api-gateway-統合)
-7. [イベントソース設計](#イベントソース設計)
+1. [AWS SAM Overview](#aws-sam-overview)
+2. [SAM CLI Command Reference](#sam-cli-command-reference)
+3. [SAM Template Structure](#sam-template-structure)
+4. [Resource Types](#resource-types)
+5. [Lambda Function Design](#lambda-function-design)
+6. [API Gateway Integration](#api-gateway-integration)
+7. [Event Source Design](#event-source-design)
 8. [Lambda Layers](#lambda-layers)
-9. [環境変数と設定管理](#環境変数と設定管理)
-10. [IAM とセキュリティ](#iam-とセキュリティ)
-11. [ローカル開発とテスト](#ローカル開発とテスト)
-12. [CI/CD パイプライン](#cicd-パイプライン)
-13. [ディレクトリ構造](#ディレクトリ構造)
-14. [ベストプラクティス一覧](#ベストプラクティス一覧)
+9. [Environment Variables and Configuration Management](#environment-variables-and-configuration-management)
+10. [IAM and Security](#iam-and-security)
+11. [Local Development and Testing](#local-development-and-testing)
+12. [CI/CD Pipeline](#cicd-pipeline)
+13. [Directory Structure](#directory-structure)
+14. [Best Practices Checklist](#best-practices-checklist)
 
 ---
 
-## AWS SAM 概要
+## AWS SAM Overview
 
-### SAM とは
+### What is SAM
 
-AWS SAM は、サーバーレスアプリケーションを構築・デプロイするためのオープンソースフレームワーク。
-CloudFormation の拡張であり、Lambda、API Gateway、DynamoDB などのリソースを簡潔に定義できる。
+AWS SAM is an open-source framework for building and deploying serverless applications.
+It is an extension of CloudFormation and allows you to define resources such as Lambda, API Gateway, and DynamoDB concisely.
 
-### 主な特徴
+### Key Features
 
-1. **簡潔なテンプレート記法** - CloudFormation より短い記述でリソース定義
-2. **ローカル開発環境** - Docker を使用してローカルでテスト可能
-3. **ビルトインベストプラクティス** - セキュリティ設定やロギングが標準で組み込み
-4. **CI/CD 統合** - GitHub Actions、CodePipeline との連携が容易
+1. **Concise template syntax** - Define resources with less code than CloudFormation
+2. **Local development environment** - Test locally using Docker
+3. **Built-in best practices** - Security settings and logging are included by default
+4. **CI/CD integration** - Easy integration with GitHub Actions and CodePipeline
 
 ### SAM vs CloudFormation
 
-| 項目 | SAM | CloudFormation |
+| Item | SAM | CloudFormation |
 |------|-----|----------------|
-| 記述量 | 少ない | 多い |
-| サーバーレス特化 | ○ | × |
-| ローカルテスト | ○ | × |
-| Transform | 必須 | 不要 |
-| リソースタイプ | AWS::Serverless::* | AWS::* |
+| Code volume | Less | More |
+| Serverless-focused | Yes | No |
+| Local testing | Yes | No |
+| Transform | Required | Not required |
+| Resource types | AWS::Serverless::* | AWS::* |
 
 ---
 
-## SAM CLI コマンドリファレンス
+## SAM CLI Command Reference
 
-### プロジェクト初期化
+### Project Initialization
 
 ```bash
-# 対話式でプロジェクト作成
+# Create project interactively
 sam init
 
-# テンプレート指定で作成
+# Create with template specification
 sam init --runtime python3.12 --name my-app --app-template hello-world
 
-# カスタムテンプレートから作成
+# Create from custom template
 sam init --location https://github.com/example/sam-template
 ```
 
-### ビルド
+### Build
 
 ```bash
-# 標準ビルド
+# Standard build
 sam build
 
-# コンテナ内でビルド（ネイティブ依存関係がある場合）
+# Build inside container (for native dependencies)
 sam build --use-container
 
-# 特定の関数のみビルド
+# Build specific function only
 sam build MyFunction
 
-# 並列ビルド
+# Parallel build
 sam build --parallel
 
-# キャッシュを使用したビルド
+# Build with cache
 sam build --cached
 ```
 
-### デプロイ
+### Deploy
 
 ```bash
-# 対話式デプロイ（初回推奨）
+# Interactive deploy (recommended for first time)
 sam deploy --guided
 
-# 設定ファイルを使用したデプロイ
+# Deploy using configuration file
 sam deploy
 
-# スタック名とリージョン指定
+# Specify stack name and region
 sam deploy --stack-name my-stack --region ap-northeast-1
 
-# パラメータ上書き
+# Parameter overrides
 sam deploy --parameter-overrides Environment=prod ApiKey=xxx
 
-# 変更セットの確認をスキップ
+# Skip change set confirmation
 sam deploy --no-confirm-changeset
 
-# IAM 権限の自動承認
+# Auto-approve IAM permissions
 sam deploy --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
 ```
 
-### ローカル実行
+### Local Execution
 
 ```bash
-# 関数をローカルで実行
+# Execute function locally
 sam local invoke MyFunction
 
-# イベントファイルを指定して実行
+# Execute with event file
 sam local invoke MyFunction -e events/event.json
 
-# 環境変数ファイルを指定
+# Specify environment variables file
 sam local invoke MyFunction --env-vars env.json
 
-# ローカル API サーバー起動
+# Start local API server
 sam local start-api
 
-# ポート指定
+# Specify port
 sam local start-api --port 3000
 
-# ホット リロード有効
+# Enable hot reload
 sam local start-api --warm-containers EAGER
 
-# Lambda エンドポイント起動（API Gateway なし）
+# Start Lambda endpoint (without API Gateway)
 sam local start-lambda
 ```
 
-### 同期（開発時）
+### Sync (for development)
 
 ```bash
-# 変更を AWS に自動同期
+# Auto-sync changes to AWS
 sam sync --watch
 
-# コードのみ同期（インフラ変更なし）
+# Sync code only (no infrastructure changes)
 sam sync --watch --code
 
-# スタック指定
+# Specify stack
 sam sync --watch --stack-name my-stack
 ```
 
-### ログ確認
+### Log Viewing
 
 ```bash
-# ログをテール
+# Tail logs
 sam logs -n MyFunction --tail
 
-# 時間範囲指定
+# Specify time range
 sam logs -n MyFunction --start-time '5min ago'
 
-# フィルター
+# Filter
 sam logs -n MyFunction --filter "ERROR"
 
-# CloudWatch Insights クエリ
+# CloudWatch Insights query
 sam logs --cw-log-group /aws/lambda/my-function
 ```
 
-### パイプライン
+### Pipeline
 
 ```bash
-# パイプライン設定の初期化
+# Initialize pipeline configuration
 sam pipeline init
 
-# パイプライン用ブートストラップ
+# Bootstrap for pipeline
 sam pipeline bootstrap
 
-# GitHub Actions 用設定
+# GitHub Actions configuration
 sam pipeline init --bootstrap
 ```
 
-### その他
+### Other Commands
 
 ```bash
-# テンプレート検証
+# Validate template
 sam validate
 
-# リソース一覧
+# List resources
 sam list resources --stack-name my-stack
 
-# エンドポイント一覧
+# List endpoints
 sam list endpoints --stack-name my-stack
 
-# スタック削除
+# Delete stack
 sam delete --stack-name my-stack
 ```
 
 ---
 
-## SAM テンプレート構造
+## SAM Template Structure
 
-### 基本構造
+### Basic Structure
 
 ```yaml
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: サンプルサーバーレスアプリケーション
+Description: Sample serverless application
 
-# グローバル設定（全関数に適用）
+# Global settings (applied to all functions)
 Globals:
   Function:
     Timeout: 30
@@ -211,7 +211,7 @@ Globals:
       Variables:
         LOG_LEVEL: INFO
 
-# パラメータ
+# Parameters
 Parameters:
   Environment:
     Type: String
@@ -221,13 +221,13 @@ Parameters:
       - stg
       - prod
 
-# 条件
+# Conditions
 Conditions:
   IsProd: !Equals [!Ref Environment, prod]
 
-# リソース定義
+# Resource definitions
 Resources:
-  # Lambda 関数
+  # Lambda function
   MyFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -240,35 +240,35 @@ Resources:
             Path: /hello
             Method: get
 
-# 出力
+# Outputs
 Outputs:
   ApiEndpoint:
-    Description: API Gateway エンドポイント URL
+    Description: API Gateway endpoint URL
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
 ```
 
-### Globals セクション
+### Globals Section
 
 ```yaml
 Globals:
   Function:
-    # ランタイム設定
+    # Runtime settings
     Runtime: python3.12
     Architectures:
       - arm64
     Timeout: 30
     MemorySize: 256
 
-    # ログ設定
+    # Logging settings
     LoggingConfig:
       LogFormat: JSON
       ApplicationLogLevel: INFO
       SystemLogLevel: WARN
 
-    # トレーシング
+    # Tracing
     Tracing: Active
 
-    # VPC 設定
+    # VPC settings
     VpcConfig:
       SecurityGroupIds:
         - !Ref LambdaSecurityGroup
@@ -276,28 +276,28 @@ Globals:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
 
-    # 環境変数
+    # Environment variables
     Environment:
       Variables:
         POWERTOOLS_SERVICE_NAME: my-service
         LOG_LEVEL: INFO
 
   Api:
-    # CORS 設定
+    # CORS settings
     Cors:
       AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
       AllowHeaders: "'Content-Type,Authorization'"
       AllowOrigin: "'*'"
 
-    # ステージ設定
+    # Stage settings
     OpenApiVersion: 3.0.1
 
-    # 認証設定
+    # Authentication settings
     Auth:
       DefaultAuthorizer: MyCognitoAuthorizer
 ```
 
-### Parameters セクション
+### Parameters Section
 
 ```yaml
 Parameters:
@@ -308,7 +308,7 @@ Parameters:
       - dev
       - stg
       - prod
-    Description: デプロイ環境
+    Description: Deployment environment
 
   LogLevel:
     Type: String
@@ -328,10 +328,10 @@ Parameters:
   ApiKey:
     Type: String
     NoEcho: true
-    Description: 外部 API キー（機密情報）
+    Description: External API key (sensitive information)
 ```
 
-### Conditions セクション
+### Conditions Section
 
 ```yaml
 Conditions:
@@ -342,7 +342,7 @@ Conditions:
     - !Equals [!Ref Environment, stg]
 ```
 
-### Mappings セクション
+### Mappings Section
 
 ```yaml
 Mappings:
@@ -363,7 +363,7 @@ Mappings:
 
 ---
 
-## リソースタイプ
+## Resource Types
 
 ### AWS::Serverless::Function
 
@@ -371,36 +371,36 @@ Mappings:
 MyFunction:
   Type: AWS::Serverless::Function
   Properties:
-    # 基本設定
+    # Basic settings
     FunctionName: !Sub "${AWS::StackName}-my-function"
-    Description: サンプル Lambda 関数
+    Description: Sample Lambda function
     CodeUri: functions/my_function/
     Handler: app.lambda_handler
     Runtime: python3.12
     Architectures:
       - arm64
 
-    # リソース設定
+    # Resource settings
     MemorySize: 256
     Timeout: 30
     ReservedConcurrentExecutions: 100
 
-    # 環境変数
+    # Environment variables
     Environment:
       Variables:
         TABLE_NAME: !Ref MyTable
         BUCKET_NAME: !Ref MyBucket
 
-    # IAM ロール（自動生成または指定）
+    # IAM role (auto-generated or specified)
     Role: !GetAtt MyFunctionRole.Arn
-    # または SAM ポリシーテンプレート
+    # Or SAM policy templates
     Policies:
       - DynamoDBCrudPolicy:
           TableName: !Ref MyTable
       - S3ReadPolicy:
           BucketName: !Ref MyBucket
 
-    # イベントソース
+    # Event sources
     Events:
       ApiEvent:
         Type: Api
@@ -412,17 +412,17 @@ MyFunction:
         Properties:
           Schedule: rate(1 hour)
 
-    # レイヤー
+    # Layers
     Layers:
       - !Ref SharedLayer
       - arn:aws:lambda:ap-northeast-1:123456789012:layer:my-layer:1
 
-    # デッドレターキュー
+    # Dead letter queue
     DeadLetterQueue:
       Type: SQS
       TargetArn: !GetAtt DeadLetterQueue.Arn
 
-    # VPC 設定
+    # VPC settings
     VpcConfig:
       SecurityGroupIds:
         - !Ref LambdaSecurityGroup
@@ -430,10 +430,10 @@ MyFunction:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
 
-    # トレーシング
+    # Tracing
     Tracing: Active
 
-    # ログ設定
+    # Logging settings
     LoggingConfig:
       LogFormat: JSON
       LogGroup: !Ref MyFunctionLogGroup
@@ -444,11 +444,11 @@ MyFunction:
     EphemeralStorage:
       Size: 1024
 
-    # SnapStart（Java のみ）
+    # SnapStart (Java only)
     SnapStart:
       ApplyOn: PublishedVersions
 
-  # Metadata（ビルド設定）
+  # Metadata (build settings)
   Metadata:
     BuildMethod: python3.12
     BuildProperties:
@@ -465,7 +465,7 @@ MyApi:
     StageName: !Ref Environment
     Description: REST API
 
-    # OpenAPI 定義
+    # OpenAPI definition
     DefinitionBody:
       openapi: "3.0.1"
       info:
@@ -486,30 +486,30 @@ MyApi:
       AllowOrigin: "'*'"
       MaxAge: "'600'"
 
-    # 認証
+    # Authentication
     Auth:
       DefaultAuthorizer: CognitoAuthorizer
       Authorizers:
         CognitoAuthorizer:
           UserPoolArn: !GetAtt UserPool.Arn
 
-    # アクセスログ
+    # Access logging
     AccessLogSetting:
       DestinationArn: !GetAtt ApiAccessLogGroup.Arn
       Format: '{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","path":"$context.path","status":"$context.status","responseLength":"$context.responseLength"}'
 
-    # スロットリング
+    # Throttling
     MethodSettings:
       - ResourcePath: "/*"
         HttpMethod: "*"
         ThrottlingBurstLimit: 100
         ThrottlingRateLimit: 50
 
-    # キャッシュ
+    # Cache
     CacheClusterEnabled: true
     CacheClusterSize: "0.5"
 
-    # カスタムドメイン
+    # Custom domain
     Domain:
       DomainName: api.example.com
       CertificateArn: !Ref Certificate
@@ -525,7 +525,7 @@ MyHttpApi:
   Type: AWS::Serverless::HttpApi
   Properties:
     StageName: !Ref Environment
-    Description: HTTP API（REST API より低コスト）
+    Description: HTTP API (lower cost than REST API)
 
     # CORS
     CorsConfiguration:
@@ -541,7 +541,7 @@ MyHttpApi:
         - Authorization
       MaxAge: 600
 
-    # 認証
+    # Authentication
     Auth:
       DefaultAuthorizer: OAuth2Authorizer
       Authorizers:
@@ -555,12 +555,12 @@ MyHttpApi:
             audience:
               - !Ref UserPoolClient
 
-    # アクセスログ
+    # Access logging
     AccessLogSettings:
       DestinationArn: !GetAtt HttpApiAccessLogGroup.Arn
       Format: '{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","path":"$context.path","status":"$context.status"}'
 
-    # ルート設定
+    # Route settings
     RouteSettings:
       "GET /items":
         ThrottlingBurstLimit: 100
@@ -580,7 +580,7 @@ MyTable:
     ProvisionedThroughput:
       ReadCapacityUnits: 5
       WriteCapacityUnits: 5
-    # または オンデマンド
+    # Or on-demand
     # BillingMode: PAY_PER_REQUEST
     SSESpecification:
       SSEEnabled: true
@@ -595,7 +595,7 @@ SharedLayer:
   Type: AWS::Serverless::LayerVersion
   Properties:
     LayerName: !Sub "${AWS::StackName}-shared-layer"
-    Description: 共有ライブラリレイヤー
+    Description: Shared library layer
     ContentUri: layers/shared/
     CompatibleRuntimes:
       - python3.11
@@ -610,7 +610,7 @@ SharedLayer:
     BuildArchitecture: arm64
 ```
 
-### AWS::Serverless::Application（ネストスタック）
+### AWS::Serverless::Application (Nested Stack)
 
 ```yaml
 PaymentService:
@@ -627,7 +627,7 @@ PaymentService:
 ### AWS::Serverless::Connector
 
 ```yaml
-# Lambda から DynamoDB への接続
+# Lambda to DynamoDB connection
 FunctionToTableConnector:
   Type: AWS::Serverless::Connector
   Properties:
@@ -639,7 +639,7 @@ FunctionToTableConnector:
       - Read
       - Write
 
-# Lambda から S3 への接続
+# Lambda to S3 connection
 FunctionToBucketConnector:
   Type: AWS::Serverless::Connector
   Properties:
@@ -650,7 +650,7 @@ FunctionToBucketConnector:
     Permissions:
       - Read
 
-# Lambda から SQS への接続
+# Lambda to SQS connection
 FunctionToQueueConnector:
   Type: AWS::Serverless::Connector
   Properties:
@@ -664,15 +664,15 @@ FunctionToQueueConnector:
 
 ---
 
-## Lambda 関数の設計
+## Lambda Function Design
 
-### Python ハンドラー実装
+### Python Handler Implementation
 
 ```python
 """
-Lambda 関数ハンドラー
+Lambda function handler
 
-アイテム取得 API のエントリーポイント
+Entry point for item retrieval API
 """
 import json
 import logging
@@ -685,12 +685,12 @@ from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-# ロガーとトレーサーの初期化
+# Initialize logger and tracer
 logger = Logger()
 tracer = Tracer()
 app = APIGatewayRestResolver()
 
-# DynamoDB クライアント
+# DynamoDB client
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(os.environ["TABLE_NAME"])
 
@@ -699,17 +699,17 @@ table = dynamodb.Table(os.environ["TABLE_NAME"])
 @tracer.capture_method
 def get_items() -> dict[str, Any]:
     """
-    アイテム一覧を取得する
+    Retrieve item list
     """
-    logger.info("アイテム一覧取得開始")
+    logger.info("Starting item list retrieval")
 
     try:
         response = table.scan()
         items = response.get("Items", [])
-        logger.info(f"取得件数: {len(items)}")
+        logger.info(f"Retrieved count: {len(items)}")
         return {"items": items}
     except Exception as e:
-        logger.exception("アイテム取得エラー")
+        logger.exception("Item retrieval error")
         raise
 
 
@@ -717,15 +717,15 @@ def get_items() -> dict[str, Any]:
 @tracer.capture_method
 def get_item(item_id: str) -> dict[str, Any]:
     """
-    指定されたアイテムを取得する
+    Retrieve specified item
     """
-    logger.info(f"アイテム取得: {item_id}")
+    logger.info(f"Retrieving item: {item_id}")
 
     response = table.get_item(Key={"id": item_id})
     item = response.get("Item")
 
     if not item:
-        logger.warning(f"アイテムが見つかりません: {item_id}")
+        logger.warning(f"Item not found: {item_id}")
         return {"statusCode": 404, "body": json.dumps({"error": "Item not found"})}
 
     return item
@@ -735,12 +735,12 @@ def get_item(item_id: str) -> dict[str, Any]:
 @tracer.capture_method
 def create_item() -> dict[str, Any]:
     """
-    新しいアイテムを作成する
+    Create new item
     """
     import uuid
 
     body = app.current_event.json_body
-    logger.info(f"アイテム作成: {body}")
+    logger.info(f"Creating item: {body}")
 
     item = {
         "id": str(uuid.uuid4()),
@@ -749,7 +749,7 @@ def create_item() -> dict[str, Any]:
     }
 
     table.put_item(Item=item)
-    logger.info(f"アイテム作成完了: {item['id']}")
+    logger.info(f"Item creation complete: {item['id']}")
 
     return {"statusCode": 201, "body": json.dumps(item)}
 
@@ -758,18 +758,18 @@ def create_item() -> dict[str, Any]:
 @tracer.capture_lambda_handler
 def lambda_handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
     """
-    Lambda エントリーポイント
+    Lambda entry point
     """
     return app.resolve(event, context)
 ```
 
-### Node.js ハンドラー実装
+### Node.js Handler Implementation
 
 ```javascript
 /**
- * Lambda 関数ハンドラー
+ * Lambda function handler
  *
- * アイテム取得 API のエントリーポイント
+ * Entry point for item retrieval API
  */
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const {
@@ -780,21 +780,21 @@ const {
 } = require("@aws-sdk/lib-dynamodb");
 const { v4: uuidv4 } = require("uuid");
 
-// DynamoDB クライアント
+// DynamoDB client
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = process.env.TABLE_NAME;
 
 /**
- * アイテム一覧を取得する
+ * Retrieve item list
  */
 async function getItems() {
-  console.log("アイテム一覧取得開始");
+  console.log("Starting item list retrieval");
 
   const command = new ScanCommand({ TableName: TABLE_NAME });
   const response = await docClient.send(command);
 
-  console.log(`取得件数: ${response.Items?.length || 0}`);
+  console.log(`Retrieved count: ${response.Items?.length || 0}`);
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
@@ -803,10 +803,10 @@ async function getItems() {
 }
 
 /**
- * 指定されたアイテムを取得する
+ * Retrieve specified item
  */
 async function getItem(itemId) {
-  console.log(`アイテム取得: ${itemId}`);
+  console.log(`Retrieving item: ${itemId}`);
 
   const command = new GetCommand({
     TableName: TABLE_NAME,
@@ -815,7 +815,7 @@ async function getItem(itemId) {
   const response = await docClient.send(command);
 
   if (!response.Item) {
-    console.warn(`アイテムが見つかりません: ${itemId}`);
+    console.warn(`Item not found: ${itemId}`);
     return {
       statusCode: 404,
       headers: { "Content-Type": "application/json" },
@@ -831,11 +831,11 @@ async function getItem(itemId) {
 }
 
 /**
- * 新しいアイテムを作成する
+ * Create new item
  */
 async function createItem(body) {
   const data = JSON.parse(body);
-  console.log("アイテム作成:", data);
+  console.log("Creating item:", data);
 
   const item = {
     id: uuidv4(),
@@ -850,7 +850,7 @@ async function createItem(body) {
   });
   await docClient.send(command);
 
-  console.log(`アイテム作成完了: ${item.id}`);
+  console.log(`Item creation complete: ${item.id}`);
   return {
     statusCode: 201,
     headers: { "Content-Type": "application/json" },
@@ -859,7 +859,7 @@ async function createItem(body) {
 }
 
 /**
- * Lambda エントリーポイント
+ * Lambda entry point
  */
 exports.handler = async (event, context) => {
   console.log("Event:", JSON.stringify(event, null, 2));
@@ -867,7 +867,7 @@ exports.handler = async (event, context) => {
   try {
     const { httpMethod, path, pathParameters, body } = event;
 
-    // ルーティング
+    // Routing
     if (path === "/items" && httpMethod === "GET") {
       return await getItems();
     }
@@ -897,11 +897,11 @@ exports.handler = async (event, context) => {
 };
 ```
 
-### エラーハンドリングパターン
+### Error Handling Pattern
 
 ```python
 """
-エラーハンドリングユーティリティ
+Error handling utilities
 """
 import json
 from functools import wraps
@@ -914,7 +914,7 @@ logger = Logger()
 
 class AppError(Exception):
     """
-    アプリケーションエラー基底クラス
+    Application error base class
     """
 
     def __init__(self, message: str, status_code: int = 500, error_code: str = "INTERNAL_ERROR"):
@@ -925,7 +925,7 @@ class AppError(Exception):
 
 
 class NotFoundError(AppError):
-    """リソースが見つからないエラー"""
+    """Resource not found error"""
 
     def __init__(self, resource: str, resource_id: str):
         super().__init__(
@@ -936,7 +936,7 @@ class NotFoundError(AppError):
 
 
 class ValidationError(AppError):
-    """バリデーションエラー"""
+    """Validation error"""
 
     def __init__(self, message: str):
         super().__init__(
@@ -947,7 +947,7 @@ class ValidationError(AppError):
 
 
 class UnauthorizedError(AppError):
-    """認証エラー"""
+    """Authentication error"""
 
     def __init__(self, message: str = "Unauthorized"):
         super().__init__(
@@ -959,7 +959,7 @@ class UnauthorizedError(AppError):
 
 def error_handler(func: Callable) -> Callable:
     """
-    エラーハンドリングデコレータ
+    Error handling decorator
     """
 
     @wraps(func)
@@ -998,11 +998,11 @@ def error_handler(func: Callable) -> Callable:
     return wrapper
 ```
 
-### 入力バリデーション
+### Input Validation
 
 ```python
 """
-入力バリデーションユーティリティ
+Input validation utilities
 """
 from typing import Any
 
@@ -1010,7 +1010,7 @@ from pydantic import BaseModel, Field, ValidationError as PydanticValidationErro
 
 
 class CreateItemRequest(BaseModel):
-    """アイテム作成リクエスト"""
+    """Item creation request"""
 
     name: str = Field(..., min_length=1, max_length=100)
     description: str | None = Field(None, max_length=500)
@@ -1019,7 +1019,7 @@ class CreateItemRequest(BaseModel):
 
 
 class UpdateItemRequest(BaseModel):
-    """アイテム更新リクエスト"""
+    """Item update request"""
 
     name: str | None = Field(None, min_length=1, max_length=100)
     description: str | None = Field(None, max_length=500)
@@ -1028,7 +1028,7 @@ class UpdateItemRequest(BaseModel):
 
 def validate_request(model: type[BaseModel], data: dict[str, Any]) -> BaseModel:
     """
-    リクエストデータをバリデーションする
+    Validate request data
     """
     try:
         return model(**data)
@@ -1042,9 +1042,9 @@ def validate_request(model: type[BaseModel], data: dict[str, Any]) -> BaseModel:
 
 ---
 
-## API Gateway 統合
+## API Gateway Integration
 
-### REST API イベント
+### REST API Events
 
 ```yaml
 Resources:
@@ -1082,7 +1082,7 @@ Resources:
               Required: true
 ```
 
-### HTTP API イベント
+### HTTP API Events
 
 ```yaml
 Resources:
@@ -1107,7 +1107,7 @@ Resources:
             ApiId: !Ref MyHttpApi
 ```
 
-### Lambda 関数 URL
+### Lambda Function URL
 
 ```yaml
 Resources:
@@ -1118,7 +1118,7 @@ Resources:
       Handler: app.handler
       FunctionUrlConfig:
         AuthType: NONE
-        # または IAM 認証
+        # Or IAM authentication
         # AuthType: AWS_IAM
         Cors:
           AllowOrigins:
@@ -1130,7 +1130,7 @@ Resources:
             - Content-Type
 ```
 
-### API Gateway 認証
+### API Gateway Authentication
 
 ```yaml
 Resources:
@@ -1141,20 +1141,20 @@ Resources:
       Auth:
         DefaultAuthorizer: CognitoAuthorizer
         Authorizers:
-          # Cognito 認証
+          # Cognito authentication
           CognitoAuthorizer:
             UserPoolArn: !GetAtt UserPool.Arn
             Identity:
               Header: Authorization
 
-          # Lambda 認証
+          # Lambda authentication
           LambdaAuthorizer:
             FunctionArn: !GetAtt AuthorizerFunction.Arn
             Identity:
               Header: Authorization
               ReauthorizeEvery: 300
 
-  # 認証なしエンドポイント
+  # Endpoint without authentication
   PublicFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -1169,11 +1169,11 @@ Resources:
               Authorizer: NONE
 ```
 
-### カスタム Lambda オーソライザー
+### Custom Lambda Authorizer
 
 ```python
 """
-Lambda オーソライザー
+Lambda Authorizer
 """
 import json
 from typing import Any
@@ -1181,12 +1181,12 @@ from typing import Any
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     """
-    トークンベースのオーソライザー
+    Token-based authorizer
     """
     token = event.get("authorizationToken", "")
     method_arn = event["methodArn"]
 
-    # トークン検証ロジック
+    # Token validation logic
     if validate_token(token):
         principal_id = extract_user_id(token)
         return generate_policy(principal_id, "Allow", method_arn)
@@ -1195,19 +1195,19 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
 
 
 def validate_token(token: str) -> bool:
-    """トークンを検証する"""
-    # 実際の検証ロジックを実装
+    """Validate token"""
+    # Implement actual validation logic
     return token.startswith("Bearer ")
 
 
 def extract_user_id(token: str) -> str:
-    """トークンからユーザー ID を抽出する"""
-    # 実際の抽出ロジックを実装
+    """Extract user ID from token"""
+    # Implement actual extraction logic
     return "user-123"
 
 
 def generate_policy(principal_id: str, effect: str, resource: str) -> dict[str, Any]:
-    """IAM ポリシードキュメントを生成する"""
+    """Generate IAM policy document"""
     return {
         "principalId": principal_id,
         "policyDocument": {
@@ -1228,9 +1228,9 @@ def generate_policy(principal_id: str, effect: str, resource: str) -> dict[str, 
 
 ---
 
-## イベントソース設計
+## Event Source Design
 
-### SQS イベント
+### SQS Events
 
 ```yaml
 Resources:
@@ -1270,7 +1270,7 @@ Resources:
 
 ```python
 """
-SQS イベントハンドラー
+SQS event handler
 """
 from typing import Any
 
@@ -1288,25 +1288,25 @@ processor = BatchProcessor(event_type=EventType.SQS)
 
 def record_handler(record: SQSRecord) -> None:
     """
-    個別レコードを処理する
+    Process individual record
     """
     payload = record.json_body
     logger.info(f"Processing message: {payload}")
 
-    # ビジネスロジック
+    # Business logic
     process_message(payload)
 
 
 def process_message(payload: dict[str, Any]) -> None:
-    """メッセージを処理する"""
-    # 実際の処理ロジック
+    """Process message"""
+    # Actual processing logic
     pass
 
 
 @logger.inject_lambda_context
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     """
-    Lambda エントリーポイント（バッチ処理）
+    Lambda entry point (batch processing)
     """
     return process_partial_response(
         event=event,
@@ -1316,7 +1316,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     )
 ```
 
-### S3 イベント
+### S3 Events
 
 ```yaml
 Resources:
@@ -1351,7 +1351,7 @@ Resources:
 
 ```python
 """
-S3 イベントハンドラー
+S3 event handler
 """
 import json
 from typing import Any
@@ -1367,7 +1367,7 @@ s3 = boto3.client("s3")
 @logger.inject_lambda_context
 def lambda_handler(event: dict[str, Any], context: Any) -> None:
     """
-    S3 イベントを処理する
+    Process S3 event
     """
     for record in event["Records"]:
         bucket = record["s3"]["bucket"]["name"]
@@ -1375,16 +1375,16 @@ def lambda_handler(event: dict[str, Any], context: Any) -> None:
 
         logger.info(f"Processing: s3://{bucket}/{key}")
 
-        # オブジェクト取得
+        # Get object
         response = s3.get_object(Bucket=bucket, Key=key)
         content = json.loads(response["Body"].read().decode("utf-8"))
 
-        # ビジネスロジック
+        # Business logic
         process_file(content)
 
 
 def process_file(content: dict[str, Any]) -> None:
-    """ファイル内容を処理する"""
+    """Process file content"""
     pass
 ```
 
@@ -1428,7 +1428,7 @@ Resources:
         StreamViewType: NEW_AND_OLD_IMAGES
 ```
 
-### EventBridge スケジュール
+### EventBridge Schedule
 
 ```yaml
 Resources:
@@ -1438,21 +1438,21 @@ Resources:
       CodeUri: functions/scheduled/
       Handler: app.handler
       Events:
-        # cron 式
+        # cron expression
         DailySchedule:
           Type: Schedule
           Properties:
             Schedule: cron(0 9 * * ? *)
-            Description: 毎日 9:00 JST に実行
+            Description: Execute daily at 9:00 JST
             Enabled: true
             Input: '{"type": "daily"}'
 
-        # rate 式
+        # rate expression
         HourlySchedule:
           Type: Schedule
           Properties:
             Schedule: rate(1 hour)
-            Description: 1時間ごとに実行
+            Description: Execute every hour
 
         # EventBridge Scheduler
         SchedulerEvent:
@@ -1464,7 +1464,7 @@ Resources:
               MaximumWindowInMinutes: 5
 ```
 
-### EventBridge ルール
+### EventBridge Rules
 
 ```yaml
 Resources:
@@ -1488,7 +1488,7 @@ Resources:
             Target:
               Id: MyTarget
 
-        # CloudTrail イベント
+        # CloudTrail event
         CloudTrailEvent:
           Type: CloudWatchEvent
           Properties:
@@ -1536,7 +1536,7 @@ Resources:
 
 ## Lambda Layers
 
-### レイヤー構造
+### Layer Structure
 
 ```
 layers/
@@ -1552,7 +1552,7 @@ layers/
                     └── requirements.txt
 ```
 
-### レイヤー定義
+### Layer Definition
 
 ```yaml
 Resources:
@@ -1560,7 +1560,7 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: !Sub "${AWS::StackName}-shared"
-      Description: 共有ユーティリティレイヤー
+      Description: Shared utility layer
       ContentUri: layers/shared/
       CompatibleRuntimes:
         - python3.11
@@ -1573,7 +1573,7 @@ Resources:
       BuildMethod: python3.12
       BuildArchitecture: arm64
 
-  # 関数からレイヤーを参照
+  # Reference layer from function
   MyFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -1581,11 +1581,11 @@ Resources:
       Handler: app.handler
       Layers:
         - !Ref SharedLayer
-        # 外部レイヤーも参照可能
+        # External layers can also be referenced
         - arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV3-python312-arm64:3
 ```
 
-### レイヤー用 requirements.txt
+### Layer requirements.txt
 
 ```
 # layers/shared/requirements.txt
@@ -1594,39 +1594,39 @@ pydantic>=2.0.0
 httpx>=0.27.0
 ```
 
-### レイヤーのビルド
+### Building Layers
 
 ```bash
-# レイヤーをビルド
+# Build layer
 sam build SharedLayer
 
-# コンテナ内でビルド（ネイティブ依存関係がある場合）
+# Build inside container (for native dependencies)
 sam build SharedLayer --use-container
 ```
 
-### Python レイヤーからのインポート
+### Importing from Python Layer
 
 ```python
 """
-レイヤーからユーティリティをインポートする例
+Example of importing utilities from layer
 """
-# レイヤーに含まれるモジュールをインポート
+# Import modules included in layer
 from myutils.db import get_connection
 from myutils.validation import validate_input
 ```
 
 ---
 
-## 環境変数と設定管理
+## Environment Variables and Configuration Management
 
-### 環境変数の定義
+### Defining Environment Variables
 
 ```yaml
 Globals:
   Function:
     Environment:
       Variables:
-        # 共通環境変数
+        # Common environment variables
         LOG_LEVEL: !If [IsProd, WARNING, INFO]
         POWERTOOLS_SERVICE_NAME: !Ref AWS::StackName
 
@@ -1636,20 +1636,20 @@ Resources:
     Properties:
       Environment:
         Variables:
-          # 関数固有の環境変数
+          # Function-specific environment variables
           TABLE_NAME: !Ref MyTable
           BUCKET_NAME: !Ref MyBucket
-          # Secrets Manager 参照
+          # Secrets Manager reference
           DB_PASSWORD: "{{resolve:secretsmanager:my-secret:SecretString:password}}"
-          # SSM Parameter Store 参照
+          # SSM Parameter Store reference
           API_KEY: "{{resolve:ssm:/my-app/api-key:1}}"
 ```
 
-### Secrets Manager との統合
+### Secrets Manager Integration
 
 ```yaml
 Resources:
-  # シークレットの定義
+  # Secret definition
   DatabaseSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
@@ -1660,7 +1660,7 @@ Resources:
         PasswordLength: 32
         ExcludeCharacters: '"@/\'
 
-  # シークレットを参照する関数
+  # Function that references secret
   MyFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -1674,7 +1674,7 @@ Resources:
 
 ```python
 """
-Secrets Manager からシークレットを取得する
+Retrieve secret from Secrets Manager
 """
 import json
 import os
@@ -1684,13 +1684,13 @@ from aws_lambda_powertools import Logger
 
 logger = Logger()
 
-# キャッシュ
+# Cache
 _secrets_cache = {}
 
 
 def get_secret(secret_arn: str) -> dict:
     """
-    シークレットを取得する（キャッシュ付き）
+    Retrieve secret (with caching)
     """
     if secret_arn in _secrets_cache:
         return _secrets_cache[secret_arn]
@@ -1708,14 +1708,14 @@ def lambda_handler(event, context):
     secret = get_secret(secret_arn)
 
     db_password = secret["password"]
-    # データベース接続処理
+    # Database connection processing
 ```
 
-### SSM Parameter Store との統合
+### SSM Parameter Store Integration
 
 ```yaml
 Resources:
-  # パラメータの定義
+  # Parameter definition
   ApiKeyParameter:
     Type: AWS::SSM::Parameter
     Properties:
@@ -1734,7 +1734,7 @@ Resources:
             ParameterName: !Sub "${AWS::StackName}/*"
 ```
 
-### AWS AppConfig との統合
+### AWS AppConfig Integration
 
 ```yaml
 Resources:
@@ -1751,9 +1751,9 @@ Resources:
 
 ---
 
-## IAM とセキュリティ
+## IAM and Security
 
-### SAM ポリシーテンプレート
+### SAM Policy Templates
 
 ```yaml
 Resources:
@@ -1817,7 +1817,7 @@ Resources:
         # VPC
         - VPCAccessPolicy: {}
 
-        # カスタムポリシー
+        # Custom policy
         - Version: "2012-10-17"
           Statement:
             - Effect: Allow
@@ -1830,7 +1830,7 @@ Resources:
 
 ```yaml
 Resources:
-  # Lambda → DynamoDB
+  # Lambda -> DynamoDB
   FunctionToTableConnector:
     Type: AWS::Serverless::Connector
     Properties:
@@ -1842,7 +1842,7 @@ Resources:
         - Read
         - Write
 
-  # Lambda → S3（読み取りのみ）
+  # Lambda -> S3 (read only)
   FunctionToBucketConnector:
     Type: AWS::Serverless::Connector
     Properties:
@@ -1853,7 +1853,7 @@ Resources:
       Permissions:
         - Read
 
-  # Lambda → SQS
+  # Lambda -> SQS
   FunctionToQueueConnector:
     Type: AWS::Serverless::Connector
     Properties:
@@ -1864,7 +1864,7 @@ Resources:
       Permissions:
         - Write
 
-  # API Gateway → Lambda
+  # API Gateway -> Lambda
   ApiToFunctionConnector:
     Type: AWS::Serverless::Connector
     Properties:
@@ -1875,7 +1875,7 @@ Resources:
       Permissions:
         - Write
 
-  # SNS → Lambda
+  # SNS -> Lambda
   TopicToFunctionConnector:
     Type: AWS::Serverless::Connector
     Properties:
@@ -1887,11 +1887,11 @@ Resources:
         - Write
 ```
 
-### リソースベースポリシー
+### Resource-Based Policies
 
 ```yaml
 Resources:
-  # S3 バケットポリシー
+  # S3 bucket policy
   BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -1908,7 +1908,7 @@ Resources:
               StringEquals:
                 aws:SourceAccount: !Ref AWS::AccountId
 
-  # Lambda 実行ロール（カスタム）
+  # Lambda execution role (custom)
   MyFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -1934,11 +1934,11 @@ Resources:
                 Resource: !GetAtt MyTable.Arn
 ```
 
-### セキュリティベストプラクティス
+### Security Best Practices
 
 ```yaml
 Resources:
-  # 暗号化された DynamoDB テーブル
+  # Encrypted DynamoDB table
   SecureTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -1947,7 +1947,7 @@ Resources:
         SSEType: KMS
         KMSMasterKeyId: !Ref TableEncryptionKey
 
-  # 暗号化された S3 バケット
+  # Encrypted S3 bucket
   SecureBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -1962,7 +1962,7 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
 
-  # VPC 内の Lambda
+  # Lambda in VPC
   VpcFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -1975,7 +1975,7 @@ Resources:
       Policies:
         - VPCAccessPolicy: {}
 
-  # セキュリティグループ
+  # Security group
   LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -1990,9 +1990,9 @@ Resources:
 
 ---
 
-## ローカル開発とテスト
+## Local Development and Testing
 
-### Docker 環境設定
+### Docker Environment Setup
 
 ```yaml
 # docker-compose.yml
@@ -2021,42 +2021,42 @@ services:
 ### sam local invoke
 
 ```bash
-# 基本実行
+# Basic execution
 sam local invoke MyFunction
 
-# イベントファイルを指定
+# Specify event file
 sam local invoke MyFunction -e events/api-event.json
 
-# 環境変数ファイルを指定
+# Specify environment variables file
 sam local invoke MyFunction --env-vars env.json
 
-# Docker ネットワーク指定（LocalStack 接続用）
+# Specify Docker network (for LocalStack connection)
 sam local invoke MyFunction --docker-network host
 
-# デバッグモード（VS Code 接続用）
+# Debug mode (for VS Code connection)
 sam local invoke MyFunction -d 5858
 ```
 
 ### sam local start-api
 
 ```bash
-# API サーバー起動
+# Start API server
 sam local start-api
 
-# ポート指定
+# Specify port
 sam local start-api --port 3000
 
-# ホットリロード
+# Hot reload
 sam local start-api --warm-containers EAGER
 
-# Docker ネットワーク指定
+# Specify Docker network
 sam local start-api --docker-network host
 
-# 環境変数ファイル指定
+# Specify environment variables file
 sam local start-api --env-vars env.json
 ```
 
-### イベントファイル
+### Event Files
 
 ```json
 // events/api-get-event.json
@@ -2136,32 +2136,32 @@ sam local start-api --env-vars env.json
 }
 ```
 
-### イベント生成コマンド
+### Event Generation Commands
 
 ```bash
-# API Gateway イベント生成
+# Generate API Gateway event
 sam local generate-event apigateway aws-proxy \
   --method GET \
   --path /items \
   > events/api-get.json
 
-# S3 イベント生成
+# Generate S3 event
 sam local generate-event s3 put \
   --bucket my-bucket \
   --key uploads/test.json \
   > events/s3-put.json
 
-# SQS イベント生成
+# Generate SQS event
 sam local generate-event sqs receive-message \
   --body '{"id": "123"}' \
   > events/sqs.json
 
-# DynamoDB Streams イベント生成
+# Generate DynamoDB Streams event
 sam local generate-event dynamodb update \
   > events/dynamodb.json
 ```
 
-### 環境変数ファイル
+### Environment Variables File
 
 ```json
 // env.json
@@ -2178,11 +2178,11 @@ sam local generate-event dynamodb update \
 }
 ```
 
-### ユニットテスト
+### Unit Testing
 
 ```python
 """
-Lambda 関数のユニットテスト
+Lambda function unit tests
 """
 import json
 import os
@@ -2190,14 +2190,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# 環境変数を設定
+# Set environment variables
 os.environ["TABLE_NAME"] = "test-table"
 os.environ["AWS_DEFAULT_REGION"] = "ap-northeast-1"
 
 
 @pytest.fixture
 def api_gateway_event():
-    """API Gateway イベントフィクスチャ"""
+    """API Gateway event fixture"""
     return {
         "httpMethod": "GET",
         "path": "/items",
@@ -2210,7 +2210,7 @@ def api_gateway_event():
 
 @pytest.fixture
 def mock_dynamodb():
-    """DynamoDB モック"""
+    """DynamoDB mock"""
     with patch("boto3.resource") as mock:
         table = MagicMock()
         mock.return_value.Table.return_value = table
@@ -2218,11 +2218,11 @@ def mock_dynamodb():
 
 
 class TestGetItems:
-    """アイテム取得のテスト"""
+    """Item retrieval tests"""
 
     def test_get_items_success(self, api_gateway_event, mock_dynamodb):
-        """正常系: アイテム一覧を取得"""
-        # モックの設定
+        """Success case: Retrieve item list"""
+        # Mock setup
         mock_dynamodb.scan.return_value = {
             "Items": [
                 {"id": "1", "name": "Item 1"},
@@ -2230,19 +2230,19 @@ class TestGetItems:
             ]
         }
 
-        # ハンドラーをインポート（環境変数設定後）
+        # Import handler (after environment variable setup)
         from functions.items import app
 
-        # 実行
+        # Execute
         response = app.lambda_handler(api_gateway_event, None)
 
-        # 検証
+        # Verify
         assert response["statusCode"] == 200
         body = json.loads(response["body"])
         assert len(body["items"]) == 2
 
     def test_get_items_empty(self, api_gateway_event, mock_dynamodb):
-        """正常系: アイテムが空"""
+        """Success case: Empty items"""
         mock_dynamodb.scan.return_value = {"Items": []}
 
         from functions.items import app
@@ -2255,10 +2255,10 @@ class TestGetItems:
 
 
 class TestCreateItem:
-    """アイテム作成のテスト"""
+    """Item creation tests"""
 
     def test_create_item_success(self, mock_dynamodb):
-        """正常系: アイテムを作成"""
+        """Success case: Create item"""
         event = {
             "httpMethod": "POST",
             "path": "/items",
@@ -2274,12 +2274,12 @@ class TestCreateItem:
         mock_dynamodb.put_item.assert_called_once()
 
     def test_create_item_validation_error(self, mock_dynamodb):
-        """異常系: バリデーションエラー"""
+        """Error case: Validation error"""
         event = {
             "httpMethod": "POST",
             "path": "/items",
             "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"name": ""}),  # 空の名前
+            "body": json.dumps({"name": ""}),  # Empty name
         }
 
         from functions.items import app
@@ -2289,11 +2289,11 @@ class TestCreateItem:
         assert response["statusCode"] == 400
 ```
 
-### 統合テスト
+### Integration Testing
 
 ```python
 """
-統合テスト（LocalStack 使用）
+Integration tests (using LocalStack)
 """
 import json
 import os
@@ -2302,20 +2302,20 @@ import boto3
 import pytest
 from moto import mock_aws
 
-# LocalStack エンドポイント
+# LocalStack endpoint
 LOCALSTACK_ENDPOINT = os.environ.get("AWS_ENDPOINT_URL", "http://localhost:4566")
 
 
 @pytest.fixture(scope="module")
 def dynamodb_table():
-    """DynamoDB テーブルをセットアップ"""
+    """Set up DynamoDB table"""
     dynamodb = boto3.resource(
         "dynamodb",
         endpoint_url=LOCALSTACK_ENDPOINT,
         region_name="ap-northeast-1",
     )
 
-    # テーブル作成
+    # Create table
     table = dynamodb.create_table(
         TableName="test-items",
         KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
@@ -2326,15 +2326,15 @@ def dynamodb_table():
 
     yield table
 
-    # クリーンアップ
+    # Cleanup
     table.delete()
 
 
 class TestIntegration:
-    """統合テスト"""
+    """Integration tests"""
 
     def test_crud_operations(self, dynamodb_table):
-        """CRUD 操作のテスト"""
+        """CRUD operations test"""
         # Create
         item = {"id": "test-1", "name": "Test Item", "price": 100}
         dynamodb_table.put_item(Item=item)
@@ -2358,7 +2358,7 @@ class TestIntegration:
         assert "Item" not in response
 ```
 
-### pytest 設定
+### pytest Configuration
 
 ```ini
 # pytest.ini
@@ -2376,9 +2376,9 @@ env =
 
 ---
 
-## CI/CD パイプライン
+## CI/CD Pipeline
 
-### GitHub Actions ワークフロー
+### GitHub Actions Workflow
 
 ```yaml
 # .github/workflows/sam-pipeline.yml
@@ -2399,7 +2399,7 @@ env:
   SAM_CLI_TELEMETRY: 0
 
 jobs:
-  # テストジョブ
+  # Test job
   test:
     runs-on: ubuntu-latest
     steps:
@@ -2428,7 +2428,7 @@ jobs:
         with:
           files: coverage.xml
 
-  # ビルドジョブ
+  # Build job
   build:
     needs: test
     runs-on: ubuntu-latest
@@ -2455,7 +2455,7 @@ jobs:
           name: sam-artifact
           path: .aws-sam/
 
-  # 開発環境デプロイ
+  # Development environment deploy
   deploy-dev:
     if: github.ref == 'refs/heads/develop'
     needs: build
@@ -2487,7 +2487,7 @@ jobs:
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
 
-  # 本番環境デプロイ
+  # Production environment deploy
   deploy-prod:
     if: github.ref == 'refs/heads/main'
     needs: build
@@ -2520,23 +2520,23 @@ jobs:
             --no-fail-on-empty-changeset
 ```
 
-### OIDC 認証設定
+### OIDC Authentication Setup
 
 ```yaml
-# oidc-role.yaml（CloudFormation テンプレート）
+# oidc-role.yaml (CloudFormation template)
 AWSTemplateFormatVersion: "2010-09-09"
 Description: GitHub Actions OIDC Role
 
 Parameters:
   GitHubOrg:
     Type: String
-    Description: GitHub 組織名
+    Description: GitHub organization name
   GitHubRepo:
     Type: String
-    Description: GitHub リポジトリ名
+    Description: GitHub repository name
 
 Resources:
-  # OIDC プロバイダー
+  # OIDC Provider
   GitHubOIDCProvider:
     Type: AWS::IAM::OIDCProvider
     Properties:
@@ -2547,7 +2547,7 @@ Resources:
         - 6938fd4d98bab03faadb97b34396831e3780aea1
         - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
 
-  # デプロイ用ロール
+  # Deploy role
   GitHubActionsRole:
     Type: AWS::IAM::Role
     Properties:
@@ -2574,22 +2574,22 @@ Resources:
 
 Outputs:
   RoleArn:
-    Description: GitHub Actions 用 IAM ロール ARN
+    Description: IAM role ARN for GitHub Actions
     Value: !GetAtt GitHubActionsRole.Arn
 ```
 
 ### sam pipeline init
 
 ```bash
-# パイプライン設定の初期化
+# Initialize pipeline configuration
 sam pipeline init --bootstrap
 
-# 対話式で以下を設定:
-# 1. パイプラインテンプレート（GitHub Actions）
-# 2. ステージ（dev, prod）
-# 3. AWS 認証（OIDC）
-# 4. S3 バケット（アーティファクト用）
-# 5. ECR リポジトリ（コンテナイメージ用、オプション）
+# Interactive setup for:
+# 1. Pipeline template (GitHub Actions)
+# 2. Stages (dev, prod)
+# 3. AWS authentication (OIDC)
+# 4. S3 bucket (for artifacts)
+# 5. ECR repository (for container images, optional)
 ```
 
 ### samconfig.toml
@@ -2634,25 +2634,25 @@ confirm_changeset = true
 
 ---
 
-## ディレクトリ構造
+## Directory Structure
 
-### 推奨構造（小〜中規模）
+### Recommended Structure (Small to Medium Scale)
 
 ```
 my-sam-app/
-├── template.yaml              # SAM テンプレート
-├── samconfig.toml             # デプロイ設定
-├── README.md                  # プロジェクト説明
+├── template.yaml              # SAM template
+├── samconfig.toml             # Deploy configuration
+├── README.md                  # Project description
 │
-├── functions/                 # Lambda 関数
+├── functions/                 # Lambda functions
 │   ├── get_items/
-│   │   ├── app.py             # ハンドラー
-│   │   ├── requirements.txt   # 依存関係
+│   │   ├── app.py             # Handler
+│   │   ├── requirements.txt   # Dependencies
 │   │   └── __init__.py
 │   ├── create_item/
 │   │   ├── app.py
 │   │   └── requirements.txt
-│   └── shared/                # 関数間共有コード
+│   └── shared/                # Shared code between functions
 │       ├── __init__.py
 │       ├── db.py
 │       └── models.py
@@ -2664,12 +2664,12 @@ my-sam-app/
 │           └── common_utils/
 │               └── __init__.py
 │
-├── events/                    # テスト用イベント
+├── events/                    # Test events
 │   ├── api-get.json
 │   ├── api-post.json
 │   └── sqs-event.json
 │
-├── tests/                     # テスト
+├── tests/                     # Tests
 │   ├── unit/
 │   │   ├── test_get_items.py
 │   │   └── test_create_item.py
@@ -2677,7 +2677,7 @@ my-sam-app/
 │   │   └── test_api.py
 │   └── conftest.py
 │
-├── scripts/                   # ユーティリティスクリプト
+├── scripts/                   # Utility scripts
 │   ├── setup-local.sh
 │   └── seed-data.py
 │
@@ -2685,23 +2685,23 @@ my-sam-app/
 │   └── workflows/
 │       └── sam-pipeline.yml
 │
-├── docker-compose.yml         # ローカル開発用
-├── env.json                   # ローカル環境変数
-├── requirements-dev.txt       # 開発用依存関係
-├── pyproject.toml             # Python プロジェクト設定
+├── docker-compose.yml         # Local development
+├── env.json                   # Local environment variables
+├── requirements-dev.txt       # Development dependencies
+├── pyproject.toml             # Python project settings
 └── .gitignore
 ```
 
-### 推奨構造（大規模・マイクロサービス）
+### Recommended Structure (Large Scale / Microservices)
 
 ```
 my-sam-app/
-├── template.yaml              # ルートテンプレート
+├── template.yaml              # Root template
 ├── samconfig.toml
 │
-├── services/                  # マイクロサービス
+├── services/                  # Microservices
 │   ├── users/
-│   │   ├── template.yaml      # サービス固有テンプレート
+│   │   ├── template.yaml      # Service-specific template
 │   │   ├── functions/
 │   │   │   ├── get_user/
 │   │   │   ├── create_user/
@@ -2718,14 +2718,14 @@ my-sam-app/
 │       ├── functions/
 │       └── tests/
 │
-├── shared/                    # 共有リソース
+├── shared/                    # Shared resources
 │   ├── layers/
 │   │   └── common/
 │   ├── api-gateway/
 │   │   └── openapi.yaml
 │   └── events/
 │
-├── infrastructure/            # インフラ定義
+├── infrastructure/            # Infrastructure definitions
 │   ├── vpc/
 │   │   └── template.yaml
 │   ├── database/
@@ -2792,75 +2792,75 @@ credentials.json
 
 ---
 
-## ベストプラクティス一覧
+## Best Practices Checklist
 
-### テンプレート設計
+### Template Design
 
-| カテゴリ | ベストプラクティス |
-|---------|-------------------|
-| 構造 | Globals でデフォルト値を設定し、関数ごとの重複を削減 |
-| パラメータ | 環境（dev/stg/prod）を Parameters で切り替え |
-| 命名 | `${AWS::StackName}-` プレフィックスでリソース名を一意に |
-| 出力 | API エンドポイントやリソース ARN を Outputs に定義 |
-| セキュリティ | NoEcho で機密パラメータを保護 |
+| Category | Best Practice |
+|---------|---------------|
+| Structure | Set default values in Globals to reduce duplication per function |
+| Parameters | Switch environments (dev/stg/prod) using Parameters |
+| Naming | Use `${AWS::StackName}-` prefix to make resource names unique |
+| Outputs | Define API endpoints and resource ARNs in Outputs |
+| Security | Protect sensitive parameters with NoEcho |
 
-### Lambda 関数設計
+### Lambda Function Design
 
-| カテゴリ | ベストプラクティス |
-|---------|-------------------|
-| アーキテクチャ | arm64（Graviton2）を使用してコスト削減 |
-| メモリ | Power Tuning で最適なメモリサイズを決定 |
-| タイムアウト | API Gateway 連携時は 29 秒以内に設定 |
-| ハンドラー | 初期化コードはハンドラー外に配置 |
-| エラー | 構造化ロギングと適切なエラーハンドリング |
-| 依存関係 | Lambda Layers で共通ライブラリを共有 |
+| Category | Best Practice |
+|---------|---------------|
+| Architecture | Use arm64 (Graviton2) for cost reduction |
+| Memory | Use Power Tuning to determine optimal memory size |
+| Timeout | Set to 29 seconds or less when integrating with API Gateway |
+| Handler | Place initialization code outside the handler |
+| Error | Use structured logging and proper error handling |
+| Dependencies | Share common libraries using Lambda Layers |
 
-### セキュリティ
+### Security
 
-| カテゴリ | ベストプラクティス |
-|---------|-------------------|
-| IAM | 最小権限の原則、SAM ポリシーテンプレート使用 |
-| シークレット | Secrets Manager または SSM Parameter Store |
-| 暗号化 | S3、DynamoDB の保存時暗号化を有効化 |
-| ネットワーク | 必要に応じて VPC 内で実行 |
-| API | 認証・認可を適切に設定（Cognito、Lambda Authorizer） |
+| Category | Best Practice |
+|---------|---------------|
+| IAM | Principle of least privilege, use SAM policy templates |
+| Secrets | Use Secrets Manager or SSM Parameter Store |
+| Encryption | Enable encryption at rest for S3 and DynamoDB |
+| Network | Run in VPC when necessary |
+| API | Configure authentication/authorization properly (Cognito, Lambda Authorizer) |
 
-### ローカル開発
+### Local Development
 
-| カテゴリ | ベストプラクティス |
-|---------|-------------------|
-| テスト | sam local invoke でローカルテスト |
-| API | sam local start-api で API サーバー起動 |
-| イベント | sam local generate-event でイベント生成 |
-| 環境 | LocalStack または DynamoDB Local を使用 |
-| Docker | --docker-network でローカルサービスに接続 |
+| Category | Best Practice |
+|---------|---------------|
+| Test | Local testing with sam local invoke |
+| API | Start API server with sam local start-api |
+| Events | Generate events with sam local generate-event |
+| Environment | Use LocalStack or DynamoDB Local |
+| Docker | Connect to local services with --docker-network |
 
 ### CI/CD
 
-| カテゴリ | ベストプラクティス |
-|---------|-------------------|
-| 認証 | GitHub Actions OIDC でシークレットレス認証 |
-| ビルド | sam build --cached で高速化 |
-| テスト | PR 時にユニットテスト、マージ時に統合テスト |
-| デプロイ | dev → stg → prod の段階的デプロイ |
-| ロールバック | CloudFormation のロールバック機能を活用 |
+| Category | Best Practice |
+|---------|---------------|
+| Authentication | Secretless authentication with GitHub Actions OIDC |
+| Build | Speed up with sam build --cached |
+| Test | Unit tests on PR, integration tests on merge |
+| Deploy | Gradual deployment: dev -> stg -> prod |
+| Rollback | Utilize CloudFormation rollback capability |
 
-### 監視・運用
+### Monitoring & Operations
 
-| カテゴリ | ベストプラクティス |
-|---------|-------------------|
-| ログ | 構造化ロギング（JSON 形式）を使用 |
-| トレース | X-Ray トレーシングを有効化 |
-| メトリクス | CloudWatch Embedded Metrics Format 使用 |
-| アラート | エラー率、レイテンシに対するアラーム設定 |
-| コスト | Lambda Power Tools でコスト最適化 |
+| Category | Best Practice |
+|---------|---------------|
+| Logging | Use structured logging (JSON format) |
+| Tracing | Enable X-Ray tracing |
+| Metrics | Use CloudWatch Embedded Metrics Format |
+| Alerts | Set alarms for error rates and latency |
+| Cost | Optimize costs with Lambda Power Tools |
 
-### パフォーマンス
+### Performance
 
-| カテゴリ | ベストプラクティス |
-|---------|-------------------|
-| コールドスタート | Provisioned Concurrency または SnapStart |
-| 接続 | データベース接続の再利用（グローバル変数） |
-| バッチ | SQS バッチ処理で効率化 |
-| キャッシュ | API Gateway キャッシュ、Lambda 内キャッシュ |
-| 並列 | 適切な並列度設定（ReservedConcurrentExecutions） |
+| Category | Best Practice |
+|---------|---------------|
+| Cold Start | Use Provisioned Concurrency or SnapStart |
+| Connections | Reuse database connections (global variables) |
+| Batch | Improve efficiency with SQS batch processing |
+| Cache | API Gateway cache, in-Lambda caching |
+| Parallelism | Set appropriate concurrency (ReservedConcurrentExecutions) |

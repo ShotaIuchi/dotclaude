@@ -1,29 +1,29 @@
-# KMP テスト戦略
+# KMP Testing Strategy
 
-Kotlin Multiplatform でのテスト戦略と commonTest 実装パターン。
+Testing strategy and commonTest implementation patterns in Kotlin Multiplatform.
 
-> **関連ドキュメント**: [KMP Architecture Guide](./kmp-architecture.md)
+> **Related Documentation**: [KMP Architecture Guide](./kmp-architecture.md)
 
 ---
 
-## テストピラミッド
+## Test Pyramid
 
 ```
          ┌─────────┐
-         │   E2E   │  ← プラットフォーム別 UI テスト
+         │   E2E   │  ← Platform-specific UI tests
          │  Tests  │
          ├─────────┤
-         │ Integra-│  ← Repository、ViewModel のテスト
+         │ Integra-│  ← Repository, ViewModel tests
          │  tion   │     (commonTest)
          ├─────────┤
-         │  Unit   │  ← UseCase、Domain Model のテスト
-         │  Tests  │     (commonTest) 最も多く書く
+         │  Unit   │  ← UseCase, Domain Model tests
+         │  Tests  │     (commonTest) Write the most tests here
          └─────────┘
 ```
 
 ---
 
-## commonTest でのユニットテスト
+## Unit Tests in commonTest
 
 ```kotlin
 // commonTest/kotlin/com/example/shared/domain/usecase/GetUsersUseCaseTest.kt
@@ -91,7 +91,7 @@ class GetUsersUseCaseTest {
 
 ---
 
-## ViewModel テスト
+## ViewModel Tests
 
 ```kotlin
 // commonTest/kotlin/com/example/shared/presentation/UserListViewModelTest.kt
@@ -123,7 +123,7 @@ class UserListViewModelTest {
         val users = listOf(createTestUser())
         getUsersUseCase.setUsers(users)
 
-        // When（init でロードが開始される）
+        // When (loading starts in init)
         advanceUntilIdle()
 
         // Then
@@ -170,7 +170,7 @@ class UserListViewModelTest {
 
 ---
 
-## Fake の実装
+## Fake Implementations
 
 ### FakeUserRepository
 
@@ -178,7 +178,7 @@ class UserListViewModelTest {
 // commonTest/kotlin/com/example/shared/test/FakeUserRepository.kt
 
 /**
- * Fake Repository（テスト用実装）
+ * Fake Repository (test implementation)
  */
 class FakeUserRepository : UserRepository {
 
@@ -238,7 +238,7 @@ class FakeUserRepository : UserRepository {
 // commonTest/kotlin/com/example/shared/test/FakeGetUsersUseCase.kt
 
 /**
- * Fake UseCase（テスト用実装）
+ * Fake UseCase (test implementation)
  */
 class FakeGetUsersUseCase : GetUsersUseCaseProtocol {
 
@@ -262,13 +262,13 @@ class FakeGetUsersUseCase : GetUsersUseCaseProtocol {
 
 ---
 
-## テストユーティリティ
+## Test Utilities
 
 ```kotlin
 // commonTest/kotlin/com/example/shared/test/TestUtils.kt
 
 /**
- * テスト用ユーザー作成
+ * Create test user
  */
 fun createTestUser(
     id: String = randomUUID(),
@@ -288,9 +288,9 @@ fun createTestUser(
 
 ---
 
-## ベストプラクティス
+## Best Practices
 
-- commonTest でユニットテストを実装
-- Fake を優先、Mock は最小限
-- runTest で Coroutine テスト
-- テストユーティリティを共通化
+- Implement unit tests in commonTest
+- Prefer Fakes over Mocks
+- Use runTest for Coroutine tests
+- Centralize test utilities

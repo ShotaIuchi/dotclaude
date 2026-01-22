@@ -8,74 +8,74 @@
 
 ## Purpose
 
-特定のファイルやモジュールを変更した場合の影響範囲を特定します。
-変更前のリスク評価や、テスト対象の選定に活用します。
+Identifies the impact scope when modifying specific files or modules.
+Used for risk assessment before changes and test target selection.
 
 ## Context
 
-### 入力
+### Input
 
-- `target`: 分析対象のファイルパスまたはモジュール（必須）
-- `change_type`: 変更の種類（"modify" | "delete" | "rename"、デフォルトは "modify"）
+- `target`: File path or module to analyze (required)
+- `change_type`: Type of change ("modify" | "delete" | "rename", defaults to "modify")
 
-### 参照ファイル
+### Reference Files
 
-- 対象ファイルとその依存関係
-- テストファイル
-- 設定ファイル
+- Target file and its dependencies
+- Test files
+- Configuration files
 
 ## Capabilities
 
-1. **直接影響の特定**
-   - 対象ファイルを import しているファイル
-   - 対象の関数/クラスを使用しているコード
+1. **Direct Impact Identification**
+   - Files that import the target file
+   - Code that uses the target's functions/classes
 
-2. **間接影響の特定**
-   - 依存チェーンを通じた影響
-   - 再エクスポートによる影響
+2. **Indirect Impact Identification**
+   - Impact through dependency chains
+   - Impact through re-exports
 
-3. **テスト影響の特定**
-   - 関連するテストファイル
-   - 影響を受けるテストケース
+3. **Test Impact Identification**
+   - Related test files
+   - Affected test cases
 
-4. **設定影響の特定**
-   - ビルド設定への影響
-   - 環境設定への影響
+4. **Configuration Impact Identification**
+   - Impact on build configuration
+   - Impact on environment settings
 
 ## Constraints
 
-- 読み取り専用（コードの変更は行わない）
-- 静的解析のみ（実行時の動的な依存は検出不可）
-- 推測に基づく影響は明示的にマーク
+- Read-only (do not modify code)
+- Static analysis only (cannot detect runtime dynamic dependencies)
+- Explicitly mark impacts based on inference
 
 ## Instructions
 
-### 1. 対象ファイルの分析
+### 1. Target File Analysis
 
 ```bash
-# ファイルの存在確認
+# Verify file existence
 ls -la <target>
 
-# ファイルの内容を確認
+# Check file contents
 cat <target>
 ```
 
-対象ファイルから以下を抽出:
-- エクスポートされている関数/クラス/変数
-- 型定義
+Extract the following from the target file:
+- Exported functions/classes/variables
+- Type definitions
 
-### 2. 直接依存の検出
+### 2. Direct Dependency Detection
 
 ```bash
-# 対象ファイルを import しているファイルを検索
+# Search for files that import the target file
 target_name=$(basename <target> .ts)
 grep -r "from '.*${target_name}'" --include="*.ts" --include="*.tsx" .
 grep -r "from \".*${target_name}\"" --include="*.ts" --include="*.tsx" .
 ```
 
-### 3. 間接依存の追跡
+### 3. Indirect Dependency Tracking
 
-直接依存から再帰的に依存を追跡:
+Recursively track dependencies from direct dependencies:
 
 ```
 target.ts
@@ -84,95 +84,95 @@ target.ts
         └── ...
 ```
 
-### 4. テストファイルの特定
+### 4. Test File Identification
 
 ```bash
-# 対象のテストファイル
+# Test files for the target
 find . -name "*${target_name}*.test.ts" -o -name "*${target_name}*.spec.ts"
 
-# 依存元のテストファイル
-# （各依存ファイルに対してテストを検索）
+# Test files for dependents
+# (search for tests for each dependent file)
 ```
 
-### 5. 影響度の評価
+### 5. Impact Assessment
 
-各影響について以下を評価:
+Evaluate the following for each impact:
 
-- **影響度**: 高（破壊的変更）/ 中（互換性あり）/ 低（内部のみ）
-- **確実性**: 確実 / 可能性あり / 推測
+- **Impact Level**: High (breaking change) / Medium (compatible) / Low (internal only)
+- **Certainty**: Certain / Possible / Inferred
 
-### 6. 結果の構造化
+### 6. Result Structuring
 
-影響範囲を視覚的に整理
+Organize impact scope visually
 
 ## Output Format
 
 ```markdown
-## 影響範囲分析結果
+## Impact Analysis Results
 
-### 分析対象
+### Analysis Target
 
-- **ファイル**: <target>
-- **変更種別**: <change_type>
+- **File**: <target>
+- **Change Type**: <change_type>
 
-### 対象ファイルの概要
+### Target File Overview
 
-**エクスポート:**
+**Exports:**
 
-| 名前 | 種類 | 説明 |
-|------|------|------|
-| <name> | 関数/クラス/型/変数 | <description> |
+| Name | Type | Description |
+|------|------|-------------|
+| <name> | Function/Class/Type/Variable | <description> |
 
-### 影響範囲
+### Impact Scope
 
-#### 直接影響（レベル1）
+#### Direct Impact (Level 1)
 
-| ファイル | 使用内容 | 影響度 |
-|---------|---------|--------|
-| <path> | <usage> | 高/中/低 |
+| File | Usage | Impact Level |
+|------|-------|--------------|
+| <path> | <usage> | High/Medium/Low |
 
-#### 間接影響（レベル2+）
+#### Indirect Impact (Level 2+)
 
-| ファイル | 経由 | 影響度 |
-|---------|------|--------|
-| <path> | <via> | 高/中/低 |
+| File | Via | Impact Level |
+|------|-----|--------------|
+| <path> | <via> | High/Medium/Low |
 
-### 影響グラフ
+### Impact Graph
 
 ```
 <target>
-├── [直接] dependent1.ts
-│   ├── [間接] dependent1a.ts
-│   └── [間接] dependent1b.ts
-├── [直接] dependent2.ts
-└── [直接] dependent3.ts
+├── [Direct] dependent1.ts
+│   ├── [Indirect] dependent1a.ts
+│   └── [Indirect] dependent1b.ts
+├── [Direct] dependent2.ts
+└── [Direct] dependent3.ts
 ```
 
-### テストへの影響
+### Test Impact
 
-| テストファイル | 関連度 | 再実行必要 |
-|---------------|--------|-----------|
-| <path> | 直接/間接 | Yes/No |
+| Test File | Relevance | Re-run Required |
+|-----------|-----------|-----------------|
+| <path> | Direct/Indirect | Yes/No |
 
-### リスク評価
+### Risk Assessment
 
-| リスク | レベル | 説明 |
-|--------|--------|------|
-| <risk> | 高/中/低 | <description> |
+| Risk | Level | Description |
+|------|-------|-------------|
+| <risk> | High/Medium/Low | <description> |
 
-### 推奨される確認事項
+### Recommended Verification Items
 
-#### 変更前
+#### Before Change
 
 - [ ] <check1>
 - [ ] <check2>
 
-#### 変更後
+#### After Change
 
 - [ ] <test1>
 - [ ] <test2>
 
-### 注意事項
+### Notes
 
-<特記事項や推測に基づく影響の説明>
+<Special notes or explanation of inferred impacts>
 ```

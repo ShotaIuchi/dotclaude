@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 #
-# WF運用システム - ユーティリティ関数
-# slug生成、TYPE判定など共通処理を提供
+# WF Operation System - Utility Functions
+# Provides common utilities like slug generation, TYPE detection, etc.
 #
 
 set -euo pipefail
 
-# dotclaude リポジトリのルートディレクトリ
+# Root directory of dotclaude repository
 DOTCLAUDE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# WF 設定ディレクトリ（プロジェクト内）
+# WF configuration directory (in project)
 WF_DIR=".wf"
 
-# WF ドキュメントディレクトリ（プロジェクト内）
+# WF documents directory (in project)
 WF_DOCS_DIR="docs/wf"
 
-# ブランチプレフィックスのデフォルト値
+# Default branch prefix values
 declare -A DEFAULT_BRANCH_PREFIX=(
     ["FEAT"]="feat"
     ["FIX"]="fix"
@@ -24,7 +24,7 @@ declare -A DEFAULT_BRANCH_PREFIX=(
     ["RFC"]="rfc"
 )
 
-# TYPE を判定するラベル対応
+# Label to TYPE mapping
 declare -A LABEL_TO_TYPE=(
     ["feature"]="FEAT"
     ["enhancement"]="FEAT"
@@ -39,9 +39,9 @@ declare -A LABEL_TO_TYPE=(
 )
 
 #
-# エラーメッセージを出力して終了
-# @param $1 エラーメッセージ
-# @param $2 終了コード（デフォルト: 1）
+# Output error message and exit
+# @param $1 Error message
+# @param $2 Exit code (default: 1)
 #
 wf_error() {
     local message="$1"
@@ -51,8 +51,8 @@ wf_error() {
 }
 
 #
-# 警告メッセージを出力
-# @param $1 警告メッセージ
+# Output warning message
+# @param $1 Warning message
 #
 wf_warn() {
     local message="$1"
@@ -60,8 +60,8 @@ wf_warn() {
 }
 
 #
-# 情報メッセージを出力
-# @param $1 メッセージ
+# Output info message
+# @param $1 Message
 #
 wf_info() {
     local message="$1"
@@ -69,8 +69,8 @@ wf_info() {
 }
 
 #
-# 成功メッセージを出力
-# @param $1 メッセージ
+# Output success message
+# @param $1 Message
 #
 wf_success() {
     local message="$1"
@@ -78,19 +78,19 @@ wf_success() {
 }
 
 #
-# タイトル文字列からslugを生成
-# - 小文字に変換
-# - 英数字とハイフン以外を除去
-# - 連続ハイフンを単一に
-# - 先頭・末尾のハイフンを除去
-# - 最大40文字に制限
-# @param $1 タイトル文字列
-# @return slug文字列
+# Generate slug from title string
+# - Convert to lowercase
+# - Remove characters other than alphanumeric and hyphen
+# - Collapse consecutive hyphens to single
+# - Remove leading/trailing hyphens
+# - Limit to maximum 40 characters
+# @param $1 Title string
+# @return Slug string
 #
 wf_generate_slug() {
     local title="$1"
 
-    # macOS (BSD sed) と Linux (GNU sed) 両対応のため -E オプションを使用
+    # Use -E option for both macOS (BSD sed) and Linux (GNU sed) compatibility
     echo "$title" \
         | tr '[:upper:]' '[:lower:]' \
         | sed 's/[^a-z0-9-]/-/g' \
@@ -100,21 +100,21 @@ wf_generate_slug() {
 }
 
 #
-# GitHub Issue のラベルから TYPE を判定
-# @param $1 ラベル（カンマ区切り）
-# @return TYPE（FEAT, FIX, REFACTOR, CHORE, RFC）
+# Detect TYPE from GitHub Issue labels
+# @param $1 Labels (comma-separated)
+# @return TYPE (FEAT, FIX, REFACTOR, CHORE, RFC)
 #
 wf_detect_type_from_labels() {
     local labels="$1"
 
-    # ラベルをカンマで分割して検査
+    # Split labels by comma and check
     IFS=',' read -ra label_array <<< "$labels"
     for label in "${label_array[@]}"; do
-        # 前後の空白を除去
+        # Trim leading/trailing whitespace
         label=$(echo "$label" | xargs)
         label_lower=$(echo "$label" | tr '[:upper:]' '[:lower:]')
 
-        # 連想配列アクセス時は set -u を一時的に無効化
+        # Temporarily disable set -u for associative array access
         set +u
         local type_value="${LABEL_TO_TYPE[$label_lower]:-}"
         set -u
@@ -125,21 +125,21 @@ wf_detect_type_from_labels() {
         fi
     done
 
-    # デフォルトは FEAT
+    # Default is FEAT
     echo "FEAT"
 }
 
 #
-# TYPE からブランチプレフィックスを取得
+# Get branch prefix from TYPE
 # @param $1 TYPE
-# @param $2 config.json のパス（オプション）
-# @return ブランチプレフィックス
+# @param $2 config.json path (optional)
+# @return Branch prefix
 #
 wf_get_branch_prefix() {
     local type="$1"
     local config_path="${2:-}"
 
-    # config.json から取得を試みる
+    # Try to get from config.json
     if [[ -n "$config_path" && -f "$config_path" ]]; then
         local prefix
         prefix=$(jq -r ".branch_prefix.${type} // empty" "$config_path" 2>/dev/null)
@@ -149,7 +149,7 @@ wf_get_branch_prefix() {
         fi
     fi
 
-    # デフォルト値を返す（連想配列アクセス時は set -u を一時的に無効化）
+    # Return default value (temporarily disable set -u for associative array access)
     set +u
     local default_prefix="${DEFAULT_BRANCH_PREFIX[$type]:-feat}"
     set -u
@@ -157,11 +157,11 @@ wf_get_branch_prefix() {
 }
 
 #
-# work-id を生成
+# Generate work-id
 # @param $1 TYPE
-# @param $2 Issue番号
+# @param $2 Issue number
 # @param $3 slug
-# @return work-id（例: FEAT-123-export-csv）
+# @return work-id (e.g., FEAT-123-export-csv)
 #
 wf_generate_work_id() {
     local type="$1"
@@ -172,16 +172,16 @@ wf_generate_work_id() {
 }
 
 #
-# work-id からブランチ名を生成
+# Generate branch name from work-id
 # @param $1 work-id
-# @param $2 config.json のパス（オプション）
-# @return ブランチ名（例: feat/123-export-csv）
+# @param $2 config.json path (optional)
+# @return Branch name (e.g., feat/123-export-csv)
 #
 wf_work_id_to_branch() {
     local work_id="$1"
     local config_path="${2:-}"
 
-    # work-id を分解（TYPE-ISSUE-SLUG）
+    # Decompose work-id (TYPE-ISSUE-SLUG)
     local type issue slug
     type=$(echo "$work_id" | cut -d'-' -f1)
     issue=$(echo "$work_id" | cut -d'-' -f2)
@@ -194,18 +194,18 @@ wf_work_id_to_branch() {
 }
 
 #
-# ブランチ名から work-id を生成
-# @param $1 ブランチ名
+# Generate work-id from branch name
+# @param $1 Branch name
 # @return work-id
 #
 wf_branch_to_work_id() {
     local branch="$1"
 
-    # プレフィックスを除去（feat/123-slug → 123-slug）
+    # Remove prefix (feat/123-slug → 123-slug)
     local suffix
     suffix=$(echo "$branch" | sed 's|^[^/]*/||')
 
-    # プレフィックスから TYPE を推測
+    # Infer TYPE from prefix
     local prefix type
     prefix=$(echo "$branch" | cut -d'/' -f1)
 
@@ -222,69 +222,69 @@ wf_branch_to_work_id() {
 }
 
 #
-# jq がインストールされているか確認
+# Check if jq is installed
 #
 wf_require_jq() {
     if ! command -v jq &> /dev/null; then
-        wf_error "jq がインストールされていません。brew install jq でインストールしてください。"
+        wf_error "jq is not installed. Please install with: brew install jq"
     fi
 }
 
 #
-# gh がインストールされているか確認
+# Check if gh is installed
 #
 wf_require_gh() {
     if ! command -v gh &> /dev/null; then
-        wf_error "gh (GitHub CLI) がインストールされていません。brew install gh でインストールしてください。"
+        wf_error "gh (GitHub CLI) is not installed. Please install with: brew install gh"
     fi
 }
 
 #
-# gh が認証済みか確認
+# Check if gh is authenticated
 #
 wf_require_gh_auth() {
     wf_require_gh
     if ! gh auth status &> /dev/null; then
-        wf_error "gh が認証されていません。gh auth login で認証してください。"
+        wf_error "gh is not authenticated. Please authenticate with: gh auth login"
     fi
 }
 
 #
-# 現在のディレクトリが git リポジトリか確認
+# Check if current directory is a git repository
 #
 wf_require_git_repo() {
     if ! git rev-parse --git-dir &> /dev/null; then
-        wf_error "現在のディレクトリは git リポジトリではありません。"
+        wf_error "Current directory is not a git repository."
     fi
 }
 
 #
-# プロジェクトルートを取得
-# @return git リポジトリのルートパス
+# Get project root
+# @return Git repository root path
 #
 wf_get_project_root() {
     git rev-parse --show-toplevel 2>/dev/null || pwd
 }
 
 #
-# 現在のブランチ名を取得
-# @return ブランチ名
+# Get current branch name
+# @return Branch name
 #
 wf_get_current_branch() {
     git rev-parse --abbrev-ref HEAD 2>/dev/null
 }
 
 #
-# ISO8601 形式の現在時刻を取得
-# @return ISO8601 形式の日時（例: 2026-01-17T10:00:00+09:00）
+# Get current time in ISO8601 format
+# @return ISO8601 formatted datetime (e.g., 2026-01-17T10:00:00+09:00)
 #
 wf_get_timestamp() {
     date +"%Y-%m-%dT%H:%M:%S%z" | sed 's/\([0-9][0-9]\)$/:\1/'
 }
 
 #
-# 確認プロンプトを表示
-# @param $1 確認メッセージ
+# Show confirmation prompt
+# @param $1 Confirmation message
 # @return 0: yes, 1: no
 #
 wf_confirm() {
@@ -299,18 +299,18 @@ wf_confirm() {
 }
 
 #
-# ファイルが存在するか確認
-# @param $1 ファイルパス
-# @return 0: 存在する, 1: 存在しない
+# Check if file exists
+# @param $1 File path
+# @return 0: exists, 1: does not exist
 #
 wf_file_exists() {
     [[ -f "$1" ]]
 }
 
 #
-# ディレクトリが存在するか確認
-# @param $1 ディレクトリパス
-# @return 0: 存在する, 1: 存在しない
+# Check if directory exists
+# @param $1 Directory path
+# @return 0: exists, 1: does not exist
 #
 wf_dir_exists() {
     [[ -d "$1" ]]

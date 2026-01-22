@@ -1,61 +1,61 @@
-# スキル体系
+# Skills System
 
-プロジェクト固有の知識・ベストプラクティスを Claude に提供するスキル定義。
+Skill definitions that provide project-specific knowledge and best practices to Claude.
 
-## 概要
+## Overview
 
-スキルは特定のドメインや技術スタックに関する専門知識を定義します。
-references/ からナレッジを参照し、プロジェクトに最適化されたガイダンスを提供します。
+Skills define specialized knowledge about specific domains or technology stacks.
+They reference knowledge from references/ and provide guidance optimized for the project.
 
-## スキル一覧
+## Skill List
 
-| スキル | 用途 |
-|-------|------|
-| `android-architecture` | Android アプリのアーキテクチャ設計 |
-| `ios-architecture` | iOS アプリのアーキテクチャ設計 |
-| `kmp-architecture` | Kotlin Multiplatform のアーキテクチャ設計 |
-| `aws-sam` | AWS SAM テンプレート・Lambda 実装 |
+| Skill | Purpose |
+|-------|---------|
+| `android-architecture` | Android app architecture design |
+| `ios-architecture` | iOS app architecture design |
+| `kmp-architecture` | Kotlin Multiplatform architecture design |
+| `aws-sam` | AWS SAM template and Lambda implementation |
 
-## 使用方法
+## Usage
 
-スキルはプロンプトに含めることで Claude がそのコンテキストを理解します。
+Claude understands the context when skills are included in prompts.
 
 ```
-このプロジェクトでは android-architecture スキルに従って実装してください。
+Please implement according to the android-architecture skill in this project.
 ```
 
-## スキル定義形式
+## Skill Definition Format
 
-各スキルは以下の形式で定義されています。
+Each skill is defined in the following format.
 
 ```markdown
 ---
-name: スキル名
-description: 説明（英語）
+name: Skill name
+description: Description (in English)
 references:
   - path: ../references/...
 ---
 
-# スキル名
+# Skill Name
 
-## 目的
-{このスキルが提供するガイダンス}
+## Purpose
+{Guidance this skill provides}
 
-## 適用場面
-{どのような場面で使用するか}
+## Use Cases
+{Situations where this skill should be used}
 
-## 主要な原則
-{守るべき原則}
+## Key Principles
+{Principles to follow}
 
-## 実装パターン
-{推奨される実装パターン}
+## Implementation Patterns
+{Recommended implementation patterns}
 ```
 
-## ディレクトリ構成
+## Directory Structure
 
 ```
 skills/
-├── README.md                 # このファイル
+├── README.md                 # This file
 ├── android-architecture/
 │   └── SKILL.md
 ├── ios-architecture/
@@ -66,9 +66,9 @@ skills/
     └── SKILL.md
 ```
 
-## references/ との関係
+## Relationship with references/
 
-スキルは references/ のナレッジを参照します。
+Skills reference knowledge from references/.
 
 ```
 skills/android-architecture/SKILL.md
@@ -78,9 +78,9 @@ skills/aws-sam/SKILL.md
   → references: ../references/services/aws/...
 ```
 
-## 新規スキル追加時の手順
+## Steps for Adding New Skills
 
-1. `skills/{skill-name}/` ディレクトリを作成
-2. `SKILL.md` を作成（上記形式に従う）
-3. 必要な references/ へのパスを設定
-4. この README.md のスキル一覧を更新
+1. Create `skills/{skill-name}/` directory
+2. Create `SKILL.md` (following the format above)
+3. Set paths to necessary references/
+4. Update the skill list in this README.md

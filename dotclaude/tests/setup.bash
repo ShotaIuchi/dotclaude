@@ -1,50 +1,50 @@
 #!/usr/bin/env bash
 #
-# bats テスト用の共通セットアップ
-# 各テストファイルから source して使用する
+# Common setup for bats tests
+# Source this file from each test file
 #
 
-# テストスクリプトのディレクトリ
+# Test scripts directory
 TESTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# scripts/ ディレクトリ
+# scripts/ directory
 SCRIPTS_DIR="$(cd "${TESTS_DIR}/../scripts" && pwd)"
 
-# 一時ディレクトリ（テスト中に使用）
+# Temporary directory (used during tests)
 TEST_TMPDIR=""
 
 #
-# bash バージョンチェック
-# 連想配列を使う関数は bash 4+ が必要
+# Bash version check
+# Functions using associative arrays require bash 4+
 #
 check_bash_version() {
     if [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
-        skip "bash 4+ が必要です（現在: ${BASH_VERSION}）"
+        skip "bash 4+ required (current: ${BASH_VERSION})"
     fi
 }
 
 #
-# テスト全体のセットアップ
-# bats の setup_file() から呼び出す
+# Setup for all tests
+# Called from bats setup_file()
 #
 common_setup_file() {
-    # bash 4+ が必要（連想配列のため）
+    # Requires bash 4+ (for associative arrays)
     if [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
-        echo "bash 4+ が必要です（現在: ${BASH_VERSION}）" >&2
+        echo "bash 4+ required (current: ${BASH_VERSION})" >&2
         return 1
     fi
 }
 
 #
-# 各テストのセットアップ
-# bats の setup() から呼び出す
+# Setup for each test
+# Called from bats setup()
 #
 common_setup() {
-    # 一時ディレクトリを作成
+    # Create temporary directory
     TEST_TMPDIR="$(mktemp -d)"
 
-    # wf-utils.sh を source
-    # set -u を一時的に無効化（連想配列の初期化のため）
+    # Source wf-utils.sh
+    # Temporarily disable set -u (for associative array initialization)
     # shellcheck source=../scripts/wf-utils.sh
     set +u
     source "${SCRIPTS_DIR}/wf-utils.sh"
@@ -52,11 +52,11 @@ common_setup() {
 }
 
 #
-# 連想配列を使う関数をサブシェルで実行するヘルパー
-# コマンド置換では連想配列が継承されないため、
-# このヘルパーで source してから実行する
-# @param $1 関数名
-# @param $@ 引数
+# Helper to run functions that use associative arrays in a subshell
+# Associative arrays are not inherited in command substitution,
+# so this helper sources the script before execution
+# @param $1 Function name
+# @param $@ Arguments
 #
 run_with_arrays() {
     local func="$1"
@@ -70,21 +70,21 @@ run_with_arrays() {
 }
 
 #
-# 各テストのクリーンアップ
-# bats の teardown() から呼び出す
+# Cleanup for each test
+# Called from bats teardown()
 #
 common_teardown() {
-    # 一時ディレクトリを削除
+    # Delete temporary directory
     if [[ -n "${TEST_TMPDIR}" && -d "${TEST_TMPDIR}" ]]; then
         rm -rf "${TEST_TMPDIR}"
     fi
 }
 
 #
-# config.json を一時ディレクトリに作成
-# @param $1 branch_prefix の設定（JSON オブジェクト形式、波括弧なし）
-#           例: '"FEAT": "feature", "FIX": "bugfix"'
-# @return 作成した config.json のパス
+# Create config.json in temporary directory
+# @param $1 branch_prefix settings (JSON object format, without braces)
+#           Example: '"FEAT": "feature", "FIX": "bugfix"'
+# @return Path to created config.json
 #
 create_test_config() {
     local branch_prefix="${1:-}"

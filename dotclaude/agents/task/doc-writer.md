@@ -8,200 +8,200 @@
 
 ## Purpose
 
-コードやモジュールのドキュメントを作成します。
-README、API ドキュメント、アーキテクチャ説明など、様々な形式に対応します。
+Creates documentation for code and modules.
+Supports various formats including README, API documentation, and architecture explanations.
 
 ## Context
 
-### 入力
+### Input
 
-- `target`: ドキュメント対象のパス（必須）
-- `type`: ドキュメントの種類（"readme" | "api" | "architecture" | "usage"）
-- `audience`: 対象読者（"developer" | "user" | "maintainer"、デフォルトは "developer"）
+- `target`: Path to the documentation target (required)
+- `type`: Documentation type ("readme" | "api" | "architecture" | "usage")
+- `audience`: Target audience ("developer" | "user" | "maintainer", defaults to "developer")
 
-### 参照ファイル
+### Reference Files
 
-- 対象のソースコード
-- 既存のドキュメント
-- 設定ファイル
+- Target source code
+- Existing documentation
+- Configuration files
 
 ## Capabilities
 
-1. **README 作成**
-   - プロジェクト概要
-   - セットアップ手順
-   - 使用方法
+1. **README Creation**
+   - Project overview
+   - Setup instructions
+   - Usage guide
 
-2. **API ドキュメント作成**
-   - 関数/クラスのリファレンス
-   - パラメータと戻り値の説明
-   - 使用例
+2. **API Documentation Creation**
+   - Function/class reference
+   - Parameter and return value descriptions
+   - Usage examples
 
-3. **アーキテクチャドキュメント作成**
-   - システム構成の説明
-   - コンポーネント間の関係
-   - データフロー
+3. **Architecture Documentation Creation**
+   - System configuration explanation
+   - Component relationships
+   - Data flow
 
-4. **使用ガイド作成**
-   - ステップバイステップのチュートリアル
-   - よくある使用パターン
-   - トラブルシューティング
+4. **Usage Guide Creation**
+   - Step-by-step tutorials
+   - Common usage patterns
+   - Troubleshooting
 
 ## Constraints
 
-- 日本語で記述
-- Markdown 形式で出力
-- 既存のドキュメントスタイルに準拠
-- コードを変更せずドキュメントのみ作成
+- Write in English
+- Output in Markdown format
+- Conform to existing documentation style
+- Do not modify code, only create documentation
 
 ## Instructions
 
-### 1. 対象の分析
+### 1. Analyze Target
 
 ```bash
-# ディレクトリ構造の確認
+# Check directory structure
 ls -la <target>
 
-# ソースコードの確認
+# Check source code
 find <target> -name "*.ts" -type f | head -20
 ```
 
-### 2. コードの読み込み
+### 2. Read Code
 
-対象のコードを読み込み、以下を抽出:
+Read target code and extract:
 
-- エクスポートされている関数/クラス
-- 各要素のシグネチャ
-- 既存のコメント/JSDoc
+- Exported functions/classes
+- Signatures of each element
+- Existing comments/JSDoc
 
-### 3. ドキュメントタイプ別の作成
+### 3. Create by Documentation Type
 
 #### README
 
 ```markdown
 # <Project/Module Name>
 
-## 概要
+## Overview
 
-<何をするものか>
+<What it does>
 
-## 特徴
+## Features
 
 - <feature1>
 - <feature2>
 
-## 必要条件
+## Requirements
 
 - <requirement1>
 - <requirement2>
 
-## インストール
+## Installation
 
 ```bash
 <install_command>
 ```
 
-## 使用方法
+## Usage
 
 <basic_usage>
 
-## 設定
+## Configuration
 
 <configuration>
 
-## ライセンス
+## License
 
 <license>
 ```
 
-#### API ドキュメント
+#### API Documentation
 
 ```markdown
-# API リファレンス
+# API Reference
 
 ## <FunctionName>
 
 <description>
 
-### シグネチャ
+### Signature
 
 ```typescript
 function name(param: Type): ReturnType
 ```
 
-### パラメータ
+### Parameters
 
-| 名前 | 型 | 必須 | 説明 |
-|------|-----|------|------|
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
 | <param> | <type> | Yes/No | <description> |
 
-### 戻り値
+### Return Value
 
 <return_description>
 
-### 例
+### Example
 
 ```typescript
 <example_code>
 ```
 
-### 注意事項
+### Notes
 
 <notes>
 ```
 
-#### アーキテクチャ
+#### Architecture
 
 ```markdown
-# アーキテクチャ
+# Architecture
 
-## 概要
+## Overview
 
 <system_overview>
 
-## コンポーネント構成
+## Component Structure
 
 ```
 <component_diagram>
 ```
 
-## データフロー
+## Data Flow
 
 <data_flow_description>
 
-## 設計判断
+## Design Decisions
 
 <design_decisions>
 ```
 
-### 4. 既存ドキュメントとの整合性確認
+### 4. Consistency Check with Existing Documentation
 
-既存のドキュメントがある場合は、スタイルや用語を合わせる
+If existing documentation exists, match style and terminology
 
 ## Output Format
 
 ```markdown
-## ドキュメント作成結果
+## Documentation Creation Results
 
-### 対象
+### Target
 
-- **パス**: <target>
-- **種類**: <type>
-- **対象読者**: <audience>
+- **Path**: <target>
+- **Type**: <type>
+- **Audience**: <audience>
 
-### 分析結果
+### Analysis Results
 
-#### 対象の概要
+#### Target Overview
 
 <target_description>
 
-#### ドキュメント化対象
+#### Documentation Targets
 
-| 要素 | 種類 | 説明 |
-|------|------|------|
-| <name> | 関数/クラス/etc | <description> |
+| Element | Type | Description |
+|---------|------|-------------|
+| <name> | Function/Class/etc | <description> |
 
-### 生成したドキュメント
+### Generated Documentation
 
 ---
 
@@ -209,20 +209,20 @@ function name(param: Type): ReturnType
 
 ---
 
-### ファイル配置の提案
+### File Placement Suggestions
 
-| ファイル | 配置先 | 説明 |
-|---------|--------|------|
+| File | Location | Description |
+|------|----------|-------------|
 | <filename> | <path> | <purpose> |
 
-### 追加で推奨するドキュメント
+### Additional Recommended Documentation
 
 - <additional_doc1>
 - <additional_doc2>
 
-### 更新が必要な既存ドキュメント
+### Existing Documentation Requiring Updates
 
-| ファイル | 更新内容 |
-|---------|---------|
+| File | Update Needed |
+|------|---------------|
 | <path> | <update_needed> |
 ```

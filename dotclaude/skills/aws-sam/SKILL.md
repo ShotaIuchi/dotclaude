@@ -1,6 +1,6 @@
 ---
 name: AWS SAM
-description: AWS SAMを使用したサーバーレスアプリケーションの開発、Lambda関数の実装、テンプレート設計、ローカルテスト、デプロイメント時に参照するスキル。
+description: Skill for AWS SAM serverless application development, Lambda function implementation, template design, local testing, and deployment.
 references:
   - path: ../../references/services/aws/sam-template.md
 external:
@@ -12,16 +12,16 @@ external:
 
 # AWS SAM (Serverless Application Model)
 
-AWS SAM は、サーバーレスアプリケーションを構築するための IaC フレームワーク。
+AWS SAM is an IaC framework for building serverless applications.
 
-## 基本原則
+## Core Principles
 
-1. **Infrastructure as Code (IaC)** - すべてのリソースを template.yaml で管理
-2. **単一責任の関数設計** - 各 Lambda は一つの機能に集中
-3. **最小権限の原則** - IAM ポリシーは必要最小限に
-4. **ローカルファースト開発** - sam local でテストしてからデプロイ
+1. **Infrastructure as Code (IaC)** - Manage all resources in template.yaml
+2. **Single Responsibility Function Design** - Each Lambda focuses on one function
+3. **Principle of Least Privilege** - IAM policies should be minimal
+4. **Local-First Development** - Test with sam local before deploying
 
-## アーキテクチャ
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -43,27 +43,27 @@ AWS SAM は、サーバーレスアプリケーションを構築するための
     └────────────┘    └────────────┘    └────────────┘
 ```
 
-## SAM CLI コマンド
+## SAM CLI Commands
 
-| コマンド | 用途 |
-|---------|------|
-| `sam init` | 新規プロジェクト作成 |
-| `sam build` | ビルド（依存関係解決） |
-| `sam deploy --guided` | 初回デプロイ（対話式） |
-| `sam local invoke` | ローカルで関数を実行 |
-| `sam local start-api` | ローカル API サーバー起動 |
-| `sam sync --watch` | 変更を自動同期（開発時） |
-| `sam logs -t` | CloudWatch ログをテール |
+| Command | Purpose |
+|---------|---------|
+| `sam init` | Create new project |
+| `sam build` | Build (resolve dependencies) |
+| `sam deploy --guided` | Initial deployment (interactive) |
+| `sam local invoke` | Run function locally |
+| `sam local start-api` | Start local API server |
+| `sam sync --watch` | Auto-sync changes (during development) |
+| `sam logs -t` | Tail CloudWatch logs |
 
-## ディレクトリ構造
+## Directory Structure
 
 ```
 project/
-├── template.yaml           # SAMテンプレート
-├── samconfig.toml          # デプロイ設定
+├── template.yaml           # SAM template
+├── samconfig.toml          # Deployment configuration
 ├── functions/
 │   ├── function_a/
-│   │   ├── app.py          # ハンドラー
+│   │   ├── app.py          # Handler
 │   │   └── requirements.txt
 │   └── function_b/
 │       ├── index.js
@@ -71,12 +71,12 @@ project/
 ├── layers/
 │   └── shared/
 │       └── python/
-├── events/                 # テスト用イベント
+├── events/                 # Test events
 │   └── event.json
 └── tests/
     └── unit/
 ```
 
-## 詳細リファレンス
+## Detailed References
 
-- [AWS SAM テンプレートとベストプラクティス](../../references/services/aws/sam-template.md)
+- [AWS SAM Templates and Best Practices](../../references/services/aws/sam-template.md)

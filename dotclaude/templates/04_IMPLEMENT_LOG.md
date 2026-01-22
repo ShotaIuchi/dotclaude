@@ -11,13 +11,13 @@
 
 ### Planned
 
-<!-- Plan から抽出した予定作業 -->
+<!-- Planned tasks extracted from Plan -->
 - {{PLANNED_TASK_1}}
 - {{PLANNED_TASK_2}}
 
 ### Changes Made
 
-<!-- 実際に行った変更（diff 形式推奨） -->
+<!-- Actual changes made (diff format recommended) -->
 
 **{{FILE_1}}:**
 ```diff
@@ -31,7 +31,7 @@
 
 ### Issues Encountered
 
-<!-- 発生した問題と解決方法 -->
+<!-- Problems encountered and resolutions -->
 | Issue | Resolution |
 |-------|------------|
 | {{ISSUE_1}} | {{RESOLUTION_1}} |
@@ -46,7 +46,7 @@
 
 ### Handover
 
-<!-- 次のステップへの申し送り事項 -->
+<!-- Items to pass on to the next step -->
 - {{HANDOVER_1}}
 - {{HANDOVER_2}}
 

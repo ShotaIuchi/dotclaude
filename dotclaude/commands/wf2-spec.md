@@ -1,24 +1,24 @@
 # /wf2-spec
 
-仕様書（Spec）を作成するコマンド。
+Command to create the Specification (Spec) document.
 
-## 使用方法
+## Usage
 
 ```
-/wf2-spec [サブコマンド]
+/wf2-spec [subcommand]
 ```
 
-## サブコマンド
+## Subcommands
 
-- `(なし)`: 新規作成
-- `update`: 既存の Spec を更新
-- `validate`: Kickoff との整合性を確認
+- `(none)`: Create new
+- `update`: Update existing Spec
+- `validate`: Check consistency with Kickoff
 
-## 処理内容
+## Processing
 
-$ARGUMENTS を解析して以下の処理を実行してください。
+Parse $ARGUMENTS and execute the following processing.
 
-### 1. 前提条件の確認
+### 1. Check Prerequisites
 
 ```bash
 work_id=$(jq -r '.active_work // empty' .wf/state.json)
@@ -26,77 +26,77 @@ docs_dir="docs/wf/$work_id"
 kickoff_path="$docs_dir/00_KICKOFF.md"
 spec_path="$docs_dir/01_SPEC.md"
 
-# Kickoff が存在するか確認
+# Check if Kickoff exists
 if [ ! -f "$kickoff_path" ]; then
-  echo "Kickoff ドキュメントがありません"
-  echo "/wf1-kickoff を先に実行してください"
+  echo "Kickoff document not found"
+  echo "Please run /wf1-kickoff first"
   exit 1
 fi
 ```
 
-### 2. Kickoff の読み込みと分析
+### 2. Load and Analyze Kickoff
 
 ```bash
 cat "$kickoff_path"
 ```
 
-Kickoff から以下を抽出：
+Extract from Kickoff:
 - Goal
 - Success Criteria
 - Constraints
 - Dependencies
 
-### 3. コードベースの調査
+### 3. Investigate Codebase
 
-Kickoff の内容に基づいて関連コードを調査：
+Investigate related code based on Kickoff content:
 
-- 影響を受けるファイルの特定
-- 既存の実装パターンの確認
-- 関連するテストの確認
-- 既存の仕様書（`docs/spec/`）との整合性確認
+- Identify affected files
+- Check existing implementation patterns
+- Check related tests
+- Check consistency with existing specifications (`docs/spec/`)
 
-### 4. Spec の作成
+### 4. Create Spec
 
-**テンプレート参照:** `~/.claude/templates/01_SPEC.md` を読み込んで使用してください。
+**Template reference:** Load and use `~/.claude/templates/01_SPEC.md`.
 
-テンプレートのプレースホルダを調査結果と Kickoff の内容で置換します。
+Replace template placeholders with investigation results and Kickoff content.
 
-### 5. 整合性の確認
+### 5. Consistency Check
 
-以下の点を確認：
+Check the following points:
 
-1. **Kickoff との整合性**
-   - Goal が Spec に反映されているか
-   - Success Criteria が達成可能な変更か
-   - Constraints が考慮されているか
+1. **Consistency with Kickoff**
+   - Is Goal reflected in Spec
+   - Are changes achievable for Success Criteria
+   - Are Constraints considered
 
-2. **既存仕様との整合性**
-   - `docs/spec/` 内の仕様書と矛盾がないか
-   - 既存の API 仕様と互換性があるか
+2. **Consistency with Existing Specifications**
+   - No contradictions with specifications in `docs/spec/`
+   - Compatible with existing API specifications
 
-3. **テスト戦略の妥当性**
-   - Success Criteria を検証できるテストがあるか
+3. **Test Strategy Validity**
+   - Are there tests to verify Success Criteria
 
-### 6. state.json の更新
+### 6. Update state.json
 
 ```bash
 jq ".works[\"$work_id\"].current = \"wf2-spec\"" .wf/state.json > tmp && mv tmp .wf/state.json
 jq ".works[\"$work_id\"].next = \"wf3-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
 
-### 7. コミット
+### 7. Commit
 
-Spec ドキュメントの変更をコミット：
+Commit Spec document changes:
 
 ```bash
-# 新規作成の場合
+# For new creation
 git add "$spec_path" .wf/state.json
 git commit -m "docs(wf): create spec <work-id>
 
 Work: <work-id>
 "
 
-# update の場合
+# For update
 git add "$spec_path" .wf/state.json
 git commit -m "docs(wf): update spec <work-id>
 
@@ -104,40 +104,40 @@ Work: <work-id>
 "
 ```
 
-### 8. 完了メッセージ
+### 8. Completion Message
 
 ```
-✅ Spec ドキュメントを作成しました
+✅ Spec document created
 
-ファイル: docs/wf/<work-id>/01_SPEC.md
+File: docs/wf/<work-id>/01_SPEC.md
 
 Affected Components:
 - <component1> (high)
 - <component2> (medium)
 
-次のステップ: /wf3-plan を実行して実装計画を作成してください
+Next step: Run /wf3-plan to create the implementation plan
 ```
 
-## validate サブコマンド
+## validate Subcommand
 
-既存の Spec と Kickoff の整合性を確認：
+Check consistency between existing Spec and Kickoff:
 
 ```
 📋 Spec Validation: <work-id>
 ═══════════════════════════════════════
 
-Kickoff → Spec 整合性チェック:
+Kickoff → Spec Consistency Check:
 
-[✓] Goal が Overview に反映されている
-[✓] Success Criteria が Test Strategy でカバーされている
-[!] Constraint "パフォーマンス要件" が考慮されていない
-[ ] Dependency "認証API" の影響が未記載
+[✓] Goal is reflected in Overview
+[✓] Success Criteria are covered in Test Strategy
+[!] Constraint "performance requirements" not considered
+[ ] Dependency "authentication API" impact not documented
 
-結果: 2 warnings, 1 missing
+Result: 2 warnings, 1 missing
 ```
 
-## 注意事項
+## Notes
 
-- Kickoff の内容を勝手に変更しない
-- 既存の仕様書との矛盾がある場合は警告
-- 技術的に実現不可能な場合は Kickoff の修正を提案
+- Do not arbitrarily change Kickoff content
+- Warn if there are contradictions with existing specifications
+- Suggest Kickoff revision if technically not feasible

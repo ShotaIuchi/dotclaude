@@ -8,94 +8,94 @@
 
 ## Purpose
 
-指定されたファイルやモジュールに対するテストを作成します。
-ユニットテスト、統合テストの両方に対応し、既存のテストスタイルに準拠します。
+Creates tests for specified files or modules.
+Supports both unit tests and integration tests, conforming to existing test styles.
 
 ## Context
 
-### 入力
+### Input
 
-- `target`: テスト対象のファイルパス（必須）
-- `type`: テストの種類（"unit" | "integration"、デフォルトは "unit"）
-- `focus`: 特定の関数やクラス名（オプション）
+- `target`: File path of the test target (required)
+- `type`: Test type ("unit" | "integration", defaults to "unit")
+- `focus`: Specific function or class name (optional)
 
-### 参照ファイル
+### Reference Files
 
-- テスト対象ファイル
-- 既存のテストファイル（スタイル参考）
-- テスト設定ファイル（jest.config.js, vitest.config.ts など）
+- Test target file
+- Existing test files (for style reference)
+- Test configuration files (jest.config.js, vitest.config.ts, etc.)
 
 ## Capabilities
 
-1. **テストケース設計**
-   - 正常系・異常系のテストケース設計
-   - 境界値のテストケース設計
-   - エッジケースの特定
+1. **Test Case Design**
+   - Happy path and error case design
+   - Boundary value test case design
+   - Edge case identification
 
-2. **テストコード生成**
-   - 既存スタイルに準拠したテストコード
-   - モックの設定
-   - アサーションの記述
+2. **Test Code Generation**
+   - Test code conforming to existing style
+   - Mock setup
+   - Assertion writing
 
-3. **カバレッジ向上**
-   - 未カバーのコードパスの特定
-   - カバレッジ向上のためのテスト追加
+3. **Coverage Improvement**
+   - Identifying uncovered code paths
+   - Adding tests for coverage improvement
 
 ## Constraints
 
-- 既存のテストフレームワーク・スタイルに準拠
-- テスト対象のコードは変更しない
-- 実際のテスト実行は行わない（生成のみ）
+- Conform to existing test framework and style
+- Do not modify the code under test
+- Do not actually run tests (generation only)
 
 ## Instructions
 
-### 1. テスト対象の分析
+### 1. Analyze Test Target
 
 ```bash
-# 対象ファイルの読み込み
+# Read target file
 cat <target>
 ```
 
-以下を抽出:
-- エクスポートされている関数/クラス
-- 各関数のシグネチャ（引数、戻り値）
-- 依存関係（インポート）
+Extract:
+- Exported functions/classes
+- Signature of each function (parameters, return values)
+- Dependencies (imports)
 
-### 2. 既存テストの確認
+### 2. Check Existing Tests
 
 ```bash
-# 既存テストファイルの確認
+# Check existing test files
 target_name=$(basename <target> .ts)
 find . -name "*${target_name}*.test.ts" -o -name "*${target_name}*.spec.ts"
 
-# テスト設定の確認
+# Check test configuration
 cat jest.config.js 2>/dev/null || cat vitest.config.ts 2>/dev/null
 ```
 
-### 3. テストケースの設計
+### 3. Design Test Cases
 
-各関数/メソッドについて:
+For each function/method:
 
-1. **正常系**
-   - 基本的な入力での動作
-   - 期待される出力の確認
+1. **Happy Path**
+   - Behavior with basic inputs
+   - Verify expected outputs
 
-2. **異常系**
-   - 無効な入力への対応
-   - エラーハンドリングの確認
+2. **Error Cases**
+   - Response to invalid inputs
+   - Error handling verification
 
-3. **境界値**
-   - 最小値/最大値
-   - 空の入力
+3. **Boundary Values**
+   - Minimum/maximum values
+   - Empty inputs
    - null/undefined
 
-4. **エッジケース**
-   - 特殊な状態
-   - 競合状態（該当する場合）
+4. **Edge Cases**
+   - Special states
+   - Race conditions (when applicable)
 
-### 4. テストコードの生成
+### 4. Generate Test Code
 
-既存のスタイルに合わせてテストコードを生成:
+Generate test code matching existing style:
 
 ```typescript
 describe('<ModuleName>', () => {
@@ -109,38 +109,38 @@ describe('<ModuleName>', () => {
 });
 ```
 
-### 5. モックの設計
+### 5. Mock Design
 
-必要に応じてモックを設計:
+Design mocks as needed:
 
-- 外部依存のモック
-- 時間依存処理のモック
-- ネットワーク呼び出しのモック
+- External dependency mocks
+- Time-dependent process mocks
+- Network call mocks
 
 ## Output Format
 
 ```markdown
-## テスト作成結果
+## Test Creation Results
 
-### 対象
+### Target
 
-- **ファイル**: <target>
-- **種類**: <type>
-- **フォーカス**: <focus or "全体">
+- **File**: <target>
+- **Type**: <type>
+- **Focus**: <focus or "All">
 
-### テスト対象の分析
+### Test Target Analysis
 
-| 関数/クラス | 説明 | 複雑度 |
-|------------|------|--------|
-| <name> | <description> | 高/中/低 |
+| Function/Class | Description | Complexity |
+|----------------|-------------|------------|
+| <name> | <description> | High/Medium/Low |
 
-### テストケース一覧
+### Test Case List
 
-| ID | 対象 | ケース | 種別 |
-|----|------|--------|------|
-| TC-1 | <function> | <case> | 正常系/異常系/境界値 |
+| ID | Target | Case | Type |
+|----|--------|------|------|
+| TC-1 | <function> | <case> | Happy/Error/Boundary |
 
-### 生成したテストコード
+### Generated Test Code
 
 #### <test_file_path>
 
@@ -148,9 +148,9 @@ describe('<ModuleName>', () => {
 import { <exports> } from '<target>';
 
 describe('<ModuleName>', () => {
-  // テストの前処理
+  // Test setup
   beforeEach(() => {
-    // セットアップ
+    // Setup
   });
 
   describe('<functionName>', () => {
@@ -178,7 +178,7 @@ describe('<ModuleName>', () => {
 });
 ```
 
-### モック設定
+### Mock Setup
 
 ```typescript
 // <mock_description>
@@ -187,18 +187,18 @@ jest.mock('<module>', () => ({
 }));
 ```
 
-### カバレッジ予測
+### Coverage Prediction
 
-| 対象 | ステートメント | ブランチ | 関数 |
-|------|--------------|---------|------|
+| Target | Statements | Branches | Functions |
+|--------|------------|----------|-----------|
 | <function> | <n>% | <n>% | <n>% |
 
-### 追加で推奨するテスト
+### Additional Recommended Tests
 
 - <additional_test1>
 - <additional_test2>
 
-### 注意事項
+### Notes
 
-<テスト実行時の注意点など>
+<Notes for test execution, etc.>
 ```
