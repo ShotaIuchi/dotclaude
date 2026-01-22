@@ -23,7 +23,9 @@ This agent is designed to be called from the `/doc-fix` command for parallel pro
 
 - Review file (`.review.md`)
 - Original document (derived from review file name)
-- Template reference: `~/.claude/templates/DOC_REVIEW.md` or `dotclaude/templates/DOC_REVIEW.md`
+- Template reference (priority order):
+  1. `dotclaude/templates/DOC_REVIEW.md` (project-specific)
+  2. `~/.claude/templates/DOC_REVIEW.md` (global fallback)
 
 ## Capabilities
 
@@ -47,7 +49,10 @@ This agent is designed to be called from the `/doc-fix` command for parallel pro
 - Modifies both original file and review file
 - Applies fixes in priority order (High → Medium → Future)
 - Must preserve file integrity on partial failures
-- Backup strategy: Relies on git for versioning; if git is unavailable, changes are applied directly without backup (user should manually backup if needed)
+- Backup strategy:
+  1. Primary: Relies on git for versioning (if available)
+  2. Fallback: If git is unavailable, creates `.bak` file before modification
+  3. Warning: Outputs warning message when operating without git version control
 
 ## Instructions
 
@@ -67,8 +72,12 @@ if review_file does not exist:
 base_name = review_file without ".review.md"
 
 # Check for common extensions in order
-# Priority: documentation formats first, then config/data formats
-# Other extensions (.sh, .py, .ts, etc.) should use explicit file naming
+# Extension selection criteria:
+# - Documentation formats (md, txt): Primary use case for doc-fixer
+# - Configuration formats (yaml, yml, json): Commonly reviewed configuration files
+# - Code files (.sh, .py, .ts, etc.): Not included by default
+#   - Reason: Code files require specialized linting/formatting tools
+#   - To support: Use explicit naming (e.g., script.sh.review.md) or extend config
 for ext in [md, yaml, yml, json, txt]:
   if file exists at "{base_name}.{ext}":
     original_file = "{base_name}.{ext}"
@@ -116,8 +125,11 @@ For each target issue in priority order:
 3. Apply suggested changes:
    - **Literal application**: When the suggestion provides exact text to add/replace
      - Example: "Add `--verbose` flag description" → Add the exact text as specified
+     - Detection criteria: Suggestion contains code blocks, quoted text, or specific syntax
    - **Contextual implementation**: When the suggestion describes intent or improvement
      - Example: "Clarify the error handling" → Understand context and write appropriate content
+     - Detection criteria: Suggestion uses descriptive language without specific text to insert
+   - **Selection rule**: If suggestion contains backticks, quotes, or code fences → Literal; otherwise → Contextual
    - Preserve existing style and formatting
 4. Track success/failure for each fix
 
@@ -188,14 +200,24 @@ The agent returns a structured result for the caller to process:
 ```
 
 Status values:
-- `success`: All requested fixes applied successfully
-- `partial`: At least one fix applied AND at least one fix failed (e.g., 2/5 fixes succeeded)
-- `failure`: No fixes applied (all failed) or critical error (e.g., file not found, parse error)
+- `success`: All requested fixes applied successfully (N/N succeeded)
+- `partial`: At least one fix applied AND at least one fix failed (e.g., 2/5 fixes succeeded, where 1 <= succeeded < total)
+- `failure`: No fixes applied (0 succeeded) or critical error (e.g., file not found, parse error)
+  - Note: 0 success + 1 or more failures = `failure`, not `partial`
+
+## Future Considerations
+
+The following enhancements are planned for future versions:
+
+- **Dry-run mode**: Preview changes without applying them (`--dry-run` flag)
+- **Rollback capability**: Undo applied fixes without relying on git (maintain `.bak` chain or undo log)
+- **Granular fix application**: Allow partial fixes within a single issue (configurable via `--allow-partial`)
+- **Enhanced error handling**: Categorize errors (parse error, file permission, invalid location) with specific recovery actions
 
 ## Notes
 
 - This agent is optimized for single-file processing
 - For multiple files, the parent command handles parallelization
 - Fixes are applied atomically per-issue (all or nothing for each)
-- Original file is backed up implicitly via git (if available)
+- Original file is backed up via git (primary) or `.bak` file (fallback)
 - Always update review file status even on partial failures

@@ -16,10 +16,10 @@ Agents that work in conjunction with workflow commands.
 
 | Agent | Purpose | Caller |
 |-------|---------|--------|
-| `research` | Issue background research, related code identification | wf1-kickoff |
-| `spec-writer` | Specification draft creation | wf2-spec |
-| `planner` | Implementation planning | wf3-plan |
-| `implementer` | Single step implementation support | wf5-implement |
+| [`research`](workflow/research.md) | Issue background research, related code identification | wf1-kickoff |
+| [`spec-writer`](workflow/spec-writer.md) | Specification draft creation | wf2-spec |
+| [`planner`](workflow/planner.md) | Implementation planning | wf3-plan |
+| [`implementer`](workflow/implementer.md) | Single step implementation support | wf5-implement |
 
 ### Task-Specific Type (task/)
 
@@ -27,12 +27,12 @@ General-purpose task agents that can be executed standalone.
 
 | Agent | Purpose |
 |-------|---------|
-| `reviewer` | Code review |
-| `doc-reviewer` | Document review (single file) |
-| `doc-fixer` | Apply fixes from review file |
-| `test-writer` | Test creation |
-| `refactor` | Refactoring suggestions |
-| `doc-writer` | Documentation creation |
+| [`reviewer`](task/reviewer.md) | Code review |
+| [`doc-reviewer`](task/doc-reviewer.md) | Document review (single file) |
+| [`doc-fixer`](task/doc-fixer.md) | Apply fixes from review file |
+| [`test-writer`](task/test-writer.md) | Test creation |
+| [`refactor`](task/refactor.md) | Refactoring suggestions |
+| [`doc-writer`](task/doc-writer.md) | Documentation creation |
 
 ### Project Analysis Type (analysis/)
 
@@ -40,9 +40,9 @@ Agents for investigating and analyzing the codebase.
 
 | Agent | Purpose |
 |-------|---------|
-| `codebase` | Codebase investigation |
-| `dependency` | Dependency analysis |
-| `impact` | Impact scope identification |
+| [`codebase`](analysis/codebase.md) | Codebase investigation |
+| [`dependency`](analysis/dependency.md) | Dependency analysis |
+| [`impact`](analysis/impact.md) | Impact scope identification |
 
 ## Usage
 
@@ -67,6 +67,20 @@ Any agent can be executed directly via the `/agent` command.
 /agent codebase query="authentication flow implementation location"
 /agent reviewer files="src/auth/*.ts"
 ```
+
+#### Command Arguments
+
+| Argument | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `agent_name` | string | Yes | - | Name of the agent to execute (e.g., `research`, `codebase`) |
+| `<param>=<value>` | varies | No | - | Agent-specific parameters passed as key=value pairs |
+
+Common parameters by agent type:
+- **workflow agents**: `issue`, `work_id`, `phase`
+- **task agents**: `files`, `target`, `scope`
+- **analysis agents**: `query`, `path`, `depth`
+
+See individual agent documentation for complete parameter specifications.
 
 ## Agent Definition Format
 
@@ -101,7 +115,7 @@ Each agent is defined in the following format.
 
 ## Integration with state.json
 
-Agent execution status is recorded in state.json.
+Agent execution status is recorded in state.json. For the complete schema definition, see [state.json schema](../rules/state.schema.md).
 
 ```json
 {
@@ -122,6 +136,8 @@ Agent execution status is recorded in state.json.
 ```
 
 ## Directory Structure
+
+> **Note**: This structure is maintained manually. For verification, run `ls -R agents/` from the project root.
 
 ```
 agents/

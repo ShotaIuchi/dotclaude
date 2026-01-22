@@ -3,7 +3,7 @@
 ## Metadata
 
 - **ID**: spec-writer
-- **Base Type**: general
+- **Base Type**: general (base agent type without specialized capabilities)
 - **Category**: workflow
 
 ## Purpose
@@ -21,14 +21,17 @@ Works as support for wf2-spec command, generating structured specifications.
 ### Reference Files
 
 - `docs/wf/<work-id>/00_KICKOFF.md` - Kickoff document
-- `~/.claude/templates/01_SPEC.md` - Specification template
+- `~/.claude/templates/01_SPEC.md` or `dotclaude/templates/01_SPEC.md` - Specification template
 - `.wf/state.json` - Current work state
 
 ## Capabilities
 
 1. **Requirements Structuring**
    - Extract Functional Requirements (FR) and Non-Functional Requirements (NFR) from Kickoff
-   - Assign priority to requirements
+   - Assign priority to requirements using Must/Should/Could criteria:
+     - **Must**: Essential for delivery, non-negotiable
+     - **Should**: Important but not critical, can be deferred if necessary
+     - **Could**: Desirable but optional, nice-to-have features
 
 2. **Scope Clarification**
    - Clear separation of In Scope / Out of Scope
@@ -47,21 +50,26 @@ Works as support for wf2-spec command, generating structured specifications.
 - Do not deviate from Kickoff content
 - Do not delve into technical implementation details (that is Plan's role)
 - Explicitly list ambiguous points as Open Questions
+- If Kickoff document is not found, report error and terminate without generating partial output
 
 ## Instructions
 
 ### 1. Load Kickoff
 
-```bash
-work_id=$(jq -r '.active_work' .wf/state.json)
-kickoff_path="docs/wf/$work_id/00_KICKOFF.md"
-cat "$kickoff_path"
+Read the state file to get the active work ID, then read the Kickoff document:
+
+```
+1. Read .wf/state.json to get active_work value
+2. Read docs/wf/<work-id>/00_KICKOFF.md
+3. If Kickoff is not found, return error and terminate
 ```
 
 ### 2. Load Template
 
-```bash
-cat ~/.claude/templates/01_SPEC.md
+Read the specification template:
+
+```
+Read ~/.claude/templates/01_SPEC.md or dotclaude/templates/01_SPEC.md
 ```
 
 ### 3. Extract Requirements
@@ -128,6 +136,8 @@ Create the following sections according to template:
 List points that are not clear from Kickoff as Open Questions
 
 ## Output Format
+
+**Output Location**: `docs/wf/<work-id>/01_SPEC.md`
 
 ```markdown
 ## Specification Draft

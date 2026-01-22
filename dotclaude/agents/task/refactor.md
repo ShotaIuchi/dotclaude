@@ -3,7 +3,7 @@
 ## Metadata
 
 - **ID**: refactor
-- **Base Type**: plan
+- **Base Type**: explore
 - **Category**: task
 
 ## Purpose
@@ -41,7 +41,9 @@ Proposes changes to improve quality, readability, and maintainability without ch
 
 3. **Impact Analysis**
    - Identifying scope of refactoring impact
+   - Dependency graph analysis (files importing/exporting affected code)
    - Identifying necessary test changes
+   - Risk assessment based on code coupling
 
 ## Constraints
 
@@ -54,13 +56,14 @@ Proposes changes to improve quality, readability, and maintainability without ch
 
 ### 1. Analyze Target Code
 
-```bash
-# Read target file
-cat <target>
+```
+# Read target file using Read tool
+Read(<target>)
 
-# Check related tests
-target_name=$(basename <target> .ts)
-cat *${target_name}*.test.ts 2>/dev/null
+# Find and read related test files using Glob tool
+test_files = Glob("**/*<target_name>*.test.*")
+for each test_file in test_files:
+  Read(test_file)
 ```
 
 ### 2. Detect Code Smells
@@ -146,15 +149,17 @@ Describe each refactoring suggestion in detail
 
 **Current Code:**
 
-```typescript
+```
 <current_code>
 ```
 
 **Suggested Code:**
 
-```typescript
+```
 <proposed_code>
 ```
+
+> Note: Use appropriate language syntax highlighting (e.g., `typescript`, `python`, `go`) when rendering.
 
 **Reason:**
 <why_this_change>

@@ -21,16 +21,33 @@ Covers both external package dependencies and internal module dependencies.
 
 ### Reference Files
 
+**JavaScript/TypeScript:**
 - `package.json` - External dependencies
 - `package-lock.json` / `yarn.lock` / `pnpm-lock.yaml` - Lock files
-- import/require statements in source code
+
+**Python:**
+- `requirements.txt` - Pip dependencies
+- `pyproject.toml` - Modern Python project config
+- `Pipfile` / `Pipfile.lock` - Pipenv dependencies
+- `poetry.lock` - Poetry dependencies
+
+**Go:**
+- `go.mod` - Go module dependencies
+- `go.sum` - Dependency checksums
+
+**Rust:**
+- `Cargo.toml` - Cargo dependencies
+- `Cargo.lock` - Lock file
+
+**Other:**
+- import/require/use statements in source code
 
 ## Capabilities
 
 1. **External Dependency Analysis**
    - Understanding direct and indirect dependencies
    - Collecting version information
-   - Vulnerability status (when known)
+   - Vulnerability status check (npm audit, yarn audit, pip-audit, cargo audit)
 
 2. **Internal Module Dependency Analysis**
    - Import relationships between modules
@@ -54,40 +71,57 @@ Covers both external package dependencies and internal module dependencies.
 
 ### 1. Check Dependency Files
 
-```bash
-# Check package.json
-cat package.json | jq '.dependencies, .devDependencies'
+Use the Read tool to examine dependency files:
 
-# Check lock files
-ls -la package-lock.json yarn.lock pnpm-lock.yaml 2>/dev/null
 ```
+# Read package.json for JavaScript/TypeScript projects
+Read: package.json
+
+# Check for lock files
+Glob: package-lock.json, yarn.lock, pnpm-lock.yaml
+
+# For Python projects
+Read: requirements.txt, pyproject.toml
+
+# For Go projects
+Read: go.mod
+
+# For Rust projects
+Read: Cargo.toml
+```
+
+**Note:** If jq is not available for JSON parsing, use the Read tool and parse the JSON content directly. Claude can understand JSON structure without jq.
 
 ### 2. External Dependency Analysis
 
-```bash
-# List direct dependencies
-cat package.json | jq -r '.dependencies | keys[]'
+Use the Read tool to examine dependency files:
 
-# List dev dependencies
-cat package.json | jq -r '.devDependencies | keys[]'
+```
+# Read and analyze package.json structure
+Read: package.json
+# Extract dependencies and devDependencies from the JSON content
 ```
 
-For specific packages:
-```bash
-# Search for package usage locations
-grep -r "from '<package>'" --include="*.ts" --include="*.tsx" .
-grep -r "require('<package>')" --include="*.js" .
+For specific packages, use the Grep tool:
+```
+# Search for package usage locations in TypeScript/TSX files
+Grep: "from '<package>'" with glob="*.{ts,tsx}"
+
+# Search for require statements in JavaScript files
+Grep: "require\('<package>'\)" with glob="*.js"
 ```
 
 ### 3. Internal Module Dependency Analysis
 
-```bash
-# Extract import statements
-grep -r "^import" --include="*.ts" --include="*.tsx" <target_file>
+Use the Grep tool to analyze imports:
+
+```
+# Extract import statements from TypeScript files
+Grep: "^import" with glob="*.{ts,tsx}" in <target_directory>
 
 # Find files that reference a specific module
-grep -r "from './<module>'" --include="*.ts" --include="*.tsx" .
-grep -r "from '.*/<module>'" --include="*.ts" --include="*.tsx" .
+Grep: "from './<module>'" with glob="*.{ts,tsx}"
+Grep: "from '.*/<module>'" with glob="*.{ts,tsx}"
 ```
 
 ### 4. Circular Dependency Detection
@@ -98,7 +132,30 @@ Track imports between modules and detect cycles:
 A → B → C → A (circular)
 ```
 
-### 5. Create Dependency Graph
+### 5. Vulnerability Check
+
+Run security audit tools based on the project type:
+
+```bash
+# JavaScript/TypeScript (npm)
+npm audit
+
+# JavaScript/TypeScript (yarn)
+yarn audit
+
+# JavaScript/TypeScript (pnpm)
+pnpm audit
+
+# Python
+pip-audit
+
+# Rust
+cargo audit
+```
+
+**Note:** These commands are recommendations only. Do not execute without user consent.
+
+### 6. Create Dependency Graph
 
 Organize discovered dependencies in graph format
 

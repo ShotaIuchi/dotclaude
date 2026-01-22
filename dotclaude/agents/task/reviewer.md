@@ -22,7 +22,7 @@ Evaluates code from quality, security, performance, and readability perspectives
 ### Reference Files
 
 - Review target files
-- Project configuration files (.eslintrc, tsconfig.json, etc.)
+- Project configuration files (.eslintrc, tsconfig.json, .prettierrc, pyproject.toml, Cargo.toml, etc.)
 
 ## Capabilities
 
@@ -56,12 +56,12 @@ Evaluates code from quality, security, performance, and readability perspectives
 
 ### 1. Get Review Targets
 
-```bash
-# Get file list by file pattern
-find . -name "<pattern>" -type f
+```
+# Get file list by file pattern using Glob tool
+Glob: pattern="**/<pattern>"
 
 # For diff_only, only changed files
-git diff --name-only HEAD~1 | grep "<pattern>"
+git diff --name-only HEAD~1
 ```
 
 ### 2. Read Files
@@ -83,12 +83,18 @@ Read and review each target file
 - [ ] Is SQL injection protected?
 - [ ] Is XSS protected?
 - [ ] Is sensitive information not hardcoded?
+- [ ] Is SSRF (Server-Side Request Forgery) protected?
+- [ ] Are dependencies free from known vulnerabilities?
+- [ ] Are secrets/credentials not leaked in code or logs?
 
 #### Performance
 
 - [ ] Are there unnecessary loops?
 - [ ] Are there large data copies?
 - [ ] Is async processing used appropriately?
+- [ ] Is bundle size optimized (for frontend)?
+- [ ] Are unnecessary re-renders avoided (for React/Vue)?
+- [ ] Is lazy loading used for heavy resources?
 
 #### Readability
 
@@ -167,6 +173,14 @@ Report discovered issues in structured format
 <same format>
 
 ### Good Points
+
+Identify and highlight positive aspects of the code:
+- Well-structured and organized code
+- Effective use of design patterns
+- Comprehensive error handling
+- Clear and helpful comments/documentation
+- Good test coverage
+- Efficient algorithms or optimizations
 
 - <good_point1>
 - <good_point2>

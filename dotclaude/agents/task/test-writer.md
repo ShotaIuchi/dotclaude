@@ -16,14 +16,18 @@ Supports both unit tests and integration tests, conforming to existing test styl
 ### Input
 
 - `target`: File path of the test target (required)
-- `type`: Test type ("unit" | "integration", defaults to "unit")
+- `type`: Test type ("unit" | "integration" | "e2e", defaults to "unit")
 - `focus`: Specific function or class name (optional)
 
 ### Reference Files
 
 - Test target file
 - Existing test files (for style reference)
-- Test configuration files (jest.config.js, vitest.config.ts, etc.)
+- Test configuration files:
+  - JavaScript/TypeScript: jest.config.js, vitest.config.ts, etc.
+  - Python: pytest.ini, setup.cfg, pyproject.toml
+  - Go: go.mod (for module info)
+  - Java/Kotlin: build.gradle, pom.xml (JUnit/TestNG config)
 
 ## Capabilities
 
@@ -46,14 +50,16 @@ Supports both unit tests and integration tests, conforming to existing test styl
 - Conform to existing test framework and style
 - Do not modify the code under test
 - Do not actually run tests (generation only)
+- After generation, verify syntax correctness (e.g., via language server or linter if available)
 
 ## Instructions
 
 ### 1. Analyze Test Target
 
-```bash
-# Read target file
-cat <target>
+Use the Read tool to read the target file:
+
+```
+Read: <target>
 ```
 
 Extract:
@@ -63,13 +69,16 @@ Extract:
 
 ### 2. Check Existing Tests
 
-```bash
-# Check existing test files
-target_name=$(basename <target> .ts)
-find . -name "*${target_name}*.test.ts" -o -name "*${target_name}*.spec.ts"
+Use the Glob tool to find existing test files:
 
-# Check test configuration
-cat jest.config.js 2>/dev/null || cat vitest.config.ts 2>/dev/null
+```
+Glob: **/*<target_name>*.test.* or **/*<target_name>*.spec.*
+```
+
+Use the Read tool to check test configuration:
+
+```
+Read: jest.config.js (or vitest.config.ts, pytest.ini, etc.)
 ```
 
 ### 3. Design Test Cases
@@ -95,8 +104,9 @@ For each function/method:
 
 ### 4. Generate Test Code
 
-Generate test code matching existing style:
+Generate test code matching existing style. Examples by language:
 
+**JavaScript/TypeScript (Jest/Vitest):**
 ```typescript
 describe('<ModuleName>', () => {
   describe('<functionName>', () => {
@@ -109,6 +119,39 @@ describe('<ModuleName>', () => {
 });
 ```
 
+**Python (pytest):**
+```python
+class TestModuleName:
+    def test_function_name_when_condition(self):
+        # Arrange
+        # Act
+        # Assert
+        pass
+```
+
+**Go:**
+```go
+func TestFunctionName(t *testing.T) {
+    // Arrange
+    // Act
+    // Assert
+}
+```
+
+**Java (JUnit 5):**
+```java
+@DisplayName("ModuleName")
+class ModuleNameTest {
+    @Test
+    @DisplayName("should <expected_behavior> when <condition>")
+    void testFunctionName() {
+        // Arrange
+        // Act
+        // Assert
+    }
+}
+```
+
 ### 5. Mock Design
 
 Design mocks as needed:
@@ -116,6 +159,42 @@ Design mocks as needed:
 - External dependency mocks
 - Time-dependent process mocks
 - Network call mocks
+
+**Mock examples by framework:**
+
+**Jest/Vitest (JavaScript/TypeScript):**
+```typescript
+jest.mock('<module>', () => ({
+  functionName: jest.fn().mockReturnValue(mockValue)
+}));
+```
+
+**Vitest:**
+```typescript
+vi.mock('<module>', () => ({
+  functionName: vi.fn().mockReturnValue(mockValue)
+}));
+```
+
+**pytest (Python):**
+```python
+from unittest.mock import Mock, patch
+
+@patch('module.function_name')
+def test_something(mock_fn):
+    mock_fn.return_value = mock_value
+```
+
+**Go (testify/mock):**
+```go
+type MockService struct {
+    mock.Mock
+}
+func (m *MockService) MethodName() string {
+    args := m.Called()
+    return args.String(0)
+}
+```
 
 ## Output Format
 
@@ -126,6 +205,8 @@ Design mocks as needed:
 
 - **File**: <target>
 - **Type**: <type>
+- **Language**: <detected_language>
+- **Framework**: <detected_test_framework>
 - **Focus**: <focus or "All">
 
 ### Test Target Analysis
@@ -138,54 +219,26 @@ Design mocks as needed:
 
 | ID | Target | Case | Type |
 |----|--------|------|------|
-| TC-1 | <function> | <case> | Happy/Error/Boundary |
+| TC-1 | <function> | <case> | Happy/Error/Boundary/E2E |
 
 ### Generated Test Code
 
 #### <test_file_path>
 
-```typescript
-import { <exports> } from '<target>';
+(Code block in the detected language with appropriate test framework syntax)
 
-describe('<ModuleName>', () => {
-  // Test setup
-  beforeEach(() => {
-    // Setup
-  });
-
-  describe('<functionName>', () => {
-    // TC-1: <case_description>
-    it('should <expected_behavior> when <condition>', () => {
-      // Arrange
-      const input = <input_value>;
-
-      // Act
-      const result = <function_call>;
-
-      // Assert
-      expect(result).toBe(<expected_value>);
-    });
-
-    // TC-2: <case_description>
-    it('should throw error when <invalid_condition>', () => {
-      // Arrange
-      const invalidInput = <invalid_value>;
-
-      // Act & Assert
-      expect(() => <function_call>).toThrow(<ErrorType>);
-    });
-  });
-});
-```
+**Template pattern (language-agnostic):**
+- Import/require test target
+- Setup: Initialize test fixtures, mocks
+- Test cases following AAA pattern:
+  - Arrange: Set up test data and conditions
+  - Act: Execute the function/method under test
+  - Assert: Verify the expected outcome
+- Teardown: Clean up resources if needed
 
 ### Mock Setup
 
-```typescript
-// <mock_description>
-jest.mock('<module>', () => ({
-  <mockImplementation>
-}));
-```
+(Mock code in the detected language/framework)
 
 ### Coverage Prediction
 
@@ -200,5 +253,5 @@ jest.mock('<module>', () => ({
 
 ### Notes
 
-<Notes for test execution, etc.>
+<Notes for test execution, framework-specific considerations, etc.>
 ```

@@ -17,23 +17,26 @@ Works as support for wf3-plan command, generating plans broken down into executa
 
 - Active work's work-id (automatically obtained)
 - `approach`: Implementation approach specification (optional)
+  - Default: When omitted, automatically selects approach based on existing codebase patterns and best practices
 
 ### Reference Files
 
 - `docs/wf/<work-id>/00_KICKOFF.md` - Kickoff document
 - `docs/wf/<work-id>/01_SPEC.md` - Specification
-- `~/.claude/templates/02_PLAN.md` - Plan template
+- `~/.claude/templates/02_PLAN.md` or `dotclaude/templates/02_PLAN.md` - Plan template
 - `.wf/state.json` - Current work state
 
 ## Capabilities
 
 1. **Implementation Step Decomposition**
    - Break down specification into executable units
-   - Clarify dependencies between steps
+   - Clarify dependencies between steps (DAG structure recommended)
+   - Estimate effort per step (~15-60 min target)
 
 2. **Technical Approach Selection**
    - Analyze trade-offs when multiple approaches exist
    - Consider consistency with existing code patterns
+   - Evaluation criteria: Complexity, Maintainability, Performance, Risk (score 1-5)
 
 3. **Risk Analysis**
    - Identify technical risks
@@ -46,9 +49,32 @@ Works as support for wf3-plan command, generating plans broken down into executa
 
 - Limited to planning within specification scope
 - 1 step = granularity completable in one wf5-implement
+  - Guideline: ~50-200 lines of code changes, ~15-60 minutes of work
+  - Each step should have a single, well-defined objective
 - Each step must be independently testable
 
+## Error Handling
+
+When `01_SPEC.md` is missing or incomplete:
+
+1. **Missing file**: Notify user and suggest running `wf2-spec` first
+2. **Incomplete specification**: List missing required sections and request completion
+3. **Invalid format**: Identify format issues and provide correction guidance
+
 ## Instructions
+
+### 0. Validate Prerequisites
+
+```bash
+work_id=$(jq -r '.active_work' .wf/state.json)
+docs_dir="docs/wf/$work_id"
+
+# Check 01_SPEC.md exists
+if [ ! -f "$docs_dir/01_SPEC.md" ]; then
+  echo "Error: 01_SPEC.md not found. Run wf2-spec first."
+  exit 1
+fi
+```
 
 ### 1. Load Related Documents
 
@@ -73,10 +99,18 @@ Extract the following from specification:
 
 Collect information needed for implementation:
 
-```
+```bash
 # Check related files
+find . -name "*.md" -path "*/docs/*" | head -20
+grep -r "pattern_name" --include="*.ts" src/
+
 # Check existing patterns
+ls -la src/components/
+grep -r "export function" --include="*.ts" src/
+
 # Check test structure
+find . -name "*.test.ts" -o -name "*.spec.ts" | head -10
+ls -la tests/
 ```
 
 ### 4. Design Steps
@@ -175,7 +209,11 @@ Design steps according to the following principles:
 
 ### Verification Items
 
-- [ ] Is step granularity appropriate
-- [ ] Are dependencies correct
-- [ ] Is all specification covered
+- [ ] Is step granularity appropriate (each step ~50-200 LOC, ~15-60 min)
+- [ ] Are dependencies correct (DAG structure, no cycles)
+- [ ] Is all specification covered (map FR/NFR to steps)
+- [ ] Are rollback procedures defined for each step
+- [ ] Are test methods specified for each step
 ```
+
+**Note:** All items should be checked before finalizing the plan document.

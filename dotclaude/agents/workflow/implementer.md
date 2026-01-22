@@ -43,6 +43,7 @@ Works as support for wf5-implement command, making code changes according to pla
 - **No Off-Plan Changes**: Do not make changes not documented in 02_PLAN.md
 - **One Execution = One Step**: Do not implement multiple steps at once
 - **Tests Required**: Execute tests that satisfy step completion criteria
+  - Exception: Documentation-only changes or configuration updates may skip tests if explicitly noted in the plan
 - **Log Required**: Record implementation content in 04_IMPLEMENT_LOG.md
 
 ## Instructions
@@ -74,6 +75,19 @@ Verify the following:
 - [ ] Do target files exist
 - [ ] Are prerequisite steps completed
 - [ ] Is plan content clear
+
+**Check prerequisite steps:**
+```bash
+# Verify previous step is completed
+prev_step=$((next_step - 1))
+if [ $prev_step -gt 0 ]; then
+  prev_status=$(jq -r ".works[\"$work_id\"].plan.steps[\"$prev_step\"].status // \"pending\"" .wf/state.json)
+  if [ "$prev_status" != "completed" ]; then
+    echo "Error: Step $prev_step is not completed (status: $prev_status)"
+    exit 1
+  fi
+fi
+```
 
 Generate questions if there are unclear points
 
@@ -125,12 +139,16 @@ npm run build
 ### 7. Update state.json
 
 ```bash
-# Update current_step
-jq ".works[\"$work_id\"].plan.current_step = $next_step" .wf/state.json > tmp && mv tmp .wf/state.json
+# Create unique temporary file for atomic updates
+tmpfile=$(mktemp)
 
-# Update step status
-timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S+09:00")
-jq ".works[\"$work_id\"].plan.steps[\"$next_step\"] = {\"status\": \"completed\", \"completed_at\": \"$timestamp\"}" .wf/state.json > tmp && mv tmp .wf/state.json
+# Update current_step
+jq ".works[\"$work_id\"].plan.current_step = $next_step" .wf/state.json > "$tmpfile" && mv "$tmpfile" .wf/state.json
+
+# Update step status (using UTC timezone for consistency)
+timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+tmpfile=$(mktemp)
+jq ".works[\"$work_id\"].plan.steps[\"$next_step\"] = {\"status\": \"completed\", \"completed_at\": \"$timestamp\"}" .wf/state.json > "$tmpfile" && mv "$tmpfile" .wf/state.json
 ```
 
 ## Output Format
@@ -160,6 +178,8 @@ jq ".works[\"$work_id\"].plan.steps[\"$next_step\"] = {\"status\": \"completed\"
 - <old_code>
 + <new_code>
 ```
+
+> **Note**: For large-scale changes (more than 50 lines), show only key modifications and summarize the rest. Include a note such as "Additional N lines of similar changes omitted for brevity."
 
 ### Test Results
 

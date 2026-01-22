@@ -24,6 +24,10 @@ Used for risk assessment before changes and test target selection.
 - Test files
 - Configuration files
 
+### Supported Languages
+
+This agent primarily targets TypeScript/JavaScript projects (`.ts`, `.tsx`, `.js`, `.jsx`), but the principles can be applied to other languages with appropriate tool adjustments (e.g., Python with `.py`, Vue with `.vue`).
+
 ## Capabilities
 
 1. **Direct Impact Identification**
@@ -46,18 +50,17 @@ Used for risk assessment before changes and test target selection.
 
 - Read-only (do not modify code)
 - Static analysis only (cannot detect runtime dynamic dependencies)
-- Explicitly mark impacts based on inference
+- Mark inferred impacts explicitly: When impacts are determined through inference rather than direct code analysis, clearly label them as "Inferred" in the certainty field
 
 ## Instructions
 
 ### 1. Target File Analysis
 
-```bash
-# Verify file existence
-ls -la <target>
+Use the Read tool to examine the target file:
 
-# Check file contents
-cat <target>
+```
+# Verify file existence and read contents
+Read tool: file_path = <target>
 ```
 
 Extract the following from the target file:
@@ -66,12 +69,20 @@ Extract the following from the target file:
 
 ### 2. Direct Dependency Detection
 
-```bash
-# Search for files that import the target file
-target_name=$(basename <target> .ts)
-grep -r "from '.*${target_name}'" --include="*.ts" --include="*.tsx" .
-grep -r "from \".*${target_name}\"" --include="*.ts" --include="*.tsx" .
+Use the Grep tool to find files that import the target:
+
 ```
+# Search for files that import the target file
+# For TypeScript/JavaScript:
+Grep tool: pattern = "from ['\"].*<target_name>['\"]"
+           glob = "*.{ts,tsx,js,jsx}"
+
+# For Python:
+Grep tool: pattern = "^(from|import) .*<target_name>"
+           glob = "*.py"
+```
+
+Note: Adjust the glob pattern based on the project's language (see Supported Languages).
 
 ### 3. Indirect Dependency Tracking
 
@@ -86,12 +97,18 @@ target.ts
 
 ### 4. Test File Identification
 
-```bash
+Use the Glob tool to find related test files:
+
+```
 # Test files for the target
-find . -name "*${target_name}*.test.ts" -o -name "*${target_name}*.spec.ts"
+Glob tool: pattern = "**/*<target_name>*.{test,spec}.{ts,tsx,js,jsx}"
+
+# For Python projects:
+Glob tool: pattern = "**/test_*<target_name>*.py"
+           pattern = "**/*<target_name>*_test.py"
 
 # Test files for dependents
-# (search for tests for each dependent file)
+# (search for tests for each dependent file using the same patterns)
 ```
 
 ### 5. Impact Assessment
@@ -129,7 +146,7 @@ Organize impact scope visually
 
 | File | Usage | Impact Level |
 |------|-------|--------------|
-| <path> | <usage> | High/Medium/Low |
+| <path> | import / function call / type reference / extends/implements | High/Medium/Low |
 
 #### Indirect Impact (Level 2+)
 
@@ -176,3 +193,15 @@ Organize impact scope visually
 
 <Special notes or explanation of inferred impacts>
 ```
+
+## Notes
+
+### Limitations
+
+- **Dynamic imports**: The `import()` syntax creates runtime dependencies that cannot be detected through static analysis. Document any known dynamic imports in the Notes section of the output.
+- **Circular dependencies**: This agent does not automatically detect circular dependencies. Consider using dedicated tools (e.g., `madge` for JavaScript) for circular dependency analysis.
+
+### Advanced Scenarios
+
+- **Monorepo environments**: When analyzing files in a monorepo, consider cross-package dependencies by extending the search scope to sibling packages.
+- **CI/CD integration**: Impact analysis results can be used to optimize CI pipelines by running only affected tests (e.g., using `--changedSince` in Jest).

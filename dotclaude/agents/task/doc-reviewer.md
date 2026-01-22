@@ -20,7 +20,9 @@ This agent is designed to be called from the `/doc-review` command for parallel 
 ### Reference Files
 
 - Review target file
-- Template: `~/.claude/templates/DOC_REVIEW.md` (or `dotclaude/templates/DOC_REVIEW.md`)
+- Template (checked in priority order):
+  1. `~/.claude/templates/DOC_REVIEW.md` (user-level, takes precedence)
+  2. `dotclaude/templates/DOC_REVIEW.md` (project-level, fallback)
 
 ## Capabilities
 
@@ -44,6 +46,7 @@ This agent is designed to be called from the `/doc-review` command for parallel 
 - Read-only (does not modify source document)
 - Outputs review in Japanese regardless of document language
 - Must generate `<filename>.review.md` as output
+- If output file already exists, it will be overwritten without warning (previous review is replaced)
 
 ## Instructions
 
@@ -67,22 +70,36 @@ output_file="${file%.*}.review.md"
 
 ### 3. Load Template
 
-Load template from one of:
-- `~/.claude/templates/DOC_REVIEW.md`
-- `dotclaude/templates/DOC_REVIEW.md`
+Load template in priority order:
+
+```
+template_paths = [
+  "~/.claude/templates/DOC_REVIEW.md",
+  "dotclaude/templates/DOC_REVIEW.md"
+]
+
+template = null
+for path in template_paths:
+  if file exists at path:
+    template = load(path)
+    break
+
+if template is null:
+  return error: "Template not found. Searched: ~/.claude/templates/DOC_REVIEW.md, dotclaude/templates/DOC_REVIEW.md"
+```
 
 ### 4. Analyze Document
 
 Read the target file and evaluate from these perspectives:
 
-| Perspective | Evaluation Points |
-|-------------|-------------------|
-| Purpose and Role | What is this document for |
-| Completeness | Is necessary information covered |
-| Clarity | Is it understandable for readers |
-| Consistency | Are terms and style unified |
-| Technical Accuracy | Is information accurate and current |
-| Improvements | What should be improved and how |
+| Perspective | Evaluation Points | Criteria |
+|-------------|-------------------|----------|
+| Purpose and Role | What is this document for | Clear statement of intent; target audience identified |
+| Completeness | Is necessary information covered | All required sections present; no missing critical info; examples provided where needed |
+| Clarity | Is it understandable for readers | Logical structure; clear language; appropriate headings; no ambiguous statements |
+| Consistency | Are terms and style unified | Consistent terminology; uniform formatting; coherent voice throughout |
+| Technical Accuracy | Is information accurate and current | Code examples work; commands are valid; references are correct; no outdated info |
+| Improvements | What should be improved and how | Prioritized by impact; specific location cited; actionable suggestions |
 
 ### 5. Generate Review
 

@@ -2,12 +2,19 @@
 
 Constraints that all sub-agents must follow.
 
+> **Document Hierarchy**: This document is subordinate to [PRINCIPLES.md](../../PRINCIPLES.md) and [CONSTITUTION.md](../../CONSTITUTION.md). In case of conflict, those documents take precedence.
+
 ## Basic Constraints
 
 ### 1. Read-Only Principle (Analysis Type)
 
 Analysis type agents (analysis/) are read-only by principle.
 They do not modify or create files.
+
+**Other agent categories:**
+- `task/` agents: May modify files within their defined scope
+- `workflow/` agents: May modify files as part of workflow execution
+- All agents must respect the minimal change principle regardless of write permissions
 
 ### 2. Scope Limitation
 
@@ -18,6 +25,8 @@ If work outside the scope is needed, report to the caller for judgment.
 
 The calling command is responsible for updating state.json.
 Agents do not directly update state.json on their own.
+
+For state.json schema and update guidelines, refer to [rules/state.schema.md](../../rules/state.schema.md).
 
 ## Code Quality
 
@@ -50,6 +59,11 @@ All output follows this basic structure.
 ## Next Actions
 {recommended next steps}
 ```
+
+For purpose-specific output formats, refer to:
+- Analysis reports: [templates/ANALYSIS_REPORT.md](../../templates/ANALYSIS_REPORT.md)
+- Task completion: [templates/TASK_REPORT.md](../../templates/TASK_REPORT.md)
+- Document reviews: [templates/DOC_REVIEW.md](../../templates/DOC_REVIEW.md)
 
 ### 2. Explicit File Paths
 
@@ -98,3 +112,5 @@ Report progress periodically for long-running processes.
 
 All output should be in English.
 Comments in code should also be written in English.
+
+**Note**: The calling command or user may specify a different output language. When explicitly instructed, agents should follow the specified language preference.

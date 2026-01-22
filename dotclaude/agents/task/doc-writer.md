@@ -16,8 +16,9 @@ Supports various formats including README, API documentation, and architecture e
 ### Input
 
 - `target`: Path to the documentation target (required)
-- `type`: Documentation type ("readme" | "api" | "architecture" | "usage")
+- `type`: Documentation type ("readme" | "api" | "architecture" | "usage") (required)
 - `audience`: Target audience ("developer" | "user" | "maintainer", defaults to "developer")
+- `language`: Output language ("en" | "ja", defaults to "en", follows project settings if available)
 
 ### Reference Files
 
@@ -27,29 +28,38 @@ Supports various formats including README, API documentation, and architecture e
 
 ## Capabilities
 
-1. **README Creation**
+The following capabilities are selected based on the `type` input parameter:
+
+| `type` Value | Capability | Description |
+|--------------|------------|-------------|
+| `readme` | README Creation | Project overview and getting started guide |
+| `api` | API Documentation Creation | Function/class reference with examples |
+| `architecture` | Architecture Documentation Creation | System design and component relationships |
+| `usage` | Usage Guide Creation | Step-by-step tutorials and patterns |
+
+1. **README Creation** (`type: "readme"`)
    - Project overview
    - Setup instructions
    - Usage guide
 
-2. **API Documentation Creation**
+2. **API Documentation Creation** (`type: "api"`)
    - Function/class reference
    - Parameter and return value descriptions
    - Usage examples
 
-3. **Architecture Documentation Creation**
+3. **Architecture Documentation Creation** (`type: "architecture"`)
    - System configuration explanation
    - Component relationships
    - Data flow
 
-4. **Usage Guide Creation**
+4. **Usage Guide Creation** (`type: "usage"`)
    - Step-by-step tutorials
    - Common usage patterns
    - Troubleshooting
 
 ## Constraints
 
-- Write in English
+- Write in the language specified by `language` parameter (default: English)
 - Output in Markdown format
 - Conform to existing documentation style
 - Do not modify code, only create documentation
@@ -62,8 +72,12 @@ Supports various formats including README, API documentation, and architecture e
 # Check directory structure
 ls -la <target>
 
-# Check source code
+# Check source code (TypeScript example)
+# Note: Adapt the pattern for other languages (e.g., "*.py", "*.go", "*.rs")
 find <target> -name "*.ts" -type f | head -20
+
+# Alternative: Use glob patterns for shell-agnostic file discovery
+# ls <target>/**/*.ts (requires shell globbing support)
 ```
 
 ### 2. Read Code
@@ -71,7 +85,11 @@ find <target> -name "*.ts" -type f | head -20
 Read target code and extract:
 
 - Exported functions/classes
-- Signatures of each element
+- Signatures of each element:
+  - Function signatures (name, parameters, return type)
+  - Class definitions (public methods, properties)
+  - Type/interface definitions
+  - Constants and enums
 - Existing comments/JSDoc
 
 ### 3. Create by Documentation Type
@@ -177,6 +195,22 @@ function name(param: Type): ReturnType
 ### 4. Consistency Check with Existing Documentation
 
 If existing documentation exists, match style and terminology
+
+### 5. Output File Placement
+
+Generated documentation follows these placement rules:
+
+| `type` | Default Location | File Name |
+|--------|------------------|-----------|
+| `readme` | `<target>/` | `README.md` |
+| `api` | `docs/<target>/` or `<target>/docs/` | `API.md` |
+| `architecture` | `docs/` | `ARCHITECTURE.md` |
+| `usage` | `docs/` or `<target>/docs/` | `USAGE.md` or `GUIDE.md` |
+
+**Notes:**
+- If `docs/` directory exists at project root, prefer placing there
+- If target is a subdirectory/module, consider `<target>/docs/` for module-specific docs
+- Always check for existing documentation structure and follow established patterns
 
 ## Output Format
 
