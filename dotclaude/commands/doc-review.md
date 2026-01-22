@@ -1,6 +1,6 @@
 # /doc-review
 
-Command to create a review of any document file and output as `<filename>.review.md`.
+Command to create a review of any document file and output as `__README.<filename>.md`.
 Supports parallel processing for multiple files using the doc-reviewer sub-agent.
 
 ## Usage
@@ -98,7 +98,7 @@ Task tool:
     Follow the agent instructions to:
     1. Load and analyze the document
     2. Generate review using template
-    3. Write output to <filename>.review.md
+    3. Write output to __README.<filename>.md
 
     Return the result in JSON format:
     {"status": "success|failure", "file": "<path>", "output": "<path>", "error": "<msg if failed>"}
@@ -176,10 +176,10 @@ Summary:
   Failed:    1 file
 
 Generated:
-  - README.review.md
-  - INSTALL.review.md
-  - CONFIG.review.md
-  - GUIDE.review.md
+  - __README.README.md
+  - __README.INSTALL.md
+  - __README.CONFIG.md
+  - __README.GUIDE.md
 
 Failed:
   - API.md: <error_reason>
@@ -230,7 +230,7 @@ The following features are planned for future implementation:
 
 ## Notes
 
-- Write review file (`.review.md`) in Japanese regardless of the document's language
+- Write review file (`__README.*.md`) in Japanese regardless of the document's language
 - Provide specific and constructive feedback
 - For improvements, clearly describe "location", "issue", and "suggestion"
 - Check/uncheck evaluation checklist based on actual evaluation results

@@ -8,7 +8,7 @@
 
 ## Purpose
 
-Applies fixes from a `.review.md` file to its corresponding original document.
+Applies fixes from a `__README.*.md` file to its corresponding original document.
 This agent is designed to be called from the `/doc-fix` command for parallel processing of multiple review files.
 
 ## Context
@@ -21,7 +21,7 @@ This agent is designed to be called from the `/doc-fix` command for parallel pro
 
 ### Reference Files
 
-- Review file (`.review.md`)
+- Review file (`__README.*.md`)
 - Original document (derived from review file name)
 - Template reference (priority order):
   1. `dotclaude/templates/DOC_REVIEW.md` (project-specific)
@@ -69,7 +69,12 @@ if review_file does not exist:
 ### 2. Derive Original File
 
 ```
-base_name = review_file without ".review.md"
+# __README.file.md → file
+dir = dirname(review_file)
+base = basename(review_file)
+base = base.removePrefix("__README.")
+base = base.removeSuffix(".md")
+base_name = join(dir, base)
 
 # Check for common extensions in order
 # Extension selection criteria:
@@ -77,7 +82,7 @@ base_name = review_file without ".review.md"
 # - Configuration formats (yaml, yml, json): Commonly reviewed configuration files
 # - Code files (.sh, .py, .ts, etc.): Not included by default
 #   - Reason: Code files require specialized linting/formatting tools
-#   - To support: Use explicit naming (e.g., script.sh.review.md) or extend config
+#   - To support: Use explicit naming (e.g., __README.script.sh.md) or extend config
 for ext in [md, yaml, yml, json, txt]:
   if file exists at "{base_name}.{ext}":
     original_file = "{base_name}.{ext}"

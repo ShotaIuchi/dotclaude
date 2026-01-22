@@ -1,6 +1,6 @@
 # /doc-fix
 
-Command to fix issues identified in `.review.md` files and apply changes to the original document.
+Command to fix issues identified in `__README.*.md` files and apply changes to the original document.
 Supports parallel processing for multiple review files using the doc-fixer sub-agent.
 
 ## Usage
@@ -12,11 +12,11 @@ Supports parallel processing for multiple review files using the doc-fixer sub-a
 ## Arguments
 
 - `file_path`: Path to the review file(s) or original file(s) (optional)
-  - `file.review.md` → Use directly as review file
-  - `file.md` → Auto-search for `file.review.md`
-  - `*.review.md` → Glob pattern for multiple files (non-recursive, current directory only)
-  - `**/*.review.md` → Recursive glob pattern (all subdirectories)
-  - Omitted → Search for `.review.md` files in current directory (non-recursive)
+  - `__README.file.md` → Use directly as review file
+  - `file.md` → Auto-search for `__README.file.md`
+  - `__README.*.md` → Glob pattern for multiple files (non-recursive, current directory only)
+  - `**/__README.*.md` → Recursive glob pattern (all subdirectories)
+  - Omitted → Search for `__README.*.md` files in current directory (non-recursive)
 - `--all`: Apply all fixes without interactive selection (required for parallel mode)
 
 ## Processing
@@ -34,10 +34,10 @@ all_mode = "--all" in args
 file_args = args without "--all"
 
 if file_args is empty:
-  # Search for .review.md files in current directory
-  review_files = Glob("*.review.md")
+  # Search for __README.*.md files in current directory
+  review_files = Glob("__README.*.md")
   if review_files is empty:
-    Display error: "❌ Error: No .review.md files found in current directory"
+    Display error: "❌ Error: No __README.*.md files found in current directory"
     Stop processing
   # If multiple files found without --all, use AskUserQuestion for selection
   # (see "Multiple Files Selection" section below)
@@ -45,10 +45,13 @@ else:
   # Expand glob patterns and normalize to review files
   review_files = []
   for arg in file_args:
-    if arg ends with ".review.md":
+    if basename(arg) starts with "__README.":
       review_files.append(arg)
     else:
-      review_files.append(arg.replace(extension, ".review.md"))
+      # file.md → __README.file.md
+      dir = dirname(arg)
+      base = basename(arg)
+      review_files.append(join(dir, "__README." + base))
 ```
 
 ### 2. Processing Mode Decision
@@ -73,7 +76,10 @@ if review_file does not exist:
   Stop processing (or skip in parallel mode)
 
 # Derive original file
-base_name = review_file without ".review.md"
+# __README.file.md → file
+dir = dirname(review_file)
+base = basename(review_file).removePrefix("__README.").removeSuffix(".md")
+base_name = join(dir, base)
 # Priority order: common documentation formats first, then config files
 # md: Most common for documentation
 # yaml/yml: Configuration and spec files
@@ -263,11 +269,11 @@ Add `Status` column to the improvement tables and mark fixed items.
 ```
 📋 Fixing 5 review files (parallel)
 ───────────────────────────────────────────────────────────
-[1/5] README.review.md ....... ✓ (3/3 fixed)
-[2/5] INSTALL.review.md ...... ✓ (2/2 fixed)
-[3/5] CONFIG.review.md ....... △ (1/3 fixed)
-[4/5] API.review.md .......... ✗ (failed)
-[5/5] GUIDE.review.md ........ ✓ (5/5 fixed)
+[1/5] __README.README.md ....... ✓ (3/3 fixed)
+[2/5] __README.INSTALL.md ...... ✓ (2/2 fixed)
+[3/5] __README.CONFIG.md ....... △ (1/3 fixed)
+[4/5] __README.API.md .......... ✗ (failed)
+[5/5] __README.GUIDE.md ........ ✓ (5/5 fixed)
 ───────────────────────────────────────────────────────────
 ```
 
@@ -311,7 +317,7 @@ Details:
 ───────────────────────────────────────────────────────────
 
 To retry failed files:
-  /doc-fix CONFIG.review.md API.review.md --all
+  /doc-fix __README.CONFIG.md __README.API.md --all
 ```
 
 #### All Issues Fixed (Single File)
@@ -333,7 +339,7 @@ Files modified:
 
 ## Multiple Files Selection
 
-When multiple `.review.md` files are found without `--all` flag:
+When multiple `__README.*.md` files are found without `--all` flag:
 
 ```json
 {
@@ -341,8 +347,8 @@ When multiple `.review.md` files are found without `--all` flag:
     "question": "どのレビューファイルを処理しますか？",
     "header": "ファイル選択",
     "options": [
-      {"label": "file1.review.md", "description": "Original: file1.md"},
-      {"label": "file2.review.md", "description": "Original: file2.md"},
+      {"label": "__README.file1.md", "description": "Original: file1.md"},
+      {"label": "__README.file2.md", "description": "Original: file2.md"},
       {"label": "すべて処理 (--all)", "description": "全ファイルの全修正を適用"}
     ],
     "multiSelect": false

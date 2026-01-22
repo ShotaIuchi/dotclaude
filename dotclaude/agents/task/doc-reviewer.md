@@ -8,7 +8,7 @@
 
 ## Purpose
 
-Executes a single document file review and generates a `.review.md` file.
+Executes a single document file review and generates a `__README.*.md` file.
 This agent is designed to be called from the `/doc-review` command for parallel processing of multiple files.
 
 ## Context
@@ -45,7 +45,7 @@ This agent is designed to be called from the `/doc-review` command for parallel 
 - Processes exactly ONE file per invocation
 - Read-only (does not modify source document)
 - Outputs review in Japanese regardless of document language
-- Must generate `<filename>.review.md` as output
+- Must generate `__README.<filename>.md` as output
 - If output file already exists, it will be overwritten without warning (previous review is replaced)
 
 ## Instructions
@@ -63,9 +63,11 @@ if file does not exist:
 ### 2. Determine Output Path
 
 ```bash
-# Base name without extension + .review.md
-# Example: docs/guide.md → docs/guide.review.md
-output_file="${file%.*}.review.md"
+# Prefix "__README." + base name without extension + .md
+# Example: docs/guide.md → docs/__README.guide.md
+dir=$(dirname "$file")
+base=$(basename "${file%.*}")
+output_file="${dir}/__README.${base}.md"
 ```
 
 ### 3. Load Template
