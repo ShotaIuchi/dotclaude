@@ -6,8 +6,8 @@
 
 set -euo pipefail
 
-# Directory of this script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Directory of this script (bash/zsh compatible)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 
 # Load wf-utils.sh and wf-state.sh
 source "${SCRIPT_DIR}/wf-utils.sh"
@@ -259,7 +259,17 @@ wf_remove_worktree() {
 }
 
 # Main processing (when executed directly)
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+# bash: BASH_SOURCE[0] != $0 when sourced
+# zsh: ZSH_EVAL_CONTEXT contains "file" when sourced
+_wf_is_sourced() {
+    if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+        [[ "${BASH_SOURCE[0]}" != "$0" ]]
+    else
+        [[ "${ZSH_EVAL_CONTEXT:-}" == *:file:* ]] || [[ "${ZSH_EVAL_CONTEXT:-}" == *:file ]]
+    fi
+}
+
+if ! _wf_is_sourced; then
     case "${1:-init}" in
         init)
             wf_init_project "${2:-}"

@@ -6,8 +6,8 @@
 
 set -euo pipefail
 
-# Directory of this script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Directory of this script (bash/zsh compatible)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 
 # Load wf-utils.sh
 source "${SCRIPT_DIR}/wf-utils.sh"

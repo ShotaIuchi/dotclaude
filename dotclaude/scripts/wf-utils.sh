@@ -6,8 +6,8 @@
 
 set -euo pipefail
 
-# Root directory of dotclaude repository
-DOTCLAUDE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Root directory of dotclaude repository (bash/zsh compatible)
+DOTCLAUDE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)"
 
 # WF configuration directory (in project)
 WF_DIR=".wf"
@@ -15,28 +15,37 @@ WF_DIR=".wf"
 # WF documents directory (in project)
 WF_DOCS_DIR="docs/wf"
 
-# Default branch prefix values
-declare -A DEFAULT_BRANCH_PREFIX=(
-    ["FEAT"]="feat"
-    ["FIX"]="fix"
-    ["REFACTOR"]="refactor"
-    ["CHORE"]="chore"
-    ["RFC"]="rfc"
-)
+#
+# Get default branch prefix for TYPE (bash/zsh compatible)
+# @param $1 TYPE
+# @return Branch prefix
+#
+_wf_default_branch_prefix() {
+    case "$1" in
+        FEAT) echo "feat" ;;
+        FIX) echo "fix" ;;
+        REFACTOR) echo "refactor" ;;
+        CHORE) echo "chore" ;;
+        RFC) echo "rfc" ;;
+        *) echo "feat" ;;
+    esac
+}
 
-# Label to TYPE mapping
-declare -A LABEL_TO_TYPE=(
-    ["feature"]="FEAT"
-    ["enhancement"]="FEAT"
-    ["bug"]="FIX"
-    ["bugfix"]="FIX"
-    ["refactor"]="REFACTOR"
-    ["refactoring"]="REFACTOR"
-    ["chore"]="CHORE"
-    ["maintenance"]="CHORE"
-    ["rfc"]="RFC"
-    ["discussion"]="RFC"
-)
+#
+# Get TYPE from label (bash/zsh compatible)
+# @param $1 Label (lowercase)
+# @return TYPE or empty
+#
+_wf_label_to_type() {
+    case "$1" in
+        feature|enhancement) echo "FEAT" ;;
+        bug|bugfix) echo "FIX" ;;
+        refactor|refactoring) echo "REFACTOR" ;;
+        chore|maintenance) echo "CHORE" ;;
+        rfc|discussion) echo "RFC" ;;
+        *) echo "" ;;
+    esac
+}
 
 #
 # Output error message and exit
@@ -106,18 +115,26 @@ wf_generate_slug() {
 #
 wf_detect_type_from_labels() {
     local labels="$1"
+    local label_array
 
-    # Split labels by comma and check
-    IFS=',' read -ra label_array <<< "$labels"
+    # Split labels by comma (bash/zsh compatible)
+    if [[ -n "${ZSH_VERSION:-}" ]]; then
+        # zsh: use parameter expansion
+        label_array=("${(@s/,/)labels}")
+    else
+        # bash: use read -ra
+        IFS=',' read -ra label_array <<< "$labels"
+    fi
+
+    local label
     for label in "${label_array[@]}"; do
         # Trim leading/trailing whitespace
         label=$(echo "$label" | xargs)
+        local label_lower
         label_lower=$(echo "$label" | tr '[:upper:]' '[:lower:]')
 
-        # Temporarily disable set -u for associative array access
-        set +u
-        local type_value="${LABEL_TO_TYPE[$label_lower]:-}"
-        set -u
+        local type_value
+        type_value=$(_wf_label_to_type "$label_lower")
 
         if [[ -n "$type_value" ]]; then
             echo "$type_value"
@@ -149,11 +166,8 @@ wf_get_branch_prefix() {
         fi
     fi
 
-    # Return default value (temporarily disable set -u for associative array access)
-    set +u
-    local default_prefix="${DEFAULT_BRANCH_PREFIX[$type]:-feat}"
-    set -u
-    echo "$default_prefix"
+    # Return default value (bash/zsh compatible)
+    _wf_default_branch_prefix "$type"
 }
 
 #
