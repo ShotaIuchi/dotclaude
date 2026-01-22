@@ -18,7 +18,22 @@ They reference knowledge from references/ and provide guidance optimized for the
 
 ## Usage
 
-Claude understands the context when skills are included in prompts.
+Skills can be invoked in two ways:
+
+### Slash Command
+
+Use the skill name as a slash command:
+
+```
+/android-architecture
+/ios-architecture
+/kmp-architecture
+/aws-sam
+```
+
+### Contextual Reference
+
+Reference the skill in your prompts:
 
 ```
 Please implement according to the android-architecture skill in this project.
@@ -34,6 +49,8 @@ name: Skill name
 description: Description (in English)
 references:
   - path: ../references/...
+external:
+  - id: external-doc-id
 ---
 
 # Skill Name
@@ -84,3 +101,12 @@ skills/aws-sam/SKILL.md
 2. Create `SKILL.md` (following the format above)
 3. Set paths to necessary references/
 4. Update the skill list in this README.md
+
+### Verification Steps
+
+After adding a new skill, verify it works correctly:
+
+1. **Syntax Check**: Ensure the SKILL.md frontmatter is valid YAML
+2. **Reference Validation**: Confirm all referenced files exist
+3. **Invocation Test**: Try invoking the skill with `/{skill-name}` in Claude
+4. **Context Test**: Verify Claude correctly loads the skill context when invoked

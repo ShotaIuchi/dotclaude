@@ -7,8 +7,12 @@ references:
   - path: ../../references/platforms/ios/architecture.md
 external:
   - id: swift-concurrency
+    # Resolved via: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/
   - id: swiftui-docs
+    # Resolved via: https://developer.apple.com/documentation/swiftui/
   - id: combine-docs
+    # Resolved via: https://developer.apple.com/documentation/combine/
+  # Note: External references are resolved by the skill loader. See references/README.md for configuration.
 ---
 
 # iOS Architecture
@@ -23,7 +27,33 @@ SwiftUI + MVVM / State management patterns based on Apple's official guidelines.
 4. **Unidirectional Data Flow (UDF)** - Events flow upstream, state flows downstream
 
 ```
-Presentation Layer → Domain Layer → Data Layer
+User Action → View → ViewModel → UseCase → Repository → DataSource
+                         ↓
+                   State Update
+                         ↓
+              View re-renders with new state
+```
+
+**UDF Example:**
+```swift
+// 1. User taps button in View
+Button("Load Users") { viewModel.loadUsers() }
+
+// 2. ViewModel receives event and calls UseCase
+func loadUsers() {
+    state = .loading
+    Task {
+        let result = await getUsersUseCase.execute()
+        state = result.isSuccess ? .success(result.data) : .error(result.error)
+    }
+}
+
+// 3. View automatically updates based on state
+switch viewModel.state {
+case .loading: ProgressView()
+case .success(let users): UserListView(users: users)
+case .error(let error): ErrorView(error: error)
+}
 ```
 
 ## Layer Structure
@@ -33,6 +63,41 @@ Presentation Layer → Domain Layer → Data Layer
 | Presentation | Display and user interaction | View (SwiftUI), ViewModel |
 | Domain | Business logic | UseCase, Domain Model |
 | Data | Data retrieval and persistence | Repository, DataSource, API |
+
+### Domain Layer Details
+
+The Domain layer contains pure business logic independent of frameworks:
+
+**UseCase:**
+- Encapsulates a single business operation (e.g., `GetUsersUseCase`, `UpdateProfileUseCase`)
+- Coordinates between multiple repositories if needed
+- Contains validation and business rules
+- Returns `Result<T, Error>` or throws for error handling
+
+**Domain Model:**
+- Pure Swift structs/classes without framework dependencies
+- Represents core business entities (e.g., `User`, `Order`, `Product`)
+- Contains computed properties for derived business values
+- Immutable by default; use `mutating` methods only when necessary
+
+```swift
+// UseCase Example
+protocol GetUsersUseCase {
+    func execute() async throws -> [User]
+}
+
+final class GetUsersUseCaseImpl: GetUsersUseCase {
+    private let userRepository: UserRepository
+
+    init(userRepository: UserRepository) {
+        self.userRepository = userRepository
+    }
+
+    func execute() async throws -> [User] {
+        try await userRepository.getUsers()
+    }
+}
+```
 
 ## Directory Structure
 

@@ -5,9 +5,13 @@ references:
   - path: ../../references/services/aws/sam-template.md
 external:
   - id: aws-sam-docs
+    url: https://docs.aws.amazon.com/serverless-application-model/
   - id: aws-lambda-docs
+    url: https://docs.aws.amazon.com/lambda/
   - id: aws-api-gateway
+    url: https://docs.aws.amazon.com/apigateway/
   - id: lambda-powertools-python
+    url: https://docs.powertools.aws.dev/lambda/python/
 ---
 
 # AWS SAM (Serverless Application Model)
@@ -54,6 +58,7 @@ AWS SAM is an IaC framework for building serverless applications.
 | `sam local start-api` | Start local API server |
 | `sam sync --watch` | Auto-sync changes (during development) |
 | `sam logs -t` | Tail CloudWatch logs |
+| `sam delete` | Delete deployed stack and resources |
 
 ## Directory Structure
 
@@ -71,8 +76,8 @@ project/
 ├── layers/
 │   └── shared/
 │       └── python/
-├── events/                 # Test events
-│   └── event.json
+├── events/                 # Test events (use `sam local generate-event` to create)
+│   └── event.json          # Generated via: sam local generate-event apigateway aws-proxy
 └── tests/
     └── unit/
 ```
