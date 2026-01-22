@@ -1,96 +1,100 @@
 # /doc-fix
 
 Command to fix issues identified in `.review.md` files and apply changes to the original document.
+Supports parallel processing for multiple review files using the doc-fixer sub-agent.
 
 ## Usage
 
 ```
-/doc-fix [file_path]
+/doc-fix [file_path...] [--all]
 ```
 
 ## Arguments
 
-- `file_path`: Path to the review file or original file (optional)
+- `file_path`: Path to the review file(s) or original file(s) (optional)
   - `file.review.md` → Use directly as review file
   - `file.md` → Auto-search for `file.review.md`
-  - Omitted → Search for `.review.md` files in current directory
+  - `*.review.md` → Glob pattern for multiple files (non-recursive, current directory only)
+  - `**/*.review.md` → Recursive glob pattern (all subdirectories)
+  - Omitted → Search for `.review.md` files in current directory (non-recursive)
+- `--all`: Apply all fixes without interactive selection (required for parallel mode)
 
 ## Processing
 
 Parse $ARGUMENTS and execute the following processing.
 
-### 1. Identify Files
+> **Note**: The following is pseudocode illustrating the processing logic.
+> Claude Code executes this logic internally, not as a shell script.
 
-```bash
-arg="$ARGUMENTS"
+### 1. Parse Arguments
 
-if [ -z "$arg" ]; then
+```
+args = $ARGUMENTS
+all_mode = "--all" in args
+file_args = args without "--all"
+
+if file_args is empty:
   # Search for .review.md files in current directory
-  review_files=$(find . -maxdepth 1 -name "*.review.md" -type f)
-  if [ -z "$review_files" ]; then
-    echo "❌ Error: No .review.md files found in current directory"
-    exit 1
-  fi
-  # If multiple files found, use AskUserQuestion for selection
+  review_files = Glob("*.review.md")
+  if review_files is empty:
+    Display error: "❌ Error: No .review.md files found in current directory"
+    Stop processing
+  # If multiple files found without --all, use AskUserQuestion for selection
   # (see "Multiple Files Selection" section below)
-elif [[ "$arg" == *.review.md ]]; then
-  review_file="$arg"
-else
-  review_file="${arg%.*}.review.md"
-fi
-
-# Derive original file from review file
-# Extract base name and find the actual original file
-base_name="${review_file%.review.md}"
-# Check for common extensions in order of preference
-for ext in md yaml yml json txt; do
-  if [ -f "${base_name}.${ext}" ]; then
-    original_file="${base_name}.${ext}"
-    break
-  fi
-done
-# Fallback to .md if no file found (will error later if not exists)
-original_file="${original_file:-${base_name}.md}"
+else:
+  # Expand glob patterns and normalize to review files
+  review_files = []
+  for arg in file_args:
+    if arg ends with ".review.md":
+      review_files.append(arg)
+    else:
+      review_files.append(arg.replace(extension, ".review.md"))
 ```
 
-Error if review file does not exist:
+### 2. Processing Mode Decision
+
+| File Count | --all Flag | Processing Mode |
+|------------|------------|-----------------|
+| 1 | No | Interactive (user selects issues) |
+| 1 | Yes | Batch via sub-agent (all fixes) |
+| 2+ | No | Error: "--all required for multiple files" |
+| 2+ | Yes | Parallel via sub-agents |
+
+**Constant:**
+- `MAX_PARALLEL`: 5 (maximum concurrent sub-agents)
+
+### 3. File Validation
+
+For each review file:
+
 ```
-❌ Error: Review file not found: <review_file>
+if review_file does not exist:
+  Display error: "❌ Error: Review file not found: {review_file}"
+  Stop processing (or skip in parallel mode)
+
+# Derive original file
+base_name = review_file without ".review.md"
+# Priority order: common documentation formats first, then config files
+# md: Most common for documentation
+# yaml/yml: Configuration and spec files
+# json: Data and config files
+# txt: Plain text fallback
+original_file = find file with extension [md, yaml, yml, json, txt]
+
+if original_file does not exist:
+  Display error: "❌ Error: Original file not found: {original_file}"
+  Stop processing (or skip in parallel mode)
 ```
 
-Error if original file does not exist:
-```
-❌ Error: Original file not found: <original_file>
-```
+### 4. Interactive Mode (Single File, No --all)
 
-#### Multiple Files Selection
-
-When multiple `.review.md` files are found, use `AskUserQuestion`:
-
-```json
-{
-  "questions": [{
-    "question": "どのレビューファイルを処理しますか？",
-    "header": "ファイル選択",
-    "options": [
-      {"label": "file1.review.md", "description": "Original: file1.md"},
-      {"label": "file2.review.md", "description": "Original: file2.md"},
-      {"label": "file3.review.md", "description": "Original: file3.md"}
-    ],
-    "multiSelect": false
-  }]
-}
-```
-
-If more than 4 files exist, display most recently modified files first. The "Other" option is automatically provided by AskUserQuestion, allowing users to input a custom file path.
-
-### 2. Parse Review File
+#### 4.1. Parse Review File
 
 Parse the review file content to extract issues from the following sections:
 
 **Template reference:** `../templates/DOC_REVIEW.md`
 
-#### High Priority Issues (`### 優先度高 (High Priority)`)
+##### High Priority Issues (`### 優先度高 (High Priority)`)
 
 Parse table format:
 ```markdown
@@ -99,18 +103,18 @@ Parse table format:
 | 1 | <location> | <issue> | <suggestion> |
 ```
 
-#### Medium Priority Issues (`### 優先度中 (Medium Priority)`)
+##### Medium Priority Issues (`### 優先度中 (Medium Priority)`)
 
 Same table format as High Priority.
 
-#### Future Considerations (`### 将来の検討事項 (Future Considerations)`)
+##### Future Considerations (`### 将来の検討事項 (Future Considerations)`)
 
 Parse list format:
 ```markdown
 - <consideration>
 ```
 
-### 3. Display Issues
+#### 4.2. Display Issues
 
 ```
 📋 Review Issues: <review_file>
@@ -119,10 +123,6 @@ Parse list format:
 🔴 High Priority (<count> items)
 ───────────────────────────────────────────────────────────
 [H1] <location>
-     問題: <issue>
-     提案: <suggestion>
-
-[H2] <location>
      問題: <issue>
      提案: <suggestion>
 
@@ -139,9 +139,9 @@ Parse list format:
 ═══════════════════════════════════════════════════════════
 ```
 
-### 4. Select Issues to Fix
+#### 4.3. Select Issues to Fix
 
-Use `AskUserQuestion` with `multiSelect: true` to allow users to select multiple issues:
+Use `AskUserQuestion` with `multiSelect: true`:
 
 ```json
 {
@@ -152,7 +152,7 @@ Use `AskUserQuestion` with `multiSelect: true` to allow users to select multiple
       {"label": "[H1] <location>", "description": "問題: <issue>"},
       {"label": "[H2] <location>", "description": "問題: <issue>"},
       {"label": "[M1] <location>", "description": "問題: <issue>"},
-      {"label": "[F1] <description>", "description": "将来の検討事項"}
+      {"label": "All remaining (N items)", "description": "残りすべての項目"}
     ],
     "multiSelect": true
   }]
@@ -161,41 +161,77 @@ Use `AskUserQuestion` with `multiSelect: true` to allow users to select multiple
 
 **Option rules:**
 - Maximum 4 options per question (tool limitation)
-- If more than 4 issues exist, use pagination (multiple rounds of questions)
+- If more than 4 issues exist, use pagination
 - Include highest priority issues first (High > Medium > Future)
-- Add "All remaining items" option when more than 4 issues remain
 
-**Pagination example (5+ issues):**
-```
-Round 1: [H1], [H2], [M1], "All remaining (5 items)"
-  ↓ (if "All remaining" not selected)
-Round 2: [M2], [M3], [F1], "All remaining (2 items)"
-  ↓ (if "All remaining" not selected)
-Round 3: [F2], [F3]
-```
+#### 4.4. Apply Fixes (Interactive)
 
-**"All remaining" selection behavior:**
-When "All remaining (N items)" is selected, all remaining issues not yet displayed are automatically marked as selected. No further pagination rounds are needed, and processing proceeds directly to the Apply Fixes step with all those items included.
+For each selected issue, apply the fix directly without sub-agent.
 
-### 5. Apply Fixes
+### 5. Parallel Mode (Multiple Files or --all)
 
-For each selected issue:
+#### 5.1. Sub-agent Invocation
 
-1. **Load original file**
-2. **Identify target section/location** based on `箇所` column
-3. **Apply suggested changes** following these principles:
-   - Apply the suggestion literally when it's specific and unambiguous
-   - When the suggestion describes intent (e.g., "add pagination"), implement it using appropriate patterns from the codebase
-   - Preserve existing formatting and style conventions
-   - If the suggestion conflicts with existing content, prefer the suggestion but maintain consistency
-4. **Verify changes are applied correctly**
+All files are processed via the `doc-fixer` sub-agent for consistent behavior.
+
+##### Single File with --all
 
 ```
-修正中...
-───────────────────────────────────────────────────────────
-[H1] <location> ... ✓
-[M2] <location> ... ✓
-───────────────────────────────────────────────────────────
+Task tool:
+  subagent_type: general-purpose
+  prompt: |
+    Execute the doc-fixer agent defined in agents/task/doc-fixer.md.
+    Input: review_file=<review_file_path>, issues="all"
+
+    Follow the agent instructions to:
+    1. Parse review file and extract all issues
+    2. Apply all fixes to the original document
+    3. Update review file with fix status
+
+    Return the result in JSON format:
+    {"status": "success|partial|failure", "review_file": "<path>", ...}
+```
+
+##### Multiple Files (Parallel)
+
+Launch sub-agents in parallel using `run_in_background: true`:
+
+```
+for each review_file in review_files (up to MAX_PARALLEL):
+  Task tool:
+    subagent_type: general-purpose
+    run_in_background: true
+    prompt: |
+      Execute the doc-fixer agent defined in agents/task/doc-fixer.md.
+      Input: review_file=<review_file_path>, issues="all"
+      ...
+```
+
+For file_count > MAX_PARALLEL, process in batches:
+1. Launch first 5 files in parallel
+2. Wait for completion using TaskOutput
+3. Launch next batch
+4. Repeat until all files processed
+
+#### 5.2. Result Collection
+
+Use TaskOutput to wait for all background tasks to complete.
+
+```
+results = {
+  succeeded: [],
+  partial: [],
+  failed: []
+}
+
+for each task:
+  result = TaskOutput(task_id)
+  if result.status == "success":
+    succeeded.append(result)
+  elif result.status == "partial":
+    partial.append(result)
+  else:
+    failed.append(result)
 ```
 
 ### 6. Update Review File
@@ -205,7 +241,6 @@ Add `Status` column to the improvement tables and mark fixed items.
 **Table formatting rules:**
 - Do not align pipe characters; use minimal spacing
 - Keep existing column widths unchanged where possible
-- Only add the Status column to the header separator with appropriate dashes
 
 **Before:**
 ```markdown
@@ -221,12 +256,22 @@ Add `Status` column to the improvement tables and mark fixed items.
 | 1 | セクション4.1 | ... | ... | ✓ Fixed (YYYY-MM-DD) |
 ```
 
-For Future Considerations, add ` ✓ Fixed (YYYY-MM-DD)` suffix:
-```markdown
-- <consideration> ✓ Fixed (YYYY-MM-DD)
+### 7. Output Format
+
+#### Progress Display (Parallel Mode)
+
+```
+📋 Fixing 5 review files (parallel)
+───────────────────────────────────────────────────────────
+[1/5] README.review.md ....... ✓ (3/3 fixed)
+[2/5] INSTALL.review.md ...... ✓ (2/2 fixed)
+[3/5] CONFIG.review.md ....... △ (1/3 fixed)
+[4/5] API.review.md .......... ✗ (failed)
+[5/5] GUIDE.review.md ........ ✓ (5/5 fixed)
+───────────────────────────────────────────────────────────
 ```
 
-### 7. Completion Message
+#### Completion Message (Single File)
 
 ```
 ✅ Fix completed
@@ -245,7 +290,32 @@ Fixed items:
 Remaining issues: <remaining_count>
 ```
 
-If all issues are fixed:
+#### Completion Message (Parallel Mode)
+
+```
+✅ Fix completed
+
+Summary:
+  Total:     5 files
+  Succeeded: 3 files (all issues fixed)
+  Partial:   1 file (some issues fixed)
+  Failed:    1 file
+
+Details:
+───────────────────────────────────────────────────────────
+✓ README.md: 3/3 issues fixed
+✓ INSTALL.md: 2/2 issues fixed
+△ CONFIG.md: 1/3 issues fixed
+  - Failed: [M2] Section 3 - Could not locate target
+✗ API.md: Error reading review file
+───────────────────────────────────────────────────────────
+
+To retry failed files:
+  /doc-fix CONFIG.review.md API.review.md --all
+```
+
+#### All Issues Fixed (Single File)
+
 ```
 ✅ All issues have been fixed
 
@@ -256,10 +326,36 @@ Files modified:
 🎉 No remaining issues. Consider deleting the review file.
 ```
 
+## Sub-agent Reference
+
+- **Agent**: `agents/task/doc-fixer.md`
+- **Template**: `~/.claude/templates/DOC_REVIEW.md` or `dotclaude/templates/DOC_REVIEW.md`
+
+## Multiple Files Selection
+
+When multiple `.review.md` files are found without `--all` flag:
+
+```json
+{
+  "questions": [{
+    "question": "どのレビューファイルを処理しますか？",
+    "header": "ファイル選択",
+    "options": [
+      {"label": "file1.review.md", "description": "Original: file1.md"},
+      {"label": "file2.review.md", "description": "Original: file2.md"},
+      {"label": "すべて処理 (--all)", "description": "全ファイルの全修正を適用"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
 ## Notes
 
 - Issues are displayed in priority order: High → Medium → Future
-- Only selected items are modified; unselected items remain unchanged
+- Interactive mode: Only selected items are modified
+- Parallel mode (--all): All issues in each file are fixed
 - Review file is updated with fix status for traceability
 - Original file changes follow the suggestions in the review
 - If a suggestion is ambiguous, use best judgment based on context
+- Parallel processing significantly improves performance for multiple files
