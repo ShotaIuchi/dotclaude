@@ -28,6 +28,7 @@ General-purpose task agents that can be executed standalone.
 | Agent | Purpose |
 |-------|---------|
 | `reviewer` | Code review |
+| `doc-reviewer` | Document review (single file) |
 | `test-writer` | Test creation |
 | `refactor` | Refactoring suggestions |
 | `doc-writer` | Documentation creation |
@@ -134,6 +135,7 @@ agents/
 │   └── implementer.md
 ├── task/
 │   ├── reviewer.md
+│   ├── doc-reviewer.md
 │   ├── test-writer.md
 │   ├── refactor.md
 │   └── doc-writer.md
