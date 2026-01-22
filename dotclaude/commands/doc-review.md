@@ -92,7 +92,7 @@ Please review the review file and implement improvements as needed.
 
 ## Notes
 
-- Write review in the same language as the document
+- Write review file (`.review.md`) in Japanese regardless of the document's language
 - Provide specific and constructive feedback
 - For improvements, clearly describe "location", "issue", and "suggestion"
 - Check/uncheck evaluation checklist based on actual evaluation results
