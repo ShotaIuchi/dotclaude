@@ -59,22 +59,30 @@ current_phase=$(jq -r ".works[\"$work_id\"].current // empty" .wf/state.json)
 
 ### 4. Determine and Execute next
 
-#### 4.1 If next is null or empty (completed)
+#### 4.1 If next is null, empty, or "complete"
 
 ```bash
-if [ -z "$next_phase" ] || [ "$next_phase" = "null" ]; then
+if [ -z "$next_phase" ] || [ "$next_phase" = "null" ] || [ "$next_phase" = "complete" ]; then
   # Check if PR has been created
-  pr_url=$(jq -r ".works[\"$work_id\"].pr_url // empty" .wf/state.json)
+  pr_url=$(jq -r ".works[\"$work_id\"].pr.url // empty" .wf/state.json)
 
-  if [ -z "$pr_url" ]; then
-    echo "This work implementation is complete"
-    echo "Please create a PR with /wf6-verify"
-  else
+  if [ "$next_phase" = "complete" ] && [ -n "$pr_url" ]; then
+    # Work is fully complete with PR
     echo "✅ This work is complete"
     echo ""
     echo "PR: $pr_url"
+    exit 0
+  elif [ -z "$next_phase" ] || [ "$next_phase" = "null" ]; then
+    # next is not set (shouldn't happen normally)
+    echo "⚠️ Workflow state is unclear"
+    echo "Please check status with /wf0-status"
+    exit 1
+  else
+    # next is "complete" but no PR
+    echo "This work implementation is complete"
+    echo "Please create a PR with /wf6-verify pr"
+    exit 0
   fi
-  exit 0
 fi
 ```
 
@@ -111,6 +119,16 @@ echo ""
 Commands to execute:
 - Normal: `/$next_phase`
 - wf5-implement + incomplete steps: `/wf5-implement <next_step>`
+
+**Implementation:** Use the Skill tool to invoke the corresponding command:
+
+```
+# For normal phases
+Skill(skill: "$next_phase")
+
+# For wf5-implement with step number
+Skill(skill: "wf5-implement", args: "$next_step")
+```
 
 ## Output Format
 

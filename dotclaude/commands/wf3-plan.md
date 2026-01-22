@@ -70,6 +70,10 @@ Divide steps according to the following principles:
 1. **1 Step = 1 /wf5-implement Execution**
    - Scope completable in one implementation
    - Appropriate size for a commit unit
+   - **Size guidelines:**
+     - Lines changed: ~50-200 lines per step
+     - Files modified: 1-5 files per step
+     - Complexity: Focusable on a single logical change
 
 2. **Consider Dependency Order**
    - Foundational changes first
@@ -109,7 +113,15 @@ After creating Plan, confirm the following:
 jq ".works[\"$work_id\"].current = \"wf3-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
 jq ".works[\"$work_id\"].next = \"wf4-review\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
-# Add step information
+# Add step information with schema
+# Each step in "steps" object follows this structure:
+# {
+#   "<step_number>": {
+#     "status": "pending|in_progress|completed",
+#     "started_at": "<timestamp>|null",
+#     "completed_at": "<timestamp>|null"
+#   }
+# }
 jq ".works[\"$work_id\"].plan = {\"total_steps\": <n>, \"current_step\": 0, \"steps\": {}}" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
 

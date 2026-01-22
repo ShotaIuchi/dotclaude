@@ -10,7 +10,9 @@ Command to create a review of any document file and output as `<filename>.review
 
 ## Arguments
 
-- `<file_path>`: Path to the file to review (required)
+- `<file_path>`: Path to the file(s) to review (required)
+  - Single file: `docs/README.md`
+  - Glob pattern: `docs/*.md`, `dotclaude/commands/wf*.md`
 
 ## Processing
 
@@ -18,17 +20,35 @@ Parse $ARGUMENTS and execute the following processing.
 
 ### 1. Parse Arguments
 
-```
-target_file=$ARGUMENTS
+```bash
+target_pattern="$ARGUMENTS"
+
+# Check if argument is empty
+if [ -z "$target_pattern" ]; then
+  echo "❌ Error: Please specify a file path"
+  echo ""
+  echo "Usage: /doc-review <file_path>"
+  echo "Example: /doc-review docs/README.md"
+  echo "Example: /doc-review docs/*.md  (glob pattern)"
+  exit 1
+fi
+
+# Expand glob pattern to get file list
+files=$(ls -1 $target_pattern 2>/dev/null)
+file_count=$(echo "$files" | wc -l | tr -d ' ')
+
+if [ -z "$files" ]; then
+  echo "❌ Error: No files found matching: $target_pattern"
+  exit 1
+fi
+
+echo "Found $file_count file(s) to review"
 ```
 
-If argument is empty, display error message and exit:
-```
-❌ Error: Please specify a file path
-
-Usage: /doc-review <file_path>
-Example: /doc-review docs/README.md
-```
+**For multiple files:**
+- Process each file sequentially
+- Generate individual `.review.md` for each file
+- Display summary at the end
 
 ### 2. Check File Existence
 
@@ -59,7 +79,7 @@ Load file content and analyze from the following perspectives:
 
 ### 5. Generate Review File
 
-**Template reference:** `../templates/DOC_REVIEW.md`
+**Template reference:** `~/.claude/templates/DOC_REVIEW.md` (or `dotclaude/templates/DOC_REVIEW.md`)
 
 Load template and replace the following placeholders to create review:
 

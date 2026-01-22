@@ -51,8 +51,8 @@ if [ -f ".wf/config.json" ]; then
   fi
 fi
 
-# Fallback if no command in config.json
-if [ -z "$test_cmd" ]; then
+# Fallback if no command in config.json or command is empty
+if [ -z "$test_cmd" ] || [ "$test_cmd" = "null" ]; then
   # Check for package.json
   if [ -f "package.json" ]; then
     npm test
@@ -99,8 +99,8 @@ if [ -f ".wf/config.json" ]; then
   fi
 fi
 
-# Fallback if no command in config.json
-if [ -z "$build_cmd" ]; then
+# Fallback if no command in config.json or command is empty
+if [ -z "$build_cmd" ] || [ "$build_cmd" = "null" ]; then
   # Node.js
   if [ -f "package.json" ]; then
     npm run build
@@ -129,8 +129,8 @@ if [ -f ".wf/config.json" ]; then
   fi
 fi
 
-# Fallback if no command in config.json
-if [ -z "$lint_cmd" ]; then
+# Fallback if no command in config.json or command is empty
+if [ -z "$lint_cmd" ] || [ "$lint_cmd" = "null" ]; then
   # ESLint
   if [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ]; then
     npm run lint
@@ -207,10 +207,24 @@ base=$(jq -r ".works[\"$work_id\"].git.base" .wf/state.json)
 # Push
 git push -u origin "$branch"
 
+# Generate PR title from work-id and Kickoff Goal
+# Extract goal from Kickoff document
+kickoff_goal=$(grep -A2 "## Goal" "$docs_dir/00_KICKOFF.md" | tail -1 | sed 's/^[[:space:]]*//')
+# Extract source type and ID for reference
+source_type=$(jq -r ".works[\"$work_id\"].source.type" .wf/state.json)
+source_id=$(jq -r ".works[\"$work_id\"].source.id" .wf/state.json)
+
+# Generate PR title: "<goal summary> (#<issue_number>)" for GitHub, or just "<goal summary>" for others
+if [ "$source_type" = "github" ]; then
+  pr_title="${kickoff_goal} (#${source_id})"
+else
+  pr_title="$kickoff_goal"
+fi
+
 # Create PR
 gh pr create \
   --base "$base" \
-  --title "<PR title>" \
+  --title "$pr_title" \
   --body "$(cat << EOF
 ## Summary
 

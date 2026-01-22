@@ -60,6 +60,30 @@ Get the following from the corresponding step in Plan:
 - **Completion Criteria**
 - **Dependent Steps**
 
+**Parsing 02_PLAN.md:**
+```bash
+# Read Plan document
+plan_content=$(cat "$plan_path")
+
+# Extract step section using pattern matching
+# Steps are formatted as:
+# ## Step <n>: <title>
+# - Purpose: <purpose>
+# - Target Files: <files>
+# - Tasks: <tasks>
+# - Completion Criteria: <criteria>
+# - Dependencies: <deps>
+
+# Use Read tool to load the file, then parse the markdown structure
+# Look for "## Step $step_number:" header and extract content until next "## Step" or end
+```
+
+Alternatively, if step details are stored in state.json:
+```bash
+# Check if step details exist in state.json
+step_info=$(jq -r ".works[\"$work_id\"].plan.step_details[\"$step_number\"] // empty" .wf/state.json)
+```
+
 ### 4. Check Dependent Steps
 
 ```bash
@@ -112,6 +136,10 @@ Implement according to the tasks documented in Plan:
 3. **Run Tests**
    - Run related tests
    - Fix if tests fail
+   - **Note on test fixes:** Fixing test failures within the current step is permitted and does not count as "off-plan changes" if:
+     - The fix is directly related to the changes made in this step
+     - The fix is necessary to satisfy the step's completion criteria
+     - The fix does not introduce new features or significant refactoring
 
 ### 7. Record Implementation Log
 

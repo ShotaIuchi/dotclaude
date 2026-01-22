@@ -12,29 +12,29 @@ Command to directly invoke sub-agents.
 
 ### Workflow Support Type
 
-| Agent | Purpose |
-|-------|---------|
-| `research` | Issue background research, related code identification |
-| `spec-writer` | Specification draft creation |
-| `planner` | Implementation planning |
-| `implementer` | Single step implementation support |
+| Agent | Purpose | Base Type |
+|-------|---------|-----------|
+| `research` | Issue background research, related code identification | explore |
+| `spec-writer` | Specification draft creation | general |
+| `planner` | Implementation planning | plan |
+| `implementer` | Single step implementation support | general |
 
 ### Task-Specific Type
 
-| Agent | Purpose |
-|-------|---------|
-| `reviewer` | Code review |
-| `test-writer` | Test creation |
-| `refactor` | Refactoring suggestions |
-| `doc-writer` | Documentation creation |
+| Agent | Purpose | Base Type |
+|-------|---------|-----------|
+| `reviewer` | Code review | general |
+| `test-writer` | Test creation | general |
+| `refactor` | Refactoring suggestions | plan |
+| `doc-writer` | Documentation creation | general |
 
 ### Project Analysis Type
 
-| Agent | Purpose |
-|-------|---------|
-| `codebase` | Codebase investigation |
-| `dependency` | Dependency analysis |
-| `impact` | Impact scope identification |
+| Agent | Purpose | Base Type |
+|-------|---------|-----------|
+| `codebase` | Codebase investigation | explore |
+| `dependency` | Dependency analysis | explore |
+| `impact` | Impact scope identification | explore |
 
 ## Usage Examples
 
@@ -75,15 +75,26 @@ params=$(echo "$ARGUMENTS" | cut -d' ' -f2-)
 
 ### 2. Load Agent Definition
 
-Agent definition file locations:
+Agent definition file locations (check in order):
 
 ```
+# Project-specific (priority)
+.claude/agents/workflow/<agent_name>.md
+.claude/agents/task/<agent_name>.md
+.claude/agents/analysis/<agent_name>.md
+
+# Global (fallback)
 ~/.claude/agents/workflow/<agent_name>.md
 ~/.claude/agents/task/<agent_name>.md
 ~/.claude/agents/analysis/<agent_name>.md
+
+# dotclaude project location (if using symlink)
+dotclaude/agents/workflow/<agent_name>.md
+dotclaude/agents/task/<agent_name>.md
+dotclaude/agents/analysis/<agent_name>.md
 ```
 
-Load the corresponding agent definition from one of the above.
+Load the corresponding agent definition from the first matching location.
 
 ### 3. Prepare Context
 
@@ -123,7 +134,7 @@ Select appropriate subagent_type according to agent's Base Type:
 If there is active work, add execution record to state.json:
 
 ```bash
-timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S+09:00")
+timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 jq ".works[\"$work_id\"].agents.last_used = \"$agent_name\"" .wf/state.json > tmp && mv tmp .wf/state.json
 jq ".works[\"$work_id\"].agents.sessions[\"$agent_name\"] = {\"status\": \"completed\", \"last_run\": \"$timestamp\"}" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
@@ -165,8 +176,17 @@ Usage: /agent <agent_name> <param>=<value>
 Example: /agent research issue=123
 ```
 
+## Future Roadmap
+
+The following features are planned for future implementation:
+
+- **Pipeline Execution**: Chain multiple agents together (e.g., `research` → `spec-writer` → `planner`)
+- **Custom Agent Definitions**: Allow users to define project-specific agents in `.claude/agents/custom/`
+- **Execution History Dashboard**: Visualize agent execution history and results via `/agent history`
+
 ## Notes
 
 - Recommended to use workflow support type agents from corresponding workflow commands
 - Analysis type agents operate in read-only mode
 - Execution results are recorded in state.json (if there is active work)
+- **Agent definition files must exist** before using an agent. Use `/agent list` to verify available agents

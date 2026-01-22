@@ -45,7 +45,7 @@ fi
 #### 2a. For github mode
 
 ```bash
-gh issue view <issue_number> --json number,title,labels,body
+gh issue view <issue_number> --json number,title,labels,body,url
 ```
 
 Determine from the retrieved information:
@@ -107,7 +107,8 @@ mkdir -p docs/wf/<work-id>/
       "source": {
         "type": "github|jira|local",
         "id": "<original_id>",
-        "title": "<title>"
+        "title": "<title>",
+        "url": "<issue_url>"
       },
       "git": {
         "base": "<base_branch>",

@@ -34,14 +34,38 @@ kickoff_path="$docs_dir/00_KICKOFF.md"
 revisions_path="$docs_dir/05_REVISIONS.md"
 ```
 
-### 2. Get GitHub Issue Information
+### 2. Get Source Information
 
 Extract Issue number from work-id and get information:
 
 ```bash
-# Handle any prefix before the number (feat-123-..., F1-123-..., FEAT-123-... etc.)
-issue_number=$(echo "$work_id" | sed 's/^[^-]*-\([0-9]*\)-.*/\1/')
-gh issue view "$issue_number" --json number,title,body,labels,assignees,milestone
+# Get source type from state.json
+source_type=$(jq -r ".works[\"$work_id\"].source.type" .wf/state.json)
+
+if [ "$source_type" = "github" ]; then
+  # Extract issue number using regex that handles various prefixes
+  # Pattern: <TYPE>-<number>-<slug> where TYPE can be any alphanumeric string
+  issue_number=$(echo "$work_id" | grep -oE '[0-9]+' | head -1)
+  if [ -z "$issue_number" ]; then
+    echo "ERROR: Could not extract issue number from work-id: $work_id"
+    exit 1
+  fi
+  gh issue view "$issue_number" --json number,title,body,labels,assignees,milestone
+
+elif [ "$source_type" = "jira" ]; then
+  # For Jira, get info from state.json (Jira API access would require separate config)
+  source_id=$(jq -r ".works[\"$work_id\"].source.id" .wf/state.json)
+  source_title=$(jq -r ".works[\"$work_id\"].source.title" .wf/state.json)
+  source_url=$(jq -r ".works[\"$work_id\"].source.url // empty" .wf/state.json)
+  echo "Jira ticket: $source_id - $source_title"
+  [ -n "$source_url" ] && echo "URL: $source_url"
+
+elif [ "$source_type" = "local" ]; then
+  # For local, use info from state.json
+  source_id=$(jq -r ".works[\"$work_id\"].source.id" .wf/state.json)
+  source_title=$(jq -r ".works[\"$work_id\"].source.title" .wf/state.json)
+  echo "Local work: $source_id - $source_title"
+fi
 ```
 
 ### 3. Subcommand-Specific Processing

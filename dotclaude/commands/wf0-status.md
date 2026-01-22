@@ -64,7 +64,7 @@ Created:  <created_at>
    ├── 00_KICKOFF.md    [exists/missing]
    ├── 01_SPEC.md       [exists/missing]
    ├── 02_PLAN.md       [exists/missing]
-   ├── 03_REVIEW.md     [exists/missing]
+   ├── 03_REVIEW.md     [exists/missing]  (created by wf4-review)
    ├── 04_IMPLEMENT_LOG.md [exists/missing]
    └── 05_REVISIONS.md  [exists/missing]
 

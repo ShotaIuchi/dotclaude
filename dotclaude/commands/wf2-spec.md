@@ -48,12 +48,32 @@ Extract from Kickoff:
 
 ### 3. Investigate Codebase
 
-Investigate related code based on Kickoff content:
+Investigate related code based on Kickoff content using the following tools:
 
+**File Discovery:**
+```
+# Use Glob to find relevant files
+Glob(pattern: "src/**/*.ts")  # or appropriate pattern for the codebase
+
+# Use Grep to search for related code
+Grep(pattern: "<keyword_from_kickoff>", type: "ts")
+```
+
+**Deep Investigation (for complex analysis):**
+```
+# Use Task tool with Explore agent for comprehensive codebase investigation
+Task(
+  subagent_type: "Explore",
+  prompt: "Investigate <specific_area> related to <goal_from_kickoff>",
+  description: "Codebase investigation"
+)
+```
+
+Investigation checklist:
 - Identify affected files
 - Check existing implementation patterns
 - Check related tests
-- Check consistency with existing specifications (`docs/spec/`)
+- Check consistency with existing specifications (`docs/spec/` if exists)
 
 ### 4. Create Spec
 
@@ -76,6 +96,22 @@ Check the following points:
 
 3. **Test Strategy Validity**
    - Are there tests to verify Success Criteria
+
+**When warnings are detected:**
+```
+⚠️ Consistency check found issues
+
+Issues:
+- [!] Constraint "performance requirements" not considered in Spec
+- [ ] Dependency "authentication API" impact not documented
+
+Action required:
+1. Review the issues above
+2. Update Spec to address each issue, OR
+3. If issues are intentional, document the reasoning in Notes section
+
+Continue with current Spec? (Use AskUserQuestion)
+```
 
 ### 6. Update state.json
 

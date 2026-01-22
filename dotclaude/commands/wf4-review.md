@@ -58,11 +58,14 @@ Replace template placeholders with review results.
 Review implemented code:
 
 ```bash
+# Get base branch from state.json
+base_branch=$(jq -r ".works[\"$work_id\"].git.base" .wf/state.json)
+
 # Check changed files
-git diff <base_branch>...HEAD --name-only
+git diff "$base_branch"...HEAD --name-only
 
 # Check diff
-git diff <base_branch>...HEAD
+git diff "$base_branch"...HEAD
 ```
 
 Review perspectives:
@@ -118,6 +121,10 @@ jq ".works[\"$work_id\"].next = \"wf5-implement\"" .wf/state.json > tmp && mv tm
 
 # If changes requested
 jq ".works[\"$work_id\"].next = \"wf3-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
+
+# If needs discussion
+jq ".works[\"$work_id\"].next = \"wf4-review\"" .wf/state.json > tmp && mv tmp .wf/state.json
+# Note: "Needs Discussion" keeps next as wf4-review, requiring another review after discussion
 ```
 
 ### 6. Completion Message

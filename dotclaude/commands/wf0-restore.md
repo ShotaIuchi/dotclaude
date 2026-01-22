@@ -37,11 +37,25 @@ if [ -z "$work_id" ]; then
   work_id=$(jq -r '.active_work // empty' .wf/state.json)
 fi
 
-# If still empty, present candidates
+# If still empty, present candidates using AskUserQuestion
 if [ -z "$work_id" ]; then
   echo "Available work-ids:"
   jq -r '.works | keys[]' .wf/state.json
-  # Prompt user to select
+
+  # Use AskUserQuestion tool for selection
+  # Build options from available work-ids (max 4 options)
+  # {
+  #   "questions": [{
+  #     "question": "Which workspace do you want to restore?",
+  #     "header": "Select work",
+  #     "options": [
+  #       {"label": "<work-id-1>", "description": "Branch: <branch>, Phase: <current>"},
+  #       {"label": "<work-id-2>", "description": "Branch: <branch>, Phase: <current>"},
+  #       ...
+  #     ],
+  #     "multiSelect": false
+  #   }]
+  # }
 fi
 ```
 
@@ -90,9 +104,9 @@ if [ ! -d "$worktree_path" ]; then
   echo "worktree created: $worktree_path"
 fi
 
-# Update local.json
-jq ".works[\"$work_id\"].worktree_path = \"$worktree_path\"" .wf/local.json > .wf/local.json.tmp
-mv .wf/local.json.tmp .wf/local.json
+# Update local.json (using temp file for safe update)
+tmp_file=$(mktemp)
+jq ".works[\"$work_id\"].worktree_path = \"$worktree_path\"" .wf/local.json > "$tmp_file" && mv "$tmp_file" .wf/local.json
 ```
 
 ### 6. Update active_work
