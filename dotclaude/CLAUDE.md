@@ -7,8 +7,8 @@ Use by creating a symlink from `dotclaude/` folder to `~/.claude`.
 
 ## Directory Structure
 
-| Directory | Purpose |
-|-----------|---------|
+| Directory/File | Purpose |
+|----------------|---------|
 | `commands/` | Workflow commands (`wf{N}-{name}.md` format) |
 | `rules/` | Project rules and schemas |
 | `templates/` | Document templates |
@@ -18,6 +18,7 @@ Use by creating a symlink from `dotclaude/` folder to `~/.claude`.
 | `scripts/` | Utility scripts |
 | `examples/` | Example files |
 | `tests/` | Test files |
+| `hooks.json` | Automation hooks (see `rules/hooks.md`) |
 
 ## Principles (PRINCIPLES.md)
 
