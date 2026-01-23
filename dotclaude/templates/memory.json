@@ -1,0 +1,17 @@
+{
+  "last_session": null,
+  "session_count": 0,
+  "last_compact": null,
+  "compact_count": 0,
+  "context": {
+    "active_work": null,
+    "current_phase": null,
+    "next_phase": null,
+    "tech_stack": [],
+    "current_task": null,
+    "progress": null
+  },
+  "decisions": [],
+  "blockers": [],
+  "notes": []
+}

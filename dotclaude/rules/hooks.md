@@ -7,6 +7,58 @@ Claude Codeのフックによる自動化ルール。
 `hooks.json`で定義されたフックは、ツール実行の前後やセッションイベント時に自動実行される。
 人間が見逃すミスを自動検出し、品質の底上げを行う。
 
+## セッション永続化
+
+### 仕組み
+
+```
+SessionStart → memory.json読込 → コンテキスト復元表示
+     ↓
+  作業中
+     ↓
+PreCompact → memory.json保存 → コンパクション実行
+     ↓
+SessionEnd → memory.json保存 → タイムスタンプ記録
+```
+
+### memory.json
+
+`.wf/memory.json`にClaudeの「記憶」を保存する。
+
+```json
+{
+  "last_session": "2026-01-23T12:00:00Z",
+  "session_count": 5,
+  "context": {
+    "active_work": "FEAT-123-auth",
+    "current_phase": "wf5-implement",
+    "tech_stack": ["KMP", "Koin", "SQLDelight"],
+    "current_task": "ログイン機能の実装",
+    "progress": "API接続完了、トークン保存は未着手"
+  },
+  "decisions": [
+    "トークンはEncryptedSharedPreferencesに保存",
+    "リフレッシュトークンは次フェーズで対応"
+  ],
+  "blockers": []
+}
+```
+
+### state.jsonとの違い
+
+| ファイル | 目的 | 更新タイミング |
+|----------|------|----------------|
+| `state.json` | ワークフロー進捗（構造化） | コマンド実行時 |
+| `memory.json` | Claudeの記憶（自由形式） | セッション終了時 |
+
+### 手動で記憶を更新
+
+Claudeに指示して`memory.json`を更新できる：
+
+```
+「現在の進捗と決定事項をmemory.jsonに保存して」
+```
+
 ## 対応言語
 
 | 言語 | 拡張子 | 検出対象 | 推奨代替 |
