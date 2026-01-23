@@ -82,6 +82,29 @@ Common parameters by agent type:
 
 See individual agent documentation for complete parameter specifications.
 
+## Parallel Execution
+
+**独立したagentは並列実行する。** 詳細は [`rules/parallel-execution.md`](../rules/parallel-execution.md) を参照。
+
+### 並列実行可否
+
+| カテゴリ | 並列実行 | 理由 |
+|----------|----------|------|
+| analysis/* | ✅ 可能 | 読み取り専用、副作用なし |
+| task/reviewer | ✅ 可能 | 読み取り専用 |
+| task/doc-reviewer | ✅ 可能 | 読み取り専用 |
+| workflow/* | ⚠️ 注意 | state.json更新の競合に注意 |
+| task/doc-fixer | ❌ 順次 | ファイル編集の競合回避 |
+
+### 例: 並列レビュー
+
+```
+# 3つのagentを同時起動
+/agent reviewer files="src/auth/*.kt"
+/agent impact path="src/auth"
+/agent codebase query="認証の既存実装"
+```
+
 ## Agent Definition Format
 
 Each agent is defined in the following format.
