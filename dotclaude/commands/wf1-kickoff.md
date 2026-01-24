@@ -65,12 +65,91 @@ elif [ "$source_type" = "local" ]; then
   source_id=$(jq -r ".works[\"$work_id\"].source.id" .wf/state.json)
   source_title=$(jq -r ".works[\"$work_id\"].source.title" .wf/state.json)
   echo "Local work: $source_id - $source_title"
+  # For Plan Mode processing, see section 2.1
 fi
 ```
+
+### 2.1. Plan Mode for Local Work (source_type = "local")
+
+When source_type is "local" and creating a new Kickoff (no existing `00_KICKOFF.md`), use Plan Mode to explore requirements interactively.
+
+> **Note**: Plan Mode uses Claude Code's built-in planning feature (`EnterPlanMode` / `ExitPlanMode` tools).
+
+**Plan file path:**
+```
+.wf/<work-id>/plan.md
+```
+
+#### Flow
+
+1. **Check for existing plan.md**
+   - If `plan.md` exists → Proceed to step 4 (use as Kickoff input)
+   - If `plan.md` does not exist → Continue to step 2
+
+2. **Enter Plan Mode**
+   - Start the planning session
+   - Display the work title and any available context
+   - Guide user through requirements exploration:
+     - What problem are you solving?
+     - What is the desired outcome?
+     - What constraints exist?
+     - What is out of scope?
+     - What dependencies exist?
+
+3. **Create plan.md**
+   - After Plan Mode dialogue, save the plan to `.wf/<work-id>/plan.md`
+   - Format:
+     ```markdown
+     # Plan: <work-title>
+
+     ## Problem Statement
+     <what problem we're solving>
+
+     ## Goals
+     <desired outcomes>
+
+     ## Constraints
+     <technical/business constraints>
+
+     ## Non-Goals
+     <explicitly out of scope>
+
+     ## Dependencies
+     <dependencies on other work, external services, or APIs>
+
+     ## Approach
+     <high-level approach discussed>
+
+     ## Open Questions
+     <unresolved questions, if any>
+     ```
+   - Exit Plan Mode to complete the planning phase
+
+4. **Use plan.md as Kickoff input**
+   - Read `plan.md` content
+   - Map plan sections to Kickoff template sections:
+     | plan.md | 00_KICKOFF.md |
+     |---------|---------------|
+     | Problem Statement | Background |
+     | Goals | Goal, Success Criteria |
+     | Constraints | Constraints |
+     | Non-Goals | Non-Goals |
+     | Dependencies | Dependencies |
+     | Approach | Notes |
+     | Open Questions | Notes |
+   - Proceed to create `00_KICKOFF.md` with this input
+
+#### Skip Plan Mode
+
+To skip Plan Mode for local work, user can:
+- Create `plan.md` manually before running `/wf1-kickoff`
+- Use `/wf1-kickoff chat` for free-form dialogue instead
 
 ### 3. Subcommand-Specific Processing
 
 #### New Creation (no subcommand)
+
+**For GitHub/Jira sources:**
 
 1. Analyze Issue content
 2. Dialogue with user to confirm:
@@ -82,9 +161,20 @@ fi
 
 3. Create `00_KICKOFF.md`
 
+**For Local sources:**
+
+1. Check if `plan.md` exists at `.wf/<work-id>/plan.md`
+2. If not exists:
+   - Enter Plan Mode (see section 2.1)
+   - Complete planning dialogue
+   - Create `plan.md`
+3. Read `plan.md` and use as input
+4. Create `00_KICKOFF.md` based on plan content
+5. Optionally keep or delete `plan.md` after Kickoff creation
+
 **Template reference:** Load and use `~/.claude/templates/00_KICKOFF.md`.
 
-Replace template placeholders with content determined through dialogue.
+Replace template placeholders with content determined through dialogue (or plan.md for local).
 
 #### update
 
@@ -144,6 +234,8 @@ Revision: <new_revision>
 Work: <work-id>
 "
 ```
+
+**Note on plan.md**: The `.wf/<work-id>/plan.md` file is NOT committed to git. It serves as a temporary working document during the Kickoff creation process and can be deleted after `00_KICKOFF.md` is created.
 
 ### 6. Brainstorming Dialogue Guide
 
