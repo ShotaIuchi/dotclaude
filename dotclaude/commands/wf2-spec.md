@@ -1,3 +1,8 @@
+---
+description: Create the Specification document
+argument-hint: "[update | validate]"
+---
+
 # /wf2-spec
 
 Command to create the Specification (Spec) document.

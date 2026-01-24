@@ -1,3 +1,8 @@
+---
+description: Create the Implementation Plan
+argument-hint: "[update | step <n>]"
+---
+
 # /wf3-plan
 
 Command to create the Implementation Plan (Plan) document.

@@ -1,3 +1,8 @@
+---
+description: Restore an existing workspace
+argument-hint: "[work-id]"
+---
+
 # /wf0-restore
 
 Command to restore an existing workspace. Used for resuming work on a different PC or recreating a worktree.

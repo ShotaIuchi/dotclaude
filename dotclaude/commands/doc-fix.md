@@ -1,3 +1,8 @@
+---
+description: Fix issues from document reviews
+argument-hint: "[file_path...] [--all]"
+---
+
 # /doc-fix
 
 Command to fix issues identified in `reviews/README.<path>.<filename>.md` files and apply changes to the original document.

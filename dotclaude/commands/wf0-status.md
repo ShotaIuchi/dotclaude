@@ -1,3 +1,8 @@
+---
+description: Display current workflow status
+argument-hint: "[work-id | all]"
+---
+
 # /wf0-status
 
 Command to display current workflow status.

@@ -1,3 +1,8 @@
+---
+description: Create a new workspace from GitHub, Jira, or local work
+argument-hint: "github=<n> | jira=<id> | local=<id>"
+---
+
 # /wf0-workspace
 
 Command to create a new workspace.

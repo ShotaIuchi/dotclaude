@@ -1,3 +1,8 @@
+---
+description: Create or update the Kickoff document
+argument-hint: "[update | revise \"<instruction>\" | chat]"
+---
+
 # /wf1-kickoff
 
 Command to create or update the Kickoff document.

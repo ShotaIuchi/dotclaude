@@ -1,3 +1,8 @@
+---
+description: Verify implementation and create PR
+argument-hint: "[pr | update]"
+---
+
 # /wf6-verify
 
 Command to verify implementation and create PR.

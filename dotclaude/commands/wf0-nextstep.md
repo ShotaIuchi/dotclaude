@@ -1,3 +1,8 @@
+---
+description: Execute the next workflow step
+argument-hint: "[work-id]"
+---
+
 # /wf0-nextstep
 
 Command to immediately execute the next workflow command without confirmation.

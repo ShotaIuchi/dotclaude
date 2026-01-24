@@ -1,3 +1,8 @@
+---
+description: Invoke sub-agents for specific tasks
+argument-hint: "<agent_name> [param=value...]"
+---
+
 # /agent
 
 Command to directly invoke sub-agents.

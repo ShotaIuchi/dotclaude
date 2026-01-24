@@ -1,3 +1,8 @@
+---
+description: Implement one step of the Plan
+argument-hint: "[step_number]"
+---
+
 # /wf5-implement
 
 Command to implement one step of the Plan.

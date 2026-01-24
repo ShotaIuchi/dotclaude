@@ -1,3 +1,8 @@
+---
+description: Ask a question to a sub-agent
+argument-hint: "<question>"
+---
+
 # /subask
 
 メインセッションのコンテキストを汚さずに、サブエージェントに質問を投げて回答を得る。

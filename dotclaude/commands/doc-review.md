@@ -1,3 +1,8 @@
+---
+description: Review document files
+argument-hint: "<file_path>"
+---
+
 # /doc-review
 
 Command to create a review of any document file and output as `reviews/README.<path>.<filename>.md`.

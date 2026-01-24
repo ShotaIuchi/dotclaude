@@ -1,3 +1,8 @@
+---
+description: Create review records for Plan or code
+argument-hint: "[plan | code | pr]"
+---
+
 # /wf4-review
 
 Command to create review records. Used for Plan review or code review after implementation.
