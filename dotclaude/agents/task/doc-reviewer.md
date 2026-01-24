@@ -8,7 +8,7 @@
 
 ## Purpose
 
-Executes a single document file review and generates a `__README.*.md` file.
+Executes a single document file review and generates a `reviews/README.<path>.<filename>.md` file.
 This agent is designed to be called from the `/doc-review` command for parallel processing of multiple files.
 
 ## Context
@@ -45,7 +45,7 @@ This agent is designed to be called from the `/doc-review` command for parallel 
 - Processes exactly ONE file per invocation
 - Read-only (does not modify source document)
 - Outputs review in Japanese regardless of document language
-- Must generate `__README.<filename>.md` as output
+- Must generate `reviews/README.<path>.<filename>.md` as output
 - If output file already exists, it will be overwritten without warning (previous review is replaced)
 
 ## Instructions
@@ -63,11 +63,18 @@ if file does not exist:
 ### 2. Determine Output Path
 
 ```bash
-# Prefix "__README." + base name without extension + .md
-# Example: docs/guide.md → docs/__README.guide.md
+# Output to reviews/ directory with path encoded in filename (dot-separated)
+# Example: docs/guide.md → reviews/README.docs.guide.md
+# Example: commands/wf0-status.md → reviews/README.commands.wf0-status.md
+# Example: agents/_base/constraints.md → reviews/README.agents._base.constraints.md
 dir=$(dirname "$file")
 base=$(basename "${file%.*}")
-output_file="${dir}/__README.${base}.md"
+if [ "$dir" = "." ]; then
+  output_file="reviews/README.${base}.md"
+else
+  path_part=$(echo "$dir" | tr '/' '.')
+  output_file="reviews/README.${path_part}.${base}.md"
+fi
 ```
 
 ### 3. Load Template
