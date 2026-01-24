@@ -1,28 +1,28 @@
-# Skills System
+# スキルシステム
 
-Skill definitions that provide project-specific knowledge and best practices to Claude.
+Claudeにプロジェクト固有の知識とベストプラクティスを提供するスキル定義。
 
-## Overview
+## 概要
 
-Skills define specialized knowledge about specific domains or technology stacks.
-They reference knowledge from references/ and provide guidance optimized for the project.
+スキルは特定のドメインや技術スタックに関する専門知識を定義します。
+references/からの知識を参照し、プロジェクトに最適化されたガイダンスを提供します。
 
-## Skill List
+## スキル一覧
 
-| Skill | Purpose |
-|-------|---------|
-| `android-architecture` | Android app architecture design |
-| `ios-architecture` | iOS app architecture design |
-| `kmp-architecture` | Kotlin Multiplatform architecture design |
-| `aws-sam` | AWS SAM template and Lambda implementation |
+| スキル | 目的 |
+|--------|------|
+| `android-architecture` | Androidアプリアーキテクチャ設計 |
+| `ios-architecture` | iOSアプリアーキテクチャ設計 |
+| `kmp-architecture` | Kotlin Multiplatformアーキテクチャ設計 |
+| `aws-sam` | AWS SAMテンプレートとLambda実装 |
 
-## Usage
+## 使用方法
 
-Skills can be invoked in two ways:
+スキルは2つの方法で呼び出せます：
 
-### Slash Command
+### スラッシュコマンド
 
-Use the skill name as a slash command:
+スキル名をスラッシュコマンドとして使用：
 
 ```
 /android-architecture
@@ -31,48 +31,48 @@ Use the skill name as a slash command:
 /aws-sam
 ```
 
-### Contextual Reference
+### コンテキスト参照
 
-Reference the skill in your prompts:
+プロンプト内でスキルを参照：
 
 ```
-Please implement according to the android-architecture skill in this project.
+このプロジェクトのandroid-architectureスキルに従って実装してください。
 ```
 
-## Skill Definition Format
+## スキル定義フォーマット
 
-Each skill is defined in the following format.
+各スキルは以下の形式で定義されます。
 
 ```markdown
 ---
-name: Skill name
-description: Description (in English)
+name: スキル名
+description: 説明（英語）
 references:
   - path: ../references/...
 external:
   - id: external-doc-id
 ---
 
-# Skill Name
+# スキル名
 
 ## Purpose
-{Guidance this skill provides}
+{このスキルが提供するガイダンス}
 
 ## Use Cases
-{Situations where this skill should be used}
+{このスキルを使用すべき状況}
 
 ## Key Principles
-{Principles to follow}
+{従うべき原則}
 
 ## Implementation Patterns
-{Recommended implementation patterns}
+{推奨される実装パターン}
 ```
 
-## Directory Structure
+## ディレクトリ構造
 
 ```
 skills/
-├── README.md                 # This file
+├── README.md                 # このファイル
 ├── android-architecture/
 │   └── SKILL.md
 ├── ios-architecture/
@@ -83,9 +83,9 @@ skills/
     └── SKILL.md
 ```
 
-## Relationship with references/
+## references/との関係
 
-Skills reference knowledge from references/.
+スキルはreferences/からの知識を参照します。
 
 ```
 skills/android-architecture/SKILL.md
@@ -95,18 +95,18 @@ skills/aws-sam/SKILL.md
   → references: ../references/services/aws/...
 ```
 
-## Steps for Adding New Skills
+## 新しいスキルの追加手順
 
-1. Create `skills/{skill-name}/` directory
-2. Create `SKILL.md` (following the format above)
-3. Set paths to necessary references/
-4. Update the skill list in this README.md
+1. `skills/{skill-name}/`ディレクトリを作成
+2. `SKILL.md`を作成（上記フォーマットに従う）
+3. 必要なreferences/へのパスを設定
+4. このREADME.mdのスキル一覧を更新
 
-### Verification Steps
+### 検証手順
 
-After adding a new skill, verify it works correctly:
+新しいスキルを追加した後、正しく動作することを確認：
 
-1. **Syntax Check**: Ensure the SKILL.md frontmatter is valid YAML
-2. **Reference Validation**: Confirm all referenced files exist
-3. **Invocation Test**: Try invoking the skill with `/{skill-name}` in Claude
-4. **Context Test**: Verify Claude correctly loads the skill context when invoked
+1. **構文チェック**: SKILL.mdのフロントマターが有効なYAMLであることを確認
+2. **参照検証**: 参照されているすべてのファイルが存在することを確認
+3. **呼び出しテスト**: Claudeで`/{skill-name}`を使ってスキルを呼び出してみる
+4. **コンテキストテスト**: スキル呼び出し時にClaudeが正しくスキルコンテキストを読み込むことを確認
