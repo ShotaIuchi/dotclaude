@@ -34,10 +34,14 @@ references/
 │       ├── kmp-network-ktor.md
 │       ├── kmp-state-udf.md
 │       └── kmp-testing.md
-└── services/                   # Cloud services
-    └── aws/
+├── services/                   # Cloud services
+│   └── aws/
+│       ├── index.md
+│       └── sam-template.md
+└── tools/                      # Development tools
+    └── claude-code/
         ├── index.md
-        └── sam-template.md
+        └── command-frontmatter.md
 ```
 
 ---
@@ -101,6 +105,13 @@ Authoritative sources for design principles that all skills should reference.
 |------|-------------|----------------|
 | [index.md](services/aws/index.md) | Structure, priority, external links | aws-sam |
 | [sam-template.md](services/aws/sam-template.md) | AWS SAM template and implementation patterns | aws-sam |
+
+### tools/claude-code/ - Claude Code
+
+| File | Description | Related Skills |
+|------|-------------|----------------|
+| [index.md](tools/claude-code/index.md) | Claude Code リファレンス索引 | - |
+| [command-frontmatter.md](tools/claude-code/command-frontmatter.md) | コマンド/スキルのフロントマター仕様 | - |
 
 ---
 
@@ -188,3 +199,4 @@ references:
 | platforms/ | Platform-specific | android, ios |
 | languages/ | Programming language-specific | kotlin |
 | services/ | Cloud service-specific | aws |
+| tools/ | Development tools | claude-code |
