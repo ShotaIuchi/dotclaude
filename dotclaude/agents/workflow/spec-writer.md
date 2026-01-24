@@ -9,7 +9,7 @@
 ## Purpose
 
 Creates specification (01_SPEC.md) drafts based on Kickoff document content.
-Works as support for wf3-spec command, generating structured specifications.
+Works as support for wf2-spec command, generating structured specifications.
 
 ## Context
 

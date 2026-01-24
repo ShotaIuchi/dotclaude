@@ -26,15 +26,15 @@
    - null/empty/complete の場合は完了処理
 
 4. **コマンドの即座実行**
-   - wf6-implement: 未完了ステップがあればステップ引数付きで実行
+   - wf5-implement: 未完了ステップがあればステップ引数付きで実行
    - その他: 次のフェーズコマンドを実行
 
 ## 出力例
 
 ```
-🚀 Executing /wf3-spec...
+🚀 Executing /wf2-spec...
 
-(wf3-specコマンドの出力)
+(wf2-specコマンドの出力)
 ```
 
 ## 完了時の出力
@@ -48,6 +48,6 @@ PR: https://github.com/...
 ## 注意事項
 
 - **確認なしで即座実行**: このコマンドはユーザー確認なしで次のコマンドを実行
-- state.jsonが存在しない場合は`/wf1-workspace`を促す
+- state.jsonが存在しない場合は`/wf1-kickoff`を促す
 - work-idが解決できない場合は明確なエラーを表示
 - 完了した作業にはステータスを表示して終了

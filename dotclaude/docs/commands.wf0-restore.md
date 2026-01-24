@@ -42,13 +42,13 @@
 Work ID: FEAT-123-export-csv
 Branch: feat/123-export-csv
 Base: develop
-Current: wf3-spec
-Next: wf4-plan
+Current: wf2-spec
+Next: wf3-plan
 
 Documents:
 - docs/wf/FEAT-123-export-csv/
 
-Next step: Run /wf4-plan
+Next step: Run /wf3-plan
 ```
 
 ## 注意事項

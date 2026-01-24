@@ -196,7 +196,7 @@ Example: /cmd issue=123
 Error: No active work found
 
 To fix:
-1. Run /wf1-workspace to create a new workspace
+1. Run /wf1-kickoff to create a new workspace
    OR
 2. Run /wf0-restore to restore an existing workspace
 ```
@@ -224,7 +224,7 @@ Details:
 - build.gradle.kts (modified)
 - settings.gradle.kts (modified)
 
-Next step: Run /wf6-implement to implement the next step
+Next step: Run /wf5-implement to implement the next step
 ```
 ```
 
@@ -238,7 +238,7 @@ Work ID: FEAT-123-add-feature
 Branch: feature/123-add-feature
 
 Next steps:
-1. Run /wf2-kickoff to create the Kickoff document
+1. Run /wf1-kickoff to create the Kickoff document
 2. Review the created workspace structure
 ```
 ```
@@ -263,8 +263,8 @@ skills/android-architecture/
 
 ```
 commands/
-├── wf1-workspace.md      # ワークスペース作成
-├── wf2-kickoff.md        # キックオフ
+├── wf1-kickoff.md      # ワークスペース作成
+├── wf1-kickoff.md        # キックオフ
 └── subask.md             # サブ質問
 ```
 

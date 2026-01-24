@@ -22,7 +22,7 @@
 
 - パスの`/`を`.`に置換
 - 拡張子は`.md`を維持
-- 例: `commands/wf1-workspace.md` → `docs/commands.wf1-workspace.md`
+- 例: `commands/wf1-kickoff.md` → `docs/commands.wf1-kickoff.md`
 
 ## 翻訳内容
 

@@ -342,8 +342,8 @@ wf_create_work() {
     local work_data
     work_data=$(cat << EOF
 {
-  "current": "wf1-workspace",
-  "next": "wf2-kickoff",
+  "current": "wf1-kickoff",
+  "next": "wf2-spec",
   "git": {
     "base": "${base_branch}",
     "branch": "${feature_branch}"

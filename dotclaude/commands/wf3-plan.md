@@ -3,14 +3,14 @@ description: Create the Implementation Plan
 argument-hint: "[update | step <n>]"
 ---
 
-# /wf4-plan
+# /wf3-plan
 
 Command to create the Implementation Plan (Plan) document.
 
 ## Usage
 
 ```
-/wf4-plan [subcommand]
+/wf3-plan [subcommand]
 ```
 
 ## Subcommands
@@ -35,7 +35,7 @@ plan_path="$docs_dir/02_PLAN.md"
 # Check if Spec exists
 if [ ! -f "$spec_path" ]; then
   echo "Spec document not found"
-  echo "Please run /wf3-spec first"
+  echo "Please run /wf2-spec first"
   exit 1
 fi
 ```
@@ -72,7 +72,7 @@ Collect information needed for implementation:
 
 Divide steps according to the following principles:
 
-1. **1 Step = 1 /wf6-implement Execution**
+1. **1 Step = 1 /wf5-implement Execution**
    - Scope completable in one implementation
    - Appropriate size for a commit unit
    - **Size guidelines:**
@@ -115,8 +115,8 @@ After creating Plan, confirm the following:
 ### 7. Update state.json
 
 ```bash
-jq ".works[\"$work_id\"].current = \"wf4-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
-jq ".works[\"$work_id\"].next = \"wf5-review\"" .wf/state.json > tmp && mv tmp .wf/state.json
+jq ".works[\"$work_id\"].current = \"wf3-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
+jq ".works[\"$work_id\"].next = \"wf4-review\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
 # Add step information with schema
 # Each step in "steps" object follows this structure:
@@ -167,8 +167,8 @@ Implementation Steps:
 Total: 3 steps
 
 Next step:
-- If review is needed: /wf5-review
-- To start implementation: /wf6-implement
+- If review is needed: /wf4-review
+- To start implementation: /wf5-implement
 ```
 
 ## step Subcommand
@@ -176,7 +176,7 @@ Next step:
 Display details of a specific step:
 
 ```
-/wf4-plan step 1
+/wf3-plan step 1
 ```
 
 Output:

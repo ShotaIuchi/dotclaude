@@ -41,8 +41,8 @@
 
 Branch:   feat/123-export-csv
 Base:     develop
-Current:  wf2-kickoff
-Next:     wf3-spec
+Current:  wf1-kickoff
+Next:     wf2-spec
 
 📁 Documents:
    docs/wf/FEAT-123-export-csv/
@@ -51,12 +51,12 @@ Next:     wf3-spec
    └── ...
 
 🔄 Phase Progress:
-   [✓] wf1-workspace
-   [→] wf2-kickoff     ← current
-   [ ] wf3-spec
+   [✓] wf1-kickoff
+   [→] wf1-kickoff     ← current
+   [ ] wf2-spec
    ...
 
-💡 Next: /wf3-spec
+💡 Next: /wf2-spec
 ```
 
 ## 注意事項

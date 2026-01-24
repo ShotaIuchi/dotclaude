@@ -27,7 +27,7 @@ Parse $ARGUMENTS and execute the following processing.
 ```bash
 if [ ! -f .wf/state.json ]; then
   echo "WF system is not initialized"
-  echo "Please create a workspace with /wf1-workspace"
+  echo "Please create a workspace with /wf1-kickoff"
   exit 1
 fi
 ```
@@ -42,7 +42,7 @@ if [ -z "$work_id" ]; then
 fi
 
 if [ -z "$work_id" ]; then
-  echo "ERROR: Please specify work-id or run /wf1-workspace"
+  echo "ERROR: Please specify work-id or run /wf1-kickoff"
   exit 1
 fi
 ```
@@ -85,26 +85,26 @@ if [ -z "$next_phase" ] || [ "$next_phase" = "null" ] || [ "$next_phase" = "comp
   else
     # next is "complete" but no PR
     echo "This work implementation is complete"
-    echo "Please create a PR with /wf7-verify pr"
+    echo "Please create a PR with /wf6-verify pr"
     exit 0
   fi
 fi
 ```
 
-#### 4.2 If next is wf6-implement
+#### 4.2 If next is wf5-implement
 
-For wf6-implement, if there are incomplete steps, execute with step argument:
+For wf5-implement, if there are incomplete steps, execute with step argument:
 
 ```bash
-if [ "$next_phase" = "wf6-implement" ]; then
+if [ "$next_phase" = "wf5-implement" ]; then
   current_step=$(jq -r ".works[\"$work_id\"].plan.current_step // 0" .wf/state.json)
   total_steps=$(jq -r ".works[\"$work_id\"].plan.total_steps // 0" .wf/state.json)
 
   if [ "$current_step" -lt "$total_steps" ]; then
     next_step=$((current_step + 1))
-    echo "🚀 Executing /wf6-implement $next_step..."
+    echo "🚀 Executing /wf5-implement $next_step..."
     echo ""
-    # Execute /wf6-implement $next_step
+    # Execute /wf5-implement $next_step
   fi
 fi
 ```
@@ -123,7 +123,7 @@ echo ""
 
 Commands to execute:
 - Normal: `/$next_phase`
-- wf6-implement + incomplete steps: `/wf6-implement <next_step>`
+- wf5-implement + incomplete steps: `/wf5-implement <next_step>`
 
 **Implementation:** Use the Skill tool to invoke the corresponding command:
 
@@ -131,8 +131,8 @@ Commands to execute:
 # For normal phases
 Skill(skill: "$next_phase")
 
-# For wf6-implement with step number
-Skill(skill: "wf6-implement", args: "$next_step")
+# For wf5-implement with step number
+Skill(skill: "wf5-implement", args: "$next_step")
 ```
 
 ## Output Format
@@ -155,6 +155,6 @@ ERROR: <error message>
 ## Notes
 
 - **Execute immediately without confirmation**: This command executes the next command without asking for user confirmation
-- Prompt `/wf1-workspace` if state.json does not exist
+- Prompt `/wf1-kickoff` if state.json does not exist
 - Display clear error if work-id cannot be resolved
 - Display status and exit for completed work

@@ -16,10 +16,10 @@ WF管理システムで使用されるサブエージェントの定義と使用
 
 | エージェント | 目的 | 呼び出し元 |
 |-------------|------|-----------|
-| [`research`](workflow/research.md) | Issue背景調査、関連コード特定 | wf2-kickoff |
-| [`spec-writer`](workflow/spec-writer.md) | 仕様書ドラフト作成 | wf3-spec |
-| [`planner`](workflow/planner.md) | 実装計画立案 | wf4-plan |
-| [`implementer`](workflow/implementer.md) | 単一ステップ実装支援 | wf6-implement |
+| [`research`](workflow/research.md) | Issue背景調査、関連コード特定 | wf1-kickoff |
+| [`spec-writer`](workflow/spec-writer.md) | 仕様書ドラフト作成 | wf2-spec |
+| [`planner`](workflow/planner.md) | 実装計画立案 | wf3-plan |
+| [`implementer`](workflow/implementer.md) | 単一ステップ実装支援 | wf5-implement |
 
 ### タスク特化型 (task/)
 
@@ -51,10 +51,10 @@ WF管理システムで使用されるサブエージェントの定義と使用
 ワークフローコマンドは適切なエージェントを自動的に呼び出します。
 
 ```
-/wf2-kickoff
+/wf1-kickoff
 → researchエージェントがIssue背景を調査
 
-/wf3-spec
+/wf2-spec
 → spec-writerエージェントが仕様書ドラフトを作成
 ```
 

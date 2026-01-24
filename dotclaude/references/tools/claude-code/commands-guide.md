@@ -14,7 +14,7 @@ Claude Code のコマンド（`.claude/commands/*.md`）の書き方ガイド。
 ```
 .claude/commands/
 ├── my-command.md       # /my-command として呼び出し可能
-├── wf1-workspace.md    # /wf1-workspace
+├── wf1-kickoff.md    # /wf1-kickoff
 └── subask.md           # /subask
 ```
 
@@ -166,7 +166,7 @@ if --force in $ARGUMENTS:
 ## Usage
 
 ```
-/wf2-kickoff [subcommand] [options]
+/wf1-kickoff [subcommand] [options]
 ```
 
 ## Subcommands
@@ -389,7 +389,7 @@ Work ID: FEAT-123-add-feature
 Branch: feature/123-add-feature
 Docs: docs/wf/FEAT-123-add-feature/
 
-Next step: Run /wf2-kickoff
+Next step: Run /wf1-kickoff
 ```
 ```
 

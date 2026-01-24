@@ -2,8 +2,8 @@
   "active_work": "FEAT-123-export-csv",
   "works": {
     "FEAT-123-export-csv": {
-      "current": "wf6-implement",
-      "next": "wf7-verify",
+      "current": "wf5-implement",
+      "next": "wf6-verify",
       "git": {
         "base": "develop",
         "branch": "feat/123-export-csv"
@@ -54,8 +54,8 @@
       "created_at": "2026-01-17T10:00:00+09:00"
     },
     "FIX-456-login-error": {
-      "current": "wf3-spec",
-      "next": "wf4-plan",
+      "current": "wf2-spec",
+      "next": "wf3-plan",
       "git": {
         "base": "develop",
         "branch": "fix/456-login-error"

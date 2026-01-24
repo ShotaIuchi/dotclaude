@@ -24,13 +24,12 @@ dotclaudeプロジェクトの日本語訳ドキュメント。
 | `commands.wf0-status.md` | `commands/wf0-status.md` | ステータス表示 |
 | `commands.wf0-restore.md` | `commands/wf0-restore.md` | ワークスペース復元 |
 | `commands.wf0-nextstep.md` | `commands/wf0-nextstep.md` | 次ステップ実行 |
-| `commands.wf1-workspace.md` | `commands/wf1-workspace.md` | ワークスペース作成 |
-| `commands.wf2-kickoff.md` | `commands/wf2-kickoff.md` | Kickoff作成 |
-| `commands.wf3-spec.md` | `commands/wf3-spec.md` | 仕様書作成 |
-| `commands.wf4-plan.md` | `commands/wf4-plan.md` | 実装計画作成 |
-| `commands.wf5-review.md` | `commands/wf5-review.md` | レビュー作成 |
-| `commands.wf6-implement.md` | `commands/wf6-implement.md` | 実装 |
-| `commands.wf7-verify.md` | `commands/wf7-verify.md` | 検証・PR作成 |
+| `commands.wf1-kickoff.md` | `commands/wf1-kickoff.md` | ワークスペース・Kickoff作成 |
+| `commands.wf2-spec.md` | `commands/wf2-spec.md` | 仕様書作成 |
+| `commands.wf3-plan.md` | `commands/wf3-plan.md` | 実装計画作成 |
+| `commands.wf4-review.md` | `commands/wf4-review.md` | レビュー作成 |
+| `commands.wf5-implement.md` | `commands/wf5-implement.md` | 実装 |
+| `commands.wf6-verify.md` | `commands/wf6-verify.md` | 検証・PR作成 |
 | `commands.agent.md` | `commands/agent.md` | エージェント呼び出し |
 | `commands.doc-review.md` | `commands/doc-review.md` | ドキュメントレビュー |
 | `commands.doc-fix.md` | `commands/doc-fix.md` | レビュー修正適用 |
@@ -49,7 +48,7 @@ dotclaudeプロジェクトの日本語訳ドキュメント。
 ## 命名規則
 
 - 元ファイルパスの`/`を`.`に置換
-- 例: `commands/wf1-workspace.md` → `commands.wf1-workspace.md`
+- 例: `commands/wf1-kickoff.md` → `commands.wf1-kickoff.md`
 
 ## メンテナンス
 

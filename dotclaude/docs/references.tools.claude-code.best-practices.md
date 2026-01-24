@@ -111,7 +111,7 @@ Please check:
 Error: No active work found
 
 To fix:
-1. Run /wf1-workspace to create a new workspace
+1. Run /wf1-kickoff to create a new workspace
    OR
 2. Run /wf0-restore to restore an existing workspace
 ```
@@ -127,7 +127,7 @@ Summary:
 - Created: 3 files
 - Modified: 2 files
 
-Next step: Run /wf6-implement to implement the next step
+Next step: Run /wf5-implement to implement the next step
 ```
 
 ---

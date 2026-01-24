@@ -9,7 +9,7 @@
 ## Purpose
 
 Conducts background research on GitHub Issues and identifies related code.
-As a preliminary step for wf2-kickoff, it is responsible for gathering information to deepen understanding of Issues.
+As a preliminary step for wf1-kickoff, it is responsible for gathering information to deepen understanding of Issues.
 
 ## Context
 
@@ -142,12 +142,12 @@ Example: `.wf/research/123.md` for Issue #123
 - If existing results found, compare timestamps and update incrementally if needed
 - Cache invalidation: Results older than 7 days should be refreshed
 
-### Handoff to wf2-kickoff
+### Handoff to wf1-kickoff
 
-After completing investigation, the results are used by `wf2-kickoff`:
+After completing investigation, the results are used by `wf1-kickoff`:
 
 1. Research output file (`.wf/research/<issue>.md`) serves as input for kickoff
-2. `wf2-kickoff` reads the "Related Files" and "Technical Elements" sections
+2. `wf1-kickoff` reads the "Related Files" and "Technical Elements" sections
 3. Investigation findings inform the scope and approach of the work plan
 
 ### Output Format

@@ -98,7 +98,7 @@ Grep: "suspend fun"
 ### ワークフロー開始時
 
 ```
-/wf2-kickoff 実行時:
+/wf1-kickoff 実行時:
 
 並列:
 - Issue情報取得 (gh issue view)

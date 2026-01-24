@@ -9,7 +9,7 @@
 ## Purpose
 
 Implements one step of the implementation plan (02_PLAN.md).
-Works as support for wf6-implement command, making code changes according to plan.
+Works as support for wf5-implement command, making code changes according to plan.
 
 ## Context
 

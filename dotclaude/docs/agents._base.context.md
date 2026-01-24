@@ -18,7 +18,7 @@
 4. **計画外変更の防止**: 計画された作業のみを実装
    - `state.json` での `02_PLAN.md` ステップ追跡により強制
    - 各実装ステップは計画された項目と一致する必要がある
-   - 実装制約については `commands/wf6-implement.md` を参照
+   - 実装制約については `commands/wf5-implement.md` を参照
 
 ## ファイル構造
 
@@ -69,8 +69,8 @@ docs/wf/<work-id>/
   "active_work": "<work-id>",
   "works": {
     "<work-id>": {
-      "current": "wf6-implement",
-      "next": "wf7-verify",
+      "current": "wf5-implement",
+      "next": "wf6-verify",
       "git": {
         "base": "develop",
         "branch": "feat/123-export-csv"
@@ -147,25 +147,25 @@ gh issue view "$issue_number" --json number,title,body,labels,assignees,mileston
 ## ワークフロー順序
 
 ```
-wf1-workspace → wf2-kickoff → wf3-spec → wf4-plan → wf5-review → wf6-implement → wf7-verify
+wf1-kickoff → wf1-kickoff → wf2-spec → wf3-plan → wf4-review → wf5-implement → wf6-verify
 ```
 
 各フェーズで生成されるドキュメント:
 
 | フェーズ | ドキュメント |
 |----------|-------------|
-| wf2-kickoff | 00_KICKOFF.md |
-| wf3-spec | 01_SPEC.md |
-| wf4-plan | 02_PLAN.md |
-| wf5-review | 03_REVIEW.md |
-| wf6-implement | 04_IMPLEMENT_LOG.md |
-| wf2-kickoff（更新） | 05_REVISIONS.md |
+| wf1-kickoff | 00_KICKOFF.md |
+| wf2-spec | 01_SPEC.md |
+| wf3-plan | 02_PLAN.md |
+| wf4-review | 03_REVIEW.md |
+| wf5-implement | 04_IMPLEMENT_LOG.md |
+| wf1-kickoff（更新） | 05_REVISIONS.md |
 
 ### 05_REVISIONS.md の管理
 
 `05_REVISIONS.md` ファイルはキックオフドキュメントへの変更を追跡します:
 
-- **作成時**: 既存の作業に `--update` フラグ付きで `wf2-kickoff` を実行した場合
+- **作成時**: 既存の作業に `--update` フラグ付きで `wf1-kickoff` を実行した場合
 - **更新時**: 後続のキックオフリビジョンごとに新しいエントリを追加
 - **目的**: 開発中のスコープ/目標変更の監査証跡を維持
 - **形式**: リビジョン番号、タイムスタンプ、変更概要、更新理由を含む
@@ -184,7 +184,7 @@ wf1-workspace → wf2-kickoff → wf3-spec → wf4-plan → wf5-review → wf6-i
     "default_branch": "main"
   },
   "workflow": {
-    "require_review": true,       // 実装前にwf5-reviewを必須とする
+    "require_review": true,       // 実装前にwf4-reviewを必須とする
     "auto_create_branch": true,   // キックオフ時にgitブランチを自動作成
     "docs_path": "docs/wf"        // ワークフロードキュメントのパス
   },
@@ -204,7 +204,7 @@ wf1-workspace → wf2-kickoff → wf3-spec → wf4-plan → wf5-review → wf6-i
 ```bash
 # stateファイルの存在確認
 if [ ! -f .wf/state.json ]; then
-  echo "Error: .wf/state.json not found. Run 'wf1-workspace' to initialize."
+  echo "Error: .wf/state.json not found. Run 'wf1-kickoff' to initialize."
   exit 1
 fi
 
@@ -217,7 +217,7 @@ fi
 # アクティブな作業の確認
 work_id=$(jq -r '.active_work // empty' .wf/state.json)
 if [ -z "$work_id" ]; then
-  echo "No active work. Run 'wf2-kickoff' to start a new work item."
+  echo "No active work. Run 'wf1-kickoff' to start a new work item."
   exit 1
 fi
 ```
@@ -226,9 +226,9 @@ fi
 
 | シナリオ | 対処 |
 |----------|------|
-| `.wf/` ディレクトリがない | `wf1-workspace` を実行して初期化 |
+| `.wf/` ディレクトリがない | `wf1-kickoff` を実行して初期化 |
 | state.json のJSONが無効 | 構文エラーを確認、必要に応じてgitから復元 |
-| active_work が未設定 | `wf2-kickoff` または `wf0-restore` を実行 |
+| active_work が未設定 | `wf1-kickoff` または `wf0-restore` を実行 |
 | ワークフロードキュメントがない | `docs/wf/<work-id>/` パスを確認、復元が必要な場合あり |
 
 ## サブエージェントのコンテキスト共有
