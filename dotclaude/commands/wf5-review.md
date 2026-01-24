@@ -3,14 +3,14 @@ description: Create review records for Plan or code
 argument-hint: "[plan | code | pr]"
 ---
 
-# /wf4-review
+# /wf5-review
 
 Command to create review records. Used for Plan review or code review after implementation.
 
 ## Usage
 
 ```
-/wf4-review [subcommand]
+/wf5-review [subcommand]
 ```
 
 ## Subcommands
@@ -119,17 +119,17 @@ Next Action:
 
 ```bash
 # When review is complete
-jq ".works[\"$work_id\"].current = \"wf4-review\"" .wf/state.json > tmp && mv tmp .wf/state.json
+jq ".works[\"$work_id\"].current = \"wf5-review\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
 # If approved
-jq ".works[\"$work_id\"].next = \"wf5-implement\"" .wf/state.json > tmp && mv tmp .wf/state.json
+jq ".works[\"$work_id\"].next = \"wf6-implement\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
 # If changes requested
-jq ".works[\"$work_id\"].next = \"wf3-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
+jq ".works[\"$work_id\"].next = \"wf4-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
 # If needs discussion
-jq ".works[\"$work_id\"].next = \"wf4-review\"" .wf/state.json > tmp && mv tmp .wf/state.json
-# Note: "Needs Discussion" keeps next as wf4-review, requiring another review after discussion
+jq ".works[\"$work_id\"].next = \"wf5-review\"" .wf/state.json > tmp && mv tmp .wf/state.json
+# Note: "Needs Discussion" keeps next as wf5-review, requiring another review after discussion
 ```
 
 ### 6. Completion Message
@@ -147,8 +147,8 @@ Findings:
 - Suggestions: 3
 
 Next step:
-- Approved: Run /wf5-implement
-- Request Changes: Fix issues and run /wf4-review again
+- Approved: Run /wf6-implement
+- Request Changes: Fix issues and run /wf5-review again
 ```
 
 ## Notes

@@ -31,7 +31,7 @@ SessionEnd → memory.json保存 → タイムスタンプ記録
   "session_count": 5,
   "context": {
     "active_work": "FEAT-123-auth",
-    "current_phase": "wf5-implement",
+    "current_phase": "wf6-implement",
     "tech_stack": ["KMP", "Koin", "SQLDelight"],
     "current_task": "ログイン機能の実装",
     "progress": "API接続完了、トークン保存は未着手"

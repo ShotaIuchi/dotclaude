@@ -5,7 +5,7 @@
 
 ## 概要 (Summary)
 
-このドキュメントは、ワークフロー管理システムにおける「planner」エージェントの定義ファイルです。仕様書（01_SPEC.md）に基づいて実装計画（02_PLAN.md）を作成する役割を担い、wf3-planコマンドのサポートとして機能します。実行可能なステップへの分解、技術的アプローチの選択、リスク分析、ロールバック計画の作成という4つの主要な能力を持ちます。
+このドキュメントは、ワークフロー管理システムにおける「planner」エージェントの定義ファイルです。仕様書（01_SPEC.md）に基づいて実装計画（02_PLAN.md）を作成する役割を担い、wf4-planコマンドのサポートとして機能します。実行可能なステップへの分解、技術的アプローチの選択、リスク分析、ロールバック計画の作成という4つの主要な能力を持ちます。
 
 ## 評価 (Evaluation)
 
@@ -33,7 +33,7 @@
 
 | # | 箇所 | 問題 | 提案 | Status |
 |---|------|------|------|--------|
-| 1 | Constraints | 「1 step = granularity completable in one wf5-implement」の基準が曖昧 | 目安となる作業時間や変更行数などの具体的な指標を追加 | ✓ Fixed (2026-01-22) |
+| 1 | Constraints | 「1 step = granularity completable in one wf6-implement」の基準が曖昧 | 目安となる作業時間や変更行数などの具体的な指標を追加 | ✓ Fixed (2026-01-22) |
 | 2 | Output Format | Verification Items のチェックリストがドラフト段階のまま | 完成版ドキュメントとしてのチェック済み状態を定義する | ✓ Fixed (2026-01-22) |
 | 3 | Reference Files | テンプレートパス `~/.claude/templates/02_PLAN.md` | プロジェクト相対パス `dotclaude/templates/` との整合性を確認 | ✓ Fixed (2026-01-22) |
 

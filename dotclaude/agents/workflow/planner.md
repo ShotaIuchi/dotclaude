@@ -9,7 +9,7 @@
 ## Purpose
 
 Creates implementation plans (02_PLAN.md) based on specification (01_SPEC.md) content.
-Works as support for wf3-plan command, generating plans broken down into executable steps.
+Works as support for wf4-plan command, generating plans broken down into executable steps.
 
 ## Context
 
@@ -48,7 +48,7 @@ Works as support for wf3-plan command, generating plans broken down into executa
 ## Constraints
 
 - Limited to planning within specification scope
-- 1 step = granularity completable in one wf5-implement
+- 1 step = granularity completable in one wf6-implement
   - Guideline: ~50-200 lines of code changes, ~15-60 minutes of work
   - Each step should have a single, well-defined objective
 - Each step must be independently testable
@@ -57,7 +57,7 @@ Works as support for wf3-plan command, generating plans broken down into executa
 
 When `01_SPEC.md` is missing or incomplete:
 
-1. **Missing file**: Notify user and suggest running `wf2-spec` first
+1. **Missing file**: Notify user and suggest running `wf3-spec` first
 2. **Incomplete specification**: List missing required sections and request completion
 3. **Invalid format**: Identify format issues and provide correction guidance
 
@@ -71,7 +71,7 @@ docs_dir="docs/wf/$work_id"
 
 # Check 01_SPEC.md exists
 if [ ! -f "$docs_dir/01_SPEC.md" ]; then
-  echo "Error: 01_SPEC.md not found. Run wf2-spec first."
+  echo "Error: 01_SPEC.md not found. Run wf3-spec first."
   exit 1
 fi
 ```

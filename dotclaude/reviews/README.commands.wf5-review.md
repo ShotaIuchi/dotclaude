@@ -1,7 +1,7 @@
-# Review: wf4-review.md
+# Review: wf5-review.md
 
 > Reviewed: 2026-01-22
-> Original: dotclaude/commands/wf4-review.md
+> Original: dotclaude/commands/wf5-review.md
 
 ## 概要 (Summary)
 
@@ -34,7 +34,7 @@
 |---|------|------|------|
 | 1 | セクション2 | Planレビューのチェックリストがコマンド仕様に直接記載されている | テンプレート（03_REVIEW.md）への参照に統一する |
 | 2 | セクション4 | PRレビュー時の「Blocking Issues」の判定基準が不明確 | CI失敗、Required reviewers未承認等の具体的条件を明記する |
-| 3 | Notes | 「Must Fix items as mandatory to resolve」とあるが、実装時の強制力がない | wf5-implementでのMust Fix未解決チェックを追加する |
+| 3 | Notes | 「Must Fix items as mandatory to resolve」とあるが、実装時の強制力がない | wf6-implementでのMust Fix未解決チェックを追加する |
 
 ### 将来の検討事項 (Future Considerations)
 

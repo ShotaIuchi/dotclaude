@@ -5,7 +5,7 @@
 
 ## 概要 (Summary)
 
-このドキュメントは、GitHub Issueの背景調査とコードベース調査を行う「research」エージェントの定義書である。wf1-kickoffの事前準備として、Issueの理解を深めるための情報収集を担当する。Metadata、Purpose、Context、Capabilities、Constraints、Instructions、Output Formatの各セクションで構成されている。
+このドキュメントは、GitHub Issueの背景調査とコードベース調査を行う「research」エージェントの定義書である。wf2-kickoffの事前準備として、Issueの理解を深めるための情報収集を担当する。Metadata、Purpose、Context、Capabilities、Constraints、Instructions、Output Formatの各セクションで構成されている。
 
 ## 評価 (Evaluation)
 
@@ -43,7 +43,7 @@
 - エラーハンドリング：Issueが存在しない場合や、`gh`コマンドが認証されていない場合の対応手順を追加する ✓ Fixed (2026-01-22)
 - 調査の深度制限：大規模コードベースでの調査時間上限やファイル数上限の設定を検討する ✓ Fixed (2026-01-22)
 - キャッシュ戦略：同一Issueに対する再調査時に前回の結果を活用する仕組みを検討する ✓ Fixed (2026-01-22)
-- 他エージェントとの連携：wf1-kickoffへの引き継ぎ方法の詳細化 ✓ Fixed (2026-01-22)
+- 他エージェントとの連携：wf2-kickoffへの引き継ぎ方法の詳細化 ✓ Fixed (2026-01-22)
 
 ## 総評 (Overall Assessment)
 

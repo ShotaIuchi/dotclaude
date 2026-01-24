@@ -1,11 +1,11 @@
-# Review: wf1-kickoff.md
+# Review: wf2-kickoff.md
 
 > Reviewed: 2026-01-24
-> Original: dotclaude/commands/wf1-kickoff.md
+> Original: dotclaude/commands/wf2-kickoff.md
 
 ## 概要 (Summary)
 
-このドキュメントは `/wf1-kickoff` コマンドの仕様を定義しています。ワークフローの初期段階で Kickoff ドキュメント（00_KICKOFF.md）を作成・更新するためのコマンドです。
+このドキュメントは `/wf2-kickoff` コマンドの仕様を定義しています。ワークフローの初期段階で Kickoff ドキュメント（00_KICKOFF.md）を作成・更新するためのコマンドです。
 
 主な機能:
 - 新規 Kickoff ドキュメントの作成（対話形式）

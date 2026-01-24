@@ -1,7 +1,7 @@
-# Review: wf0-workspace.md
+# Review: wf1-workspace.md
 
 > Reviewed: 2026-01-22
-> Original: dotclaude/commands/wf0-workspace.md
+> Original: dotclaude/commands/wf1-workspace.md
 
 ## 概要 (Summary)
 

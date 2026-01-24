@@ -3,16 +3,16 @@ description: Create a new workspace from GitHub, Jira, or local work
 argument-hint: "github=<n> | jira=<id> | local=<id>"
 ---
 
-# /wf0-workspace
+# /wf1-workspace
 
 Command to create a new workspace.
 
 ## Usage
 
 ```
-/wf0-workspace github=<number>
-/wf0-workspace jira=<jira-id> [title="title"]
-/wf0-workspace local=<id> title="title" [type=<TYPE>]
+/wf1-workspace github=<number>
+/wf1-workspace jira=<jira-id> [title="title"]
+/wf1-workspace local=<id> title="title" [type=<TYPE>]
 ```
 
 ## Arguments
@@ -107,8 +107,8 @@ mkdir -p docs/wf/<work-id>/
   "active_work": "<work-id>",
   "works": {
     "<work-id>": {
-      "current": "wf0-workspace",
-      "next": "wf1-kickoff",
+      "current": "wf1-workspace",
+      "next": "wf2-kickoff",
       "source": {
         "type": "github|jira|local",
         "id": "<original_id>",
@@ -161,7 +161,7 @@ Branch: <branch_name>
 Base: <base_branch>
 Docs: docs/wf/<work-id>/
 
-Next step: Run /wf1-kickoff to create the Kickoff document
+Next step: Run /wf2-kickoff to create the Kickoff document
 ```
 
 ## Notes

@@ -116,7 +116,7 @@ argument-hint: "github=<n> | jira=<id> | local=<id>"
 
 入力時の表示:
 ```
-/wf0-workspace github=<n> | jira=<id> | local=<id>
+/wf1-workspace github=<n> | jira=<id> | local=<id>
 ```
 
 ---

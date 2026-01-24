@@ -3,14 +3,14 @@ description: Verify implementation and create PR
 argument-hint: "[pr | update]"
 ---
 
-# /wf6-verify
+# /wf7-verify
 
 Command to verify implementation and create PR.
 
 ## Usage
 
 ```
-/wf6-verify [subcommand]
+/wf7-verify [subcommand]
 ```
 
 ## Subcommands
@@ -39,7 +39,7 @@ total_steps=$(jq -r ".works[\"$work_id\"].plan.total_steps // 0" .wf/state.json)
 
 if [ "$current_step" -lt "$total_steps" ]; then
   echo "⚠️ There are incomplete steps: $current_step/$total_steps"
-  echo "Please run /wf5-implement"
+  echo "Please run /wf6-implement"
 fi
 ```
 
@@ -275,7 +275,7 @@ EOF
 ### 9. Update state.json
 
 ```bash
-jq ".works[\"$work_id\"].current = \"wf6-verify\"" .wf/state.json > tmp && mv tmp .wf/state.json
+jq ".works[\"$work_id\"].current = \"wf7-verify\"" .wf/state.json > tmp && mv tmp .wf/state.json
 jq ".works[\"$work_id\"].next = \"complete\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
 # Record PR information
@@ -296,7 +296,7 @@ Build: Success
 Lint: No issues
 Success Criteria: 4/4 completed
 
-To create PR: /wf6-verify pr
+To create PR: /wf7-verify pr
 ```
 
 #### For PR creation
@@ -330,7 +330,7 @@ Failed Items:
 Response:
 1. Fix failed tests
 2. Address incomplete Success Criteria
-3. Run /wf6-verify again
+3. Run /wf7-verify again
 ```
 
 ## Notes

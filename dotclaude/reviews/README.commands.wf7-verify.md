@@ -1,7 +1,7 @@
-# Review: wf6-verify.md
+# Review: wf7-verify.md
 
 > Reviewed: 2026-01-22
-> Original: dotclaude/commands/wf6-verify.md
+> Original: dotclaude/commands/wf7-verify.md
 
 ## 概要 (Summary)
 

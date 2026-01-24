@@ -1,7 +1,7 @@
-# Review: wf5-implement.md
+# Review: wf6-implement.md
 
 > Reviewed: 2026-01-22
-> Original: dotclaude/commands/wf5-implement.md
+> Original: dotclaude/commands/wf6-implement.md
 
 ## 概要 (Summary)
 

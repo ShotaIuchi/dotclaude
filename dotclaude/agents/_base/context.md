@@ -14,7 +14,7 @@ This system is a workflow management system for AI (Claude Code) and humans to w
 4. **Prevention of Off-Plan Changes**: Implement only planned work
    - Enforced via `02_PLAN.md` step tracking in `state.json`
    - Each implementation step must match a planned item
-   - See `commands/wf5-implement.md` for implementation constraints
+   - See `commands/wf6-implement.md` for implementation constraints
 
 ## File Structure
 
@@ -65,8 +65,8 @@ docs/wf/<work-id>/
   "active_work": "<work-id>",
   "works": {
     "<work-id>": {
-      "current": "wf5-implement",
-      "next": "wf6-verify",
+      "current": "wf6-implement",
+      "next": "wf7-verify",
       "git": {
         "base": "develop",
         "branch": "feat/123-export-csv"
@@ -148,25 +148,25 @@ gh issue view "$issue_number" --json number,title,body,labels,assignees,mileston
 ## Workflow Order
 
 ```
-wf0-workspace → wf1-kickoff → wf2-spec → wf3-plan → wf4-review → wf5-implement → wf6-verify
+wf1-workspace → wf2-kickoff → wf3-spec → wf4-plan → wf5-review → wf6-implement → wf7-verify
 ```
 
 Documents generated at each phase:
 
 | Phase | Document |
 |-------|----------|
-| wf1-kickoff | 00_KICKOFF.md |
-| wf2-spec | 01_SPEC.md |
-| wf3-plan | 02_PLAN.md |
-| wf4-review | 03_REVIEW.md |
-| wf5-implement | 04_IMPLEMENT_LOG.md |
-| wf1-kickoff (update) | 05_REVISIONS.md |
+| wf2-kickoff | 00_KICKOFF.md |
+| wf3-spec | 01_SPEC.md |
+| wf4-plan | 02_PLAN.md |
+| wf5-review | 03_REVIEW.md |
+| wf6-implement | 04_IMPLEMENT_LOG.md |
+| wf2-kickoff (update) | 05_REVISIONS.md |
 
 ### 05_REVISIONS.md Management
 
 The `05_REVISIONS.md` file tracks changes to the kickoff document:
 
-- **Created**: When `wf1-kickoff` is run with `--update` flag on existing work
+- **Created**: When `wf2-kickoff` is run with `--update` flag on existing work
 - **Updated**: Each subsequent kickoff revision appends a new entry
 - **Purpose**: Maintains audit trail of scope/goal changes during development
 - **Format**: Includes revision number, timestamp, summary of changes, and reason for update
@@ -185,7 +185,7 @@ Shared configuration file committed to the repository:
     "default_branch": "main"
   },
   "workflow": {
-    "require_review": true,       // Require wf4-review before implementation
+    "require_review": true,       // Require wf5-review before implementation
     "auto_create_branch": true,   // Auto-create git branch on kickoff
     "docs_path": "docs/wf"        // Path for workflow documents
   },
@@ -205,7 +205,7 @@ When `state.json` does not exist or is invalid:
 ```bash
 # Check if state file exists
 if [ ! -f .wf/state.json ]; then
-  echo "Error: .wf/state.json not found. Run 'wf0-workspace' to initialize."
+  echo "Error: .wf/state.json not found. Run 'wf1-workspace' to initialize."
   exit 1
 fi
 
@@ -218,7 +218,7 @@ fi
 # Check for active work
 work_id=$(jq -r '.active_work // empty' .wf/state.json)
 if [ -z "$work_id" ]; then
-  echo "No active work. Run 'wf1-kickoff' to start a new work item."
+  echo "No active work. Run 'wf2-kickoff' to start a new work item."
   exit 1
 fi
 ```
@@ -227,9 +227,9 @@ fi
 
 | Scenario | Action |
 |----------|--------|
-| No `.wf/` directory | Run `wf0-workspace` to initialize |
+| No `.wf/` directory | Run `wf1-workspace` to initialize |
 | Invalid JSON in state.json | Check for syntax errors, restore from git if needed |
-| No active_work set | Run `wf1-kickoff` or `wf0-restore` |
+| No active_work set | Run `wf2-kickoff` or `wf0-restore` |
 | Missing workflow documents | Check `docs/wf/<work-id>/` path, may need restoration |
 
 ## Sub-Agent Context Sharing

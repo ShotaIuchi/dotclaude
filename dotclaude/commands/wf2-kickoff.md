@@ -3,14 +3,14 @@ description: Create or update the Kickoff document
 argument-hint: "[update | revise \"<instruction>\" | chat]"
 ---
 
-# /wf1-kickoff
+# /wf2-kickoff
 
 Command to create or update the Kickoff document.
 
 ## Usage
 
 ```
-/wf1-kickoff [subcommand] [options]
+/wf2-kickoff [subcommand] [options]
 ```
 
 ## Subcommands
@@ -30,7 +30,7 @@ Parse $ARGUMENTS and execute the following processing.
 work_id=$(jq -r '.active_work // empty' .wf/state.json)
 if [ -z "$work_id" ]; then
   echo "No active work"
-  echo "Please run /wf0-workspace or /wf0-restore"
+  echo "Please run /wf1-workspace or /wf0-restore"
   exit 1
 fi
 
@@ -147,8 +147,8 @@ When source_type is "local" and creating a new Kickoff (no existing `00_KICKOFF.
 #### Skip Plan Mode
 
 To skip Plan Mode for local work, user can:
-- Create `plan.md` manually before running `/wf1-kickoff`
-- Use `/wf1-kickoff chat` for free-form dialogue instead
+- Create `plan.md` manually before running `/wf2-kickoff`
+- Use `/wf2-kickoff chat` for free-form dialogue instead
 
 ### 3. Subcommand-Specific Processing
 
@@ -209,10 +209,10 @@ Replace template placeholders with content determined through dialogue (or plan.
 
 ```bash
 # Update current
-jq ".works[\"$work_id\"].current = \"wf1-kickoff\"" .wf/state.json > tmp && mv tmp .wf/state.json
+jq ".works[\"$work_id\"].current = \"wf2-kickoff\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
 # Update next after completion
-jq ".works[\"$work_id\"].next = \"wf2-spec\"" .wf/state.json > tmp && mv tmp .wf/state.json
+jq ".works[\"$work_id\"].next = \"wf3-spec\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
 # Update kickoff information
 jq ".works[\"$work_id\"].kickoff.revision = <new_revision>" .wf/state.json > tmp && mv tmp .wf/state.json
@@ -277,7 +277,7 @@ When creating Kickoff, dialogue with user on the following aspects:
 File: docs/wf/<work-id>/00_KICKOFF.md
 Revision: 1
 
-Next step: Run /wf2-spec to create the specification
+Next step: Run /wf3-spec to create the specification
 ```
 
 ## Notes

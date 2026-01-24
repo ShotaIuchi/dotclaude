@@ -3,14 +3,14 @@ description: Implement one step of the Plan
 argument-hint: "[step_number]"
 ---
 
-# /wf5-implement
+# /wf6-implement
 
 Command to implement one step of the Plan.
 
 ## Usage
 
 ```
-/wf5-implement [step_number]
+/wf6-implement [step_number]
 ```
 
 ## Arguments
@@ -38,7 +38,7 @@ log_path="$docs_dir/04_IMPLEMENT_LOG.md"
 # Check if Plan exists
 if [ ! -f "$plan_path" ]; then
   echo "Plan document not found"
-  echo "Please run /wf3-plan first"
+  echo "Please run /wf4-plan first"
   exit 1
 fi
 ```
@@ -166,12 +166,12 @@ jq ".works[\"$work_id\"].plan.steps[\"$step_number\"] = {\"status\": \"completed
 jq ".works[\"$work_id\"].plan.current_step = $step_number" .wf/state.json > tmp && mv tmp .wf/state.json
 
 # Update current/next
-jq ".works[\"$work_id\"].current = \"wf5-implement\"" .wf/state.json > tmp && mv tmp .wf/state.json
+jq ".works[\"$work_id\"].current = \"wf6-implement\"" .wf/state.json > tmp && mv tmp .wf/state.json
 
 # Check if all steps are completed
 total_steps=$(jq -r ".works[\"$work_id\"].plan.total_steps" .wf/state.json)
 if [ "$step_number" -eq "$total_steps" ]; then
-  jq ".works[\"$work_id\"].next = \"wf6-verify\"" .wf/state.json > tmp && mv tmp .wf/state.json
+  jq ".works[\"$work_id\"].next = \"wf7-verify\"" .wf/state.json > tmp && mv tmp .wf/state.json
 fi
 ```
 
@@ -242,8 +242,8 @@ Completion Criteria:
 Progress: <n>/<total> steps completed
 
 Next step:
-- If remaining steps exist: /wf5-implement
-- All steps complete: /wf6-verify
+- If remaining steps exist: /wf6-implement
+- All steps complete: /wf7-verify
 ```
 
 ## About Off-Plan Changes
@@ -262,7 +262,7 @@ When changes not documented in Plan are needed:
    - <issue description>
 
    Suggestion:
-   - Please update the Plan with /wf3-plan update
+   - Please update the Plan with /wf4-plan update
    ```
 
 ## Notes

@@ -71,29 +71,29 @@ This creates the following:
 
 | Command | Description |
 |---------|-------------|
-| `/wf0-workspace issue=<n>` | Create new workspace |
 | `/wf0-restore [work-id]` | Restore existing workspace |
 | `/wf0-status [work-id\|all]` | Display status |
 
-### Documentation Commands (wf1-4)
+### Workspace & Documentation Commands (wf1-5)
 
 | Command | Description |
 |---------|-------------|
-| `/wf1-kickoff` | Create Kickoff (define goals and success criteria) |
-| `/wf1-kickoff update` | Update Kickoff |
-| `/wf1-kickoff revise "<instruction>"` | Revise Kickoff |
-| `/wf1-kickoff chat` | Brainstorming dialogue |
-| `/wf2-spec` | Create specification |
-| `/wf3-plan` | Create implementation plan |
-| `/wf4-review` | Record review |
+| `/wf1-workspace issue=<n>` | Create new workspace |
+| `/wf2-kickoff` | Create Kickoff (define goals and success criteria) |
+| `/wf2-kickoff update` | Update Kickoff |
+| `/wf2-kickoff revise "<instruction>"` | Revise Kickoff |
+| `/wf2-kickoff chat` | Brainstorming dialogue |
+| `/wf3-spec` | Create specification |
+| `/wf4-plan` | Create implementation plan |
+| `/wf5-review` | Record review |
 
-### Implementation Commands (wf5-6)
+### Implementation Commands (wf6-7)
 
 | Command | Description |
 |---------|-------------|
-| `/wf5-implement [step]` | Implement one step of the Plan |
-| `/wf6-verify` | Test and build verification |
-| `/wf6-verify pr` | Create PR after verification |
+| `/wf6-implement [step]` | Implement one step of the Plan |
+| `/wf7-verify` | Test and build verification |
+| `/wf7-verify pr` | Create PR after verification |
 
 ### Agents
 
@@ -106,19 +106,19 @@ This creates the following:
 ### Basic Flow
 
 ```
-/wf0-workspace issue=123
+/wf1-workspace issue=123
     ↓
-/wf1-kickoff (define goals and success criteria)
+/wf2-kickoff (define goals and success criteria)
     ↓
-/wf2-spec (develop change specification)
+/wf3-spec (develop change specification)
     ↓
-/wf3-plan (plan implementation steps)
+/wf4-plan (plan implementation steps)
     ↓
-/wf4-review (optional: plan review)
+/wf5-review (optional: plan review)
     ↓
-/wf5-implement (implement one step at a time)
+/wf6-implement (implement one step at a time)
     ↓ ↑ repeat
-/wf6-verify pr (verify and create PR)
+/wf7-verify pr (verify and create PR)
 ```
 
 ### Work Restoration
@@ -132,7 +132,7 @@ This creates the following:
 
 ```bash
 # Revise with instructions
-/wf1-kickoff revise "Narrow the scope to CSV export only"
+/wf2-kickoff revise "Narrow the scope to CSV export only"
 ```
 
 ## Repository Structure
@@ -168,7 +168,7 @@ your-project/
 │       └── 05_REVISIONS.md
 └── .claude/             # Symbolic link from dotclaude
     └── commands/        # Slash commands
-        ├── wf0-workspace.md
+        ├── wf1-workspace.md
         ├── wf0-restore.md
         └── ...
 ```
@@ -202,8 +202,8 @@ your-project/
   "active_work": "FEAT-123-export-csv",
   "works": {
     "FEAT-123-export-csv": {
-      "current": "wf5-implement",
-      "next": "wf6-verify",
+      "current": "wf6-implement",
+      "next": "wf7-verify",
       "git": {
         "base": "develop",
         "branch": "feat/123-export-csv"
@@ -222,10 +222,10 @@ They work in conjunction with workflow commands and can also be invoked directly
 
 | Agent | Purpose | Caller |
 |-------|---------|--------|
-| `research` | Issue background research, related code identification | wf1-kickoff |
-| `spec-writer` | Specification draft creation | wf2-spec |
-| `planner` | Implementation planning | wf3-plan |
-| `implementer` | Single step implementation support | wf5-implement |
+| `research` | Issue background research, related code identification | wf2-kickoff |
+| `spec-writer` | Specification draft creation | wf3-spec |
+| `planner` | Implementation planning | wf4-plan |
+| `implementer` | Single step implementation support | wf6-implement |
 
 ### Task-Specific Type
 
@@ -266,12 +266,12 @@ See `dotclaude/agents/README.md` for details.
 
 ### 1. No Off-Plan Changes
 
-`/wf5-implement` implements only the steps documented in the Plan.
+`/wf6-implement` implements only the steps documented in the Plan.
 If changes outside the Plan are needed, update the Plan first.
 
 ### 2. One Execution = One Step
 
-`/wf5-implement` implements only one step per execution.
+`/wf6-implement` implements only one step per execution.
 This makes work progress clear.
 
 ### 3. Preserve Original Content

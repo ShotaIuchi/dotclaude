@@ -1,7 +1,7 @@
-# Review: wf2-spec.md
+# Review: wf3-spec.md
 
 > Reviewed: 2026-01-22
-> Original: dotclaude/commands/wf2-spec.md
+> Original: dotclaude/commands/wf3-spec.md
 
 ## 概要 (Summary)
 

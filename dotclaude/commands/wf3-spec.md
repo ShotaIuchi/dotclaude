@@ -3,14 +3,14 @@ description: Create the Specification document
 argument-hint: "[update | validate]"
 ---
 
-# /wf2-spec
+# /wf3-spec
 
 Command to create the Specification (Spec) document.
 
 ## Usage
 
 ```
-/wf2-spec [subcommand]
+/wf3-spec [subcommand]
 ```
 
 ## Subcommands
@@ -34,7 +34,7 @@ spec_path="$docs_dir/01_SPEC.md"
 # Check if Kickoff exists
 if [ ! -f "$kickoff_path" ]; then
   echo "Kickoff document not found"
-  echo "Please run /wf1-kickoff first"
+  echo "Please run /wf2-kickoff first"
   exit 1
 fi
 ```
@@ -121,8 +121,8 @@ Continue with current Spec? (Use AskUserQuestion)
 ### 6. Update state.json
 
 ```bash
-jq ".works[\"$work_id\"].current = \"wf2-spec\"" .wf/state.json > tmp && mv tmp .wf/state.json
-jq ".works[\"$work_id\"].next = \"wf3-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
+jq ".works[\"$work_id\"].current = \"wf3-spec\"" .wf/state.json > tmp && mv tmp .wf/state.json
+jq ".works[\"$work_id\"].next = \"wf4-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
 ```
 
 ### 7. Commit
@@ -156,7 +156,7 @@ Affected Components:
 - <component1> (high)
 - <component2> (medium)
 
-Next step: Run /wf3-plan to create the implementation plan
+Next step: Run /wf4-plan to create the implementation plan
 ```
 
 ## validate Subcommand

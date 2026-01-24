@@ -69,18 +69,18 @@ Created:  <created_at>
    ├── 00_KICKOFF.md    [exists/missing]
    ├── 01_SPEC.md       [exists/missing]
    ├── 02_PLAN.md       [exists/missing]
-   ├── 03_REVIEW.md     [exists/missing]  (created by wf4-review)
+   ├── 03_REVIEW.md     [exists/missing]  (created by wf5-review)
    ├── 04_IMPLEMENT_LOG.md [exists/missing]
    └── 05_REVISIONS.md  [exists/missing]
 
 🔄 Phase Progress:
-   [✓] wf0-workspace
-   [→] wf1-kickoff     ← current
-   [ ] wf2-spec
-   [ ] wf3-plan
-   [ ] wf4-review
-   [ ] wf5-implement
-   [ ] wf6-verify
+   [✓] wf1-workspace
+   [→] wf2-kickoff     ← current
+   [ ] wf3-spec
+   [ ] wf4-plan
+   [ ] wf5-review
+   [ ] wf6-implement
+   [ ] wf7-verify
 
 💡 Next: /<next_phase>
 ```
@@ -95,8 +95,8 @@ Active: <active_work>
 
 | Work ID | Branch | Current | Next |
 |---------|--------|---------|------|
-| FEAT-123-export-csv | feat/123-export-csv | wf2-spec | wf3-plan |
-| FIX-456-login-error | fix/456-login-error | wf5-implement | wf6-verify |
+| FEAT-123-export-csv | feat/123-export-csv | wf3-spec | wf4-plan |
+| FIX-456-login-error | fix/456-login-error | wf6-implement | wf7-verify |
 
 Total: 2 works
 ```

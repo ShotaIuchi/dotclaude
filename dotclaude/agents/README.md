@@ -16,10 +16,10 @@ Agents that work in conjunction with workflow commands.
 
 | Agent | Purpose | Caller |
 |-------|---------|--------|
-| [`research`](workflow/research.md) | Issue background research, related code identification | wf1-kickoff |
-| [`spec-writer`](workflow/spec-writer.md) | Specification draft creation | wf2-spec |
-| [`planner`](workflow/planner.md) | Implementation planning | wf3-plan |
-| [`implementer`](workflow/implementer.md) | Single step implementation support | wf5-implement |
+| [`research`](workflow/research.md) | Issue background research, related code identification | wf2-kickoff |
+| [`spec-writer`](workflow/spec-writer.md) | Specification draft creation | wf3-spec |
+| [`planner`](workflow/planner.md) | Implementation planning | wf4-plan |
+| [`implementer`](workflow/implementer.md) | Single step implementation support | wf6-implement |
 
 ### Task-Specific Type (task/)
 
@@ -51,10 +51,10 @@ Agents for investigating and analyzing the codebase.
 Workflow commands automatically call the appropriate agent.
 
 ```
-/wf1-kickoff
+/wf2-kickoff
 → research agent investigates Issue background
 
-/wf2-spec
+/wf3-spec
 → spec-writer agent creates specification draft
 ```
 
