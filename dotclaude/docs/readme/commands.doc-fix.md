@@ -1,6 +1,6 @@
 # /doc-fix
 
-`reviews/README.<path>.<filename>.md`ファイルで特定された問題を修正し、元のドキュメントに適用するコマンド。
+`docs/reviews/<path>.<filename>.md`ファイルで特定された問題を修正し、元のドキュメントに適用するコマンド。
 doc-fixerサブエージェントを使用した複数ファイルの並列処理をサポート。
 
 ## 使用方法
@@ -12,9 +12,9 @@ doc-fixerサブエージェントを使用した複数ファイルの並列処�
 ## 引数
 
 - `file_path`: レビューファイルまたは元ファイルのパス（オプション）
-  - `reviews/README.commands.wf0-status.md` → 直接レビューファイルとして使用
-  - `commands/wf0-status.md` → `reviews/README.commands.wf0-status.md`を自動検索
-  - 省略 → reviewsディレクトリ内の`README.*.md`を検索
+  - `docs/reviews/commands.wf0-status.md` → 直接レビューファイルとして使用
+  - `commands/wf0-status.md` → `docs/reviews/commands.wf0-status.md`を自動検索
+  - 省略 → docs/reviewsディレクトリ内の`*.md`を検索
 - `--all`: インタラクティブ選択なしで全修正を適用（並列モードには必須）
 
 ## 処理モード
@@ -60,7 +60,7 @@ doc-fixerサブエージェントを使用した複数ファイルの並列処�
 
 Files modified:
 - Original: commands/wf0-status.md
-- Review:   reviews/README.commands.wf0-status.md
+- Review:   docs/reviews/commands.wf0-status.md
 
 Fixed items:
 ───────────────────────────────────────────────────────────

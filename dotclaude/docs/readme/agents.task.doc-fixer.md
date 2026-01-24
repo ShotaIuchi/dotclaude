@@ -2,7 +2,7 @@
 
 ## 概要
 
-レビューファイル (`reviews/README.<path>.<filename>.md`) から修正を適用し、元のドキュメントを更新するエージェント。`/doc-fix` コマンドから呼び出され、複数レビューファイルの並列処理に対応している。
+レビューファイル (`docs/reviews/<path>.<filename>.md`) から修正を適用し、元のドキュメントを更新するエージェント。`/doc-fix` コマンドから呼び出され、複数レビューファイルの並列処理に対応している。
 
 ## メタデータ
 
@@ -71,11 +71,11 @@
 
 ```
 # 全ての Issue を修正
-review_file="reviews/README.commands.wf0-status.md"
+review_file="docs/reviews/commands.wf0-status.md"
 issues="all"
 
 # 特定の Issue のみ修正
-review_file="reviews/README.CLAUDE.md"
+review_file="docs/reviews/CLAUDE.md"
 issues=["H1", "M2"]
 ```
 

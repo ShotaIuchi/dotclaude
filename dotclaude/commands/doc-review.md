@@ -5,7 +5,7 @@ argument-hint: "<file_path>"
 
 # /doc-review
 
-Command to create a review of any document file and output as `reviews/README.<path>.<filename>.md`.
+Command to create a review of any document file and output as `docs/reviews/<path>.<filename>.md`.
 Supports parallel processing for multiple files using the doc-reviewer sub-agent.
 
 ## Usage
@@ -112,7 +112,7 @@ Task tool:
     Follow the agent instructions to:
     1. Load and analyze the document
     2. Generate review using template
-    3. Write output to reviews/README.<path>.<filename>.md
+    3. Write output to docs/reviews/<path>.<filename>.md
 
     Return the result in JSON format:
     {"status": "success|failure", "file": "<path>", "output": "<path>", "error": "<msg if failed>"}
@@ -156,7 +156,7 @@ Task tool:
     Follow the agent instructions to:
     1. Load and analyze the document
     2. Generate review using template
-    3. Write output to reviews/README.<path>.<filename>.md
+    3. Write output to docs/reviews/<path>.<filename>.md
 
     Return the result in JSON format:
     {"status": "success|failure", "file": "<path>", "output": "<path>"}
@@ -214,10 +214,10 @@ Summary:
   Failed:    1 file
 
 Generated:
-  - reviews/README.docs.README.md
-  - reviews/README.docs.INSTALL.md
-  - reviews/README.docs.CONFIG.md
-  - reviews/README.docs.GUIDE.md
+  - docs/reviews/docs.README.md
+  - docs/reviews/docs.INSTALL.md
+  - docs/reviews/docs.CONFIG.md
+  - docs/reviews/docs.GUIDE.md
 
 Failed:
   - API.md: <error_reason>
@@ -268,7 +268,7 @@ The following features are planned for future implementation:
 
 ## Notes
 
-- Write review file (`reviews/README.<path>.<filename>.md`) in Japanese regardless of the document's language
+- Write review file (`docs/reviews/<path>.<filename>.md`) in Japanese regardless of the document's language
 - Provide specific and constructive feedback
 - For improvements, clearly describe "location", "issue", and "suggestion"
 - Check/uncheck evaluation checklist based on actual evaluation results

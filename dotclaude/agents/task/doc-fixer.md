@@ -8,7 +8,7 @@
 
 ## Purpose
 
-Applies fixes from a `reviews/README.<path>.<filename>.md` file to its corresponding original document.
+Applies fixes from a `docs/reviews/<path>.<filename>.md` file to its corresponding original document.
 This agent is designed to be called from the `/doc-fix` command for parallel processing of multiple review files.
 
 ## Context
@@ -21,7 +21,7 @@ This agent is designed to be called from the `/doc-fix` command for parallel pro
 
 ### Reference Files
 
-- Review file (`reviews/README.<path>.<filename>.md`)
+- Review file (`docs/reviews/<path>.<filename>.md`)
 - Original document (derived from review file name)
 - Template reference (priority order):
   1. `dotclaude/templates/DOC_REVIEW.md` (project-specific)
@@ -69,12 +69,11 @@ if review_file does not exist:
 ### 2. Derive Original File
 
 ```
-# reviews/README.commands.wf0-status.md → commands/wf0-status
-# reviews/README.agents._base.constraints.md → agents/_base/constraints
-# reviews/README.CLAUDE.md → CLAUDE
-# Extract filename, remove "README." prefix, replace "." with "/" for path
-base = basename(review_file)  # README.commands.wf0-status.md
-base = base.removePrefix("README.")  # commands.wf0-status.md
+# docs/reviews/commands.wf0-status.md → commands/wf0-status
+# docs/reviews/agents._base.constraints.md → agents/_base/constraints
+# docs/reviews/CLAUDE.md → CLAUDE
+# Extract filename, replace "." with "/" for path
+base = basename(review_file)  # commands.wf0-status.md
 base = base.removeSuffix(".md")  # commands.wf0-status
 
 # Replace dots with "/" to restore path structure

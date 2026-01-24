@@ -1,6 +1,6 @@
 # /doc-review
 
-ドキュメントファイルをレビューし、`reviews/README.<path>.<filename>.md`として出力するコマンド。
+ドキュメントファイルをレビューし、`docs/reviews/<path>.<filename>.md`として出力するコマンド。
 doc-reviewerサブエージェントを使用した複数ファイルの並列処理をサポート。
 
 ## 使用方法
@@ -65,10 +65,10 @@ Summary:
   Failed:    1 file
 
 Generated:
-  - reviews/README.docs.README.md
-  - reviews/README.docs.INSTALL.md
-  - reviews/README.docs.CONFIG.md
-  - reviews/README.docs.GUIDE.md
+  - docs/reviews/docs.README.md
+  - docs/reviews/docs.INSTALL.md
+  - docs/reviews/docs.CONFIG.md
+  - docs/reviews/docs.GUIDE.md
 
 Failed:
   - API.md: <error_reason>

@@ -2,7 +2,7 @@
 
 ## 概要
 
-単一のドキュメントファイルをレビューし、`reviews/README.<path>.<filename>.md` ファイルを生成するエージェント。`/doc-review` コマンドから呼び出され、複数ファイルの並列処理に対応している。
+単一のドキュメントファイルをレビューし、`docs/reviews/<path>.<filename>.md` ファイルを生成するエージェント。`/doc-review` コマンドから呼び出され、複数ファイルの並列処理に対応している。
 
 ## メタデータ
 
@@ -45,9 +45,9 @@
 ## 出力パス規則
 
 ```
-docs/guide.md → reviews/README.docs.guide.md
-commands/wf0-status.md → reviews/README.commands.wf0-status.md
-agents/_base/constraints.md → reviews/README.agents._base.constraints.md
+docs/guide.md → docs/reviews/docs.guide.md
+commands/wf0-status.md → docs/reviews/commands.wf0-status.md
+agents/_base/constraints.md → docs/reviews/agents._base.constraints.md
 ```
 
 ## 出力形式

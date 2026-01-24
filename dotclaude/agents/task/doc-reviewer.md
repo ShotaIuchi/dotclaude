@@ -8,7 +8,7 @@
 
 ## Purpose
 
-Executes a single document file review and generates a `reviews/README.<path>.<filename>.md` file.
+Executes a single document file review and generates a `docs/reviews/<path>.<filename>.md` file.
 This agent is designed to be called from the `/doc-review` command for parallel processing of multiple files.
 
 ## Context
@@ -45,7 +45,7 @@ This agent is designed to be called from the `/doc-review` command for parallel 
 - Processes exactly ONE file per invocation
 - Read-only (does not modify source document)
 - Outputs review in Japanese regardless of document language
-- Must generate `reviews/README.<path>.<filename>.md` as output
+- Must generate `docs/reviews/<path>.<filename>.md` as output
 - If output file already exists, it will be overwritten without warning (previous review is replaced)
 
 ## Instructions
@@ -63,17 +63,17 @@ if file does not exist:
 ### 2. Determine Output Path
 
 ```bash
-# Output to reviews/ directory with path encoded in filename (dot-separated)
-# Example: docs/guide.md → reviews/README.docs.guide.md
-# Example: commands/wf0-status.md → reviews/README.commands.wf0-status.md
-# Example: agents/_base/constraints.md → reviews/README.agents._base.constraints.md
+# Output to docs/reviews/ directory with path encoded in filename (dot-separated)
+# Example: docs/guide.md → docs/reviews/docs.guide.md
+# Example: commands/wf0-status.md → docs/reviews/commands.wf0-status.md
+# Example: agents/_base/constraints.md → docs/reviews/agents._base.constraints.md
 dir=$(dirname "$file")
 base=$(basename "${file%.*}")
 if [ "$dir" = "." ]; then
-  output_file="reviews/README.${base}.md"
+  output_file="docs/reviews/${base}.md"
 else
   path_part=$(echo "$dir" | tr '/' '.')
-  output_file="reviews/README.${path_part}.${base}.md"
+  output_file="docs/reviews/${path_part}.${base}.md"
 fi
 ```
 
