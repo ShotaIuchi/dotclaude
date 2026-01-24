@@ -41,7 +41,10 @@ references/
 └── tools/                      # Development tools
     └── claude-code/
         ├── index.md
-        └── command-frontmatter.md
+        ├── skills-guide.md
+        ├── commands-guide.md
+        ├── command-frontmatter.md
+        └── best-practices.md
 ```
 
 ---
@@ -111,7 +114,10 @@ Authoritative sources for design principles that all skills should reference.
 | File | Description | Related Skills |
 |------|-------------|----------------|
 | [index.md](tools/claude-code/index.md) | Claude Code リファレンス索引 | - |
-| [command-frontmatter.md](tools/claude-code/command-frontmatter.md) | コマンド/スキルのフロントマター仕様 | - |
+| [skills-guide.md](tools/claude-code/skills-guide.md) | スキルの書き方ガイド | - |
+| [commands-guide.md](tools/claude-code/commands-guide.md) | コマンドの書き方ガイド | - |
+| [command-frontmatter.md](tools/claude-code/command-frontmatter.md) | フロントマター仕様リファレンス | - |
+| [best-practices.md](tools/claude-code/best-practices.md) | ベストプラクティス | - |
 
 ---
 
