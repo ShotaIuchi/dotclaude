@@ -66,11 +66,20 @@ Error if target file does not exist:
 | File Count | Processing Mode |
 |------------|-----------------|
 | 1 | Sub-agent (single invocation) |
-| 2-5 | Parallel (all at once) |
-| 6+ | Batch parallel (5 files per batch) |
+| 2-5 | **Async parallel** (all at once) |
+| 6+ | **Async batch parallel** (5 files per batch) |
 
 **Constant:**
 - `MAX_PARALLEL`: 5 (maximum concurrent sub-agents)
+
+> **⚠️ CRITICAL: Async Parallel Execution**
+>
+> When processing multiple files, you MUST:
+> 1. Call **all Task tools in a single message** (do not split across multiple messages)
+> 2. Set **`run_in_background: true`** for each Task
+> 3. Continue without waiting for completion notifications
+>
+> Failure to follow these rules results in sequential execution, negating parallelism benefits.
 
 ### 4. Sub-agent Invocation
 
@@ -109,30 +118,54 @@ Task tool:
     {"status": "success|failure", "file": "<path>", "output": "<path>", "error": "<msg if failed>"}
 ```
 
-#### Multiple Files (file_count >= 2)
+#### Multiple Files (file_count >= 2) - Async Parallel
 
-Launch sub-agents in parallel using the Task tool's `run_in_background` parameter:
+**IMPORTANT**: Call **all Task tools in a single assistant message**.
 
 ```
-for each file in files (up to MAX_PARALLEL):
-  Task tool:
-    subagent_type: general-purpose
-    run_in_background: true
-    prompt: |
-      Execute the doc-reviewer agent defined in agents/task/doc-reviewer.md.
-      Input: file=<file_path>
+# ✅ CORRECT: Multiple Tasks in single message (true parallel)
+<function_calls>
+<invoke name="Task">  # File 1 - run_in_background: true
+<invoke name="Task">  # File 2 - run_in_background: true
+<invoke name="Task">  # File 3 - run_in_background: true
+</function_calls>
+→ All 3 launch simultaneously, completion notifications arrive as each finishes
 
-      Template placeholders:
-      - {{filename}} = <basename>
-      - {{date}} = <current date>
-      - {{file_path}} = <relative path>
-
-      [same instructions as single file...]
+# ❌ WRONG: Split across multiple messages (becomes sequential)
+Message 1: Task tool (File 1) → wait for completion
+Message 2: Task tool (File 2) → wait for completion
+Message 3: Task tool (File 3) → wait for completion
+→ Processed one by one, takes longer
 ```
 
-For file_count > MAX_PARALLEL, process in batches:
-1. Launch first 5 files in parallel (each with `run_in_background: true`)
-2. Wait for completion using TaskOutput tool
+**Task tool parameters (per file):**
+
+```yaml
+Task tool:
+  subagent_type: general-purpose
+  run_in_background: true  # ← REQUIRED
+  prompt: |
+    Execute the doc-reviewer agent defined in agents/task/doc-reviewer.md.
+    Input: file=<file_path>
+
+    Template placeholders:
+    - {{filename}} = <basename>
+    - {{date}} = <current date>
+    - {{file_path}} = <relative path>
+
+    Follow the agent instructions to:
+    1. Load and analyze the document
+    2. Generate review using template
+    3. Write output to reviews/README.<path>.<filename>.md
+
+    Return the result in JSON format:
+    {"status": "success|failure", "file": "<path>", "output": "<path>"}
+```
+
+**Batch processing (file_count > MAX_PARALLEL):**
+
+1. Launch first 5 files with `run_in_background: true`
+2. Wait for completion using TaskOutput
 3. Launch next batch
 4. Repeat until all files processed
 
@@ -239,4 +272,5 @@ The following features are planned for future implementation:
 - Provide specific and constructive feedback
 - For improvements, clearly describe "location", "issue", and "suggestion"
 - Check/uncheck evaluation checklist based on actual evaluation results
+- **For multiple files: MUST use `run_in_background: true` and call all Tasks in a single message**
 - Parallel processing significantly improves performance for multiple files
