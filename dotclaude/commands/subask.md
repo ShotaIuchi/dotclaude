@@ -1,4 +1,4 @@
-# /ask
+# /subask
 
 メインセッションのコンテキストを汚さずに、サブエージェントに質問を投げて回答を得る。
 
@@ -11,20 +11,24 @@
 ## Usage
 
 ```
-/ask <質問内容>
+/subask <質問内容>
 ```
 
 ## Examples
 
 ```bash
 # 技術的な質問
-/ask Pythonの非同期処理でasyncioとthreadingの使い分けは？
+/subask Pythonの非同期処理でasyncioとthreadingの使い分けは？
 
 # 概念の確認
-/ask RESTとGraphQLの違いを簡潔に
+/subask RESTとGraphQLの違いを簡潔に
 
 # ベストプラクティス
-/ask Goでのエラーハンドリングの一般的なパターン
+/subask Goでのエラーハンドリングの一般的なパターン
+
+# カレントディレクトリでの操作
+/subask このディレクトリのファイル一覧を教えて
+/subask コミットして
 ```
 
 ## Processing
@@ -35,7 +39,7 @@ Parse $ARGUMENTS and execute the following:
 
 ```
 if $ARGUMENTS is empty:
-  Display: "Usage: /ask <質問内容>"
+  Display: "Usage: /subask <質問内容>"
   Exit
 ```
 
@@ -47,7 +51,7 @@ Use the Task tool with the following parameters:
 |-----------|-------|
 | `subagent_type` | `general-purpose` |
 | `description` | `Answer question` |
-| `prompt` | `$ARGUMENTS` に対して簡潔に回答してください。コードベースの探索は不要です。一般的な知識で回答してください。 |
+| `prompt` | 現在のワーキングディレクトリは `$CWD` です。`$ARGUMENTS` に対して簡潔に回答してください。コードベースの探索は不要です。一般的な知識で回答してください。 |
 | `model` | `haiku` (低コスト・高速) |
 
 ### 3. Return Result
@@ -78,3 +82,4 @@ if --explore in $ARGUMENTS:
 - デフォルトでは haiku モデルを使用（高速・低コスト）
 - コードベースの探索が必要な場合は `--explore` オプションを使用
 - 回答はメインセッションに返されるが、質問処理自体は独立したコンテキストで実行
+- ワーキングディレクトリがプロンプトに含まれるため、ファイル操作やgit操作も可能
