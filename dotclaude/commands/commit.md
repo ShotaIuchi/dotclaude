@@ -1,35 +1,34 @@
 ---
-description: Commit changes asynchronously via sub-agent
+description: Commit changes via sub-agent
 argument-hint: "[message]"
 ---
 
-# /subcommit
+# /commit
 
-Commit changes asynchronously via sub-agent without blocking the main session.
+Commit changes via sub-agent with auto-generated commit messages.
 
 ## Purpose
 
-- Continue working while commit is processing
 - Auto-generate commit messages
 - Create commits following commit.schema.md
 
 ## Usage
 
 ```
-/subcommit [message]
+/commit [message]
 ```
 
 ## Examples
 
 ```bash
 # Auto-generate commit message
-/subcommit
+/commit
 
 # Specify message
-/subcommit feat: Add user authentication
+/commit feat: Add user authentication
 
 # With quoted message
-/subcommit "Add login feature"
+/commit "Add login feature"
 ```
 
 ## Processing
@@ -56,15 +55,14 @@ Schema locations (check in order):
 3. ~/.claude/rules/commit.schema.md (global)
 ```
 
-### 3. Launch Subagent (Background)
+### 3. Launch Subagent
 
 Use the Task tool with the following parameters:
 
 | Parameter | Value |
 |-----------|-------|
 | `subagent_type` | `general-purpose` |
-| `description` | `Async commit` |
-| `run_in_background` | `true` |
+| `description` | `Commit changes` |
 | `prompt` | See below |
 
 #### Prompt Template
@@ -98,11 +96,13 @@ Current directory: $CWD
 Complete the commit following the steps above.
 ```
 
-### 4. Notify User
+### 4. Display Result
 
 ```
-Display: "Committing in background..."
-Display: "Use /tasks to check status"
+Display commit summary:
+- Files committed
+- Commit message
+- Commit hash
 ```
 
 ## Options
@@ -131,20 +131,8 @@ if --amend in $ARGUMENTS:
    Do not use on already pushed commits."
 ```
 
-## Output Check
-
-Check background task results:
-
-```bash
-# Check task list
-/tasks
-
-# Check result (Read tool to read output_file)
-```
-
 ## Notes
 
-- Results need to be checked later due to background execution
 - If pre-commit hooks exist, they will be executed
 - Exit with error if conflicts exist
 - Use `--amend` only after confirming the previous commit is yours

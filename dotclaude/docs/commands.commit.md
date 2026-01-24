@@ -1,30 +1,29 @@
-# /subcommit
+# /commit
 
-メインセッションをブロックせずに、サブエージェントを通じて非同期でコミットを実行するコマンド。
+サブエージェントを通じてコミットを実行するコマンド。コミットメッセージの自動生成をサポート。
 
 ## 目的
 
-- コミット処理中も作業を継続可能
 - コミットメッセージの自動生成
 - commit.schema.mdに従ったコミット作成
 
 ## 使用方法
 
 ```
-/subcommit [message]
+/commit [message]
 ```
 
 ## 使用例
 
 ```bash
 # コミットメッセージを自動生成
-/subcommit
+/commit
 
 # メッセージを指定
-/subcommit feat: Add user authentication
+/commit feat: Add user authentication
 
 # クオート付きメッセージ
-/subcommit "Add login feature"
+/commit "Add login feature"
 ```
 
 ## 処理内容
@@ -36,13 +35,14 @@
 2. **プロンプト構築**
    - コミットスキーマの場所を確認（project → global）
 
-3. **サブエージェント起動（バックグラウンド）**
-   - `run_in_background: true`で非同期実行
+3. **サブエージェント起動**
    - 変更内容からコミットメッセージを生成（または指定メッセージを使用）
+   - コミット完了まで待機
 
-4. **ユーザー通知**
-   - "Committing in background..."
-   - "Use /tasks to check status"
+4. **結果表示**
+   - コミットされたファイル
+   - コミットメッセージ
+   - コミットハッシュ
 
 ## オプション
 
@@ -57,20 +57,8 @@
 - `--amend`: 前回のコミットを表示し確認後に`git commit --amend`を使用
   - **警告**: 既にプッシュ済みのコミットには使用しない
 
-## 結果確認
-
-バックグラウンドタスクの結果を確認:
-
-```bash
-# タスクリストを確認
-/tasks
-
-# 結果を確認（Readツールでoutput_fileを読む）
-```
-
 ## 注意事項
 
-- バックグラウンド実行のため、結果は後で確認が必要
 - pre-commitフックが存在する場合は実行される
 - コンフリクトがある場合はエラーで終了
 - `--amend`は前回のコミットが自分のものであることを確認してから使用
