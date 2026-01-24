@@ -34,6 +34,8 @@ Claude Code のコマンド（`.claude/commands/*.md`）の書き方ガイド。
 
 ## 基本構造
 
+> **参照:** フロントマターの全フィールドについては [command-frontmatter.md](command-frontmatter.md) を参照。
+
 ```markdown
 ---
 description: コマンドの説明
@@ -249,7 +251,25 @@ $ARGUMENTS が空の場合、使用方法を表示して終了。
 
 ## 動的コンテキスト注入
 
-`` `!`command`` `` でシェル実行結果を注入：
+シェルコマンドの実行結果をコマンド本文に注入できる。
+
+### 記法
+
+バッククォート内に `!` プレフィックスを付けたコマンドを記述する：
+
+```
+`!command`
+```
+
+構造の分解：
+- `` ` `` - 開始バッククォート
+- `!` - 動的実行を示すプレフィックス
+- `command` - 実行されるシェルコマンド
+- `` ` `` - 終了バッククォート
+
+### 例
+
+**ファイルの内容（commands/pr-summary.md）:**
 
 ```markdown
 ---
@@ -258,15 +278,37 @@ name: pr-summary
 
 ## Context
 
-- PR diff: `!`gh pr diff``
-- Changed files: `!`gh pr diff --name-only``
+- PR diff: `!gh pr diff`
+- Changed files: `!gh pr diff --name-only`
 
 ## Task
 
 Summarize this PR...
 ```
 
-**注意:** コマンドは Claude が受け取る**前**に実行される（プリプロセッシング）。
+**Claude が受け取る内容（実行後）:**
+
+```markdown
+## Context
+
+- PR diff:
+  diff --git a/src/main.ts b/src/main.ts
+  + added line
+  - removed line
+
+- Changed files:
+  src/main.ts
+  src/utils.ts
+
+## Task
+
+Summarize this PR...
+```
+
+### 動作タイミング
+
+**重要:** コマンドは Claude が受け取る**前**に実行される（プリプロセッシング）。
+つまり、`/pr-summary` を実行した時点でシェルコマンドが実行され、その結果が埋め込まれた状態で Claude に渡される。
 
 ---
 
@@ -276,8 +318,8 @@ Summarize this PR...
 |------|----------|--------|
 | パス | `.claude/commands/*.md` | `.claude/skills/*/SKILL.md` |
 | 構造 | 単一ファイル | ディレクトリ |
-| `name` フィールド | 不要（ファイル名が名前） | 必須 |
-| サポートファイル | 不可 | 可（同ディレクトリ内） |
+| `name` フィールド | 省略可（指定しても無視される。ファイル名が常にコマンド名として使用される） | 必須 |
+| サポートファイル | 不可 | 可（同ディレクトリ内に補助的なMarkdownファイルや設定ファイルを配置可能） |
 | 主な用途 | ワークフロー実行 | 知識提供 |
 | 自動起動 | 可（description必要） | 可 |
 
@@ -311,6 +353,25 @@ Error: Required parameters missing
 Usage: /cmd <param>=<value>
 
 Example: /cmd issue=123
+```
+
+### Recovery Patterns
+
+エラー発生時は、ユーザーに次のアクションを提示する：
+
+```markdown
+### On Failure
+
+```
+❌ Operation failed: <reason>
+
+Suggested actions:
+1. Check prerequisites: <specific check>
+2. Verify input: <expected format>
+3. Retry with: /cmd --verbose
+
+For help: /cmd --help
+```
 ```
 ```
 

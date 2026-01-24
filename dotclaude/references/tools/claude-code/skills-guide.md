@@ -84,9 +84,18 @@ external:
 | `disable-model-invocation` | false | `true` で手動起動のみ |
 | `user-invocable` | true | `false` で `/` メニューから非表示（Claude のみ使用） |
 | `allowed-tools` | all | 使用可能ツールを制限 |
-| `model` | inherit | 使用モデル: `haiku`, `sonnet`, `opus` |
+| `model` | inherit | 使用モデル: `haiku`, `sonnet`, `opus`（下記参照） |
 | `context` | - | `fork` でサブエージェント実行 |
 | `agent` | - | `context: fork` 時のエージェント型 |
+
+**モデル選択ガイダンス:**
+
+| Model | 特徴 | 推奨用途 |
+|-------|------|----------|
+| `inherit` | 親セッションのモデルを継承（デフォルト） | 通常のスキル |
+| `haiku` | 高速・低コスト | シンプルな検索・参照タスク |
+| `sonnet` | バランス型 | コード生成・分析 |
+| `opus` | 最高性能 | 複雑な推論・設計タスク |
 
 ---
 
@@ -148,6 +157,42 @@ ID は `~/.claude/references/external-links.yaml` で定義：
 android-arch-guide:
   url: https://developer.android.com/topic/architecture
   description: Official Android Architecture Guide
+```
+
+**external-links.yaml の構造:**
+
+```yaml
+# 必須フィールド: url
+# 推奨フィールド: description
+# 任意フィールド: tags, last-updated
+
+<id>:
+  url: <URL>              # 必須: 参照先URL
+  description: <text>      # 推奨: 内容の説明（Claudeが参照判断に使用）
+  tags:                    # 任意: 分類タグ
+    - android
+    - architecture
+  last-updated: 2026-01-01 # 任意: 最終確認日
+```
+
+**完全な例:**
+
+```yaml
+# ~/.claude/references/external-links.yaml
+android-arch-guide:
+  url: https://developer.android.com/topic/architecture
+  description: Official Android Architecture Guide covering MVVM, Repository pattern
+  tags: [android, architecture]
+
+jetpack-compose-docs:
+  url: https://developer.android.com/jetpack/compose
+  description: Jetpack Compose official documentation
+  tags: [android, ui, compose]
+
+kotlin-coroutines:
+  url: https://kotlinlang.org/docs/coroutines-overview.html
+  description: Kotlin Coroutines documentation for async programming
+  tags: [kotlin, async]
 ```
 
 ---
@@ -236,13 +281,29 @@ Research $ARGUMENTS thoroughly:
 3. Summarize findings
 ```
 
+**$ARGUMENTS 変数:**
+
+`$ARGUMENTS` はスキル呼び出し時にユーザーが渡した引数を含む。
+
+```
+# ユーザー入力
+/deep-research authentication flow
+
+# $ARGUMENTS の値
+"authentication flow"
+```
+
+スキル内で `$ARGUMENTS` を使用してタスクをパラメータ化できる。
+
 **エージェント型:**
 
 | Agent | 用途 |
 |-------|------|
-| `Explore` | コードベース探索・調査 |
-| `Plan` | 設計・計画 |
-| `general-purpose` | 汎用タスク |
+| `Explore` | コードベース探索・調査（読み取り中心） |
+| `Plan` | 設計・計画（分析と構造化） |
+| `general-purpose` | 汎用タスク（デフォルト） |
+
+これらは Claude Code で利用可能な標準エージェント型である。カスタムエージェントは `agents/` ディレクトリで定義可能。
 
 ---
 
@@ -269,6 +330,35 @@ allowed-tools:
   - Grep
   - Glob
 ---
+```
+
+**利用可能なツール名:**
+
+| Tool | 機能 |
+|------|------|
+| `Read` | ファイル読み取り |
+| `Write` | ファイル書き込み |
+| `Edit` | ファイル編集（部分置換） |
+| `Glob` | ファイルパターン検索 |
+| `Grep` | ファイル内容検索 |
+| `Bash` | シェルコマンド実行 |
+| `WebFetch` | Web コンテンツ取得 |
+| `WebSearch` | Web 検索 |
+| `Task` | サブタスク実行 |
+| `Skill` | 他スキル呼び出し |
+| `NotebookEdit` | Jupyter Notebook 編集 |
+
+**制限の組み合わせ例:**
+
+```yaml
+# 読み取り専用（調査向け）
+allowed-tools: [Read, Grep, Glob]
+
+# 編集可能（実装向け）
+allowed-tools: [Read, Write, Edit, Grep, Glob, Bash]
+
+# Web 調査向け
+allowed-tools: [Read, Grep, WebFetch, WebSearch]
 ```
 
 ---

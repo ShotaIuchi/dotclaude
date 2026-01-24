@@ -36,9 +36,9 @@ argument-hint: "[arg1] [arg2]"
 
 # スキル専用
 name: skill-name
-references:
+references:                     # ローカルファイル参照（相対パス）
   - path: ../../references/file.md
-external:
+external:                       # 外部ドキュメントID（Claude Code内部リソース）
   - id: external-doc-id
 
 # 動作制御
@@ -52,11 +52,14 @@ context: fork                   # サブエージェント実行
 
 ### $ARGUMENTS の使い方
 
+`$ARGUMENTS` はユーザーがコマンド実行時に渡した引数で自動的に置換される。
+詳細は [skills-guide.md](skills-guide.md) を参照。
+
 ```markdown
 # 明示的に使用
 Fix issue $ARGUMENTS
 
-# オプション処理
+# オプション処理（擬似コード - 実際はClaudeが解釈）
 if --dry-run in $ARGUMENTS:
   Show preview only
 ```
@@ -67,7 +70,7 @@ if --dry-run in $ARGUMENTS:
 
 | Resource | Description |
 |----------|-------------|
-| [Claude Code Skills](https://docs.anthropic.com/en/docs/claude-code/skills) | 公式: Skills |
-| [Claude Code Sub-agents](https://docs.anthropic.com/en/docs/claude-code/sub-agents) | 公式: Sub-agents |
-| [Claude Code Memory](https://docs.anthropic.com/en/docs/claude-code/memory) | 公式: Memory & CLAUDE.md |
+| [Claude Code Skills](https://code.claude.com/docs/en/skills) | 公式: Skills |
+| [Claude Code Sub-agents](https://code.claude.com/docs/en/sub-agents) | 公式: Sub-agents |
+| [Claude Code Memory](https://code.claude.com/docs/en/memory) | 公式: Memory & CLAUDE.md |
 | [Agent Skills Standard](https://agentskills.io) | Agent Skills 標準仕様 |

@@ -130,18 +130,20 @@ argument-hint: "<issue-number>"
 
 ### 疑似コードは明確に
 
+コードブロック内で疑似コードを記述する場合、言語指定なしのコードブロックを使用：
+
 ```markdown
 ### 1. 入力検証
 
-```
-if $ARGUMENTS is empty:
-  Display: "Usage: /cmd <arg>"
-  Exit
+    if $ARGUMENTS is empty:
+      Display: "Usage: /cmd <arg>"
+      Exit
 
-if file does not exist:
-  Error: "File not found"
+    if file does not exist:
+      Error: "File not found"
 ```
-```
+
+> **Note:** インデント（4スペース）を使用することで、ネストされたコードブロックの問題を回避できる。
 
 ### Bash 例示は実行可能に
 
@@ -348,7 +350,9 @@ allowed-tools:
 ### 自動起動確認
 
 1. 関連する質問をして自動起動されるか確認
-2. `/context` でスキルが認識されているか確認
+2. 現在のコンテキストでスキルが認識されているか確認
+
+> **Note:** Claude Code のコンテキスト確認方法については、実行環境に応じて異なる場合がある。
 
 ### チェックリスト
 
