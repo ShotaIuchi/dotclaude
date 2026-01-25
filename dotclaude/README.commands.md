@@ -169,6 +169,9 @@ GitHub Issue → 仕様 → 計画 → 実装 → PR作成 までを構造化さ
 # 単一work監視開始
 /wf0-remote start FEAT-123-auth
 
+# 複数work指定（可変引数）
+/wf0-remote start FEAT-123-auth FIX-456-login FEAT-789-export
+
 # 全GitHub-sourceのwork一括監視
 /wf0-remote start --all
 
@@ -187,6 +190,7 @@ GitHub Issue → 仕様 → 計画 → 実装 → PR作成 までを構造化さ
 
 # 監視停止
 /wf0-remote stop FEAT-123-auth  # 単一
+/wf0-remote stop FEAT-123 FEAT-456  # 複数
 /wf0-remote stop --all          # 全て
 /wf0-remote stop FEAT-*         # パターン
 ```
@@ -196,6 +200,7 @@ GitHub Issue → 仕様 → 計画 → 実装 → PR作成 までを構造化さ
 | 形式 | 説明 | 例 |
 |------|------|-----|
 | `work-id` | 単一のwork指定 | `FEAT-123-auth` |
+| `work-id...` | 複数work指定（可変引数） | `FEAT-123 FIX-456 FEAT-789` |
 | `--all` | 全GitHub-source work | start時: github sourceのみ対象<br>stop時: remote.enabled=trueのwork |
 | `PATTERN` | ワイルドカード | `FEAT-*`, `*-auth`, `FIX-???-*` |
 

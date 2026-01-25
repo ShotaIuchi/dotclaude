@@ -6,15 +6,15 @@ GitHub Issueコメント経由でワークフローを監視・実行するコ�
 ## 構文
 
 ```
-/wf0-remote <subcommand> [target]
+/wf0-remote <subcommand> [target...]
 ```
 
 ## サブコマンド
 
 | サブコマンド | 説明 |
 |--------------|------|
-| `start [target]` | リモート監視を開始（tmuxセッションで起動） |
-| `stop [target]` | リモート監視を停止 |
+| `start [target...]` | リモート監視を開始（tmuxセッションで起動） |
+| `stop [target...]` | リモート監視を停止 |
 | `status` | 現在の監視状態を表示 |
 
 ## ターゲット指定
@@ -22,6 +22,7 @@ GitHub Issueコメント経由でワークフローを監視・実行するコ�
 | 形式 | 説明 | 例 |
 |------|------|-----|
 | `work-id` | 単一のwork指定 | `FEAT-123-auth` |
+| `work-id...` | 複数work指定（可変引数） | `FEAT-123 FIX-456 FEAT-789` |
 | `--all` | 全対象work | start時: GitHub sourceのみ<br>stop時: 実行中のworkすべて |
 | `PATTERN` | ワイルドカードパターン | `FEAT-*`, `*-auth`, `FIX-???-*` |
 | (省略) | `active_work`を使用 | - |
@@ -39,6 +40,16 @@ GitHub Issueコメント経由でワークフローを監視・実行するコ�
 
 # 監視停止
 /wf0-remote stop FEAT-123-auth
+```
+
+### 複数work指定
+
+```bash
+# 複数のwork-idを直接指定
+/wf0-remote start FEAT-123-auth FIX-456-login FEAT-789-export
+
+# 停止も同様
+/wf0-remote stop FEAT-123 FEAT-456
 ```
 
 ### 一括操作

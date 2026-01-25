@@ -1,6 +1,6 @@
 ---
 description: Remote workflow operation via GitHub Issue
-argument-hint: "<start|stop|status> [work-id|--all|pattern]"
+argument-hint: "<start|stop|status> [work-id... | --all | pattern]"
 ---
 
 # /wf0-remote
@@ -11,21 +11,21 @@ Enables workflow approval from mobile devices while PC daemon executes the comma
 ## Usage
 
 ```
-/wf0-remote <subcommand> [work-id|--all|pattern]
+/wf0-remote <subcommand> [target...]
 ```
 
 ## Subcommands
 
 | Subcommand | Description |
 |------------|-------------|
-| `start [target]` | Start remote monitoring (launches in tmux session) |
-| `stop [target]` | Stop remote monitoring |
+| `start [target...]` | Start remote monitoring (launches in tmux session) |
+| `stop [target...]` | Stop remote monitoring |
 | `status` | Show current monitoring status |
 
 ## Arguments
 
-- `target`: Target specification (optional)
-  - `work-id`: Single work ID (e.g., `FEAT-123-auth`, `FIX-456-login-error`)
+- `target`: Target specification (optional, supports multiple)
+  - `work-id...`: One or more work IDs (e.g., `FEAT-123-auth FIX-456-login`)
   - `--all`: All works with GitHub source
   - `pattern`: Wildcard pattern (e.g., `FEAT-*`, `*-auth`, `FIX-???-*`)
   - If omitted: Use `active_work` from `state.json`
@@ -35,6 +35,10 @@ Enables workflow approval from mobile devices while PC daemon executes the comma
 ```bash
 # Single work
 /wf0-remote start FEAT-123-auth
+
+# Multiple works (variadic)
+/wf0-remote start FEAT-123-auth FIX-456-login FEAT-789-export
+/wf0-remote stop FEAT-123 FEAT-456
 
 # All GitHub-sourced works
 /wf0-remote start --all
@@ -50,11 +54,13 @@ Enables workflow approval from mobile devices while PC daemon executes the comma
 
 Parse $ARGUMENTS and execute the following processing.
 
-### 1. Parse Subcommand and Target
+### 1. Parse Subcommand and Targets
 
 ```bash
 subcommand=$(echo "$ARGUMENTS" | awk '{print $1}')
-target=$(echo "$ARGUMENTS" | awk '{print $2}')
+
+# Get all arguments after subcommand
+targets=$(echo "$ARGUMENTS" | awk '{$1=""; print $0}' | xargs)
 
 if [ -z "$subcommand" ]; then
   echo "ERROR: Subcommand required (start|stop|status)"
@@ -62,14 +68,20 @@ if [ -z "$subcommand" ]; then
 fi
 
 # Determine target type
-if [ "$target" = "--all" ]; then
+first_target=$(echo "$targets" | awk '{print $1}')
+target_count=$(echo "$targets" | wc -w | xargs)
+
+if [ "$first_target" = "--all" ]; then
   target_type="all"
-elif [[ "$target" == *"*"* ]] || [[ "$target" == *"?"* ]]; then
+elif [[ "$first_target" == *"*"* ]] || [[ "$first_target" == *"?"* ]]; then
   target_type="pattern"
-  target_pattern="$target"
-elif [ -n "$target" ]; then
+  target_pattern="$first_target"
+elif [ "$target_count" -gt 1 ]; then
+  target_type="multiple"
+  target_list="$targets"
+elif [ -n "$first_target" ]; then
   target_type="single"
-  work_id="$target"
+  work_id="$first_target"
 else
   target_type="single"  # Will use active_work
 fi
@@ -109,6 +121,17 @@ case "$target_type" in
       case "$wid" in
         $target_pattern) work_ids+=("$wid") ;;
       esac
+    done
+    ;;
+  "multiple")
+    # Multiple work IDs specified directly
+    for wid in $target_list; do
+      # Verify work exists
+      if jq -e ".works[\"$wid\"]" .wf/state.json > /dev/null 2>&1; then
+        work_ids+=("$wid")
+      else
+        echo "WARNING: Work '$wid' not found, skipping"
+      fi
     done
     ;;
   "single")
