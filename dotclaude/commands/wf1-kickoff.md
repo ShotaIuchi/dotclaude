@@ -82,6 +82,53 @@ Determine from the retrieved information:
 - **slug**: Generate from title (lowercase, alphanumeric and hyphens only, max 40 characters)
 - **work-id**: `<TYPE>-<local-id>-<slug>` format (e.g., `FEAT-myid-add-feature`)
 
+##### 2d. Ask for Issue/Jira Creation (local mode only)
+
+After determining work-id in local mode, ask user:
+
+```
+ローカルワークフローを作成します。
+外部システムにも作成しますか？
+
+1. ローカルのみ (後で /wf0-promote で昇格可能)
+2. GitHub Issue も作成
+3. Jira チケットも作成
+```
+
+**If user selects GitHub Issue:**
+
+1. Create GitHub Issue using `gh issue create`:
+   ```bash
+   gh issue create \
+     --title "<title>" \
+     --body "Created from local workflow: <work-id>" \
+     --label "<type-label>"
+   ```
+2. Get created issue number from output
+3. Update source info:
+   ```json
+   {
+     "source": {
+       "type": "github",
+       "id": "<issue_number>",
+       "title": "<title>",
+       "url": "<issue_url>",
+       "promoted_from": "local"
+     }
+   }
+   ```
+4. Optionally update work-id to include issue number: `<TYPE>-<issue>-<slug>`
+
+**If user selects Jira:**
+
+1. Prompt for Jira project key (e.g., `ABC`)
+2. Create Jira ticket (requires Jira CLI or API configuration)
+3. Update source info with Jira details
+
+**If user selects local only:**
+
+Continue with local source type. Can be promoted later with `/wf0-promote`.
+
 #### 3. Select Base Branch
 
 Use `default_base_branch` from `.wf/config.json` as default.
