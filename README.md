@@ -73,52 +73,59 @@ ln -s /path/to/dotclaude/dotclaude .claude
 |---------|------|
 | `/wf0-restore [work-id]` | 既存ワークスペースの復元 |
 | `/wf0-status [work-id\|all]` | ステータス表示 |
+| `/wf0-nextstep [work-id]` | 次のワークフローステップを自動実行 |
+| `/wf0-remote <start\|stop\|status> [target...]` | GitHub Issue経由のリモートワークフロー操作 |
 
-### ワークスペース・ドキュメントコマンド (wf1-5)
-
-| コマンド | 説明 |
-|---------|------|
-| `/wf1-workspace issue=<n>` | 新規ワークスペース作成 |
-| `/wf2-kickoff` | Kickoff作成（目標と成功基準の定義） |
-| `/wf2-kickoff update` | Kickoff更新 |
-| `/wf2-kickoff revise "<指示>"` | Kickoff修正 |
-| `/wf2-kickoff chat` | ブレインストーミング対話 |
-| `/wf3-spec` | 仕様書作成 |
-| `/wf4-plan` | 実装計画作成 |
-| `/wf5-review` | レビュー記録 |
-
-### 実装コマンド (wf6-7)
+### ワークフローコマンド (wf1-6)
 
 | コマンド | 説明 |
 |---------|------|
-| `/wf6-implement [step]` | Planの1ステップを実装 |
-| `/wf7-verify` | テスト・ビルド検証 |
-| `/wf7-verify pr` | 検証後にPR作成 |
+| `/wf1-kickoff github=<n>` | ワークスペース作成＋Kickoff（GitHub Issue） |
+| `/wf1-kickoff jira=<id> title="..."` | ワークスペース作成＋Kickoff（Jira） |
+| `/wf1-kickoff local=<id> title="..."` | ワークスペース作成＋Kickoff（ローカル） |
+| `/wf1-kickoff update` | 既存Kickoffの更新 |
+| `/wf1-kickoff revise "<指示>"` | Kickoff修正 |
+| `/wf1-kickoff chat` | ブレインストーミング対話 |
+| `/wf2-spec` | 仕様書（Spec）作成 |
+| `/wf3-plan` | 実装計画（Plan）作成 |
+| `/wf4-review [plan\|code\|pr]` | レビュー記録作成 |
+| `/wf5-implement [step]` | Planの1ステップを実装 |
+| `/wf6-verify` | テスト・ビルド検証 |
+| `/wf6-verify pr` | 検証後にPR作成 |
 
-### エージェント
+### ユーティリティコマンド
 
 | コマンド | 説明 |
 |---------|------|
 | `/agent <name> [params]` | サブエージェントを直接呼び出し |
+| `/subask <質問>` | サブエージェントに質問（コンテキストを汚さない） |
+| `/commit [message]` | コミットメッセージ自動生成＋コミット |
+| `/doc-review <file_path>` | ドキュメントレビュー作成 |
+| `/doc-fix [file_path...] [--all]` | レビュー指摘の修正適用 |
 
 ## ワークフロー
 
 ### 基本フロー
 
 ```
-/wf1-workspace issue=123
+/wf1-kickoff github=123（ワークスペース＋目標と成功基準を定義）
     ↓
-/wf2-kickoff（目標と成功基準を定義）
+/wf2-spec（変更仕様を作成）
     ↓
-/wf3-spec（変更仕様を作成）
+/wf3-plan（実装ステップを計画）
     ↓
-/wf4-plan（実装ステップを計画）
+/wf4-review（任意: 計画レビュー）
     ↓
-/wf5-review（任意: 計画レビュー）
-    ↓
-/wf6-implement（1ステップずつ実装）
+/wf5-implement（1ステップずつ実装）
     ↓ ↑ 繰り返し
-/wf7-verify pr（検証してPR作成）
+/wf6-verify pr（検証してPR作成）
+```
+
+### 自動進行
+
+```bash
+# 次のステップを自動実行
+/wf0-nextstep
 ```
 
 ### 作業の復元
@@ -132,7 +139,17 @@ ln -s /path/to/dotclaude/dotclaude .claude
 
 ```bash
 # 指示を与えて修正
-/wf2-kickoff revise "CSVエクスポートのみにスコープを絞る"
+/wf1-kickoff revise "CSVエクスポートのみにスコープを絞る"
+```
+
+### リモート操作
+
+```bash
+# GitHub Issueコメントで承認待ちモード
+/wf0-remote start FEAT-123-auth
+
+# 複数ワークを同時監視
+/wf0-remote start --all
 ```
 
 ## リポジトリ構造
@@ -142,6 +159,8 @@ dotclaude/                 # リポジトリルート
 ├── dotclaude/             # ~/.claudeにリンクする対象
 │   ├── agents/            # サブエージェント定義
 │   ├── commands/          # スラッシュコマンド定義
+│   ├── skills/            # アーキテクチャスキル（iOS/Android/KMP/AWS SAM）
+│   ├── rules/             # プロジェクトルール・スキーマ
 │   ├── guides/            # アーキテクチャガイド
 │   ├── examples/          # 設定ファイル例
 │   ├── scripts/           # シェルスクリプト
@@ -168,7 +187,7 @@ your-project/
 │       └── 05_REVISIONS.md
 └── .claude/             # dotclaudeからのシンボリックリンク
     └── commands/        # スラッシュコマンド
-        ├── wf1-workspace.md
+        ├── wf1-kickoff.md
         ├── wf0-restore.md
         └── ...
 ```
@@ -202,11 +221,20 @@ your-project/
   "active_work": "FEAT-123-export-csv",
   "works": {
     "FEAT-123-export-csv": {
-      "current": "wf6-implement",
-      "next": "wf7-verify",
+      "current": "wf5-implement",
+      "next": "wf6-verify",
+      "source": {
+        "type": "github",
+        "id": "123",
+        "title": "Add CSV export feature"
+      },
       "git": {
         "base": "develop",
         "branch": "feat/123-export-csv"
+      },
+      "plan": {
+        "total_steps": 5,
+        "current_step": 3
       }
     }
   }
@@ -222,10 +250,10 @@ Claude CodeのTaskツールを活用した専門エージェント群。
 
 | エージェント | 目的 | 呼び出し元 |
 |-------------|------|-----------|
-| `research` | Issue背景調査、関連コード特定 | wf2-kickoff |
-| `spec-writer` | 仕様書ドラフト作成 | wf3-spec |
-| `planner` | 実装計画立案 | wf4-plan |
-| `implementer` | 単一ステップ実装支援 | wf6-implement |
+| `research` | Issue背景調査、関連コード特定 | wf1-kickoff |
+| `spec-writer` | 仕様書ドラフト作成 | wf2-spec |
+| `planner` | 実装計画立案 | wf3-plan |
+| `implementer` | 単一ステップ実装支援 | wf5-implement |
 
 ### タスク特化型
 
@@ -266,12 +294,12 @@ Claude CodeのTaskツールを活用した専門エージェント群。
 
 ### 1. 計画外変更の禁止
 
-`/wf6-implement`はPlanに記載されたステップのみを実装します。
+`/wf5-implement`はPlanに記載されたステップのみを実装します。
 Plan外の変更が必要な場合は、まずPlanを更新してください。
 
 ### 2. 1実行 = 1ステップ
 
-`/wf6-implement`は1回の実行で1ステップのみを実装します。
+`/wf5-implement`は1回の実行で1ステップのみを実装します。
 これにより作業の進捗が明確になります。
 
 ### 3. 原本の保持
