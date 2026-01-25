@@ -28,7 +28,10 @@ command -v gh >/dev/null || echo "ERROR: gh is required"
 gh auth status || echo "ERROR: Please run gh auth login"
 
 # For Jira (if configured)
-# Requires Jira CLI or API token in config
+# Recommended: jira-cli (https://github.com/ankitpokhrel/jira-cli)
+# Install: brew install ankitpokhrel/jira-cli/jira-cli
+# Setup: jira init
+# Alternatively: Configure API token in .wf/config.json
 ```
 
 ## Processing
@@ -86,25 +89,47 @@ case "$work_type" in
 esac
 
 # Create issue body from kickoff
+# Note: Using awk for cross-platform compatibility (sed -i differs between macOS and Linux)
+extract_section() {
+  local file="$1"
+  local section="$2"
+  awk "/^## $section/,/^## /" "$file" | sed '1d;$d'
+}
+
 body=$(cat <<EOF
 ## Goal
 
-$(sed -n '/^## Goal/,/^## /p' "$kickoff_path" | sed '1d;$d')
+$(extract_section "$kickoff_path" "Goal")
 
 ## Success Criteria
 
-$(sed -n '/^## Success Criteria/,/^## /p' "$kickoff_path" | sed '1d;$d')
+$(extract_section "$kickoff_path" "Success Criteria")
 
 ---
 📁 Local workflow: \`$work_id\`
 EOF
 )
 
-# Create GitHub Issue
+# Create GitHub Issue with error handling
 if [ -n "$label" ]; then
-  result=$(gh issue create --title "$title" --body "$body" --label "$label")
+  result=$(gh issue create --title "$title" --body "$body" --label "$label" 2>&1) || {
+    echo "ERROR: Failed to create GitHub Issue"
+    echo "$result"
+    exit 1
+  }
 else
-  result=$(gh issue create --title "$title" --body "$body")
+  result=$(gh issue create --title "$title" --body "$body" 2>&1) || {
+    echo "ERROR: Failed to create GitHub Issue"
+    echo "$result"
+    exit 1
+  }
+fi
+
+# Validate result
+if [ -z "$result" ] || ! echo "$result" | grep -qE 'https://'; then
+  echo "ERROR: Unexpected response from gh issue create"
+  echo "Response: $result"
+  exit 1
 fi
 
 # Extract issue number and URL
@@ -115,34 +140,58 @@ issue_number=$(echo "$result" | grep -oE '[0-9]+$')
 ### 4. Promote to Jira
 
 ```bash
-# Get Jira configuration
-jira_project=$(jq -r '.jira.project // empty' .wf/config.json)
+# Get Jira configuration from config file or environment
+jira_project="${JIRA_PROJECT:-$(jq -r '.jira.project // empty' .wf/config.json 2>/dev/null)}"
+jira_domain="${JIRA_DOMAIN:-$(jq -r '.jira.domain // empty' .wf/config.json 2>/dev/null)}"
 
+# Fallback to interactive input only if not in CI and no config
 if [ -z "$jira_project" ]; then
+  if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
+    echo "ERROR: Jira project not configured. Set JIRA_PROJECT environment variable or .wf/config.json"
+    exit 1
+  fi
   echo "Jira project not configured."
   echo "Enter Jira project key (e.g., ABC):"
   read jira_project
 fi
 
+if [ -z "$jira_domain" ]; then
+  if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
+    echo "ERROR: Jira domain not configured. Set JIRA_DOMAIN environment variable or .wf/config.json"
+    exit 1
+  fi
+  echo "Enter Jira domain (e.g., your-company.atlassian.net):"
+  read jira_domain
+fi
+
 # Get title and description
 title=$(jq -r ".works[\"$work_id\"].source.title" .wf/state.json)
-description="Goal: $(sed -n '/^## Goal/,/^## /p' "$kickoff_path" | sed '1d;$d')"
+description="Goal: $(extract_section "$kickoff_path" "Goal")"
 
 # Create Jira ticket (using jira-cli or API)
-# This is a placeholder - actual implementation depends on Jira setup
+# NOTE: Jira integration is partially implemented. Full support planned for future release.
 echo "Creating Jira ticket in project $jira_project..."
 echo "Title: $title"
 echo "Description: $description"
 
-# If using jira-cli:
-# jira_id=$(jira issue create -p "$jira_project" -t Task -s "$title" -b "$description" --no-input)
+# Check if jira-cli is available
+if command -v jira >/dev/null 2>&1; then
+  jira_id=$(jira issue create -p "$jira_project" -t Task -s "$title" -b "$description" --no-input 2>&1) || {
+    echo "ERROR: Failed to create Jira ticket: $jira_id"
+    exit 1
+  }
+else
+  # Prompt for manual creation if no CLI (non-CI only)
+  if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
+    echo "ERROR: jira-cli not found and running in CI. Install jira-cli or configure API."
+    exit 1
+  fi
+  echo ""
+  echo "Please create the Jira ticket manually and enter the ticket ID:"
+  read jira_id
+fi
 
-# Prompt for manual creation if no CLI
-echo ""
-echo "Please create the Jira ticket manually and enter the ticket ID:"
-read jira_id
-
-jira_url="https://your-domain.atlassian.net/browse/$jira_id"
+jira_url="https://$jira_domain/browse/$jira_id"
 ```
 
 ### 5. Update state.json
@@ -180,11 +229,22 @@ jq --arg id "$jira_id" \
 Update the Issue reference in kickoff:
 
 ```bash
+# Cross-platform sed -i implementation
+sed_inplace() {
+  local file="$1"
+  local pattern="$2"
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "$pattern" "$file"
+  else
+    sed -i "$pattern" "$file"
+  fi
+}
+
 # For GitHub
-sed -i '' "s|^> Issue:.*|> Issue: #$issue_number|" "$kickoff_path"
+sed_inplace "$kickoff_path" "s|^> Issue:.*|> Issue: #$issue_number|"
 
 # For Jira
-sed -i '' "s|^> Issue:.*|> Issue: $jira_id|" "$kickoff_path"
+sed_inplace "$kickoff_path" "s|^> Issue:.*|> Issue: $jira_id|"
 ```
 
 ### 7. Optionally Rename Work-ID
@@ -192,20 +252,51 @@ sed -i '' "s|^> Issue:.*|> Issue: $jira_id|" "$kickoff_path"
 Ask user if they want to update work-id to include the issue number:
 
 ```
-Work-ID を更新しますか？
+Do you want to update the Work-ID?
 
-現在: FEAT-myid-add-feature
-提案: FEAT-123-add-feature (GitHub Issue #123)
+Current: FEAT-myid-add-feature
+Proposed: FEAT-123-add-feature (GitHub Issue #123)
 
-1. はい、更新する
-2. いいえ、現在のままにする
+1. Yes, update it
+2. No, keep current
 ```
 
-If yes:
-1. Generate new work-id with issue number
-2. Rename `docs/wf/<old-work-id>/` to `docs/wf/<new-work-id>/`
-3. Update state.json (rename key in works, update active_work)
-4. Update git branch name (optional, with user confirmation)
+If yes, execute the following steps:
+
+```bash
+# Generate new work-id
+old_work_id="$work_id"
+work_type=$(echo "$work_id" | cut -d'-' -f1)
+work_suffix=$(echo "$work_id" | cut -d'-' -f3-)
+new_work_id="${work_type}-${issue_number}-${work_suffix}"
+
+# 1. Rename workflow directory
+if [ -d "docs/wf/$old_work_id" ]; then
+  mv "docs/wf/$old_work_id" "docs/wf/$new_work_id"
+fi
+
+# 2. Update state.json (rename key in works, update active_work)
+jq --arg old "$old_work_id" --arg new "$new_work_id" '
+  .works[$new] = .works[$old] |
+  del(.works[$old]) |
+  if .active_work == $old then .active_work = $new else . end
+' .wf/state.json > .wf/state.json.tmp && mv .wf/state.json.tmp .wf/state.json
+
+# 3. Update git branch name (with user confirmation)
+current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+if [ "$current_branch" = "$old_work_id" ]; then
+  echo "Current git branch matches old work-id."
+  echo "Rename branch to '$new_work_id'? (y/N)"
+  read -r confirm
+  if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
+    git branch -m "$old_work_id" "$new_work_id"
+    echo "Branch renamed to: $new_work_id"
+  fi
+fi
+
+work_id="$new_work_id"
+kickoff_path="docs/wf/$work_id/00_KICKOFF.md"
+```
 
 ### 8. Commit Changes
 

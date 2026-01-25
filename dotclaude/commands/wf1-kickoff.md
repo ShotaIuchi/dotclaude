@@ -122,7 +122,7 @@ After determining work-id in local mode, ask user:
 **If user selects Jira:**
 
 1. Prompt for Jira project key (e.g., `ABC`)
-2. Create Jira ticket (requires Jira CLI or API configuration)
+2. Create Jira ticket using jira-cli or API (see `/wf0-promote` Prerequisites for setup)
 3. Update source info with Jira details
 
 **If user selects local only:**
@@ -170,17 +170,28 @@ Extract Issue number from work-id and get information:
 source_type=$(jq -r ".works[\"$work_id\"].source.type" .wf/state.json)
 
 if [ "$source_type" = "github" ]; then
-  # Extract issue number using regex that handles various prefixes
-  # Pattern: <TYPE>-<number>-<slug> where TYPE can be any alphanumeric string
-  issue_number=$(echo "$work_id" | grep -oE '[0-9]+' | head -1)
-  if [ -z "$issue_number" ]; then
-    echo "ERROR: Could not extract issue number from work-id: $work_id"
-    exit 1
+  # Extract issue number from state.json (most reliable source)
+  issue_number=$(jq -r ".works[\"$work_id\"].source.id" .wf/state.json)
+
+  # Fallback: Extract from work-id if not in state.json
+  # Pattern: <TYPE>-<number>-<slug> where TYPE can be FEAT, FIX, etc.
+  # Note: For JIRA-prefixed work-ids, use the Jira source type instead
+  if [ -z "$issue_number" ] || [ "$issue_number" = "null" ]; then
+    # Extract the second segment which should be the issue number
+    issue_number=$(echo "$work_id" | cut -d'-' -f2)
+    # Validate it's a number
+    if ! echo "$issue_number" | grep -qE '^[0-9]+$'; then
+      echo "ERROR: Could not extract issue number from work-id: $work_id"
+      echo "Hint: Ensure work-id follows <TYPE>-<number>-<slug> format for GitHub source"
+      exit 1
+    fi
   fi
   gh issue view "$issue_number" --json number,title,body,labels,assignees,milestone
 
 elif [ "$source_type" = "jira" ]; then
-  # For Jira, get info from state.json (Jira API access would require separate config)
+  # For Jira, get info from state.json
+  # Note: For Jira CLI setup and configuration, see /wf0-promote Prerequisites section
+  # Recommended: jira-cli (https://github.com/ankitpokhrel/jira-cli)
   source_id=$(jq -r ".works[\"$work_id\"].source.id" .wf/state.json)
   source_title=$(jq -r ".works[\"$work_id\"].source.title" .wf/state.json)
   source_url=$(jq -r ".works[\"$work_id\"].source.url // empty" .wf/state.json)
@@ -200,7 +211,7 @@ fi
 
 When source_type is "local" and creating a new Kickoff (no existing `00_KICKOFF.md`), use Plan Mode to explore requirements interactively.
 
-> **Note**: Plan Mode uses Claude Code's built-in planning feature (`EnterPlanMode` / `ExitPlanMode` tools).
+> **Note**: Plan Mode uses Claude Code's built-in planning feature. When entering Plan Mode, Claude will engage in an interactive dialogue to explore requirements without making changes. This is particularly useful for local workflows where there is no pre-existing Issue or ticket to reference. The `EnterPlanMode` and `ExitPlanMode` tools are internal to Claude Code and automatically manage the planning state.
 
 **Plan file path:**
 ```
@@ -421,13 +432,45 @@ Work: <work-id>
 
 ## Create worktree (Optional)
 
-If `config.worktree.enabled` is `true`:
+If `config.worktree.enabled` is `true` in `.wf/config.json`:
+
+```json
+// .wf/config.json
+{
+  "worktree": {
+    "enabled": true,
+    "base_path": ".worktrees"
+  }
+}
+```
 
 ```bash
 git worktree add .worktrees/<branch-name> <branch>
 ```
 
-Record worktree path in `local.json`.
+Record worktree path in `.wf/local.json` (git-ignored, local machine specific):
+
+```json
+// .wf/local.json
+{
+  "worktrees": {
+    "<work-id>": ".worktrees/<branch-name>"
+  }
+}
+```
+
+## Error Handling
+
+| Error Scenario | Behavior | Recovery |
+|----------------|----------|----------|
+| Branch already exists | Display error with existing branch name | Use different slug or delete existing branch |
+| GitHub Issue not found | Display error with issue number | Verify issue number and repository |
+| Title not specified (jira/local) | Display error prompting for title | Re-run with `title="..."` argument |
+| Multiple source types specified | Display error listing conflicting arguments | Re-run with single source type |
+| Branch creation fails | Display git error | Check git status, resolve conflicts |
+| state.json update fails | Display error, rollback branch creation | Check file permissions, disk space |
+| Directory creation fails | Display error | Check permissions on docs/wf/ |
+| gh CLI not authenticated | Display auth error | Run `gh auth login` |
 
 ## Notes
 
