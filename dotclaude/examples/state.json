@@ -1,5 +1,6 @@
 {
   "active_work": "FEAT-123-export-csv",
+  "schedule_id": null,
   "works": {
     "FEAT-123-export-csv": {
       "current": "wf5-implement",
