@@ -12,5 +12,18 @@
   "worktree": {
     "enabled": true,
     "root_dir": ".worktrees"
+  },
+  "commit": {
+    "type_detection": "auto",
+    "default_type": "feat"
+  },
+  "verify": {
+    "test": "npm test",
+    "build": "npm run build",
+    "lint": "npm run lint"
+  },
+  "jira": {
+    "project": "PROJ",
+    "domain": "your-company.atlassian.net"
   }
 }
