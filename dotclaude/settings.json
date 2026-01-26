@@ -1,3 +1,16 @@
 {
+  "enabledPlugins": {
+    "rust-analyzer-lsp@claude-plugins-official": true
+  },
+  "language": "Japanese",
+  "permissions": {
+    "deny": [
+      "Read(./**/__README*.md)",
+      "Read(./__README*.md)"
+    ],
+    "allow": [
+      "mcp__pencil"
+    ]
+  },
   "plansDirectory": "./.claude/plans"
 }
