@@ -1,7 +1,7 @@
 ---
 name: wf1-kickoff
 description: Create a new workspace and Kickoff document
-argument-hint: "<github=N | jira=ID | local=ID> [title=...] [type=...]"
+argument-hint: "<github=N | jira=ID | local=ID> [title=...] [type=...] [--no-branch]"
 context: fork
 agent: general-purpose
 ---
@@ -15,9 +15,9 @@ Create a new workspace and Kickoff document, or update an existing one.
 ## Usage
 
 ```
-/wf1-kickoff github=<number>
-/wf1-kickoff jira=<jira-id> [title="title"]
-/wf1-kickoff local=<id> title="title" [type=<TYPE>]
+/wf1-kickoff github=<number> [--no-branch]
+/wf1-kickoff jira=<jira-id> [title="title"] [--no-branch]
+/wf1-kickoff local=<id> title="title" [type=<TYPE>] [--no-branch]
 /wf1-kickoff [update | revise "<instruction>" | chat]
 ```
 
@@ -30,6 +30,7 @@ Create a new workspace and Kickoff document, or update an existing one.
 - `local`: Local ID (arbitrary string)
 - `title`: Title (required for jira/local)
 - `type`: FEAT/FIX/REFACTOR/CHORE/RFC (local only, default: FEAT)
+- `--no-branch`: Skip branch creation, use current branch as work branch
 
 ### Subcommands (for existing workspace)
 
@@ -53,6 +54,13 @@ Create a new workspace and Kickoff document, or update an existing one.
 
 4. **Create work branch**:
    > **CRITICAL**: Working on main/master directly is forbidden. All work MUST happen on a feature branch.
+
+   **If `--no-branch` is specified:**
+   - Skip branch creation. Use the current branch as the work branch.
+   - **Verify**: current branch MUST NOT be main/master. If it is, **ABORT** with error "Cannot use --no-branch on main/master".
+   - Record the current branch name as `git.branch`.
+
+   **Otherwise (default):**
    - `git checkout -b <prefix>/<issue>-<slug> <base_branch>`
    - **Verify immediately**: if still on main/master, **ABORT entire process**.
 
@@ -110,6 +118,7 @@ If `config.worktree.enabled` is true: `git worktree add .worktrees/<branch-name>
 | Title missing (jira/local) | Prompt for title |
 | Multiple source types | Error listing conflicts |
 | Still on main/master at Step 5+ | **ABORT immediately** |
+| `--no-branch` on main/master | **ABORT** with error message |
 
 ## Agent Reference
 

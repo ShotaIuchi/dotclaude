@@ -17,6 +17,7 @@ Select and execute the next task from schedule.json, respecting dependency order
 | `--dry-run` | Display task info only, do not execute |
 | `--until <phase>` | Auto-execute until specified phase (skip selection) |
 | `--all` | Auto-execute all remaining tasks (max 50, safety limit) |
+| `--no-branch` | Skip branch creation in wf1-kickoff, use current branch |
 
 ## Processing
 
@@ -64,7 +65,7 @@ Selection mapping: 1→wf1-kickoff, 2→wf3-plan, 3→wf4-review, 4→wf6-verify
 ### 6. Execute Workflow
 
 1. Update schedule: set work status to `"running"`, record `started_at`, update `.progress`
-2. Execute `/wf1-kickoff {work_id}` via Skill tool
+2. Execute `/wf1-kickoff {work_id}` via Skill tool (pass `--no-branch` if specified)
 3. If target is beyond wf1-kickoff, loop `/wf0-nextstep {work_id}` until `current == target_phase` or `next == "complete"`
 
 ### 7. Mark Complete and Show Remaining
