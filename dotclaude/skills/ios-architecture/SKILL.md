@@ -4,7 +4,7 @@ description: This skill should be used when implementing iOS features, creating 
 references:
   - path: ../../references/common/clean-architecture.md
   - path: ../../references/common/testing-strategy.md
-  - path: ../../references/platforms/ios/architecture.md
+  - path: ../../references/platforms/ios/conventions.md
 external:
   - id: swift-concurrency
     # Resolved via: https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/
@@ -133,4 +133,4 @@ App/
 
 - [Clean Architecture Guide](../../references/common/clean-architecture.md)
 - [Testing Strategy Guide](../../references/common/testing-strategy.md)
-- [iOS Architecture Details](../../references/platforms/ios/architecture.md)
+- [iOS Conventions](../../references/platforms/ios/conventions.md)

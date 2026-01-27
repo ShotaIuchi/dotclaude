@@ -1,47 +1,81 @@
-# Android References
+# Android Reference
 
-## Overview
-
-Reference for Android app development based on Google's official Android Architecture Guide.
-Defines MVVM, UDF (Unidirectional Data Flow), and Repository patterns.
+Android application architecture reference based on Google's official Architecture Guide.
 
 ---
 
-## File List and Priority
+## 公式ドキュメント
 
-| File | Description | Priority |
-|------|-------------|----------|
-| [architecture.md](architecture.md) | Android MVVM/UDF architecture details | ★★★ Official guide compliant |
+### Architecture
 
-> **Note**: Additional reference files (e.g., compose.md, navigation.md, testing.md) may be added as the documentation expands.
+| Topic | URL |
+|-------|-----|
+| Guide to App Architecture | https://developer.android.com/topic/architecture |
+| UI Layer | https://developer.android.com/topic/architecture/ui-layer |
+| Domain Layer | https://developer.android.com/topic/architecture/domain-layer |
+| Data Layer | https://developer.android.com/topic/architecture/data-layer |
+| Architecture Recommendations | https://developer.android.com/topic/architecture/recommendations |
+
+### Jetpack Compose
+
+| Topic | URL |
+|-------|-----|
+| Jetpack Compose | https://developer.android.com/jetpack/compose |
+| State and Jetpack Compose | https://developer.android.com/jetpack/compose/state |
+| Side-effects in Compose | https://developer.android.com/jetpack/compose/side-effects |
+| Lifecycle of Composables | https://developer.android.com/jetpack/compose/lifecycle |
+| Navigation in Compose | https://developer.android.com/jetpack/compose/navigation |
+| Compose Performance | https://developer.android.com/jetpack/compose/performance |
+
+### Dependency Injection
+
+| Topic | URL |
+|-------|-----|
+| Hilt | https://developer.android.com/training/dependency-injection/hilt-android |
+| Hilt and Jetpack | https://developer.android.com/training/dependency-injection/hilt-jetpack |
+
+### Data & Persistence
+
+| Topic | URL |
+|-------|-----|
+| Room | https://developer.android.com/training/data-storage/room |
+| DataStore | https://developer.android.com/topic/libraries/architecture/datastore |
+| WorkManager | https://developer.android.com/topic/libraries/architecture/workmanager |
+
+### Kotlin / Coroutines
+
+| Topic | URL |
+|-------|-----|
+| Kotlin Coroutines on Android | https://developer.android.com/kotlin/coroutines |
+| Kotlin Flows on Android | https://developer.android.com/kotlin/flow |
+| StateFlow and SharedFlow | https://developer.android.com/kotlin/flow/stateflow-and-sharedflow |
+
+### Testing
+
+| Topic | URL |
+|-------|-----|
+| Testing Overview | https://developer.android.com/training/testing |
+| Testing Compose | https://developer.android.com/jetpack/compose/testing |
+| Hilt Testing Guide | https://developer.android.com/training/dependency-injection/hilt-testing |
 
 ---
 
-## External Links
+## プロジェクト固有規約
 
-> **Priority Legend**: ★★★ = Essential (must read), ★★ = Recommended, ★ = Optional
+公式ドキュメントでカバーされない本プロジェクト独自のルール:
 
-### Official Documentation (Highest Priority)
-- [Android Architecture Guide (Official)](https://developer.android.com/topic/architecture) - ★★★ Most Important
-- [Android UI Layer Guide](https://developer.android.com/topic/architecture/ui-layer) - ★★★ UI Design
-- [Android Data Layer Guide](https://developer.android.com/topic/architecture/data-layer) - ★★★ Data Design
-- [Android Domain Layer Guide](https://developer.android.com/topic/architecture/domain-layer) - ★★ Business Logic
-
-### Jetpack Libraries
-- [Jetpack Compose Documentation (Official)](https://developer.android.com/jetpack/compose) - ★★★ UI Framework
-- [Hilt Dependency Injection](https://developer.android.com/training/dependency-injection/hilt-android) - ★★★ DI Standard
-- [Room Persistence Library](https://developer.android.com/training/data-storage/room) - ★★★ Database
-
----
-
-## Related References
-
-- [clean-architecture.md](../../common/clean-architecture.md) - Common architecture principles
-- [testing-strategy.md](../../common/testing-strategy.md) - Testing strategy
-- [coroutines.md](../../languages/kotlin/coroutines.md) - Async processing
+→ [conventions.md](conventions.md)
 
 ---
 
 ## Related Skills
 
-- **android-architecture**: Use when implementing Android features, creating ViewModels, setting up Repositories, using Hilt, implementing Jetpack Compose, or following MVVM/UDF patterns on Android.
+| Skill | Path |
+|-------|------|
+| `android-architecture` | `skills/android-architecture/SKILL.md` |
+
+## Related References
+
+- [Clean Architecture](../../common/clean-architecture.md)
+- [Testing Strategy](../../common/testing-strategy.md)
+- [Kotlin Coroutines](../../languages/kotlin/index.md)

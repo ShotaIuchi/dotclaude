@@ -1,72 +1,96 @@
-# Kotlin References
+# Kotlin / KMP Reference
 
-## Overview
-
-Reference for Kotlin language and KMP (Kotlin Multiplatform) development based on official Kotlin documentation.
-Defines Coroutines, Flow, and multiplatform architecture patterns.
+Kotlin Multiplatform development reference based on official documentation.
 
 ---
 
-## File List and Priority
+## 公式ドキュメント
 
-> **Priority Legend**: ★★★ = Must Read | ★★☆ = Recommended | ★☆☆ = Reference
+### Kotlin Multiplatform
 
-### Coroutines
+| Topic | URL |
+|-------|-----|
+| KMP Overview | https://kotlinlang.org/docs/multiplatform.html |
+| Get Started with KMP | https://kotlinlang.org/docs/multiplatform-get-started.html |
+| Share Code on Platforms | https://kotlinlang.org/docs/multiplatform-share-on-platforms.html |
+| expect/actual Declarations | https://kotlinlang.org/docs/multiplatform-expect-actual.html |
+| Hierarchical Project Structure | https://kotlinlang.org/docs/multiplatform-hierarchy.html |
+| KMP Compatibility Guide | https://kotlinlang.org/docs/multiplatform-compatibility-guide.html |
 
-| File | Description | Priority |
-|------|-------------|----------|
-| [coroutines.md](coroutines.md) | Kotlin Coroutines best practices | ★★★ Foundation for async processing |
+### Compose Multiplatform
 
-### KMP Foundation
+| Topic | URL |
+|-------|-----|
+| Compose Multiplatform | https://www.jetbrains.com/compose-multiplatform/ |
+| Getting Started | https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-getting-started.html |
+| Resources in Compose MP | https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources.html |
+| Navigation in Compose MP | https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-navigation-routing.html |
 
-| File | Description | Priority |
-|------|-------------|----------|
-| [kmp-architecture.md](kmp-architecture.md) | Kotlin Multiplatform architecture | ★★★ Foundation for KMP design |
-| [kmp-expect-actual.md](kmp-expect-actual.md) | expect/actual pattern for platform abstraction | ★★★ Platform-specific implementation |
-| [kmp-state-udf.md](kmp-state-udf.md) | Unidirectional Data Flow and MVI pattern | ★★★ State management |
-| [kmp-error-handling.md](kmp-error-handling.md) | Common error types and UI error display | ★★☆ Error handling patterns |
+### Kotlin Coroutines
 
-### KMP Libraries
+| Topic | URL |
+|-------|-----|
+| Coroutines Guide | https://kotlinlang.org/docs/coroutines-guide.html |
+| Flow | https://kotlinlang.org/docs/flow.html |
+| StateFlow and SharedFlow | https://kotlinlang.org/docs/stateflow-and-sharedflow.html |
+| Channels | https://kotlinlang.org/docs/channels.html |
+| Coroutine Context and Dispatchers | https://kotlinlang.org/docs/coroutine-context-and-dispatchers.html |
+| Exception Handling | https://kotlinlang.org/docs/exception-handling.html |
 
-| File | Description | Priority |
-|------|-------------|----------|
-| [kmp-di-koin.md](kmp-di-koin.md) | Dependency injection using Koin | ★★★ DI patterns |
-| [kmp-data-sqldelight.md](kmp-data-sqldelight.md) | Local database with SQLDelight | ★★☆ Data persistence |
-| [kmp-network-ktor.md](kmp-network-ktor.md) | HTTP client using Ktor | ★★☆ Network layer |
+### Koin (DI)
 
-### KMP Features
+| Topic | URL |
+|-------|-----|
+| Koin for KMP | https://insert-koin.io/docs/reference/koin-mp/kmp/ |
+| Koin Compose | https://insert-koin.io/docs/reference/koin-compose/compose/ |
+| Koin Annotations | https://insert-koin.io/docs/reference/koin-annotations/annotations/ |
 
-| File | Description | Priority |
-|------|-------------|----------|
-| [kmp-compose-ui.md](kmp-compose-ui.md) | Compose Multiplatform UI implementation | ★★★ Cross-platform UI |
-| [kmp-auth.md](kmp-auth.md) | KMP authentication best practices | ★★★ Foundation for authentication |
-| [kmp-camera.md](kmp-camera.md) | KMP camera implementation guide | ★★☆ Device functionality |
-| [kmp-testing.md](kmp-testing.md) | Testing strategy and commonTest patterns | ★★☆ Testing patterns |
+### SQLDelight
+
+| Topic | URL |
+|-------|-----|
+| SQLDelight KMP | https://cashapp.github.io/sqldelight/2.0.2/multiplatform_sqlite/ |
+| SQLDelight Migrations | https://cashapp.github.io/sqldelight/2.0.2/android_sqlite/migrations/ |
+| SQLDelight Coroutines Extension | https://cashapp.github.io/sqldelight/2.0.2/native_sqlite/coroutines/ |
+
+### Ktor (Networking)
+
+| Topic | URL |
+|-------|-----|
+| Ktor Client | https://ktor.io/docs/client-create-new-application.html |
+| Content Negotiation | https://ktor.io/docs/client-serialization.html |
+| Authentication | https://ktor.io/docs/client-auth.html |
+| Logging | https://ktor.io/docs/client-logging.html |
+
+### Testing
+
+| Topic | URL |
+|-------|-----|
+| Kotlin Test | https://kotlinlang.org/api/latest/kotlin.test/ |
+| Turbine (Flow Testing) | https://github.com/cashapp/turbine |
+| MockK | https://mockk.io/ |
 
 ---
 
-## External Links
+## プロジェクト固有規約
 
-### Official Documentation (Highest Priority)
-- [Kotlin Coroutines (Official)](https://kotlinlang.org/docs/coroutines-overview.html) - ★★★ Async processing
-- [Kotlin Flow (Official)](https://kotlinlang.org/docs/flow.html) - ★★★ Reactive streams
-- [Kotlin Multiplatform (Official)](https://kotlinlang.org/docs/multiplatform.html) - ★★★ KMP basics
+公式ドキュメントでカバーされない本プロジェクト独自のルール:
 
-### Multiplatform
-- [Compose Multiplatform (JetBrains)](https://www.jetbrains.com/lp/compose-multiplatform/) - ★★★ Cross-platform UI
-
----
-
-## Related References
-
-- [clean-architecture.md](../../common/clean-architecture.md) - Common architecture principles
-- [testing-strategy.md](../../common/testing-strategy.md) - Testing strategy
+→ [conventions.md](conventions.md) — 命名規則・ディレクトリ構造・Gradle設定
+→ [library-patterns.md](library-patterns.md) — ライブラリ別実装パターン
+→ [feature-patterns.md](feature-patterns.md) — 機能別実装パターン
 
 ---
 
 ## Related Skills
 
-| Skill | Usage | Description |
-|-------|-------|-------------|
-| android-architecture | `/android-architecture` | Android MVVM patterns (includes Coroutines section) |
-| kmp-architecture | `/kmp-architecture` | KMP architecture patterns and best practices |
+| Skill | Path |
+|-------|------|
+| `kmp-architecture` | `skills/kmp-architecture/SKILL.md` |
+
+## Related References
+
+- [Clean Architecture](../../common/clean-architecture.md)
+- [Testing Strategy](../../common/testing-strategy.md)
+- [Android Platform](../../platforms/android/index.md)
+- [iOS Platform](../../platforms/ios/index.md)

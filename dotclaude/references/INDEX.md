@@ -15,29 +15,20 @@ references/
 ├── platforms/                  # Platforms
 │   ├── android/
 │   │   ├── index.md
-│   │   └── architecture.md
+│   │   └── conventions.md
 │   └── ios/
 │       ├── index.md
-│       └── architecture.md
+│       └── conventions.md
 ├── languages/                  # Languages
 │   └── kotlin/
 │       ├── index.md
-│       ├── coroutines.md
-│       ├── kmp-architecture.md
-│       ├── kmp-auth.md
-│       ├── kmp-camera.md
-│       ├── kmp-compose-ui.md
-│       ├── kmp-data-sqldelight.md
-│       ├── kmp-di-koin.md
-│       ├── kmp-error-handling.md
-│       ├── kmp-expect-actual.md
-│       ├── kmp-network-ktor.md
-│       ├── kmp-state-udf.md
-│       └── kmp-testing.md
+│       ├── conventions.md
+│       ├── library-patterns.md
+│       └── feature-patterns.md
 ├── services/                   # Cloud services
 │   └── aws/
 │       ├── index.md
-│       └── sam-template.md
+│       └── conventions.md
 └── tools/                      # Development tools
     └── claude-code/
         ├── index.md
@@ -71,40 +62,31 @@ Authoritative sources for design principles that all skills should reference.
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [index.md](platforms/android/index.md) | Structure, priority, external links | android |
-| [architecture.md](platforms/android/architecture.md) | Android MVVM/UDF architecture details | android |
+| [index.md](platforms/android/index.md) | 公式ドキュメントへのポインタ | android |
+| [conventions.md](platforms/android/conventions.md) | プロジェクト固有のAndroid規約 | android |
 
 ### platforms/ios/ - iOS Specific
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [index.md](platforms/ios/index.md) | Structure, priority, external links | ios |
-| [architecture.md](platforms/ios/architecture.md) | iOS SwiftUI/MVVM architecture details | ios |
+| [index.md](platforms/ios/index.md) | 公式ドキュメントへのポインタ | ios |
+| [conventions.md](platforms/ios/conventions.md) | プロジェクト固有のiOS規約 | ios |
 
 ### languages/kotlin/ - Kotlin Related
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [index.md](languages/kotlin/index.md) | Structure, priority, external links | android, kmp |
-| [coroutines.md](languages/kotlin/coroutines.md) | Kotlin Coroutines best practices | android, kmp |
-| [kmp-architecture.md](languages/kotlin/kmp-architecture.md) | Kotlin Multiplatform architecture | kmp |
-| [kmp-auth.md](languages/kotlin/kmp-auth.md) | KMP authentication patterns | kmp |
-| [kmp-camera.md](languages/kotlin/kmp-camera.md) | KMP camera integration | kmp |
-| [kmp-compose-ui.md](languages/kotlin/kmp-compose-ui.md) | Compose Multiplatform UI patterns | kmp |
-| [kmp-data-sqldelight.md](languages/kotlin/kmp-data-sqldelight.md) | SQLDelight data persistence | kmp |
-| [kmp-di-koin.md](languages/kotlin/kmp-di-koin.md) | Koin dependency injection | kmp |
-| [kmp-error-handling.md](languages/kotlin/kmp-error-handling.md) | KMP error handling patterns | kmp |
-| [kmp-expect-actual.md](languages/kotlin/kmp-expect-actual.md) | Expect/actual declarations | kmp |
-| [kmp-network-ktor.md](languages/kotlin/kmp-network-ktor.md) | Ktor networking | kmp |
-| [kmp-state-udf.md](languages/kotlin/kmp-state-udf.md) | Unidirectional data flow state management | kmp |
-| [kmp-testing.md](languages/kotlin/kmp-testing.md) | KMP testing strategies | kmp |
+| [index.md](languages/kotlin/index.md) | 公式ドキュメントへのポインタ | android, kmp |
+| [conventions.md](languages/kotlin/conventions.md) | プロジェクト固有のKotlin/KMP規約 | kmp |
+| [library-patterns.md](languages/kotlin/library-patterns.md) | ライブラリ実装パターン集 | kmp |
+| [feature-patterns.md](languages/kotlin/feature-patterns.md) | 機能実装パターン集 | kmp |
 
 ### services/aws/ - AWS Related
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [index.md](services/aws/index.md) | Structure, priority, external links | aws-sam |
-| [sam-template.md](services/aws/sam-template.md) | AWS SAM template and implementation patterns | aws-sam |
+| [index.md](services/aws/index.md) | 公式ドキュメントへのポインタ | aws-sam |
+| [conventions.md](services/aws/conventions.md) | プロジェクト固有のAWS SAM規約 | aws-sam |
 
 ### tools/claude-code/ - Claude Code
 
@@ -128,8 +110,7 @@ references:
   - path: ../references/platforms/android/index.md   # Check index.md first
   - path: ../references/common/clean-architecture.md
   - path: ../references/common/testing-strategy.md
-  - path: ../references/languages/kotlin/coroutines.md
-  - path: ../references/platforms/android/architecture.md
+  - path: ../references/platforms/android/conventions.md
 ```
 
 ### ios-architecture
@@ -139,7 +120,7 @@ references:
   - path: ../references/platforms/ios/index.md       # Check index.md first
   - path: ../references/common/clean-architecture.md
   - path: ../references/common/testing-strategy.md
-  - path: ../references/platforms/ios/architecture.md
+  - path: ../references/platforms/ios/conventions.md
 ```
 
 ### kmp-architecture
@@ -149,18 +130,9 @@ references:
   - path: ../references/languages/kotlin/index.md    # Check index.md first
   - path: ../references/common/clean-architecture.md
   - path: ../references/common/testing-strategy.md
-  - path: ../references/languages/kotlin/coroutines.md
-  - path: ../references/languages/kotlin/kmp-architecture.md
-  - path: ../references/languages/kotlin/kmp-auth.md
-  - path: ../references/languages/kotlin/kmp-camera.md
-  - path: ../references/languages/kotlin/kmp-compose-ui.md
-  - path: ../references/languages/kotlin/kmp-data-sqldelight.md
-  - path: ../references/languages/kotlin/kmp-di-koin.md
-  - path: ../references/languages/kotlin/kmp-error-handling.md
-  - path: ../references/languages/kotlin/kmp-expect-actual.md
-  - path: ../references/languages/kotlin/kmp-network-ktor.md
-  - path: ../references/languages/kotlin/kmp-state-udf.md
-  - path: ../references/languages/kotlin/kmp-testing.md
+  - path: ../references/languages/kotlin/conventions.md
+  - path: ../references/languages/kotlin/library-patterns.md
+  - path: ../references/languages/kotlin/feature-patterns.md
 ```
 
 ### aws-sam
@@ -168,7 +140,7 @@ references:
 ```yaml
 references:
   - path: ../references/services/aws/index.md        # Check index.md first
-  - path: ../references/services/aws/sam-template.md
+  - path: ../references/services/aws/conventions.md
 ```
 
 ---

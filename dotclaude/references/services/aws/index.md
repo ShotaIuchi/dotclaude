@@ -1,57 +1,54 @@
-# AWS References
+# AWS Reference
 
-## Overview
-
-Reference for serverless application development based on AWS official documentation.
-Defines design patterns centered on AWS SAM, Lambda, API Gateway, and DynamoDB.
-
-### Target Audience
-
-- **Primary**: Developers with basic AWS knowledge building serverless applications
-- **Prerequisites**: Familiarity with AWS Console, basic understanding of cloud concepts, experience with at least one programming language (Python, Node.js, or similar)
-
-### Quick Start
-
-1. Install [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
-2. Configure AWS credentials (`aws configure`)
-3. Start with [sam-template.md](sam-template.md) for SAM template patterns
-4. Use the `aws-sam` skill for guided development
+Serverless application development reference based on AWS official documentation.
 
 ---
 
-## File List and Priority
+## 公式ドキュメント
 
-| File | Description | Priority |
-|------|-------------|----------|
-| [sam-template.md](sam-template.md) | AWS SAM templates and implementation patterns | ★★★ Foundation for serverless design |
-| lambda-patterns.md | Lambda function implementation patterns (planned) | ★★★ Core function development |
-| api-gateway-patterns.md | API Gateway design and configuration (planned) | ★★★ API design |
-| dynamodb-modeling.md | DynamoDB data modeling patterns (planned) | ★★ Data layer design |
+### SAM / Lambda
+
+| Topic | URL |
+|-------|-----|
+| AWS SAM Developer Guide | https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html |
+| SAM CLI Reference | https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-command-reference.html |
+| SAM Template Specification | https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification.html |
+| SAM Policy Templates | https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html |
+| SAM Connectors | https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/managing-permissions-connectors.html |
+| AWS Lambda Developer Guide | https://docs.aws.amazon.com/lambda/latest/dg/welcome.html |
+| Lambda Best Practices | https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html |
+| Lambda Powertools (Python) | https://docs.powertools.aws.dev/lambda/python/latest/ |
+
+### API Gateway / DynamoDB
+
+| Topic | URL |
+|-------|-----|
+| API Gateway REST API | https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html |
+| API Gateway HTTP API | https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api.html |
+| DynamoDB Developer Guide | https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html |
+| DynamoDB Single-Table Design | https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-general-nosql-design.html |
+
+### Infrastructure
+
+| Topic | URL |
+|-------|-----|
+| CloudFormation User Guide | https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html |
+| CloudFormation Intrinsic Functions | https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html |
+| IAM Best Practices | https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html |
+| AWS Well-Architected Serverless Lens | https://docs.aws.amazon.com/wellarchitected/latest/serverless-applications-lens/welcome.html |
 
 ---
 
-## External Links
+## プロジェクト固有規約
 
-> Last verified: 2026-01-22
+公式ドキュメントでカバーされない本プロジェクト独自のルール:
 
-### Official Documentation (Highest Priority)
-- [AWS SAM Developer Guide (Official)](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) - ★★★ SAM basics
-- [AWS Lambda Developer Guide (Official)](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html) - ★★★ Lambda basics
-
-### Related Services
-- [Amazon API Gateway Developer Guide](https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html) - ★★★ API design
-- [Amazon DynamoDB Developer Guide](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html) - ★★ NoSQL database
-- [AWS CloudFormation User Guide](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html) - ★★ IaC basics
-
-### Utilities
-- [AWS Lambda Powertools for Python](https://docs.powertools.aws.dev/lambda/python/latest/) - ★★★ Lambda development productivity
+→ [conventions.md](conventions.md)
 
 ---
 
 ## Related Skills
 
-| Skill | Description | Path |
-|-------|-------------|------|
-| `aws-sam` | AWS SAM serverless application development | `dotclaude/skills/aws-sam.md` |
-
-> Note: Additional skills for Lambda development and API design patterns are planned for future releases.
+| Skill | Path |
+|-------|------|
+| `aws-sam` | `skills/aws-sam/SKILL.md` |

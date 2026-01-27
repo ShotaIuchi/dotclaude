@@ -2,7 +2,7 @@
 name: AWS SAM
 description: Skill for AWS SAM serverless application development, Lambda function implementation, template design, local testing, and deployment.
 references:
-  - path: ../../references/services/aws/sam-template.md
+  - path: ../../references/services/aws/conventions.md
 external:
   - id: aws-sam-docs
     url: https://docs.aws.amazon.com/serverless-application-model/
@@ -86,4 +86,4 @@ project/
 
 ## Detailed References
 
-- [AWS SAM Templates and Best Practices](../../references/services/aws/sam-template.md)
+- [AWS SAM Project Conventions](../../references/services/aws/conventions.md)

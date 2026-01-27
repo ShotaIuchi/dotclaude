@@ -4,8 +4,9 @@ description: This skill should be used when implementing KMP features, creating 
 references:
   - path: ../../references/common/clean-architecture.md
   - path: ../../references/common/testing-strategy.md
-  - path: ../../references/languages/kotlin/coroutines.md
-  - path: ../../references/languages/kotlin/kmp-architecture.md
+  - path: ../../references/languages/kotlin/conventions.md
+  - path: ../../references/languages/kotlin/library-patterns.md
+  - path: ../../references/languages/kotlin/feature-patterns.md
 external:
   - id: kmp-docs
   - id: compose-multiplatform
@@ -144,5 +145,6 @@ val iosModule = module {
 
 - [Clean Architecture Guide](../../references/common/clean-architecture.md)
 - [Testing Strategy Guide](../../references/common/testing-strategy.md)
-- [Kotlin Coroutines Guide](../../references/languages/kotlin/coroutines.md)
-- [KMP Architecture Details](../../references/languages/kotlin/kmp-architecture.md)
+- [KMP Conventions](../../references/languages/kotlin/conventions.md)
+- [Library Patterns](../../references/languages/kotlin/library-patterns.md)
+- [Feature Patterns](../../references/languages/kotlin/feature-patterns.md)

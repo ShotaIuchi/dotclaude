@@ -4,8 +4,7 @@ description: This skill should be used when implementing Android features, creat
 references:
   - path: ../../references/common/clean-architecture.md
   - path: ../../references/common/testing-strategy.md
-  - path: ../../references/languages/kotlin/coroutines.md
-  - path: ../../references/platforms/android/architecture.md
+  - path: ../../references/platforms/android/conventions.md
 external:
   # External IDs are resolved via ~/.claude/references/external-links.yaml
   # or project-specific dotclaude/references/external-links.yaml
@@ -184,5 +183,4 @@ NavHost(navController, startDestination = Screen.UserList.route) {
 
 - [Clean Architecture Guide](../../references/common/clean-architecture.md)
 - [Testing Strategy Guide](../../references/common/testing-strategy.md)
-- [Kotlin Coroutines Guide](../../references/languages/kotlin/coroutines.md)
-- [Android Architecture Details](../../references/platforms/android/architecture.md)
+- [Android Conventions](../../references/platforms/android/conventions.md)
