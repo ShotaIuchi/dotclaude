@@ -1,6 +1,6 @@
 # /wf4-review
 
-Planまたはコードのレビュー記録を作成するコマンド。
+Plan、実装コード、またはPRステータスのレビュー記録を作成するコマンド。
 
 ## 使用方法
 
@@ -10,63 +10,19 @@ Planまたはコードのレビュー記録を作成するコマンド。
 
 ## サブコマンド
 
-- `(なし)` または `plan`: Planのレビュー
-- `code`: 実装コードのレビュー
-- `pr`: PRのステータスチェックとレビュー
+- `(なし)` or `plan`: Planレビュー
+- `code`: 実装コードレビュー
+- `pr`: PRステータス確認
 
 ## 処理
 
-### Planレビュー
-
-チェックリスト:
-- 完全性: Spec要件が全てカバーされているか
-- 実現可能性: 各ステップの作業量が妥当か
-- 品質: セキュリティ・パフォーマンスを考慮しているか
-
-### コードレビュー
-
-観点:
-- コードスタイル
-- エラーハンドリング
-- テストカバレッジ
-- セキュリティ
-- パフォーマンス
-
-### PRレビュー
-
-GitHub PRのステータス確認:
-- CIチェック状況
-- レビュアーのコメント
-- ブロッキング項目
-
-## state.json更新
-
-- 承認時: `next = "wf5-implement"`
-- 変更要求時: `next = "wf3-plan"`
-- 議論継続時: `next = "wf4-review"`
-
-## 完了メッセージ
-
-```
-✅ Review complete
-
-File: docs/wf/<work-id>/03_REVIEW.md
-
-Result: <Approved / Request Changes / Needs Discussion>
-
-Findings:
-- Must Fix: 1
-- Should Fix: 2
-- Suggestions: 3
-
-Next step:
-- Approved: Run /wf5-implement
-- Request Changes: Fix issues and run /wf4-review again
-```
+1. **Planレビュー**: 完全性・実現可能性・品質の観点で評価。`03_REVIEW.md`に記録
+2. **コードレビュー**: `git diff <base>...HEAD`でdiff取得。スタイル・エラー処理・テスト・セキュリティ・パフォーマンスを確認
+3. **PRレビュー**: `gh pr view`でCI/レビュー状況を表示
+4. state.json更新: Approved→next: wf5-implement / Changes→next: wf3-plan / Discussion→next: wf4-review
 
 ## 注意事項
 
 - レビュー結果は必ず記録
 - Must Fix項目は解決必須
-- レビュアー名を記録
 - 複数回レビューの履歴を保持

@@ -10,43 +10,26 @@
 
 ## サブコマンド
 
-- `(なし)`: 新規作成
+- `(なし)`: 新規Spec作成
 - `update`: 既存Specを更新
 - `validate`: Kickoffとの整合性チェック
 
 ## 処理
 
-1. 前提条件チェック（Kickoffが存在するか確認）
-2. Kickoffの読み込みと分析
-3. コードベース調査
-4. Spec作成
-5. 整合性チェック
-6. `state.json`更新（current: wf2-spec, next: wf3-plan）
+1. 前提条件チェック（`00_KICKOFF.md`必須）
+2. Kickoff分析（Goal、成功条件、制約、依存関係）
+3. コードベース調査（Glob/Grep、Exploreエージェント使用）
+4. Spec作成（テンプレート使用）
+5. 整合性チェック（Kickoff、既存仕様、テスト戦略）
+6. state.json更新（current: wf2-spec, next: wf3-plan）
 7. コミット
-
-## 完了メッセージ
-
-```
-✅ Spec document created
-
-File: docs/wf/<work-id>/01_SPEC.md
-
-Affected Components:
-- <component1> (high)
-- <component2> (medium)
-
-Next step: Run /wf3-plan to create the implementation plan
-```
 
 ## 注意事項
 
-- Kickoff内容を勝手に変更しない
-- 既存仕様との矛盾があれば警告
-- 技術的に実現不可能な場合はKickoff修正を提案
-
----
+- Kickoffの内容を勝手に変更しない
+- 既存仕様との矛盾は警告
+- 技術的に不可能な場合はKickoff修正を提案
 
 ## エージェント参照
 
-このスキルは [spec-writer エージェント](../../agents/workflow/spec-writer.md) に委譲する。
-詳細な機能と制約はそのファイルを参照。
+[spec-writer エージェント](../../agents/workflow/spec-writer.md) に委譲。

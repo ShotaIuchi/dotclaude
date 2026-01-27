@@ -10,56 +10,27 @@
 
 ## サブコマンド
 
-- `(なし)`: 新規作成
+- `(なし)`: 新規Plan作成
 - `update`: 既存Planを更新
-- `step <n>`: 特定ステップの詳細を表示
+- `step <n>`: 特定ステップの詳細表示
 
 ## 処理
 
-1. 前提条件チェック（Specが存在するか確認）
-2. Specの読み込みと分析
-3. 詳細なコードベース調査
-4. ステップ分割
-5. Plan作成
-6. ユーザー確認
-7. `state.json`更新（current: wf3-plan, next: wf4-review）
+1. 前提条件チェック（`01_SPEC.md`必須）
+2. Spec分析（影響コンポーネント、変更内容、テスト戦略）
+3. コードベース調査（対象ファイル、依存関係、リスク評価）
+4. ステップ分割（1ステップ = 1 `/wf5-implement` 実行、50-200行、1-5ファイル）
+5. Plan作成（テンプレート使用、5-10ステップ目安）
+6. ユーザー確認（ステップ数、依存順序、リスク）
+7. state.json更新（current: wf3-plan, next: wf4-review）
 8. コミット
-
-## ステップ分割の原則
-
-- 1ステップ = 1回の`/wf5-implement`実行
-- 変更行数: 50-200行程度
-- 変更ファイル数: 1-5ファイル程度
-- 依存関係を考慮した順序
-
-## 完了メッセージ
-
-```
-✅ Plan document created
-
-File: docs/wf/<work-id>/02_PLAN.md
-
-Implementation Steps:
-1. <step1_title> (small)
-2. <step2_title> (medium)
-3. <step3_title> (small)
-
-Total: 3 steps
-
-Next step:
-- If review is needed: /wf4-review
-- To start implementation: /wf5-implement
-```
 
 ## 注意事項
 
-- Specの範囲を超える変更をPlanに含めない
-- 実装順序の依存関係を厳密に考慮
-- 各ステップは独立してテスト可能な単位とする
-
----
+- Specの範囲を超えないこと
+- 依存順序を厳守
+- 各ステップは独立してテスト可能であること
 
 ## エージェント参照
 
-このスキルは [planner エージェント](../../agents/workflow/planner.md) に委譲する。
-詳細な機能と制約はそのファイルを参照。
+[planner エージェント](../../agents/workflow/planner.md) に委譲。

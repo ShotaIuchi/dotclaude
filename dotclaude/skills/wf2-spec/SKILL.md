@@ -1,7 +1,7 @@
 ---
 name: wf2-spec
 description: Create the Specification document
-argument-hint: "[update | revise | chat]"
+argument-hint: "[update | validate]"
 context: fork
 agent: general-purpose
 ---
@@ -10,7 +10,7 @@ agent: general-purpose
 
 # /wf2-spec
 
-Command to create the Specification (Spec) document.
+Create or update the Specification (Spec) document.
 
 ## Usage
 
@@ -20,177 +20,60 @@ Command to create the Specification (Spec) document.
 
 ## Subcommands
 
-- `(none)`: Create new
+- `(none)`: Create new Spec
 - `update`: Update existing Spec
 - `validate`: Check consistency with Kickoff
 
 ## Processing
 
-Parse $ARGUMENTS and execute the following processing.
-
 ### 1. Check Prerequisites
 
-```bash
-work_id=$(jq -r '.active_work // empty' .wf/state.json)
-docs_dir="docs/wf/$work_id"
-kickoff_path="$docs_dir/00_KICKOFF.md"
-spec_path="$docs_dir/01_SPEC.md"
-
-# Check if Kickoff exists
-if [ ! -f "$kickoff_path" ]; then
-  echo "Kickoff document not found"
-  echo "Please run /wf1-kickoff first"
-  exit 1
-fi
-```
+Get active work. Require `00_KICKOFF.md` exists.
 
 ### 2. Load and Analyze Kickoff
 
-```bash
-cat "$kickoff_path"
-```
-
-Extract from Kickoff:
-- Goal
-- Success Criteria
-- Constraints
-- Dependencies
+Extract: Goal, Success Criteria, Constraints, Dependencies.
 
 ### 3. Investigate Codebase
 
-Investigate related code based on Kickoff content using the following tools:
+Use Glob/Grep for file discovery. Use Task tool with Explore agent for complex analysis.
 
-**File Discovery:**
-```
-# Use Glob to find relevant files
-Glob(pattern: "src/**/*.ts")  # or appropriate pattern for the codebase
-
-# Use Grep to search for related code
-Grep(pattern: "<keyword_from_kickoff>", type: "ts")
-```
-
-**Deep Investigation (for complex analysis):**
-```
-# Use Task tool with Explore agent for comprehensive codebase investigation
-Task(
-  subagent_type: "Explore",
-  prompt: "Investigate <specific_area> related to <goal_from_kickoff>",
-  description: "Codebase investigation"
-)
-```
-
-Investigation checklist:
-- Identify affected files
-- Check existing implementation patterns
-- Check related tests
-- Check consistency with existing specifications (`docs/spec/` if exists)
+Checklist: identify affected files, check existing patterns, check related tests, check existing specs in `docs/spec/`.
 
 ### 4. Create Spec
 
-**Template reference:** Load and use `~/.claude/templates/01_SPEC.md`.
-
-Replace template placeholders with investigation results and Kickoff content.
+Load template `~/.claude/templates/01_SPEC.md`. Fill with investigation results and Kickoff content.
 
 ### 5. Consistency Check
 
-Check the following points:
+1. **With Kickoff**: Goal reflected, Success Criteria achievable, Constraints considered
+2. **With existing specs**: No contradictions with `docs/spec/`, API compatibility
+3. **Test strategy**: Tests exist to verify Success Criteria
 
-1. **Consistency with Kickoff**
-   - Is Goal reflected in Spec
-   - Are changes achievable for Success Criteria
-   - Are Constraints considered
-
-2. **Consistency with Existing Specifications**
-   - No contradictions with specifications in `docs/spec/`
-   - Compatible with existing API specifications
-
-3. **Test Strategy Validity**
-   - Are there tests to verify Success Criteria
-
-**When warnings are detected:**
-```
-Consistency check found issues
-
-Issues:
-- [!] Constraint "performance requirements" not considered in Spec
-- [ ] Dependency "authentication API" impact not documented
-
-Action required:
-1. Review the issues above
-2. Update Spec to address each issue, OR
-3. If issues are intentional, document the reasoning in Notes section
-
-Continue with current Spec? (Use AskUserQuestion)
-```
+If issues found: list warnings, ask user to address or document reasoning in Notes.
 
 ### 6. Update state.json
 
-```bash
-jq ".works[\"$work_id\"].current = \"wf2-spec\"" .wf/state.json > tmp && mv tmp .wf/state.json
-jq ".works[\"$work_id\"].next = \"wf3-plan\"" .wf/state.json > tmp && mv tmp .wf/state.json
-```
+Set `current: "wf2-spec"`, `next: "wf3-plan"`.
 
 ### 7. Commit
 
-Commit Spec document changes:
-
-```bash
-# For new creation
-git add "$spec_path" .wf/state.json
-git commit -m "docs(wf): create spec <work-id>
-
-Work: <work-id>
-"
-
-# For update
-git add "$spec_path" .wf/state.json
-git commit -m "docs(wf): update spec <work-id>
-
-Work: <work-id>
-"
-```
+`docs(wf): create spec <work-id>` (or `update spec`).
 
 ### 8. Completion Message
 
-```
-Spec document created
-
-File: docs/wf/<work-id>/01_SPEC.md
-
-Affected Components:
-- <component1> (high)
-- <component2> (medium)
-
-Next step: Run /wf3-plan to create the implementation plan
-```
+Show file path, affected components with severity, next step (`/wf3-plan`).
 
 ## validate Subcommand
 
-Check consistency between existing Spec and Kickoff:
-
-```
-Spec Validation: <work-id>
-===
-
-Kickoff -> Spec Consistency Check:
-
-[OK] Goal is reflected in Overview
-[OK] Success Criteria are covered in Test Strategy
-[!] Constraint "performance requirements" not considered
-[ ] Dependency "authentication API" impact not documented
-
-Result: 2 warnings, 1 missing
-```
+Check Kickoff↔Spec consistency. Display OK/warning/missing for each criterion.
 
 ## Notes
 
-- Do not arbitrarily change Kickoff content
-- Warn if there are contradictions with existing specifications
-- Suggest Kickoff revision if technically not feasible
-
----
+- Do not change Kickoff content arbitrarily
+- Warn on contradictions with existing specs
+- Suggest Kickoff revision if technically infeasible
 
 ## Agent Reference
 
 This skill delegates to the [spec-writer agent](../../agents/workflow/spec-writer.md).
-See that file for detailed capabilities and constraints.
