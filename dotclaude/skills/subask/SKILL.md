@@ -2,6 +2,9 @@
 name: subask
 description: Ask a question to a sub-agent
 argument-hint: "<question>"
+context: fork
+agent: general-purpose
+model: haiku
 ---
 
 # /subask

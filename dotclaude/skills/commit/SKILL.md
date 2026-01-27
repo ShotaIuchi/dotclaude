@@ -2,6 +2,8 @@
 name: commit
 description: Commit changes via sub-agent
 argument-hint: "[message]"
+context: fork
+agent: general-purpose
 ---
 
 # /commit
