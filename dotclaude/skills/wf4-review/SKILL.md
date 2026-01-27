@@ -3,6 +3,8 @@ name: wf4-review
 description: Create review records for Plan or code
 ---
 
+**Always respond in Japanese.**
+
 # /wf4-review
 
 Command to create review records. Used for Plan review or code review after implementation.

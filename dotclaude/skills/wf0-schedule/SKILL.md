@@ -3,6 +3,8 @@ name: wf0-schedule
 description: Schedule management for batch workflow execution
 ---
 
+**Always respond in Japanese.**
+
 # /wf0-schedule
 
 Command for creating and managing workflow schedules with dependency analysis.

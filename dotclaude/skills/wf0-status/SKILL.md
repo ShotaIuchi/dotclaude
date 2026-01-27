@@ -3,6 +3,8 @@ name: wf0-status
 description: Display current workflow status
 ---
 
+**Always respond in Japanese.**
+
 # /wf0-status
 
 Command to display current workflow status.

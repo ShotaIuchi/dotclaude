@@ -3,6 +3,8 @@ name: wf0-remote
 description: Remote workflow operation via GitHub Issue
 ---
 
+**Always respond in Japanese.**
+
 # /wf0-remote
 
 Command for remote workflow monitoring and execution via GitHub Issue comments.

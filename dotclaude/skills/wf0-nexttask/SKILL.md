@@ -3,6 +3,8 @@ name: wf0-nexttask
 description: Execute next task from schedule
 ---
 
+**Always respond in Japanese.**
+
 # /wf0-nexttask
 
 Command to select and execute the next task from schedule.

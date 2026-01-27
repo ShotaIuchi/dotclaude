@@ -14,6 +14,8 @@ external:
   - id: hilt-docs             # https://developer.android.com/training/dependency-injection/hilt-android
 ---
 
+**Always respond in Japanese.**
+
 # Android Architecture
 
 MVVM / UDF / Repository patterns based on Google's official Android Architecture Guide.

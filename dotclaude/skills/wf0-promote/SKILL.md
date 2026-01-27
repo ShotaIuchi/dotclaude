@@ -3,6 +3,8 @@ name: wf0-promote
 description: Promote local workflow to GitHub Issue or Jira
 ---
 
+**Always respond in Japanese.**
+
 # /wf0-promote
 
 Promote a local workflow to GitHub Issue or Jira ticket.

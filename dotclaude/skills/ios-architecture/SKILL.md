@@ -15,6 +15,8 @@ external:
   # Note: External references are resolved by the skill loader. See references/README.md for configuration.
 ---
 
+**Always respond in Japanese.**
+
 # iOS Architecture
 
 SwiftUI + MVVM / State management patterns based on Apple's official guidelines.

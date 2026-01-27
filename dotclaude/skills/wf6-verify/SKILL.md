@@ -3,6 +3,8 @@ name: wf6-verify
 description: Verify implementation and create PR
 ---
 
+**Always respond in Japanese.**
+
 # /wf6-verify
 
 Command to verify implementation and create PR.

@@ -3,6 +3,8 @@ name: wf0-nextstep
 description: Execute the next workflow step
 ---
 
+**Always respond in Japanese.**
+
 # /wf0-nextstep
 
 Command to immediately execute the next workflow command without confirmation.

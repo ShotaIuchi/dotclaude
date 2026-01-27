@@ -12,6 +12,8 @@ external:
   - id: kotlin-coroutines
 ---
 
+**Always respond in Japanese.**
+
 # Kotlin Multiplatform Architecture
 
 Multiplatform development patterns based on Kotlin official documentation and Google's KMP recommendations.

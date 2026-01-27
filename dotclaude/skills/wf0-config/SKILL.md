@@ -3,6 +3,8 @@ name: wf0-config
 description: Interactive configuration editor for .wf/config.json
 ---
 
+**Always respond in Japanese.**
+
 # /wf0-config
 
 Command to interactively edit `.wf/config.json` settings.

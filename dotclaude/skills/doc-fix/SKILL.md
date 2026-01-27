@@ -4,6 +4,8 @@ description: Fix issues from document reviews
 argument-hint: "[file_path...] [--all]"
 ---
 
+**Always respond in Japanese.**
+
 # /doc-fix
 
 Command to fix issues identified in `docs/reviews/<path>.<filename>.md` files and apply changes to the original document.

@@ -4,6 +4,8 @@ description: Review document files
 argument-hint: "<file_path>"
 ---
 
+**Always respond in Japanese.**
+
 # /doc-review
 
 Command to create a review of any document file and output as `docs/reviews/<path>.<filename>.md`.

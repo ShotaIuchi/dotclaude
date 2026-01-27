@@ -4,6 +4,8 @@ description: Invoke sub-agents for specific tasks
 argument-hint: "<agent_name> [param=value...]"
 ---
 
+**Always respond in Japanese.**
+
 # /agent
 
 Command to directly invoke sub-agents.

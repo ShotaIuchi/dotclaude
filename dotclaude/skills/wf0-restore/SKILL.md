@@ -3,6 +3,8 @@ name: wf0-restore
 description: Restore an existing workspace
 ---
 
+**Always respond in Japanese.**
+
 # /wf0-restore
 
 Command to restore an existing workspace. Used for resuming work on a different PC or recreating a worktree.
