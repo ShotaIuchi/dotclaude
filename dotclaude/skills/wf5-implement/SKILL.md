@@ -5,6 +5,8 @@ context: fork
 agent: general-purpose
 ---
 
+**Always respond in Japanese.**
+
 # /wf5-implement
 
 Command to implement one step of the Plan.

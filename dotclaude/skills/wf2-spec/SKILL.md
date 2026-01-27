@@ -5,6 +5,8 @@ context: fork
 agent: general-purpose
 ---
 
+**Always respond in Japanese.**
+
 # /wf2-spec
 
 Command to create the Specification (Spec) document.

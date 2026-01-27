@@ -60,7 +60,7 @@ Use the Task tool with the following parameters:
 |-----------|-------|
 | `subagent_type` | `general-purpose` |
 | `description` | `Answer question` |
-| `prompt` | 現在のワーキングディレクトリは `$CWD` です。`$ARGUMENTS` に対して簡潔に回答してください。コードベースの探索は不要です。一般的な知識で回答してください。 |
+| `prompt` | Always respond in Japanese. 現在のワーキングディレクトリは `$CWD` です。`$ARGUMENTS` に対して簡潔に回答してください。コードベースの探索は不要です。一般的な知識で回答してください。 |
 | `model` | `haiku` (低コスト・高速) |
 
 ### 3. Return Result

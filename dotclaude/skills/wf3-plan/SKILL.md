@@ -5,6 +5,8 @@ context: fork
 agent: Plan
 ---
 
+**Always respond in Japanese.**
+
 # /wf3-plan
 
 Command to create the Implementation Plan (Plan) document.

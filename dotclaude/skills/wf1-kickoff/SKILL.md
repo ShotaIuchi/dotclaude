@@ -5,6 +5,8 @@ context: fork
 agent: general-purpose
 ---
 
+**Always respond in Japanese.**
+
 # /wf1-kickoff
 
 Command to create a new workspace and Kickoff document in one step.

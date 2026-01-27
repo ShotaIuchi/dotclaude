@@ -72,6 +72,7 @@ Use the Task tool with the following parameters:
 
 ```
 You are a git commit agent.
+Always respond in Japanese.
 
 Current directory: $CWD
 
