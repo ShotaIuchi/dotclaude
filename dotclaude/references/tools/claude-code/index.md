@@ -1,76 +1,77 @@
 # Claude Code Reference
 
-Claude Code のスキル・コマンド作成に関するリファレンス。
+公式ドキュメントへのポインタとプロジェクト固有の規約。
 
 ---
 
-## ガイド一覧
+## 公式ドキュメント
 
-| File | Description |
-|------|-------------|
-| [skills-guide.md](skills-guide.md) | スキルの書き方ガイド |
-| [commands-guide.md](commands-guide.md) | コマンドの書き方ガイド |
-| [command-frontmatter.md](command-frontmatter.md) | フロントマター仕様リファレンス |
-| [best-practices.md](best-practices.md) | ベストプラクティス |
+### Agent Skills（platform.claude.com）
 
----
+Skills の設計思想・アーキテクチャ・ベストプラクティスの包括的ガイド。
 
-## クイックリファレンス
+| Topic | URL |
+|-------|-----|
+| Overview | https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview |
+| Best Practices | https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices |
+| Quickstart | https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart |
 
-### スキル vs コマンド
+3段階ローディング、progressive disclosure、evaluation-driven development 等。
 
-| 項目 | Skills | Commands |
-|------|--------|----------|
-| パス | `.claude/skills/*/SKILL.md` | `.claude/commands/*.md` |
-| 構造 | ディレクトリ | 単一ファイル |
-| サポートファイル | 可 | 不可 |
-| 主な用途 | 知識提供 | ワークフロー実行 |
+### Agent SDK（platform.claude.com）
 
-### フロントマター早見表
+SDK でのサブエージェント定義・プログラマティック制御。
 
-```yaml
----
-# 共通
-description: いつ使うかの説明
-argument-hint: "[arg1] [arg2]"
+| Topic | URL |
+|-------|-----|
+| SDK Overview | https://platform.claude.com/docs/en/agent-sdk/overview |
+| Subagents (SDK) | https://platform.claude.com/docs/en/agent-sdk/subagents |
+| Hooks (SDK) | https://platform.claude.com/docs/en/agent-sdk/hooks |
 
-# スキル専用
-name: skill-name
-references:                     # ローカルファイル参照（相対パス）
-  - path: ../../references/file.md
-external:                       # 外部ドキュメントID（Claude Code内部リソース）
-  - id: external-doc-id
+### Claude Code（code.claude.com）
 
-# 動作制御
-disable-model-invocation: true  # 手動起動のみ
-user-invocable: false           # Claudeのみ使用
-allowed-tools: [Read, Grep]     # ツール制限
-model: haiku                    # モデル指定
-context: fork                   # サブエージェント実行
----
-```
+`.claude/` ディレクトリ構成の実装リファレンス。
 
-### $ARGUMENTS の使い方
-
-`$ARGUMENTS` はユーザーがコマンド実行時に渡した引数で自動的に置換される。
-詳細は [skills-guide.md](skills-guide.md) を参照。
-
-```markdown
-# 明示的に使用
-Fix issue $ARGUMENTS
-
-# オプション処理（擬似コード - 実際はClaudeが解釈）
-if --dry-run in $ARGUMENTS:
-  Show preview only
-```
+| Topic | 対応する `.claude/` 設定 | URL |
+|-------|-------------------------|-----|
+| Skills | `skills/*/SKILL.md` | https://code.claude.com/docs/en/skills |
+| Sub-agents | `agents/*.md` | https://code.claude.com/docs/en/sub-agents |
+| Memory & CLAUDE.md | `CLAUDE.md`, `rules/*.md` | https://code.claude.com/docs/en/memory |
+| Hooks | `settings.json` の hooks | https://code.claude.com/docs/en/hooks |
+| Hooks Guide | 同上（実践ガイド） | https://code.claude.com/docs/en/hooks-guide |
+| Settings | `settings.json`, `settings.local.json` | https://code.claude.com/docs/en/settings |
+| Plugins | `plugins/` | https://code.claude.com/docs/en/plugins |
+| IAM & Permissions | permissions 設定 | https://code.claude.com/docs/en/iam |
+| Best Practices | 全般 | https://code.claude.com/docs/en/best-practices |
+| LLMs Full Index | 全ページインデックス | https://code.claude.com/docs/llms.txt |
 
 ---
 
-## External Links
+## `.claude/` ディレクトリと公式ドキュメントの対応
 
-| Resource | Description |
-|----------|-------------|
-| [Claude Code Skills](https://code.claude.com/docs/en/skills) | 公式: Skills |
-| [Claude Code Sub-agents](https://code.claude.com/docs/en/sub-agents) | 公式: Sub-agents |
-| [Claude Code Memory](https://code.claude.com/docs/en/memory) | 公式: Memory & CLAUDE.md |
-| [Agent Skills Standard](https://agentskills.io) | Agent Skills 標準仕様 |
+| Path | 公式リファレンス |
+|------|-----------------|
+| `CLAUDE.md` | [Memory](https://code.claude.com/docs/en/memory) |
+| `rules/*.md` | [Memory > Modular rules](https://code.claude.com/docs/en/memory#modular-rules-with-clauderules) |
+| `skills/*/SKILL.md` | [Skills](https://code.claude.com/docs/en/skills) + [Agent Skills Overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) |
+| `agents/*.md` | [Sub-agents](https://code.claude.com/docs/en/sub-agents) |
+| `settings.json` | [Settings](https://code.claude.com/docs/en/settings) |
+| `settings.local.json` | [Settings](https://code.claude.com/docs/en/settings) |
+| `hooks.json` (※) | [Hooks](https://code.claude.com/docs/en/hooks) |
+| `plugins/` | [Plugins](https://code.claude.com/docs/en/plugins) |
+
+※ hooks は `settings.json` 内で定義するのが現在の標準。
+
+---
+
+## プロジェクト固有の規約
+
+公式ドキュメントでカバーされない本プロジェクト独自のルール:
+
+→ [best-practices.md](best-practices.md)
+
+- ワークフロースキルの命名規則（wf0-wf6）
+- Processing セクションの構成
+- 完了メッセージの形式
+- スキル本文の制限（500行）
+- エラーハンドリングのパターン

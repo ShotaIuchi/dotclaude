@@ -302,4 +302,5 @@ docs/wf/<work-id>/
 - テンプレート: [`templates/`](templates/)
 - エージェント: [`agents/`](agents/)
 - リモートルール: [`rules/remote-operation.md`](rules/remote-operation.md)
-- コマンド書式: [`references/tools/claude-code/commands-guide.md`](references/tools/claude-code/commands-guide.md)
+- Claude Code 公式: https://docs.anthropic.com/en/docs/claude-code/skills
+- プロジェクト規約: [`references/tools/claude-code/best-practices.md`](references/tools/claude-code/best-practices.md)
