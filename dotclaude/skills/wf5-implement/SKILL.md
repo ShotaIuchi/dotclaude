@@ -31,7 +31,7 @@ Implement one step of the Plan document.
 
 ### 1. Check Prerequisites
 
-Get active work. Require `02_PLAN.md` exists.
+Get active work. Require `03_PLAN.md` exists.
 
 ### 2. Determine Target Step
 
@@ -49,7 +49,7 @@ Title, Purpose, Target Files, Tasks, Completion Criteria, Dependencies.
 
 ### 5. Record Implementation Log
 
-Append to `04_IMPLEMENT_LOG.md` using template `~/.claude/templates/04_IMPLEMENT_LOG.md`.
+Append to `05_IMPLEMENT_LOG.md` using template `~/.claude/templates/05_IMPLEMENT_LOG.md`.
 
 ### 6. Update state.json
 

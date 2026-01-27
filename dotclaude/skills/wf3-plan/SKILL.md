@@ -28,7 +28,7 @@ Create or update the Implementation Plan document.
 
 ### 1. Check Prerequisites
 
-Get active work. Require `01_SPEC.md` exists.
+Get active work. Require `02_SPEC.md` exists.
 
 ### 2. Load and Analyze Spec
 
@@ -49,7 +49,7 @@ Extract: Affected Components, Detailed Changes, Test Strategy.
 
 ### 5. Create Plan
 
-Load template `~/.claude/templates/02_PLAN.md`. Divide into ~5-10 steps. Fill Progress table rows for each step.
+Load template `~/.claude/templates/03_PLAN.md`. Divide into ~5-10 steps. Fill Progress table rows for each step.
 
 ### 6. User Confirmation
 

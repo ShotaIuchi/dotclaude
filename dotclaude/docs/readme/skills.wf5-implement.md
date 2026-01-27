@@ -15,11 +15,11 @@ Planの1ステップを実装するコマンド。
 
 ## 処理
 
-1. 前提条件チェック（`02_PLAN.md`必須）
+1. 前提条件チェック（`03_PLAN.md`必須）
 2. 対象ステップ決定（引数 or current_step + 1）
 3. Planからステップ情報抽出
 4. 実装（ファイル変更、テスト実行）
-5. 実装ログ記録（`04_IMPLEMENT_LOG.md`）
+5. 実装ログ記録（`05_IMPLEMENT_LOG.md`）
 6. state.json更新（ステップ完了、全完了時は next: wf6-verify）
 7. 完了条件検証
 8. コミット（タイプ自動検出: fix/refactor/test/docs/feat）

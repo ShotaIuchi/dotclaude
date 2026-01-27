@@ -106,7 +106,7 @@ Grep: "suspend fun"
 - 依存関係確認 (dependency agent)
 
 順次:
-- 上記完了後 → 00_KICKOFF.md作成
+- 上記完了後 → 01_KICKOFF.md作成
 ```
 
 ### コードレビュー時
@@ -118,7 +118,7 @@ Grep: "suspend fun"
 - impact agent: 影響範囲
 
 順次:
-- 上記完了後 → 03_REVIEW.md作成
+- 上記完了後 → 04_REVIEW.md作成
 ```
 
 ## 注意事項

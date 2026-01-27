@@ -40,7 +40,7 @@ Execute each check, using commands from `.wf/config.json` (`verify.test`, `verif
 
 ### 3. Check Success Criteria
 
-Compare against Success Criteria from `00_KICKOFF.md`. Mark each as OK or incomplete.
+Compare against Success Criteria from `01_KICKOFF.md`. Mark each as OK or incomplete.
 
 ### 4. Verification Summary
 

@@ -17,12 +17,12 @@ Used by `/wf5-implement` skill.
 
 - `work_id`: Work identifier (from state.json)
 - `step_number`: Step number to implement
-- Plan document (`02_PLAN.md`)
+- Plan document (`03_PLAN.md`)
 
 ### Reference Files
 
-- `docs/wf/<work_id>/02_PLAN.md`
-- `docs/wf/<work_id>/04_IMPLEMENT_LOG.md` (if exists)
+- `docs/wf/<work_id>/03_PLAN.md`
+- `docs/wf/<work_id>/05_IMPLEMENT_LOG.md` (if exists)
 - Target source code files specified in the step
 
 ## Capabilities
@@ -37,15 +37,15 @@ Used by `/wf5-implement` skill.
    - Exception: Documentation-only changes or configuration updates may skip tests if explicitly noted in the plan
 
 3. **Implementation Log Update**
-   - Record changes in 04_IMPLEMENT_LOG.md
+   - Record changes in 05_IMPLEMENT_LOG.md
    - Handover information for next step
 
 ## Constraints
 
-- **No Off-Plan Changes**: Do not make changes not documented in 02_PLAN.md
+- **No Off-Plan Changes**: Do not make changes not documented in 03_PLAN.md
 - **One Execution = One Step**: Do not implement multiple steps at once
 - **Tests Required**: Execute tests that satisfy step completion criteria
-- **Log Required**: Record implementation content in 04_IMPLEMENT_LOG.md
+- **Log Required**: Record implementation content in 05_IMPLEMENT_LOG.md
 
 ## Instructions
 
@@ -73,7 +73,7 @@ Check that all dependent steps are completed in state.json.
 
 ### 5. Record Implementation Log
 
-Append to `04_IMPLEMENT_LOG.md` with:
+Append to `05_IMPLEMENT_LOG.md` with:
 - Changes made, files affected
 - Test results
 - Notes for next step

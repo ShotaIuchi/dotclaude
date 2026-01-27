@@ -31,11 +31,11 @@ Promote a local workflow to GitHub Issue or Jira ticket.
 
 ### 1. Validate
 
-Get work from state.json. Error if `source.type` is not `"local"`. Require `00_KICKOFF.md` exists.
+Get work from state.json. Error if `source.type` is not `"local"`. Require `01_KICKOFF.md` exists.
 
 ### 2. Extract Kickoff Info
 
-From `00_KICKOFF.md`: Title (from state.json), Goal section, Success Criteria section.
+From `01_KICKOFF.md`: Title (from state.json), Goal section, Success Criteria section.
 
 ### 3. Create External Issue
 
@@ -53,7 +53,7 @@ From `00_KICKOFF.md`: Title (from state.json), Goal section, Success Criteria se
 
 Update `source`: set type to github/jira, record id, url, `promoted_from: "local"`, `promoted_at` timestamp.
 
-### 5. Update 00_KICKOFF.md
+### 5. Update 01_KICKOFF.md
 
 Update Issue reference line in header.
 

@@ -77,7 +77,7 @@ esac
 **次のステップ**: wf4-review
 
 ### 成果物
-- `docs/wf/FEAT-123/02_PLAN.md` 作成
+- `docs/wf/FEAT-123/03_PLAN.md` 作成
 
 ---
 💡 `/approve` で次のステップを実行

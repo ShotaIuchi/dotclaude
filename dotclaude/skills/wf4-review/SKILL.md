@@ -26,7 +26,7 @@ Create review records for Plan, implementation code, or PR status.
 
 ### 1. Check Prerequisites
 
-Get active work. Set review path: `docs/wf/<work-id>/03_REVIEW.md`.
+Get active work. Set review path: `docs/wf/<work-id>/04_REVIEW.md`.
 
 ### 2. Plan Review (Default)
 
@@ -36,7 +36,7 @@ Review Plan from these perspectives:
 - **Feasibility**: Work volume per step reasonable, dependencies correct, risks assessed
 - **Quality**: Coding conventions, performance impact, security
 
-Record in `03_REVIEW.md` using template `~/.claude/templates/03_REVIEW.md`.
+Record in `04_REVIEW.md` using template `~/.claude/templates/04_REVIEW.md`.
 
 ### 3. Code Review
 

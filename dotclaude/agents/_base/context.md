@@ -12,7 +12,7 @@ This system is a workflow management system for AI (Claude Code) and humans to w
 2. **Unified Artifact Management**: Manage documents and code in a linked manner
 3. **Work Reproducibility**: Continue work on different PCs or sessions
 4. **Prevention of Off-Plan Changes**: Implement only planned work
-   - Enforced via `02_PLAN.md` step tracking in `state.json`
+   - Enforced via `03_PLAN.md` step tracking in `state.json`
    - Each implementation step must match a planned item
    - See `commands/wf5-implement.md` for implementation constraints
 
@@ -48,12 +48,12 @@ This file allows individual developers to customize their local workflow experie
 
 ```
 docs/wf/<work-id>/
-├── 00_KICKOFF.md        # Goal and success criteria definition
-├── 01_SPEC.md           # Change specification
-├── 02_PLAN.md           # Implementation plan
-├── 03_REVIEW.md         # Review record
-├── 04_IMPLEMENT_LOG.md  # Implementation log
-└── 05_REVISIONS.md      # Change history
+├── 01_KICKOFF.md        # Goal and success criteria definition
+├── 02_SPEC.md           # Change specification
+├── 03_PLAN.md           # Implementation plan
+├── 04_REVIEW.md         # Review record
+├── 05_IMPLEMENT_LOG.md  # Implementation log
+└── 06_REVISIONS.md      # Change history
 ```
 
 ## Reading State
@@ -155,16 +155,16 @@ Documents generated at each phase:
 
 | Phase | Document |
 |-------|----------|
-| wf1-kickoff | 00_KICKOFF.md |
-| wf2-spec | 01_SPEC.md |
-| wf3-plan | 02_PLAN.md |
-| wf4-review | 03_REVIEW.md |
-| wf5-implement | 04_IMPLEMENT_LOG.md |
-| wf1-kickoff (update) | 05_REVISIONS.md |
+| wf1-kickoff | 01_KICKOFF.md |
+| wf2-spec | 02_SPEC.md |
+| wf3-plan | 03_PLAN.md |
+| wf4-review | 04_REVIEW.md |
+| wf5-implement | 05_IMPLEMENT_LOG.md |
+| wf1-kickoff (update) | 06_REVISIONS.md |
 
-### 05_REVISIONS.md Management
+### 06_REVISIONS.md Management
 
-The `05_REVISIONS.md` file tracks changes to the kickoff document:
+The `06_REVISIONS.md` file tracks changes to the kickoff document:
 
 - **Created**: When `wf1-kickoff` is run with `--update` flag on existing work
 - **Updated**: Each subsequent kickoff revision appends a new entry

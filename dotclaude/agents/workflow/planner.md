@@ -16,12 +16,12 @@ Used by `/wf3-plan` skill.
 ### Input
 
 - `work_id`: Work identifier (from state.json)
-- Specification document (`01_SPEC.md`)
+- Specification document (`02_SPEC.md`)
 
 ### Reference Files
 
-- `docs/wf/<work_id>/01_SPEC.md`
-- `docs/wf/<work_id>/00_KICKOFF.md`
+- `docs/wf/<work_id>/02_SPEC.md`
+- `docs/wf/<work_id>/01_KICKOFF.md`
 - Related source code files identified in Spec
 
 ## Capabilities
@@ -55,7 +55,7 @@ Used by `/wf3-plan` skill.
 
 ### 1. Load and Analyze Spec
 
-Read `docs/wf/<work_id>/01_SPEC.md` and extract:
+Read `docs/wf/<work_id>/02_SPEC.md` and extract:
 - Affected Components
 - Detailed Changes
 - Test Strategy
@@ -76,11 +76,11 @@ Divide into 5-10 steps following:
 
 ### 4. Generate Plan Document
 
-Use template `~/.claude/templates/02_PLAN.md` to create the plan document.
+Use template `~/.claude/templates/03_PLAN.md` to create the plan document.
 
 ### Error Handling
 
-When `01_SPEC.md` is missing or incomplete:
+When `02_SPEC.md` is missing or incomplete:
 
 1. **Missing file**: Notify user and suggest running `wf2-spec` first
 2. **Incomplete specification**: List missing required sections and request completion

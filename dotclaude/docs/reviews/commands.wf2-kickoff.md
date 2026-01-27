@@ -5,7 +5,7 @@
 
 ## 概要 (Summary)
 
-このドキュメントは `/wf2-kickoff` コマンドの仕様を定義しています。ワークフローの初期段階で Kickoff ドキュメント（00_KICKOFF.md）を作成・更新するためのコマンドです。
+このドキュメントは `/wf2-kickoff` コマンドの仕様を定義しています。ワークフローの初期段階で Kickoff ドキュメント（01_KICKOFF.md）を作成・更新するためのコマンドです。
 
 主な機能:
 - 新規 Kickoff ドキュメントの作成（対話形式）
@@ -51,7 +51,7 @@ GitHub Issue、Jira チケット、ローカルワークの3種類のソース�
 
 - plan.md のテンプレート化（`templates/PLAN.md` として切り出し）
 - Plan Mode 中のセッション中断・再開のハンドリング
-- plan.md と 00_KICKOFF.md の差分検出（plan を更新した場合の Kickoff 自動更新）
+- plan.md と 01_KICKOFF.md の差分検出（plan を更新した場合の Kickoff 自動更新）
 - `--skip-plan` オプションの追加（Local でも Plan Mode をスキップする明示的な方法）
 
 ## 総評 (Overall Assessment)

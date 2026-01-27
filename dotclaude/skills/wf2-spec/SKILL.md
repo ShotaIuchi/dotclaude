@@ -28,7 +28,7 @@ Create or update the Specification (Spec) document.
 
 ### 1. Check Prerequisites
 
-Get active work. Require `00_KICKOFF.md` exists.
+Get active work. Require `01_KICKOFF.md` exists.
 
 ### 2. Load and Analyze Kickoff
 
@@ -42,7 +42,7 @@ Checklist: identify affected files, check existing patterns, check related tests
 
 ### 4. Create Spec
 
-Load template `~/.claude/templates/01_SPEC.md`. Fill with investigation results and Kickoff content.
+Load template `~/.claude/templates/02_SPEC.md`. Fill with investigation results and Kickoff content.
 
 ### 5. Consistency Check
 

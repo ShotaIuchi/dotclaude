@@ -35,7 +35,7 @@
 |---|------|------|------|--------|
 | 1 | Getting Issue Information | work-idからIssue番号を抽出するsedコマンドが複雑 | 正規表現の解説コメントを追加するか、より読みやすい代替手法を提示する | ✓ Fixed (2026-01-22) |
 | 2 | Basic Principles | 「Prevention of Off-Plan Changes」の具体的な仕組みが不明 | どのようにこれが実現されるか、参照先を示す | ✓ Fixed (2026-01-22) |
-| 3 | Documents構造 | 05_REVISIONS.mdがkickoff updateで生成されるとの記載 | 変更履歴の管理方針と更新タイミングをより明確にする | ✓ Fixed (2026-01-22) |
+| 3 | Documents構造 | 06_REVISIONS.mdがkickoff updateで生成されるとの記載 | 変更履歴の管理方針と更新タイミングをより明確にする | ✓ Fixed (2026-01-22) |
 
 ### 将来の検討事項 (Future Considerations)
 

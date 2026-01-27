@@ -16,11 +16,11 @@ Used by `/wf2-spec` skill.
 ### Input
 
 - `work_id`: Work identifier (from state.json)
-- Kickoff document (`00_KICKOFF.md`)
+- Kickoff document (`01_KICKOFF.md`)
 
 ### Reference Files
 
-- `docs/wf/<work_id>/00_KICKOFF.md`
+- `docs/wf/<work_id>/01_KICKOFF.md`
 - Related source code files identified in Kickoff
 
 ## Capabilities
@@ -55,7 +55,7 @@ Used by `/wf2-spec` skill.
 
 ### 1. Load Kickoff Document
 
-Read `docs/wf/<work_id>/00_KICKOFF.md` and extract:
+Read `docs/wf/<work_id>/01_KICKOFF.md` and extract:
 - Background and objectives
 - Affected components
 - Technical context
@@ -79,7 +79,7 @@ For each requirement, define testable acceptance criteria in Given/When/Then for
 
 ### 5. Generate Spec Document
 
-Use template `~/.claude/templates/01_SPEC.md` to create the specification document.
+Use template `~/.claude/templates/02_SPEC.md` to create the specification document.
 
 ## Output Format
 

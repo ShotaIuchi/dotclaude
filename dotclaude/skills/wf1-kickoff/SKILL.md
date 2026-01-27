@@ -76,14 +76,14 @@ Create a new workspace and Kickoff document, or update an existing one.
 
 8. **Get source information**: Fetch from GitHub/Jira/state.json based on source type.
 
-9. **Plan Mode for local works**: If local and no existing `00_KICKOFF.md`:
+9. **Plan Mode for local works**: If local and no existing `01_KICKOFF.md`:
    - Check for `.wf/<work-id>/plan.md` (temp working doc, not committed)
    - If absent, enter Plan Mode to explore requirements interactively
    - Save plan, then use as Kickoff input
 
 10. **Brainstorming dialogue**: Discuss Goal, Success Criteria, Constraints, Non-goals, Dependencies with user.
 
-11. **Create 00_KICKOFF.md**: Load template from `~/.claude/templates/00_KICKOFF.md`, fill with dialogue results.
+11. **Create 01_KICKOFF.md**: Load template from `~/.claude/templates/01_KICKOFF.md`, fill with dialogue results.
 
 ### Phase 3: Finalization
 
@@ -98,9 +98,9 @@ Create a new workspace and Kickoff document, or update an existing one.
 
 ## Subcommand Processing (Existing Workspace)
 
-Get active work from state.json. Require `00_KICKOFF.md` exists.
+Get active work from state.json. Require `01_KICKOFF.md` exists.
 
-- **update**: Dialogue → update `00_KICKOFF.md` → append to `05_REVISIONS.md` (template: `~/.claude/templates/05_REVISIONS.md`) → increment `kickoff.revision`
+- **update**: Dialogue → update `01_KICKOFF.md` → append to `06_REVISIONS.md` (template: `~/.claude/templates/06_REVISIONS.md`) → increment `kickoff.revision`
 - **revise**: Auto-revise from instruction → confirm → update → append revision history
 - **chat**: Free dialogue with Issue context. Can reflect in Notes section.
 - **Commit**: `docs(wf): update kickoff <work-id>` with revision number.

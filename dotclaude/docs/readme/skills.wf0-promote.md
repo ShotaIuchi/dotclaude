@@ -15,7 +15,7 @@
 2. Kickoffから情報抽出（タイトル、Goal、成功条件）
 3. 外部Issue作成（GitHub: gh cli / Jira: jira-cli or 手動）
 4. state.json更新（source変更、昇格履歴記録）
-5. 00_KICKOFF.mdのIssue参照を更新
+5. 01_KICKOFF.mdのIssue参照を更新
 6. オプション: Work-IDをIssue番号付きに変更
 7. コミット
 

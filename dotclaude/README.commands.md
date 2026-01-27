@@ -21,15 +21,15 @@ GitHub Issue → 仕様 → 計画 → 実装 → PR作成 までを構造化さ
 │  wf1-kickoff  │────▶│   wf2-spec    │
 │  ワークスペース │     │   仕様書作成   │
 │  作成・調査    │     │               │
-│               │     │  01_SPEC.md   │
-│ 00_KICKOFF.md │     └───────┬───────┘
+│               │     │  02_SPEC.md   │
+│ 01_KICKOFF.md │     └───────┬───────┘
 └───────────────┘             │
                               ▼
                       ┌───────────────┐
                       │   wf3-plan    │
                       │  実装計画作成  │
                       │               │
-                      │  02_PLAN.md   │
+                      │  03_PLAN.md   │
                       └───────┬───────┘
                               │
         ┌─────────────────────┼─────────────────────┐
@@ -39,7 +39,7 @@ GitHub Issue → 仕様 → 計画 → 実装 → PR作成 までを構造化さ
 │  wf4-review   │◀───▶│ wf5-implement │────────────┘
 │  レビュー記録  │     │  ステップ実装  │   (繰り返し)
 │               │     │               │
-│ 03_REVIEW.md  │     │04_IMPLEMENT   │
+│ 04_REVIEW.md  │     │04_IMPLEMENT   │
 └───────────────┘     │    _LOG.md    │
                       └───────┬───────┘
                               │ (全ステップ完了)
@@ -48,7 +48,7 @@ GitHub Issue → 仕様 → 計画 → 実装 → PR作成 までを構造化さ
                       │  wf6-verify   │
                       │  検証・PR作成  │
                       │               │
-                      │ 05_REVISIONS  │
+                      │ 06_REVISIONS  │
                       │    .md        │
                       └───────┬───────┘
                               │
@@ -71,17 +71,17 @@ GitHub Issue → 仕様 → 計画 → 実装 → PR作成 までを構造化さ
 
 | コマンド | 目的 | 成果物 | 主な内容 |
 |----------|------|--------|---------|
-| `wf1-kickoff` | ワークスペース作成・調査 | `00_KICKOFF.md` | Goal、Success Criteria、Constraints、Dependencies |
-| `wf2-spec` | 仕様書作成 | `01_SPEC.md` | 影響コンポーネント、詳細変更内容、テスト戦略 |
-| `wf3-plan` | 実装計画作成 | `02_PLAN.md` | ステップ分割（5-10個）、依存関係、リスク評価 |
-| `wf4-review` | レビュー記録作成 | `03_REVIEW.md` | Plan/コードレビュー、チェックリスト、指摘事項 |
+| `wf1-kickoff` | ワークスペース作成・調査 | `01_KICKOFF.md` | Goal、Success Criteria、Constraints、Dependencies |
+| `wf2-spec` | 仕様書作成 | `02_SPEC.md` | 影響コンポーネント、詳細変更内容、テスト戦略 |
+| `wf3-plan` | 実装計画作成 | `03_PLAN.md` | ステップ分割（5-10個）、依存関係、リスク評価 |
+| `wf4-review` | レビュー記録作成 | `04_REVIEW.md` | Plan/コードレビュー、チェックリスト、指摘事項 |
 
 ### 実装系 (wf5-6)
 
 | コマンド | 目的 | 成果物 | 制約 |
 |----------|------|--------|------|
-| `wf5-implement` | 計画の1ステップを実装 | `04_IMPLEMENT_LOG.md` | **1回=1ステップ**、計画外変更禁止 |
-| `wf6-verify` | 実装検証・PR作成 | `05_REVISIONS.md` | テスト・ビルド・Lint確認後にPR作成 |
+| `wf5-implement` | 計画の1ステップを実装 | `05_IMPLEMENT_LOG.md` | **1回=1ステップ**、計画外変更禁止 |
+| `wf6-verify` | 実装検証・PR作成 | `06_REVISIONS.md` | テスト・ビルド・Lint確認後にPR作成 |
 
 ### ユーティリティ
 
@@ -222,7 +222,7 @@ GitHub Issue → 仕様 → 計画 → 実装 → PR作成 までを構造化さ
 **次のステップ**: wf4-review
 
 ### 成果物
-- `docs/wf/FEAT-123/02_PLAN.md` 作成
+- `docs/wf/FEAT-123/03_PLAN.md` 作成
 
 ---
 💡 `/approve` で次のステップを実行
@@ -274,12 +274,12 @@ GitHub Issue → 仕様 → 計画 → 実装 → PR作成 までを構造化さ
 
 ```
 docs/wf/<work-id>/
-├── 00_KICKOFF.md        # 背景・Goal・成功基準
-├── 01_SPEC.md           # 詳細仕様・影響範囲
-├── 02_PLAN.md           # 実装ステップ・依存関係
-├── 03_REVIEW.md         # レビュー結果・指摘事項
-├── 04_IMPLEMENT_LOG.md  # 実装ログ・各ステップ記録
-└── 05_REVISIONS.md      # 修正履歴
+├── 01_KICKOFF.md        # 背景・Goal・成功基準
+├── 02_SPEC.md           # 詳細仕様・影響範囲
+├── 03_PLAN.md           # 実装ステップ・依存関係
+├── 04_REVIEW.md         # レビュー結果・指摘事項
+├── 05_IMPLEMENT_LOG.md  # 実装ログ・各ステップ記録
+└── 06_REVISIONS.md      # 修正履歴
 ```
 
 ## 重要な制約

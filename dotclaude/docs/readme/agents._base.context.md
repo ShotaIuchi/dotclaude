@@ -16,7 +16,7 @@
 2. **統一されたアーティファクト管理**: ドキュメントとコードを連携して管理
 3. **作業の再現性**: 異なるPCやセッションで作業を継続可能
 4. **計画外変更の防止**: 計画された作業のみを実装
-   - `state.json` での `02_PLAN.md` ステップ追跡により強制
+   - `state.json` での `03_PLAN.md` ステップ追跡により強制
    - 各実装ステップは計画された項目と一致する必要がある
    - 実装制約については `commands/wf5-implement.md` を参照
 
@@ -52,12 +52,12 @@
 
 ```
 docs/wf/<work-id>/
-├── 00_KICKOFF.md        # 目標と成功基準の定義
-├── 01_SPEC.md           # 変更仕様
-├── 02_PLAN.md           # 実装計画
-├── 03_REVIEW.md         # レビュー記録
-├── 04_IMPLEMENT_LOG.md  # 実装ログ
-└── 05_REVISIONS.md      # 変更履歴
+├── 01_KICKOFF.md        # 目標と成功基準の定義
+├── 02_SPEC.md           # 変更仕様
+├── 03_PLAN.md           # 実装計画
+├── 04_REVIEW.md         # レビュー記録
+├── 05_IMPLEMENT_LOG.md  # 実装ログ
+└── 06_REVISIONS.md      # 変更履歴
 ```
 
 ## 状態の読み取り
@@ -154,16 +154,16 @@ wf1-kickoff → wf1-kickoff → wf2-spec → wf3-plan → wf4-review → wf5-imp
 
 | フェーズ | ドキュメント |
 |----------|-------------|
-| wf1-kickoff | 00_KICKOFF.md |
-| wf2-spec | 01_SPEC.md |
-| wf3-plan | 02_PLAN.md |
-| wf4-review | 03_REVIEW.md |
-| wf5-implement | 04_IMPLEMENT_LOG.md |
-| wf1-kickoff（更新） | 05_REVISIONS.md |
+| wf1-kickoff | 01_KICKOFF.md |
+| wf2-spec | 02_SPEC.md |
+| wf3-plan | 03_PLAN.md |
+| wf4-review | 04_REVIEW.md |
+| wf5-implement | 05_IMPLEMENT_LOG.md |
+| wf1-kickoff（更新） | 06_REVISIONS.md |
 
-### 05_REVISIONS.md の管理
+### 06_REVISIONS.md の管理
 
-`05_REVISIONS.md` ファイルはキックオフドキュメントへの変更を追跡します:
+`06_REVISIONS.md` ファイルはキックオフドキュメントへの変更を追跡します:
 
 - **作成時**: 既存の作業に `--update` フラグ付きで `wf1-kickoff` を実行した場合
 - **更新時**: 後続のキックオフリビジョンごとに新しいエントリを追加
