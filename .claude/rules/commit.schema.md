@@ -3,7 +3,7 @@
 ## Format
 
 ```
-<type>: <subject>
+<type>: <ticket> <subject>
 
 [body]
 
@@ -22,9 +22,15 @@
 | `test` | Adding or modifying tests |
 | `chore` | Build process or tool changes |
 
+## Ticket (Required when applicable)
+
+- Placed at the beginning of the subject, before the description
+- Accepts `#123` (GitHub Issue) or `PROJ-123` (Jira style) format
+- Omit when no ticket is associated
+
 ## Subject (Required)
 
-- 50 characters or less
+- 50 characters or less (including ticket)
 - No period at the end
 - Use imperative mood (Add, Fix, Update...)
 
@@ -38,13 +44,19 @@
 - Breaking Change description
 - Issue reference (e.g., `Closes #123`)
 
-## Example
+## Examples
 
 ```
-feat: Add wf0-nextstep command
+feat: #40 Add wf0-nextstep command
 
 Implement feature to suggest next workflow step.
 Reads state.json status and displays appropriate next action.
+```
 
-Closes #42
+```
+fix: Closes-87 Correct token refresh timing
+```
+
+```
+refactor: Renumber workflow templates from 0-based to 1-based
 ```

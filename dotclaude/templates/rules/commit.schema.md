@@ -3,36 +3,60 @@
 ## Format
 
 ```
-<type>(<scope>): <subject>
+<type>: <ticket> <subject>
 
-<body>
+[body]
+
+[footer]
 ```
 
 ## Type (Required)
 
-| type | Description |
-|------|-------------|
-| feat | New feature |
-| fix | Bug fix |
-| docs | Documentation only |
-| style | Formatting (no code behavior change) |
-| refactor | Refactoring |
-| test | Add or modify tests |
-| chore | Build or auxiliary tools |
+| Type | Purpose |
+|------|---------|
+| `feat` | New feature addition |
+| `fix` | Bug fix |
+| `docs` | Documentation only changes |
+| `style` | Changes that don't affect code meaning (whitespace, formatting, etc.) |
+| `refactor` | Code changes that are neither bug fixes nor feature additions |
+| `test` | Adding or modifying tests |
+| `chore` | Build process or tool changes |
 
-## Scope (Optional)
+## Ticket (Required when applicable)
 
-Specify the main component of the change:
-- Single file change: File name (without extension)
-- Multiple file change: Common parent directory or feature name
+- Placed at the beginning of the subject, before the description
+- Accepts `#123` (GitHub Issue) or `PROJ-123` (Jira style) format
+- Omit when no ticket is associated
 
 ## Subject (Required)
 
-- 50 characters or less
+- 50 characters or less (including ticket)
 - No period at the end
 - Use imperative mood (Add, Fix, Update...)
 
 ## Body (Optional)
 
-- Each line 72 characters or less
 - Describe the reason or background of the change
+- Wrap at 72 characters
+
+## Footer (Optional)
+
+- Breaking Change description
+- Issue reference (e.g., `Closes #123`)
+
+## Examples
+
+```
+feat: #40 Add wf0-nextstep command
+
+Implement feature to suggest next workflow step.
+Reads state.json status and displays appropriate next action.
+```
+
+```
+fix: Closes-87 Correct token refresh timing
+```
+
+```
+refactor: Renumber workflow templates from 0-based to 1-based
+```
