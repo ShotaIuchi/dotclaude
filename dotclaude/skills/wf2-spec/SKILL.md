@@ -1,6 +1,7 @@
 ---
 name: wf2-spec
 description: Create the Specification document
+argument-hint: "[update | revise | chat]"
 context: fork
 agent: general-purpose
 ---

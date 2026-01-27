@@ -1,6 +1,7 @@
 ---
 name: wf0-nextstep
 description: Execute the next workflow step
+argument-hint: "[work-id]"
 ---
 
 **Always respond in Japanese.**

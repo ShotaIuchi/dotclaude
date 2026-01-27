@@ -1,6 +1,7 @@
 ---
 name: wf0-config
 description: Interactive configuration editor for .wf/config.json
+argument-hint: "[show | init | <category>]"
 ---
 
 **Always respond in Japanese.**

@@ -1,6 +1,7 @@
 ---
 name: wf0-status
 description: Display current workflow status
+argument-hint: "[work-id]"
 ---
 
 **Always respond in Japanese.**

@@ -1,6 +1,7 @@
 ---
 name: wf4-review
 description: Create review records for Plan or code
+argument-hint: "[plan | code]"
 ---
 
 **Always respond in Japanese.**

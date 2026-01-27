@@ -1,6 +1,7 @@
 ---
 name: wf3-plan
 description: Create the Implementation Plan
+argument-hint: "[update | revise | chat]"
 context: fork
 agent: Plan
 ---

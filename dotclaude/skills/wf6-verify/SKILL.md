@@ -1,6 +1,7 @@
 ---
 name: wf6-verify
 description: Verify implementation and create PR
+argument-hint: "[pr]"
 ---
 
 **Always respond in Japanese.**

@@ -1,6 +1,7 @@
 ---
 name: wf1-kickoff
 description: Create a new workspace and Kickoff document
+argument-hint: "<github=N | jira=ID | local=ID> [title=...] [type=...]"
 context: fork
 agent: general-purpose
 ---

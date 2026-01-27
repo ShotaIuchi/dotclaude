@@ -1,6 +1,7 @@
 ---
 name: wf5-implement
 description: Implement one step of the Plan
+argument-hint: "[step_number]"
 context: fork
 agent: general-purpose
 ---

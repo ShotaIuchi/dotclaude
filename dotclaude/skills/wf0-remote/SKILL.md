@@ -1,6 +1,7 @@
 ---
 name: wf0-remote
 description: Remote workflow operation via GitHub Issue
+argument-hint: "<subcommand> [target...]"
 ---
 
 **Always respond in Japanese.**

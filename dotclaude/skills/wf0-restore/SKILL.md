@@ -1,6 +1,7 @@
 ---
 name: wf0-restore
 description: Restore an existing workspace
+argument-hint: "[work-id]"
 ---
 
 **Always respond in Japanese.**

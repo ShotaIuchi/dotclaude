@@ -1,6 +1,7 @@
 ---
 name: wf0-schedule
 description: Schedule management for batch workflow execution
+argument-hint: "<create | show | edit | validate | clear> [args...]"
 ---
 
 **Always respond in Japanese.**

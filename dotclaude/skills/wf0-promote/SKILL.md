@@ -1,6 +1,7 @@
 ---
 name: wf0-promote
 description: Promote local workflow to GitHub Issue or Jira
+argument-hint: "<github | jira> [work-id]"
 ---
 
 **Always respond in Japanese.**
