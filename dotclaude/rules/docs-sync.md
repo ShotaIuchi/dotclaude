@@ -1,10 +1,14 @@
 # Docs Sync Rule
 
-ドキュメントの日本語訳を自動的に維持するためのルール。
+Rule for automatically maintaining Japanese translations of documents.
 
-## 概要
+## Source Language Requirement (CONSTITUTION Article 7)
 
-`dotclaude/`内のドキュメント（`.md`ファイル）を作成・更新した際は、対応する日本語訳ファイルを`docs/readme/`ディレクトリに作成・更新する。
+**All source documents must be written in English.** This includes all `.md` files under `skills/`, `agents/`, `rules/`, `references/`, and `templates/`, as well as root-level documents (`CLAUDE.md`, `PRINCIPLES.md`, `CONSTITUTION.md`). Japanese text must never appear in source documents.
+
+## Overview
+
+When creating or updating documents (`.md` files) under `dotclaude/`, create or update the corresponding Japanese translation file in the `docs/readme/` directory.
 
 ## 対象ファイル
 

@@ -82,6 +82,26 @@ Before executing a shell command, verify that the command exists.
 
 ---
 
+## Article 7: Document Language
+
+All source documents must be written in English. Japanese translations are maintained separately under `docs/readme/`.
+
+### Required
+- All files under `skills/`, `agents/`, `rules/`, `references/`, `templates/` must be in English
+- `CLAUDE.md`, `PRINCIPLES.md`, `CONSTITUTION.md` must be in English
+- Code comments must be in English
+
+### Japanese Translations
+- Maintained under `docs/readme/` only (see `rules/docs-sync.md`)
+- Never mix Japanese into source documents
+
+### Prohibited
+- Writing source documents in Japanese
+- Adding Japanese descriptions to tables, headings, or inline text in source documents
+- Creating Japanese-only documents outside `docs/readme/`
+
+---
+
 ## Addendum: Updating the Constitution
 
 When updating this constitution itself:
