@@ -12,9 +12,9 @@ Claude Codeと人間が同じ状態と成果物を見ながら作業するため
 | `commands/` | ワークフローコマンド（`wf{N}-{name}.md`形式） |
 | `rules/` | プロジェクトルールとスキーマ |
 | `templates/` | ドキュメントテンプレート |
-| `skills/` | スラッシュコマンド用スキル定義 |
-| `agents/` | エージェント設定 |
-| `references/` | リファレンスドキュメント |
+| `skills/` | スラッシュコマンドのインターフェース定義（agents/referencesへ委譲する薄いラッパー） |
+| `agents/` | サブエージェントの実行ロジック（workflow/, task/, analysis/） |
+| `references/` | ナレッジベース（実行しない参照情報） |
 | `scripts/` | ユーティリティスクリプト |
 | `examples/` | サンプルファイル |
 | `tests/` | テストファイル |

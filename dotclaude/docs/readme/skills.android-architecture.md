@@ -3,6 +3,7 @@
 ## 概要
 
 Google 公式 Android Architecture Guide に基づいた MVVM / UDF / Repository パターンのスキル。
+参照ドキュメントのパターンを読み込み、ユーザーの実装タスクに適用する。
 
 ---
 
@@ -19,72 +20,9 @@ Google 公式 Android Architecture Guide に基づいた MVVM / UDF / Repository
 
 ---
 
-## 基本原則
-
-1. **関心の分離** - UI ロジックとビジネスロジックを明確に分離
-2. **データ駆動 UI** - UI は状態を反映するのみ
-3. **Single Source of Truth (SSOT)** - Repository がデータの SSOT
-4. **Unidirectional Data Flow (UDF)** - イベントは上流へ、状態は下流へ
-
-```
-UI Layer -> Domain Layer -> Data Layer
-    ^                          |
-    +-------- State -----------+
-```
-
----
-
-## レイヤー構造
-
-| レイヤー | 責務 | 主要コンポーネント |
-|----------|------|-------------------|
-| UI | 画面表示とユーザーインタラクション | Activity, Fragment, Compose, ViewModel |
-| Domain | ビジネスロジック（オプション） | UseCase, Domain Model |
-| Data | データ取得と永続化 | Repository, DataSource, DAO, API |
-
----
-
-## 命名規則
-
-| 種類 | パターン | 例 |
-|------|----------|-----|
-| ViewModel | `{Feature}ViewModel` | `UserListViewModel` |
-| UI State | `{Feature}UiState` | `UserListUiState` |
-| UseCase | `{Action}{Entity}UseCase` | `GetUsersUseCase` |
-| Repository | `{Entity}Repository` | `UserRepository` |
-
----
-
-## 使用例
-
-### Hilt DI
-
-```kotlin
-@Module
-@InstallIn(SingletonComponent::class)
-object DataModule {
-    @Provides
-    @Singleton
-    fun provideUserRepository(api: UserApi, dao: UserDao): UserRepository =
-        UserRepositoryImpl(api, dao)
-}
-```
-
-### Compose 状態管理
-
-```kotlin
-@Composable
-fun UserListScreen(viewModel: UserListViewModel = hiltViewModel()) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    UserListContent(users = uiState.users, onRefresh = viewModel::refresh)
-}
-```
-
----
-
-## 詳細リファレンス
+## 参照ドキュメント
 
 - [Clean Architecture Guide](../../references/common/clean-architecture.md)
 - [Testing Strategy Guide](../../references/common/testing-strategy.md)
-- [Kotlin Coroutines Guide](../../references/languages/kotlin/coroutines.md)
-- [Android Architecture Details](../../references/platforms/android/architecture.md)
+- [Android Conventions](../../references/platforms/android/conventions.md)
+- [Architecture Patterns](../../references/platforms/android/architecture-patterns.md)

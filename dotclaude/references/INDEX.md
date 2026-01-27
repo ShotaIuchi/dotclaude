@@ -15,20 +15,24 @@ references/
 ├── platforms/                  # Platforms
 │   ├── android/
 │   │   ├── index.md
-│   │   └── conventions.md
+│   │   ├── conventions.md
+│   │   └── architecture-patterns.md
 │   └── ios/
 │       ├── index.md
-│       └── conventions.md
+│       ├── conventions.md
+│       └── architecture-patterns.md
 ├── languages/                  # Languages
 │   └── kotlin/
 │       ├── index.md
 │       ├── conventions.md
 │       ├── library-patterns.md
-│       └── feature-patterns.md
+│       ├── feature-patterns.md
+│       └── kmp-architecture-patterns.md
 ├── services/                   # Cloud services
 │   └── aws/
 │       ├── index.md
-│       └── conventions.md
+│       ├── conventions.md
+│       └── sam-architecture-patterns.md
 └── tools/                      # Development tools
     └── claude-code/
         ├── index.md
@@ -64,6 +68,7 @@ Authoritative sources for design principles that all skills should reference.
 |------|-------------|----------------|
 | [index.md](platforms/android/index.md) | 公式ドキュメントへのポインタ | android |
 | [conventions.md](platforms/android/conventions.md) | プロジェクト固有のAndroid規約 | android |
+| [architecture-patterns.md](platforms/android/architecture-patterns.md) | MVVM/UDF/Repositoryアーキテクチャパターン | android |
 
 ### platforms/ios/ - iOS Specific
 
@@ -71,6 +76,7 @@ Authoritative sources for design principles that all skills should reference.
 |------|-------------|----------------|
 | [index.md](platforms/ios/index.md) | 公式ドキュメントへのポインタ | ios |
 | [conventions.md](platforms/ios/conventions.md) | プロジェクト固有のiOS規約 | ios |
+| [architecture-patterns.md](platforms/ios/architecture-patterns.md) | SwiftUI+MVVMアーキテクチャパターン | ios |
 
 ### languages/kotlin/ - Kotlin Related
 
@@ -80,6 +86,7 @@ Authoritative sources for design principles that all skills should reference.
 | [conventions.md](languages/kotlin/conventions.md) | プロジェクト固有のKotlin/KMP規約 | kmp |
 | [library-patterns.md](languages/kotlin/library-patterns.md) | ライブラリ実装パターン集 | kmp |
 | [feature-patterns.md](languages/kotlin/feature-patterns.md) | 機能実装パターン集 | kmp |
+| [kmp-architecture-patterns.md](languages/kotlin/kmp-architecture-patterns.md) | KMPアーキテクチャパターン | kmp |
 
 ### services/aws/ - AWS Related
 
@@ -87,6 +94,7 @@ Authoritative sources for design principles that all skills should reference.
 |------|-------------|----------------|
 | [index.md](services/aws/index.md) | 公式ドキュメントへのポインタ | aws-sam |
 | [conventions.md](services/aws/conventions.md) | プロジェクト固有のAWS SAM規約 | aws-sam |
+| [sam-architecture-patterns.md](services/aws/sam-architecture-patterns.md) | SAMアーキテクチャパターン | aws-sam |
 
 ### tools/claude-code/ - Claude Code
 
@@ -107,40 +115,40 @@ Authoritative sources for design principles that all skills should reference.
 
 ```yaml
 references:
-  - path: ../references/platforms/android/index.md   # Check index.md first
   - path: ../references/common/clean-architecture.md
   - path: ../references/common/testing-strategy.md
   - path: ../references/platforms/android/conventions.md
+  - path: ../references/platforms/android/architecture-patterns.md
 ```
 
 ### ios-architecture
 
 ```yaml
 references:
-  - path: ../references/platforms/ios/index.md       # Check index.md first
   - path: ../references/common/clean-architecture.md
   - path: ../references/common/testing-strategy.md
   - path: ../references/platforms/ios/conventions.md
+  - path: ../references/platforms/ios/architecture-patterns.md
 ```
 
 ### kmp-architecture
 
 ```yaml
 references:
-  - path: ../references/languages/kotlin/index.md    # Check index.md first
   - path: ../references/common/clean-architecture.md
   - path: ../references/common/testing-strategy.md
   - path: ../references/languages/kotlin/conventions.md
   - path: ../references/languages/kotlin/library-patterns.md
   - path: ../references/languages/kotlin/feature-patterns.md
+  - path: ../references/languages/kotlin/kmp-architecture-patterns.md
 ```
 
 ### aws-sam
 
 ```yaml
 references:
-  - path: ../references/services/aws/index.md        # Check index.md first
   - path: ../references/services/aws/conventions.md
+  - path: ../references/services/aws/sam-architecture-patterns.md
 ```
 
 ---
