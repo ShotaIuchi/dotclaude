@@ -102,18 +102,39 @@ Would you also like to create in external system?
 
 #### 3. Select Base Branch
 
-Use `default_base_branch` from `.wf/config.json` as default.
-Use `main` if not present.
+Determine base branch with the following priority:
+
+1. **Current branch** (`git rev-parse --abbrev-ref HEAD`) — default
+2. `default_base_branch` from `.wf/config.json` — presented as alternative option
+3. `main` — fallback if config not present
 
 Confirm with user:
-> Base branch: Is `<branch>` OK?
+> Base branch: Is `<current_branch>` OK?
+> (Alternative: `<config_branch>` from config)
 
 #### 4. Create Work Branch
+
+> **CRITICAL: MUST NOT SKIP** — Working on main/master directly is forbidden.
+> All workflow work MUST happen on a dedicated feature branch.
 
 ```bash
 # Branch name: <prefix>/<issue>-<slug>
 git checkout -b <branch_name> <base_branch>
 ```
+
+**Verification (MUST execute immediately after branch creation):**
+
+```bash
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
+  echo "FATAL: Still on $current_branch. Branch creation failed."
+  echo "ABORT: Do not proceed."
+  exit 1
+fi
+echo "OK: On branch $current_branch"
+```
+
+> **GUARD**: If verification fails, **ABORT the entire wf1-kickoff process**. Do not proceed to Step 5.
 
 #### 5. Initialize WF Directory
 
@@ -122,6 +143,26 @@ Create `.wf/` directory if it doesn't exist:
 ```bash
 source "$HOME/.claude/scripts/wf-init.sh"
 wf_init_project
+```
+
+#### 5a. Early Branch Recording
+
+> **CRITICAL**: Record branch info in state.json immediately after WF directory init.
+> Do NOT wait until Step 10 — if the process fails midway, branch info must already be persisted.
+
+```bash
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
+  echo "FATAL: Still on $current_branch at Step 5a. ABORT."
+  exit 1
+fi
+
+# Write branch info to state.json early
+jq --arg wid "$work_id" \
+   --arg base "$base_branch" \
+   --arg branch "$current_branch" \
+   '.works[$wid].git = {"base": $base, "branch": $branch}' \
+   .wf/state.json > .wf/state.json.tmp && mv .wf/state.json.tmp .wf/state.json
 ```
 
 #### 6. Create Document Directory
@@ -232,6 +273,9 @@ Replace template placeholders with content determined through dialogue (or plan.
 ### Phase 3: Finalization
 
 #### 10. Update state.json
+
+> **GUARD**: Before writing, verify `git.branch` is NOT null, "main", or "master".
+> If it is, **ABORT** — something went wrong in Step 4 or 5a.
 
 ```json
 {
@@ -365,6 +409,7 @@ Record worktree path in `.wf/local.json` (git-ignored, local machine specific).
 | state.json update fails | Display error, rollback branch creation | Check file permissions, disk space |
 | Directory creation fails | Display error | Check permissions on docs/wf/ |
 | gh CLI not authenticated | Display auth error | Run `gh auth login` |
+| Still on main/master at Step 5+ | **ABORT immediately** | Re-run wf1-kickoff; check git status and branch creation |
 
 ## Notes
 

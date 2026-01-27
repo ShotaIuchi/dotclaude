@@ -39,9 +39,10 @@
 
 1. 前提条件チェック（jq, gh）
 2. ID情報取得とwork-id生成
-3. ベースブランチ選択・確認
-4. 作業ブランチ作成
+3. ベースブランチ選択・確認（デフォルト: カレントブランチ）
+4. 作業ブランチ作成 — **CRITICAL: スキップ厳禁**。作成後にmain/masterでないことを検証。失敗時はABORT
 5. `.wf/`ディレクトリ初期化
+5a. ブランチ情報の早期記録 — Step 10を待たず`state.json`に`git.branch`を即時書き込み
 6. `docs/wf/<work-id>/`作成
 
 ### フェーズ2: Kickoff作成
@@ -52,7 +53,7 @@
 
 ### フェーズ3: 完了処理
 
-10. `state.json`更新（current: wf1-kickoff, next: wf2-spec）
+10. `state.json`更新（current: wf1-kickoff, next: wf2-spec）— 書き込み前に`git.branch`がnull/main/masterでないことを検証
 11. コミット
 
 ## 完了メッセージ
@@ -76,6 +77,7 @@ Next step: Run /wf2-spec to create the specification
 - 既存作業がある場合は警告を表示
 - ブランチ名が既に存在する場合はエラー
 - github/jira/localは排他（複数指定でエラー）
+- Step 5以降でmain/masterブランチにいる場合は即座にABORT
 
 ---
 
