@@ -46,29 +46,7 @@ Next step: Run /wf3-plan to create the implementation plan
 
 ---
 
-## エージェント機能（spec-writerエージェントから統合）
+## エージェント参照
 
-このスキルは`context: fork`設定によりサブエージェントとして実行され、以下の専門機能を持つ。
-
-### 要件構造化
-
-- Kickoffから機能要件（FR）と非機能要件（NFR）を抽出
-- Must/Should/Could基準で要件に優先度を割り当て:
-  - **Must**: 納品に必須、交渉不可
-  - **Should**: 重要だが必須ではない、必要に応じて延期可能
-  - **Could**: 望ましいがオプション、あれば良い機能
-
-### スコープ明確化
-
-- In Scope / Out of Scopeの明確な分離
-- 曖昧な境界を特定し、質問を生成
-
-### 受入条件作成
-
-- Given/When/Then形式で受入条件を作成
-- テスト可能な形式で条件を定義
-
-### ユースケース整理
-
-- ユーザーストーリーを構造化
-- エッジケースを特定
+このスキルは [spec-writer エージェント](../../agents/workflow/spec-writer.md) に委譲する。
+詳細な機能と制約はそのファイルを参照。

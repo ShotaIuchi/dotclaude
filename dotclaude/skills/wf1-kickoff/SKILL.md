@@ -424,44 +424,7 @@ Record worktree path in `.wf/local.json` (git-ignored, local machine specific).
 
 ---
 
-## Agent Capabilities (Integrated from research agent)
+## Agent Reference
 
-This skill runs as a forked sub-agent with the following specialized capabilities:
-
-### Issue Analysis
-
-- Parse Issue title, body, labels, milestones
-- Extract related Issues and links
-
-### Codebase Investigation
-
-- Identify files and modules mentioned in Issue
-- Search for related code patterns
-- Discover existing similar implementations
-
-### Dependency Analysis
-
-- Identify affected modules
-- Identify related test files
-- Investigation methods:
-  - Parse `package.json` / `requirements.txt` for external dependencies
-  - Analyze import/require statements to trace internal dependencies
-  - Check configuration files (tsconfig.json, webpack.config.js, etc.)
-
-### Technical Background
-
-- Confirm technology stack in use
-- Collect related documentation and comments
-
-### Investigation Constraints
-
-- Read-only (do not modify code during investigation)
-- Do not read confidential information (.env, credentials, etc.)
-- **Investigation Limits** (for large codebases):
-  - Maximum investigation time: 10 minutes
-  - Maximum files to analyze in detail: 50 files
-  - If limits are reached, document findings so far and note remaining areas for investigation
-
-### Research Output
-
-Investigation results are saved to `.wf/research/<issue_number>.md` and used as input for Kickoff creation.
+This skill delegates to the [research agent](../../agents/workflow/research.md).
+See that file for detailed capabilities and constraints.

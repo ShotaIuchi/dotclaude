@@ -190,36 +190,7 @@ Result: 2 warnings, 1 missing
 
 ---
 
-## Agent Capabilities (Integrated from spec-writer agent)
+## Agent Reference
 
-This skill runs as a forked sub-agent with the following specialized capabilities:
-
-### Requirements Structuring
-
-- Extract Functional Requirements (FR) and Non-Functional Requirements (NFR) from Kickoff
-- Assign priority to requirements using Must/Should/Could criteria:
-  - **Must**: Essential for delivery, non-negotiable
-  - **Should**: Important but not critical, can be deferred if necessary
-  - **Could**: Desirable but optional, nice-to-have features
-
-### Scope Clarification
-
-- Clear separation of In Scope / Out of Scope
-- Identify ambiguous boundaries and generate questions
-
-### Acceptance Criteria Creation
-
-- Create acceptance criteria in Given/When/Then format
-- Define conditions in testable format
-
-### Use Case Organization
-
-- Structure user stories
-- Identify edge cases
-
-### Spec Writing Constraints
-
-- Do not deviate from Kickoff content
-- Do not delve into technical implementation details (that is Plan's role)
-- Explicitly list ambiguous points as Open Questions
-- If Kickoff document is not found, report error and terminate without generating partial output
+This skill delegates to the [spec-writer agent](../../agents/workflow/spec-writer.md).
+See that file for detailed capabilities and constraints.

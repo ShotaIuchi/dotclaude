@@ -10,20 +10,17 @@ WF管理システムで使用されるサブエージェントの定義と使用
 
 ## エージェント分類
 
-### ワークフロー支援型
+### ワークフロー支援型 (workflow/)
 
-> **Note:** ワークフロー支援エージェントは `skills/wf*/` に統合されました。
-> `/wf1-kickoff`, `/wf2-spec`, `/wf3-plan`, `/wf5-implement` 等のスキルを直接使用してください。
->
-> 各スキルは `context: fork` 設定により、サブエージェントとして自動実行されます。
-> これによりメインコンテキストのトークン消費を抑えながら、専門的な処理を行います。
->
-> | スキル | 目的 |
-> |--------|------|
-> | `/wf1-kickoff` | Issue背景調査、ワークスペース作成、Kickoffドキュメント作成 |
-> | `/wf2-spec` | 仕様書（Spec）作成 |
-> | `/wf3-plan` | 実装計画（Plan）立案 |
-> | `/wf5-implement` | 単一ステップ実装 |
+ワークフロースキル (`/wf1-kickoff`, `/wf2-spec`, `/wf3-plan`, `/wf5-implement`) から呼び出される専門エージェント。
+各スキルは `context: fork` 設定により、サブエージェントとして自動実行されます。
+
+| エージェント | 目的 | 呼び出し元スキル |
+|-------------|------|-----------------|
+| [`research`](workflow/research.md) | Issue背景調査、コードベース分析 | `/wf1-kickoff` |
+| [`spec-writer`](workflow/spec-writer.md) | 仕様書（Spec）作成 | `/wf2-spec` |
+| [`planner`](workflow/planner.md) | 実装計画（Plan）立案 | `/wf3-plan` |
+| [`implementer`](workflow/implementer.md) | 単一ステップ実装 | `/wf5-implement` |
 
 ### タスク特化型 (task/)
 
@@ -172,6 +169,11 @@ agents/
 ├── _base/
 │   ├── context.md      # 共通コンテキスト
 │   └── constraints.md  # 共通制約
+├── workflow/
+│   ├── research.md
+│   ├── spec-writer.md
+│   ├── planner.md
+│   └── implementer.md
 ├── task/
 │   ├── reviewer.md
 │   ├── doc-reviewer.md
@@ -184,5 +186,3 @@ agents/
     ├── dependency.md
     └── impact.md
 ```
-
-> **Note:** `workflow/` ディレクトリは `skills/wf*/` に統合されたため削除されました。

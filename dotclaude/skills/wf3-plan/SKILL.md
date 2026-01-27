@@ -215,43 +215,7 @@ Dependencies: none
 
 ---
 
-## Agent Capabilities (Integrated from planner agent)
+## Agent Reference
 
-This skill runs as a forked sub-agent (Plan type) with the following specialized capabilities:
-
-### Implementation Step Decomposition
-
-- Break down specification into executable units
-- Clarify dependencies between steps (DAG structure recommended)
-- Estimate effort per step (~15-60 min target)
-
-### Technical Approach Selection
-
-- Analyze trade-offs when multiple approaches exist
-- Consider consistency with existing code patterns
-- Evaluation criteria: Complexity, Maintainability, Performance, Risk (score 1-5)
-
-### Risk Analysis
-
-- Identify technical risks
-- Present countermeasures
-
-### Rollback Planning
-
-- Define rollback method for each step
-
-### Planning Constraints
-
-- Limited to planning within specification scope
-- 1 step = granularity completable in one wf5-implement
-  - Guideline: ~50-200 lines of code changes, ~15-60 minutes of work
-  - Each step should have a single, well-defined objective
-- Each step must be independently testable
-
-### Error Handling
-
-When `01_SPEC.md` is missing or incomplete:
-
-1. **Missing file**: Notify user and suggest running `wf2-spec` first
-2. **Incomplete specification**: List missing required sections and request completion
-3. **Invalid format**: Identify format issues and provide correction guidance
+This skill delegates to the [planner agent](../../agents/workflow/planner.md).
+See that file for detailed capabilities and constraints.
