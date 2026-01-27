@@ -1,25 +1,25 @@
 # Claude Code Usage Decisions
 
-## 採用パターン
+## Adopted Patterns
 
-| パターン | 用途 | 採用理由 | 代替候補 |
-|---------|------|---------|---------|
-| skills/ + agents/ 分離 | コマンド定義 | インターフェースとロジックの分離 | スキルにロジック埋込み |
-| references/ ナレッジベース | 知識共有 | 複数スキルからの参照 | スキル内に重複記述 |
-| context: fork | サブエージェント | メインコンテキストのトークン節約 | 同一コンテキスト実行 |
-| .wf/state.json | 状態管理 | 構造化されたワークフロー状態 | ファイル名ベース判定 |
-| .wf/memory.json | セッション記憶 | コンパクション耐性 | コンテキスト依存 |
-| hooks.json | 自動検証 | デバッグログ検出、git安全性 | 手動チェック |
+| Pattern | Purpose | Adoption Reason | Alternatives |
+|---------|---------|----------------|-------------|
+| skills/ + agents/ separation | Command definition | Separate interface from logic | Embed logic in skills |
+| references/ knowledge base | Knowledge sharing | Referenced from multiple skills | Duplicate content in each skill |
+| context: fork | Sub-agents | Save main context tokens | Same-context execution |
+| .wf/state.json | State management | Structured workflow state | Filename-based detection |
+| .wf/memory.json | Session memory | Survives compaction | Context-dependent |
+| hooks.json | Automated validation | Debug log detection, git safety | Manual checks |
 
-## 不採用とした選択肢
+## Rejected Options
 
-| パターン | 不採用理由 |
-|---------|-----------|
-| MCP Server統合 | ファイルベースで十分、サーバー管理の複雑さ回避 |
-| カスタムCLIラッパー | Claude Code標準コマンドで十分 |
-| DB保存の状態管理 | JSONファイルのシンプルさを優先 |
-| 単一巨大CLAUDE.md | 責務分離のため skills/agents/references に分割 |
+| Pattern | Rejection Reason |
+|---------|-----------------|
+| MCP Server integration | File-based approach is sufficient; avoids server management complexity |
+| Custom CLI wrapper | Claude Code standard commands are sufficient |
+| DB-backed state management | Prefer simplicity of JSON files |
+| Single monolithic CLAUDE.md | Split into skills/agents/references for separation of concerns |
 
-## 関連ドキュメント
+## Related Documents
 
-- [best-practices.md](best-practices.md) — スキル記述のベストプラクティス
+- [best-practices.md](best-practices.md) — Skill authoring best practices

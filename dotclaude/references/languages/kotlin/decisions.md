@@ -1,30 +1,30 @@
 # Kotlin Multiplatform Technology Decisions
 
-## 採用技術
+## Adopted Technologies
 
-| 技術 | 用途 | 採用理由 | 代替候補 |
-|------|------|---------|---------|
-| Kotlin Multiplatform | コード共有 | ビジネスロジック共有、ネイティブUI維持 | Flutter, React Native |
-| Compose Multiplatform | 共有UI（一部） | Kotlin統合、段階的導入可能 | SwiftUI/Compose個別 |
-| Koin | DI | KMP対応、シンプルなDSL | Kodein, Manual DI |
-| SQLDelight | Local DB | KMP対応、型安全SQL | Room (Android only) |
-| Ktor | HTTP Client | KMP対応、Coroutine統合 | OkHttp (Android only) |
-| Kotlin Coroutines | 非同期処理 | KMPネイティブ対応 | - |
-| Turbine | Flow テスト | Flow特化、簡潔なAPI | - |
+| Technology | Purpose | Adoption Reason | Alternatives |
+|------------|---------|----------------|-------------|
+| Kotlin Multiplatform | Code sharing | Share business logic, keep native UI | Flutter, React Native |
+| Compose Multiplatform | Shared UI (partial) | Kotlin integration, incremental adoption | SwiftUI/Compose separately |
+| Koin | DI | KMP compatible, simple DSL | Kodein, Manual DI |
+| SQLDelight | Local DB | KMP compatible, type-safe SQL | Room (Android only) |
+| Ktor | HTTP Client | KMP compatible, Coroutine integration | OkHttp (Android only) |
+| Kotlin Coroutines | Async processing | KMP native support | - |
+| Turbine | Flow testing | Flow-specialized, concise API | - |
 
-## 不採用とした選択肢
+## Rejected Options
 
-| 技術 | 不採用理由 |
-|------|-----------|
-| Flutter | ネイティブUI体験を優先 |
-| React Native | Kotlin/Swiftスキルセットを活用 |
-| Kodein | Koinのコミュニティ・ドキュメントが優位 |
-| Realm (KMP) | SQLDelightの型安全性を優先 |
-| Apollo GraphQL | REST APIで十分、GraphQLの要件なし |
+| Technology | Rejection Reason |
+|------------|-----------------|
+| Flutter | Prefer native UI experience |
+| React Native | Leverage Kotlin/Swift skill set |
+| Kodein | Koin has better community and documentation |
+| Realm (KMP) | Prefer SQLDelight's type safety |
+| Apollo GraphQL | REST API is sufficient; no GraphQL requirement |
 
-## 関連ドキュメント
+## Related Documents
 
-- [conventions.md](conventions.md) — 命名規則・ディレクトリ構造
-- [library-patterns.md](library-patterns.md) — ライブラリ実装パターン
-- [feature-patterns.md](feature-patterns.md) — 機能実装パターン
-- [kmp-architecture-patterns.md](kmp-architecture-patterns.md) — KMPアーキテクチャ
+- [conventions.md](conventions.md) — Naming rules and directory structure
+- [library-patterns.md](library-patterns.md) — Library implementation patterns
+- [feature-patterns.md](feature-patterns.md) — Feature implementation patterns
+- [kmp-architecture-patterns.md](kmp-architecture-patterns.md) — KMP architecture

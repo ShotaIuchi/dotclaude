@@ -66,44 +66,44 @@ Authoritative sources for design principles that all skills should reference.
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [decisions.md](platforms/android/decisions.md) | Android技術選定・採用/不採用の判断記録 | android |
-| [conventions.md](platforms/android/conventions.md) | プロジェクト固有のAndroid規約 | android |
-| [architecture-patterns.md](platforms/android/architecture-patterns.md) | MVVM/UDF/Repositoryアーキテクチャパターン | android |
+| [decisions.md](platforms/android/decisions.md) | Android technology adoption/rejection decisions | android |
+| [conventions.md](platforms/android/conventions.md) | Project-specific Android conventions | android |
+| [architecture-patterns.md](platforms/android/architecture-patterns.md) | MVVM/UDF/Repository architecture patterns | android |
 
 ### platforms/ios/ - iOS Specific
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [decisions.md](platforms/ios/decisions.md) | iOS技術選定・採用/不採用の判断記録 | ios |
-| [conventions.md](platforms/ios/conventions.md) | プロジェクト固有のiOS規約 | ios |
-| [architecture-patterns.md](platforms/ios/architecture-patterns.md) | SwiftUI+MVVMアーキテクチャパターン | ios |
+| [decisions.md](platforms/ios/decisions.md) | iOS technology adoption/rejection decisions | ios |
+| [conventions.md](platforms/ios/conventions.md) | Project-specific iOS conventions | ios |
+| [architecture-patterns.md](platforms/ios/architecture-patterns.md) | SwiftUI+MVVM architecture patterns | ios |
 
 ### languages/kotlin/ - Kotlin Related
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [decisions.md](languages/kotlin/decisions.md) | KMP技術選定・採用/不採用の判断記録 | android, kmp |
-| [conventions.md](languages/kotlin/conventions.md) | プロジェクト固有のKotlin/KMP規約 | kmp |
-| [library-patterns.md](languages/kotlin/library-patterns.md) | ライブラリ実装パターン集 | kmp |
-| [feature-patterns.md](languages/kotlin/feature-patterns.md) | 機能実装パターン集 | kmp |
-| [kmp-architecture-patterns.md](languages/kotlin/kmp-architecture-patterns.md) | KMPアーキテクチャパターン | kmp |
+| [decisions.md](languages/kotlin/decisions.md) | KMP technology adoption/rejection decisions | android, kmp |
+| [conventions.md](languages/kotlin/conventions.md) | Project-specific Kotlin/KMP conventions | kmp |
+| [library-patterns.md](languages/kotlin/library-patterns.md) | Library implementation patterns | kmp |
+| [feature-patterns.md](languages/kotlin/feature-patterns.md) | Feature implementation patterns | kmp |
+| [kmp-architecture-patterns.md](languages/kotlin/kmp-architecture-patterns.md) | KMP architecture patterns | kmp |
 
 ### services/aws/ - AWS Related
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [decisions.md](services/aws/decisions.md) | AWS技術選定・採用/不採用の判断記録 | aws-sam |
-| [conventions.md](services/aws/conventions.md) | プロジェクト固有のAWS SAM規約 | aws-sam |
-| [sam-architecture-patterns.md](services/aws/sam-architecture-patterns.md) | SAMアーキテクチャパターン | aws-sam |
+| [decisions.md](services/aws/decisions.md) | AWS technology adoption/rejection decisions | aws-sam |
+| [conventions.md](services/aws/conventions.md) | Project-specific AWS SAM conventions | aws-sam |
+| [sam-architecture-patterns.md](services/aws/sam-architecture-patterns.md) | SAM architecture patterns | aws-sam |
 
 ### tools/claude-code/ - Claude Code
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [decisions.md](tools/claude-code/decisions.md) | Claude Code運用判断・採用/不採用の記録 | - |
-| [best-practices.md](tools/claude-code/best-practices.md) | プロジェクト固有のベストプラクティス | - |
+| [decisions.md](tools/claude-code/decisions.md) | Claude Code usage adoption/rejection decisions | - |
+| [best-practices.md](tools/claude-code/best-practices.md) | Project-specific best practices | - |
 
-> Skills / Sub-agents / CLAUDE.md の仕様は公式ドキュメントを参照: https://docs.anthropic.com/en/docs/claude-code/skills
+> For official Skills / Sub-agents / CLAUDE.md specs, see: https://docs.anthropic.com/en/docs/claude-code/skills
 
 ---
 
