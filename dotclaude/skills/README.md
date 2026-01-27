@@ -9,14 +9,33 @@ references/からの知識を参照し、プロジェクトに最適化された
 
 ## スキル一覧
 
+### ワークフロー管理
+
+| スキル | 目的 |
+|--------|------|
+| `wf0-config` | WF設定の対話的編集 (`show`, `init`, カテゴリ指定) |
+| `wf0-nextstep` | 次のワークフローステップを実行 |
+| `wf0-nexttask` | スケジュールから次タスクを実行 (`--dry-run`, `--until`, `--all`) |
+| `wf0-promote` | ローカルワークフローをGitHub/Jiraに昇格 |
+| `wf0-remote` | GitHub Issueコメント経由でリモート操作 (`start`, `stop`, `status`) |
+| `wf0-restore` | 既存ワークスペースの復元 |
+| `wf0-schedule` | スケジュール管理 (`create`, `show`, `edit`, `validate`, `clear`) |
+| `wf0-status` | 現在のワークフロー状態を表示 |
+| `wf1-kickoff` | 新規ワークスペースとKickoffドキュメント作成 |
+| `wf2-spec` | 仕様書ドキュメント作成 |
+| `wf3-plan` | 実装計画ドキュメント作成 |
+| `wf4-review` | PlanまたはコードのレビューRecord作成 |
+| `wf5-implement` | Planの1ステップを実装 |
+| `wf6-verify` | 実装検証とPR作成 |
+
+### アーキテクチャ
+
 | スキル | 目的 |
 |--------|------|
 | `android-architecture` | Androidアプリアーキテクチャ設計 |
 | `ios-architecture` | iOSアプリアーキテクチャ設計 |
 | `kmp-architecture` | Kotlin Multiplatformアーキテクチャ設計 |
 | `aws-sam` | AWS SAMテンプレートとLambda実装 |
-| `wf0-schedule` | スケジュール管理 (`create`, `show`, `edit`, `validate`, `clear`) |
-| `wf0-nexttask` | 次タスク実行 (`--dry-run`, `--until`, `--all`) |
 
 ## 使用方法
 
@@ -27,12 +46,24 @@ references/からの知識を参照し、プロジェクトに最適化された
 スキル名をスラッシュコマンドとして使用：
 
 ```
+# ワークフロー
+/wf0-status
+/wf1-kickoff github=123
+/wf2-spec
+/wf3-plan
+/wf4-review
+/wf5-implement
+/wf6-verify pr
+
+# バッチ処理
+/wf0-schedule create github="label:batch"
+/wf0-nexttask --dry-run
+
+# アーキテクチャ
 /android-architecture
 /ios-architecture
 /kmp-architecture
 /aws-sam
-/wf0-schedule
-/wf0-nexttask
 ```
 
 ### コンテキスト参照
@@ -76,18 +107,42 @@ external:
 
 ```
 skills/
-├── README.md                 # このファイル
+├── README.md                    # このファイル
+├── wf0-config/
+│   └── SKILL.md
+├── wf0-nextstep/
+│   └── SKILL.md
+├── wf0-nexttask/
+│   └── SKILL.md
+├── wf0-promote/
+│   └── SKILL.md
+├── wf0-remote/
+│   └── SKILL.md
+├── wf0-restore/
+│   └── SKILL.md
+├── wf0-schedule/
+│   └── SKILL.md
+├── wf0-status/
+│   └── SKILL.md
+├── wf1-kickoff/
+│   └── SKILL.md
+├── wf2-spec/
+│   └── SKILL.md
+├── wf3-plan/
+│   └── SKILL.md
+├── wf4-review/
+│   └── SKILL.md
+├── wf5-implement/
+│   └── SKILL.md
+├── wf6-verify/
+│   └── SKILL.md
 ├── android-architecture/
 │   └── SKILL.md
 ├── ios-architecture/
 │   └── SKILL.md
 ├── kmp-architecture/
 │   └── SKILL.md
-├── aws-sam/
-│   └── SKILL.md
-├── wf0-schedule/
-│   └── SKILL.md
-└── wf0-nexttask/
+└── aws-sam/
     └── SKILL.md
 ```
 

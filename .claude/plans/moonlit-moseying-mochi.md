@@ -1,185 +1,109 @@
-# Plan: wf0-batch 廃止 & wf0-nexttask 新設
+# Plan: commands/ から skills/ への全面移行
 
 ## 概要
 
-ワークフローのタスク管理を簡素化：
-- `wf0-schedule`: タスクの依存関係を分析し、実行順番を決定（現状維持）
-- `wf0-batch`: 廃止（daemon+worker並列実行アーキテクチャを削除）
-- `wf0-nexttask`: 新設（スケジュールから次のタスクを取得・実行）
+Claude Code の commands/ と skills/ が統合されたため、重複を解消し skills/ に統一する。
 
-## wf0-nexttask の仕様
+## 背景
 
-### 基本動作
+- `commands/*.md` と `skills/{name}/SKILL.md` は両方ともスラッシュコマンドとして認識される
+- 同じ名前が両方にあると重複して読み込まれる
+- skills/ の方が高度な機能（allowed-tools, context: fork 等）をサポート
 
-```
-/wf0-nexttask [options]
-```
+## 現状
 
-1. `schedule.json`から依存解決済みの次のタスクを取得
-2. タスク情報を表示
-3. 実行範囲を提案し、ユーザーに選択させる
-4. 選択した範囲まで自動実行
+### commands/ (14ファイル) - 移行対象
+- wf0-config.md
+- wf0-nextstep.md
+- wf0-nexttask.md (重複)
+- wf0-promote.md
+- wf0-remote.md
+- wf0-restore.md
+- wf0-schedule.md (重複)
+- wf0-status.md
+- wf1-kickoff.md
+- wf2-spec.md
+- wf3-plan.md
+- wf4-review.md
+- wf5-implement.md
+- wf6-verify.md
 
-### オプション
-
-| オプション | 説明 |
-|-----------|------|
-| `--dry-run` | タスク情報を表示するのみ、実行しない |
-| `--until <phase>` | 指定フェーズまで自動実行（選択をスキップ） |
-| `--all` | 全タスク完了まで自動実行（選択をスキップ） |
-
-### 実行範囲の提案
-
-タスク選択後、以下のブレークポイントを提案：
-
-```
-📋 Next Task: FEAT-123-auth
-═══════════════════════════════════════
-
-Source:       github #123
-Title:        Add user authentication
-Dependencies: FEAT-100-database (completed)
-
-═══════════════════════════════════════
-
-Where would you like to stop?
-
-  1. wf1-kickoff only (Start work)
-  2. Until wf3-plan (Design complete)
-  3. Until wf4-review (Review complete)
-  4. Until wf6-verify (Task complete)
-  5. Complete all remaining tasks (3 tasks)
-
-Select [1-5]:
-```
-
-### 未完了タスクの通知
-
-タスク完了後、残りのタスクがある場合は通知：
-
-```
-═══════════════════════════════════════
-✅ FEAT-123-auth completed!
-
-Remaining tasks: 2
-  - FEAT-124-export (ready)
-  - FEAT-125-api (blocked by FEAT-124-export)
-
-Run '/wf0-nexttask' for the next task
-═══════════════════════════════════════
-```
-
-## 削除するファイル
-
-| ファイル | 理由 |
-|----------|------|
-| `commands/wf0-batch.md` | 廃止 |
-| `scripts/batch/batch-daemon.sh` | 並列実行廃止 |
-| `scripts/batch/batch-worker.sh` | 並列実行廃止 |
-| `scripts/batch/batch-utils.sh` | 一部関数はwf0-nexttaskに移植 |
-| `skills/wf0-batch/SKILL.md` | 廃止 |
-| `docs/readme/commands.wf0-batch.md` | ドキュメント削除 |
-
-## 更新するファイル
-
-| ファイル | 変更内容 |
-|----------|----------|
-| `commands/wf0-schedule.md` | `/wf0-batch start` → `/wf0-nexttask` への参照更新 |
-| `skills/README.md` | wf0-batch削除、wf0-nexttask追加 |
-| `examples/config.json` | `batch.default_parallel`, `batch.max_parallel` 削除 |
-
-## 作成するファイル
-
-| ファイル | 内容 |
-|----------|------|
-| `commands/wf0-nexttask.md` | コマンド仕様 |
-| `skills/wf0-nexttask/SKILL.md` | スキル定義 |
-| `docs/readme/commands.wf0-nexttask.md` | 日本語ドキュメント |
-
-## schedule.json への影響
-
-### 削除するフィールド
-
-```json
-{
-  "execution": {
-    "max_parallel": 3,      // 削除
-    "sessions": { ... }      // 削除
-  }
-}
-```
-
-### 追加するフィールド
-
-```json
-{
-  "works": {
-    "FEAT-123-auth": {
-      "started_at": "2026-01-27T10:00:00Z",   // 追加
-      "completed_at": "2026-01-27T12:00:00Z"  // 追加
-    }
-  }
-}
-```
+### skills/ (既存) - 維持
+- wf0-nexttask/SKILL.md
+- wf0-schedule/SKILL.md
+- android-architecture/SKILL.md
+- ios-architecture/SKILL.md
+- kmp-architecture/SKILL.md
+- aws-sam/SKILL.md
 
 ## 実装ステップ
 
-### Step 1: wf0-nexttask.md 作成
-- コマンド仕様の定義
-- 処理フロー（タスク取得、範囲提案、実行）
-- ヘルパー関数（batch-utils.shから移植）
+### Step 1: 既存 skills/ の内容を確認
+wf0-schedule と wf0-nexttask の SKILL.md が commands/ と同等の内容か確認。
+不足があれば commands/ から内容をマージ。
 
-### Step 2: skills/wf0-nexttask/SKILL.md 作成
-- スキル定義
-- references設定
+### Step 2: 新規 skills/ ディレクトリ作成 (12個)
+```
+skills/wf0-config/SKILL.md
+skills/wf0-nextstep/SKILL.md
+skills/wf0-promote/SKILL.md
+skills/wf0-remote/SKILL.md
+skills/wf0-restore/SKILL.md
+skills/wf0-status/SKILL.md
+skills/wf1-kickoff/SKILL.md
+skills/wf2-spec/SKILL.md
+skills/wf3-plan/SKILL.md
+skills/wf4-review/SKILL.md
+skills/wf5-implement/SKILL.md
+skills/wf6-verify/SKILL.md
+```
 
-### Step 3: wf0-schedule.md 更新
-- wf0-batch への参照を wf0-nexttask に変更
-- schedule.json スキーマから execution.sessions を削除
+### Step 3: commands/*.md を skills/ にコピー・変換
+- commands/wf*.md の内容を skills/wf*/SKILL.md にコピー
+- frontmatter 形式を skills 用に調整（必要に応じて）
 
-### Step 4: wf0-batch 関連ファイル削除
-- commands/wf0-batch.md
-- scripts/batch/*.sh
-- skills/wf0-batch/
+### Step 4: commands/wf*.md を削除 (14ファイル)
+重複を解消するため commands/ からワークフローコマンドを削除。
 
-### Step 5: config.json 更新
-- batch.default_parallel, batch.max_parallel 削除
+### Step 5: skills/README.md を更新
+新しいスキル一覧を反映。
 
-### Step 6: ドキュメント更新
-- skills/README.md
-- docs/readme/ 内の関連ファイル
+### Step 6: docs-sync ルールに従い日本語ドキュメント更新
+skills.{name}.md 形式で docs/readme/ を更新。
+
+## 変換例
+
+### Before: commands/wf0-status.md
+```markdown
+---
+description: Display current workflow status
+argument-hint: "[work-id]"
+---
+
+# /wf0-status
+...
+```
+
+### After: skills/wf0-status/SKILL.md
+```markdown
+---
+name: wf0-status
+description: Display current workflow status
+---
+
+# /wf0-status
+...
+```
 
 ## 検証方法
 
-1. `/wf0-schedule create github="label:test"` でスケジュール作成
-2. `/wf0-nexttask --dry-run` でタスク情報表示を確認
-3. `/wf0-nexttask` で範囲選択UIが表示されることを確認
-4. 選択した範囲まで正しく実行されることを確認
-5. 完了後、残りタスクの通知が表示されることを確認
-
-## 重要な設計判断
-
-### wf0-nextstep との役割分担
-
-| コマンド | 役割 | スコープ |
-|----------|------|----------|
-| `wf0-nextstep` | フェーズ遷移 | 1つのwork内 (wf1→wf2→...→wf6) |
-| `wf0-nexttask` | タスク選択・実行 | schedule.json内の複数work |
-
-### 内部処理フロー
-
-```
-wf0-nexttask
-  ├─ schedule.json から次のタスクを取得
-  ├─ 実行範囲を提案・選択
-  └─ 選択に応じて処理
-       ├─ wf1-kickoff only → /wf1-kickoff 実行して終了
-       └─ wfN まで → /wf1-kickoff 実行 → /wf0-nextstep 繰り返し
-```
+1. `/wf0-status` が正しく動作することを確認
+2. スキル一覧で重複がないことを確認
+3. 全ての wf コマンドが呼び出せることを確認
 
 ## 関連ファイル
 
-- `/Users/si/dot/dotclaude/dotclaude/commands/wf0-nextstep.md` - 参考: フェーズ遷移コマンド
-- `/Users/si/dot/dotclaude/dotclaude/commands/wf0-schedule.md` - 更新対象
-- `/Users/si/dot/dotclaude/dotclaude/commands/wf0-batch.md` - 削除対象
-- `/Users/si/dot/dotclaude/dotclaude/scripts/batch/*.sh` - 削除対象
+- `dotclaude/commands/wf*.md` - 移行元（削除）
+- `dotclaude/skills/*/SKILL.md` - 移行先
+- `dotclaude/skills/README.md` - 更新
+- `dotclaude/docs/readme/` - ドキュメント更新

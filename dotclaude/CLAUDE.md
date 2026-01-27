@@ -9,10 +9,9 @@ Use by creating a symlink from `dotclaude/` folder to `~/.claude`.
 
 | Directory/File | Purpose |
 |----------------|---------|
-| `commands/` | Workflow commands (`wf{N}-{name}.md` format) |
+| `skills/` | Skill definitions for slash commands (includes `wf{N}-{name}` workflow commands) |
 | `rules/` | Project rules and schemas |
 | `templates/` | Document templates |
-| `skills/` | Skill definitions for slash commands |
 | `agents/` | Agent configurations |
 | `references/` | Reference documentation |
 | `scripts/` | Utility scripts |

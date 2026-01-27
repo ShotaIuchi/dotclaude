@@ -28,9 +28,9 @@ Main rules:
 
 ## Development Guidelines
 
-### Commands (commands/*.md)
+### Skills (skills/*/SKILL.md)
 
-- File names follow `wf{N}-{name}.md` format
+- Workflow commands are in `skills/wf{N}-{name}/SKILL.md` format
 - Environment-related are `wf0-*`, document-related are `wf1-4`, implementation-related are `wf5-6`
-- Command arguments are explicitly defined in Markdown
+- Command arguments are explicitly defined in Markdown frontmatter and content
 - State management is done through `.wf/state.json`

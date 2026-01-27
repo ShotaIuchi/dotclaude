@@ -10,16 +10,20 @@ WF管理システムで使用されるサブエージェントの定義と使用
 
 ## エージェント分類
 
-### ワークフロー支援型 (workflow/)
+### ワークフロー支援型
 
-ワークフローコマンドと連携して動作するエージェント。
-
-| エージェント | 目的 | 呼び出し元 |
-|-------------|------|-----------|
-| [`research`](workflow/research.md) | Issue背景調査、関連コード特定 | wf1-kickoff |
-| [`spec-writer`](workflow/spec-writer.md) | 仕様書ドラフト作成 | wf2-spec |
-| [`planner`](workflow/planner.md) | 実装計画立案 | wf3-plan |
-| [`implementer`](workflow/implementer.md) | 単一ステップ実装支援 | wf5-implement |
+> **Note:** ワークフロー支援エージェントは `skills/wf*/` に統合されました。
+> `/wf1-kickoff`, `/wf2-spec`, `/wf3-plan`, `/wf5-implement` 等のスキルを直接使用してください。
+>
+> 各スキルは `context: fork` 設定により、サブエージェントとして自動実行されます。
+> これによりメインコンテキストのトークン消費を抑えながら、専門的な処理を行います。
+>
+> | スキル | 目的 |
+> |--------|------|
+> | `/wf1-kickoff` | Issue背景調査、ワークスペース作成、Kickoffドキュメント作成 |
+> | `/wf2-spec` | 仕様書（Spec）作成 |
+> | `/wf3-plan` | 実装計画（Plan）立案 |
+> | `/wf5-implement` | 単一ステップ実装 |
 
 ### タスク特化型 (task/)
 
@@ -168,11 +172,6 @@ agents/
 ├── _base/
 │   ├── context.md      # 共通コンテキスト
 │   └── constraints.md  # 共通制約
-├── workflow/
-│   ├── research.md
-│   ├── spec-writer.md
-│   ├── planner.md
-│   └── implementer.md
 ├── task/
 │   ├── reviewer.md
 │   ├── doc-reviewer.md
@@ -185,3 +184,5 @@ agents/
     ├── dependency.md
     └── impact.md
 ```
+
+> **Note:** `workflow/` ディレクトリは `skills/wf*/` に統合されたため削除されました。
