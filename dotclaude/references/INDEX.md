@@ -14,28 +14,28 @@ references/
 │   └── testing-strategy.md
 ├── platforms/                  # Platforms
 │   ├── android/
-│   │   ├── index.md
+│   │   ├── decisions.md
 │   │   ├── conventions.md
 │   │   └── architecture-patterns.md
 │   └── ios/
-│       ├── index.md
+│       ├── decisions.md
 │       ├── conventions.md
 │       └── architecture-patterns.md
 ├── languages/                  # Languages
 │   └── kotlin/
-│       ├── index.md
+│       ├── decisions.md
 │       ├── conventions.md
 │       ├── library-patterns.md
 │       ├── feature-patterns.md
 │       └── kmp-architecture-patterns.md
 ├── services/                   # Cloud services
 │   └── aws/
-│       ├── index.md
+│       ├── decisions.md
 │       ├── conventions.md
 │       └── sam-architecture-patterns.md
 └── tools/                      # Development tools
     └── claude-code/
-        ├── index.md
+        ├── decisions.md
         └── best-practices.md
 ```
 
@@ -66,7 +66,7 @@ Authoritative sources for design principles that all skills should reference.
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [index.md](platforms/android/index.md) | 公式ドキュメントへのポインタ | android |
+| [decisions.md](platforms/android/decisions.md) | Android技術選定・採用/不採用の判断記録 | android |
 | [conventions.md](platforms/android/conventions.md) | プロジェクト固有のAndroid規約 | android |
 | [architecture-patterns.md](platforms/android/architecture-patterns.md) | MVVM/UDF/Repositoryアーキテクチャパターン | android |
 
@@ -74,7 +74,7 @@ Authoritative sources for design principles that all skills should reference.
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [index.md](platforms/ios/index.md) | 公式ドキュメントへのポインタ | ios |
+| [decisions.md](platforms/ios/decisions.md) | iOS技術選定・採用/不採用の判断記録 | ios |
 | [conventions.md](platforms/ios/conventions.md) | プロジェクト固有のiOS規約 | ios |
 | [architecture-patterns.md](platforms/ios/architecture-patterns.md) | SwiftUI+MVVMアーキテクチャパターン | ios |
 
@@ -82,7 +82,7 @@ Authoritative sources for design principles that all skills should reference.
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [index.md](languages/kotlin/index.md) | 公式ドキュメントへのポインタ | android, kmp |
+| [decisions.md](languages/kotlin/decisions.md) | KMP技術選定・採用/不採用の判断記録 | android, kmp |
 | [conventions.md](languages/kotlin/conventions.md) | プロジェクト固有のKotlin/KMP規約 | kmp |
 | [library-patterns.md](languages/kotlin/library-patterns.md) | ライブラリ実装パターン集 | kmp |
 | [feature-patterns.md](languages/kotlin/feature-patterns.md) | 機能実装パターン集 | kmp |
@@ -92,7 +92,7 @@ Authoritative sources for design principles that all skills should reference.
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [index.md](services/aws/index.md) | 公式ドキュメントへのポインタ | aws-sam |
+| [decisions.md](services/aws/decisions.md) | AWS技術選定・採用/不採用の判断記録 | aws-sam |
 | [conventions.md](services/aws/conventions.md) | プロジェクト固有のAWS SAM規約 | aws-sam |
 | [sam-architecture-patterns.md](services/aws/sam-architecture-patterns.md) | SAMアーキテクチャパターン | aws-sam |
 
@@ -100,7 +100,7 @@ Authoritative sources for design principles that all skills should reference.
 
 | File | Description | Related Skills |
 |------|-------------|----------------|
-| [index.md](tools/claude-code/index.md) | 公式ドキュメントへのポインタ | - |
+| [decisions.md](tools/claude-code/decisions.md) | Claude Code運用判断・採用/不採用の記録 | - |
 | [best-practices.md](tools/claude-code/best-practices.md) | プロジェクト固有のベストプラクティス | - |
 
 > Skills / Sub-agents / CLAUDE.md の仕様は公式ドキュメントを参照: https://docs.anthropic.com/en/docs/claude-code/skills
@@ -162,7 +162,7 @@ references:
 name: Skill Name
 description: ...
 references:
-  - path: ../references/{group}/{category}/index.md  # Check index.md first
+  - path: ../references/{group}/{category}/decisions.md  # Check decisions.md first
   - path: ../references/{group}/{category}/{file}.md # Detailed files
 ---
 ```
@@ -171,7 +171,7 @@ references:
 
 - Relative path from SKILL.md: `../references/{group}/{category}/{file}.md`
 - All paths are relative to SKILL.md
-- External links and priority can be checked in each category's index.md
+- Technology decisions and rationale can be checked in each category's decisions.md
 
 ### Group Classification
 

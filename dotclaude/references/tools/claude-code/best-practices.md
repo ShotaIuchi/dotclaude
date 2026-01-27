@@ -2,7 +2,7 @@
 
 公式ドキュメントでカバーされない、本プロジェクト固有のベストプラクティス。
 
-> 公式の Skills / Sub-agents / CLAUDE.md の仕様は [index.md](index.md) のリンクを参照。
+> 公式の Skills / Sub-agents / CLAUDE.md の仕様は [decisions.md](decisions.md) のリンクを参照。
 
 ---
 
