@@ -1,7 +1,7 @@
 ---
 name: commit
 description: Commit changes via sub-agent
-argument-hint: "[--files <path>] [message | scope instruction]"
+argument-hint: "[--files <path>] [--dry-run] [--amend] [message | scope instruction]"
 context: fork
 agent: general-purpose
 ---

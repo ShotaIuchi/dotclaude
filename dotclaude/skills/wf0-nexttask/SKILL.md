@@ -1,7 +1,7 @@
 ---
 name: wf0-nexttask
 description: Execute next task from schedule
-argument-hint: "[--dry-run] [--until <phase>] [--all]"
+argument-hint: "[--dry-run] [--until <phase>] [--all] [--no-branch]"
 ---
 
 **Always respond in Japanese.**

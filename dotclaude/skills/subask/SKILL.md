@@ -1,7 +1,7 @@
 ---
 name: subask
 description: Ask a question to a sub-agent
-argument-hint: "<question>"
+argument-hint: "<question> [--detailed] [--explore]"
 context: fork
 agent: general-purpose
 model: haiku
