@@ -16,7 +16,7 @@ references/からの知識を参照し、プロジェクトに最適化された
 | `kmp-architecture` | Kotlin Multiplatformアーキテクチャ設計 |
 | `aws-sam` | AWS SAMテンプレートとLambda実装 |
 | `wf0-schedule` | スケジュール管理 (`create`, `show`, `edit`, `validate`, `clear`) |
-| `wf0-batch` | バッチ実行制御 (`start`, `stop`, `status`, `resume`) |
+| `wf0-nexttask` | 次タスク実行 (`--dry-run`, `--until`, `--all`) |
 
 ## 使用方法
 
@@ -32,7 +32,7 @@ references/からの知識を参照し、プロジェクトに最適化された
 /kmp-architecture
 /aws-sam
 /wf0-schedule
-/wf0-batch
+/wf0-nexttask
 ```
 
 ### コンテキスト参照
@@ -87,7 +87,7 @@ skills/
 │   └── SKILL.md
 ├── wf0-schedule/
 │   └── SKILL.md
-└── wf0-batch/
+└── wf0-nexttask/
     └── SKILL.md
 ```
 

@@ -27,10 +27,6 @@
     "domain": "your-company.atlassian.net"
   },
   "batch": {
-    "default_parallel": 2,
-    "max_parallel": 5,
-    "auto_worktree": true,
-    "cleanup_worktree": true,
     "dependency_patterns": [
       "depends on #(\\d+)",
       "blocked by #(\\d+)",

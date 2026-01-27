@@ -120,10 +120,6 @@ schedule_data=$(cat << 'EOF'
   "status": "pending",
   "sources": [],
   "works": {},
-  "execution": {
-    "max_parallel": 2,
-    "sessions": {}
-  },
   "progress": {
     "total": 0,
     "completed": 0,
@@ -346,7 +342,7 @@ echo "════════════════════════�
 echo "✅ Schedule created: $total_works works"
 echo ""
 echo "Use '/wf0-schedule show' to view the schedule"
-echo "Use '/wf0-batch start' to begin execution"
+echo "Use '/wf0-nexttask' to execute the next task"
 ```
 
 #### 3.2 show
@@ -396,7 +392,7 @@ echo ""
 echo "Commands:"
 echo "  /wf0-schedule edit <work-id>  - Edit priority/dependencies"
 echo "  /wf0-schedule validate        - Check for issues"
-echo "  /wf0-batch start              - Start execution"
+echo "  /wf0-nexttask                 - Execute next task"
 ```
 
 #### 3.3 edit
@@ -823,13 +819,8 @@ The `status` field uses these values consistently throughout:
       "priority": 1,
       "dependencies": ["FEAT-100-database"],
       "status": "pending",  // One of: pending, running, completed, failed
-      "worktree_path": ".worktrees/feat-123-auth"
-    }
-  },
-  "execution": {
-    "max_parallel": 3,
-    "sessions": {
-      "worker-1": {"work_id": "FEAT-100", "status": "running", "started_at": "..."}
+      "started_at": "2026-01-26T10:00:00Z",   // Set when execution starts
+      "completed_at": "2026-01-26T12:00:00Z"  // Set when completed
     }
   },
   "progress": {
@@ -864,7 +855,7 @@ Analyzing dependencies...
 ✅ Schedule created: 3 works
 
 Use '/wf0-schedule show' to view the schedule
-Use '/wf0-batch start' to begin execution
+Use '/wf0-nexttask' to execute the next task
 ```
 
 ### Show Display

@@ -3,7 +3,7 @@ name: wf0-schedule
 description: Schedule management for batch workflow execution
 references:
   - path: ../../commands/wf0-schedule.md
-  - path: ../../commands/wf0-batch.md
+  - path: ../../commands/wf0-nexttask.md
 ---
 
 # /wf0-schedule
@@ -109,9 +109,9 @@ Schedules are stored in `.wf/schedule.json`:
 1. Create schedule: `/wf0-schedule create github="label:batch"`
 2. Review: `/wf0-schedule show`
 3. Validate: `/wf0-schedule validate`
-4. Execute: `/wf0-batch start`
+4. Execute next task: `/wf0-nexttask`
 
 ## Detailed Reference
 
 - [wf0-schedule Command](../../commands/wf0-schedule.md)
-- [wf0-batch Command](../../commands/wf0-batch.md)
+- [wf0-nexttask Command](../../commands/wf0-nexttask.md)
