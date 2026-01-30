@@ -1,6 +1,6 @@
 ---
 name: wf4-review
-description: Create review records for Plan or code
+description: Planまたはコードのレビュー記録を作成
 argument-hint: "[plan | code | pr]"
 ---
 

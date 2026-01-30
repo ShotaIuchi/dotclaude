@@ -1,6 +1,6 @@
 ---
 name: doc-fix
-description: Fix issues from document reviews
+description: ドキュメントレビューの指摘事項を修正
 argument-hint: "[file_path...] [--all]"
 ---
 

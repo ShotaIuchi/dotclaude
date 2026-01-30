@@ -1,6 +1,6 @@
 ---
 name: wf0-restore
-description: Restore an existing workspace
+description: 既存のワークスペースを復元
 argument-hint: "[work-id]"
 ---
 

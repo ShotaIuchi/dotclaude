@@ -1,6 +1,6 @@
 ---
 name: wf0-nextstep
-description: Execute the next workflow step
+description: 次のワークフローステップを実行
 argument-hint: "[work-id]"
 ---
 

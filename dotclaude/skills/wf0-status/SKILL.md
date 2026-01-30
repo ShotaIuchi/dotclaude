@@ -1,6 +1,6 @@
 ---
 name: wf0-status
-description: Display current workflow status
+description: 現在のワークフロー状態を表示
 argument-hint: "[work-id | all]"
 ---
 

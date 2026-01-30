@@ -1,6 +1,6 @@
 ---
 name: wf2-spec
-description: Create the Specification document
+description: 仕様書（Spec）ドキュメントを作成
 argument-hint: "[update | validate]"
 context: fork
 agent: general-purpose

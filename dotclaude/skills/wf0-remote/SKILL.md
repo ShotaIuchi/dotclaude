@@ -1,6 +1,6 @@
 ---
 name: wf0-remote
-description: Remote workflow operation via GitHub Issue
+description: GitHub Issue経由のリモートワークフロー操作
 argument-hint: "<subcommand> [target...]"
 ---
 

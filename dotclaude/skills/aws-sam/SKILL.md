@@ -1,6 +1,6 @@
 ---
 name: AWS SAM
-description: Skill for AWS SAM serverless application development, Lambda function implementation, template design, local testing, and deployment.
+description: AWS SAMサーバーレスアプリ開発、Lambda関数実装、テンプレート設計、ローカルテスト、デプロイ用スキル
 references:
   - path: ../../references/services/aws/conventions.md
   - path: ../../references/services/aws/sam-architecture-patterns.md

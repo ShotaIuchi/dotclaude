@@ -1,6 +1,6 @@
 ---
 name: wf3-plan
-description: Create the Implementation Plan
+description: 実装計画（Plan）ドキュメントを作成
 argument-hint: "[update | step <n>]"
 context: fork
 agent: Plan

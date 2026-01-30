@@ -1,6 +1,6 @@
 ---
 name: doc-review
-description: Review document files
+description: ドキュメントファイルをレビュー
 argument-hint: "<file_path>"
 ---
 

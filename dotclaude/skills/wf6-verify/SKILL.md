@@ -1,6 +1,6 @@
 ---
 name: wf6-verify
-description: Verify implementation and create PR
+description: 実装を検証しPRを作成
 argument-hint: "[pr | update]"
 ---
 

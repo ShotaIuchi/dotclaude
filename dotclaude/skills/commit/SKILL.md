@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Commit changes via sub-agent
+description: サブエージェント経由で変更をコミット
 argument-hint: "[--files <path>] [--dry-run] [--amend] [message | scope instruction]"
 context: fork
 agent: general-purpose

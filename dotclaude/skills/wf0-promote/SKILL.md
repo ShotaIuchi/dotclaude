@@ -1,6 +1,6 @@
 ---
 name: wf0-promote
-description: Promote local workflow to GitHub Issue or Jira
+description: ローカルワークフローをGitHub IssueまたはJiraに昇格
 argument-hint: "<github | jira> [work-id]"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: wf0-config
-description: Interactive configuration editor for .wf/config.json
+description: .wf/config.json の対話式設定エディタ
 argument-hint: "[show | init | <category>]"
 ---
 

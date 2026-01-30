@@ -1,6 +1,6 @@
 ---
 name: Kotlin Multiplatform Architecture
-description: This skill should be used when implementing KMP features, creating shared modules, using expect/actual, setting up Koin/SQLDelight/Ktor, or implementing Compose Multiplatform.
+description: KMP機能実装、共有モジュール作成、expect/actual使用、Koin/SQLDelight/Ktor設定、Compose Multiplatform実装時に使用
 references:
   - path: ../../references/common/clean-architecture.md
   - path: ../../references/common/testing-strategy.md

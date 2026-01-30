@@ -1,6 +1,6 @@
 ---
 name: wf1-kickoff
-description: Create a new workspace and Kickoff document
+description: 新規ワークスペースとキックオフドキュメントを作成
 argument-hint: "<github=N | jira=ID | local=ID> [title=...] [type=...] [--no-branch]"
 context: fork
 agent: general-purpose

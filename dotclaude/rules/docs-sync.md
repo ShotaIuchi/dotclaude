@@ -6,6 +6,24 @@ Rule for automatically maintaining Japanese translations of documents.
 
 **All source documents must be written in English.** This includes all `.md` files under `skills/`, `agents/`, `rules/`, `references/`, and `templates/`, as well as root-level documents (`CLAUDE.md`, `PRINCIPLES.md`, `CONSTITUTION.md`). Japanese text must never appear in source documents.
 
+### Exception: YAML Frontmatter
+
+The `description` field in YAML frontmatter (the `---` delimited header) should be written in **Japanese**. This field is displayed to users in skill listings and help output.
+
+```yaml
+---
+name: wf0-config
+description: .wf/config.json の対話式設定エディタ
+argument-hint: "[show | init | <category>]"
+---
+```
+
+| Field | Language | Reason |
+|-------|----------|--------|
+| `name` | English | Identifier, used in commands |
+| `description` | Japanese | Human-readable, shown in listings |
+| `argument-hint` | English | Technical syntax notation |
+
 ## Overview
 
 When creating or updating documents (`.md` files) under `dotclaude/`, create or update the corresponding Japanese translation file in the `docs/readme/` directory.

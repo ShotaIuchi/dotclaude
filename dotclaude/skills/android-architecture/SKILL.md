@@ -1,6 +1,6 @@
 ---
 name: Android Architecture
-description: This skill should be used when implementing Android features, creating ViewModels, setting up Repositories, using Hilt, implementing Jetpack Compose, or following MVVM/UDF patterns on Android.
+description: Android機能実装、ViewModel作成、Repository設定、Hilt使用、Jetpack Compose実装、MVVM/UDFパターン適用時に使用
 references:
   - path: ../../references/common/clean-architecture.md
   - path: ../../references/common/testing-strategy.md

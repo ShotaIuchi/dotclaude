@@ -1,6 +1,6 @@
 ---
 name: wf0-nexttask
-description: Execute next task from schedule
+description: スケジュールから次のタスクを実行
 argument-hint: "[--dry-run] [--until <phase>] [--all] [--no-branch]"
 ---
 

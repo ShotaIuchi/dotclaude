@@ -1,6 +1,6 @@
 ---
 name: subask
-description: Ask a question to a sub-agent
+description: サブエージェントに質問を投げる
 argument-hint: "<question> [--detailed] [--explore]"
 context: fork
 agent: general-purpose

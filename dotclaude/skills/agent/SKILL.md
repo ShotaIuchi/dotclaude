@@ -1,6 +1,6 @@
 ---
 name: agent
-description: Invoke sub-agents for specific tasks
+description: 特定タスク用のサブエージェントを呼び出し
 argument-hint: "<agent_name> [param=value...]"
 ---
 

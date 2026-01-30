@@ -1,6 +1,6 @@
 ---
 name: iOS Architecture
-description: This skill should be used when implementing iOS features, creating SwiftUI views, setting up ViewModels, using async/await or Combine, or following MVVM patterns on iOS.
+description: iOS機能実装、SwiftUIビュー作成、ViewModel設定、async/awaitやCombine使用、MVVMパターン適用時に使用
 references:
   - path: ../../references/common/clean-architecture.md
   - path: ../../references/common/testing-strategy.md
