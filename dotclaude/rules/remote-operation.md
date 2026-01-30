@@ -185,6 +185,64 @@ pkill -f "remote-daemon.sh FEAT-123"
 2. リモートとの差分を確認
 3. 認証状態を確認（`gh auth status`）
 
+## Auto Mode
+
+### 概要
+
+`/wf0-remote auto`は、GitHubから自動的にIssueを検出してワークフローを実行するモード。
+
+### セキュリティ要件
+
+| 要件 | 内容 |
+|------|------|
+| ラベル検証 | `auto-workflow`ラベルが必要 |
+| 除外ラベル | `blocked`, `wip`は自動スキップ |
+| 処理上限 | デフォルト5件/セッション |
+| クールダウン | Issue間5分の待機 |
+
+### 実行フロー
+
+```
+1. GitHub Issue クエリ (label:auto-workflow)
+2. 未処理Issue選択（古い順）
+3. ブランチ作成
+4. /wf1-kickoff → /wf0-nextstep ループ
+5. 成功: completedラベル追加
+6. 失敗: Issueコメント、スキップ
+7. クールダウン後、次のIssueへ
+```
+
+### state.json (auto.json)
+
+```json
+{
+  "enabled": true,
+  "session_start": "2026-01-30T10:00:00Z",
+  "processed_count": 2,
+  "current_issue": 456,
+  "tmux_session": "wf-auto"
+}
+```
+
+### 権限と制限
+
+| 制限 | 内容 |
+|------|------|
+| Issueの条件 | open状態、指定ラベル付き |
+| ブランチ操作 | 新規作成のみ（既存上書き禁止） |
+| Git操作 | push only（force push禁止） |
+| 実行コマンド | `/wf1-kickoff`, `/wf0-nextstep`のみ |
+
+### 緊急停止
+
+```bash
+# 方法1: tmuxセッション終了
+tmux kill-session -t wf-auto
+
+# 方法2: プロセス強制終了
+pkill -f "auto-daemon.sh"
+```
+
 ## CONSTITUTIONとの関連
 
 ### Article 6: コマンド実行前検証

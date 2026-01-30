@@ -36,5 +36,12 @@
     "sources": [
       {"type": "github", "query": "label:scheduled"}
     ]
+  },
+  "auto": {
+    "query": "auto-workflow",
+    "exclude_labels": ["blocked", "wip"],
+    "complete_label": "completed",
+    "max_issues": 5,
+    "cooldown_minutes": 5
   }
 }

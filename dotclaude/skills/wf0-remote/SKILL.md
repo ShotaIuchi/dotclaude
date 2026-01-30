@@ -23,6 +23,9 @@ Remote workflow monitoring and execution via GitHub Issue comments. Enables mobi
 | `start [target...]` | Start remote monitoring (tmux session) |
 | `stop [target...]` | Stop remote monitoring |
 | `status` | Show monitoring status |
+| `auto` | Start auto-discovery mode |
+| `auto stop` | Stop auto mode |
+| `auto status` | Show auto mode status |
 
 ## Target Specification
 
@@ -91,6 +94,71 @@ Display for each monitored work: issue number, status, tmux session state, last 
 | Step limit | Max 10 steps per session |
 | Command whitelist | Only `/approve`, `/next`, `/pause`, `/stop` |
 | Execution scope | Only `/wf0-nextstep` executed |
+
+## Auto Mode
+
+Auto mode automatically discovers GitHub Issues with a specific label and processes them without manual intervention.
+
+### Usage
+
+```
+/wf0-remote auto              # Start auto-discovery mode
+/wf0-remote auto stop         # Stop auto mode
+/wf0-remote auto status       # Show current status
+/wf0-remote auto --max 3      # Process maximum 3 issues
+/wf0-remote auto --dry-run    # List issues without executing
+/wf0-remote auto --once       # Process one issue and exit
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--max <N>` | Maximum issues to process (default: 5) |
+| `--cooldown <MIN>` | Minutes between issues (default: 5) |
+| `--dry-run` | Query issues without executing |
+| `--once` | Process once and exit |
+
+### Configuration
+
+Add to `.wf/config.json`:
+
+```json
+{
+  "auto": {
+    "query": "auto-workflow",
+    "exclude_labels": ["blocked", "wip"],
+    "complete_label": "completed",
+    "max_issues": 5,
+    "cooldown_minutes": 5
+  }
+}
+```
+
+### Workflow
+
+1. Query GitHub Issues with configured label
+2. For each issue (oldest first):
+   - Create feature branch from base
+   - Execute `/wf1-kickoff #<issue>`
+   - Run `/wf0-nextstep` loop until completion
+   - Push changes and add `completed` label
+3. On failure: post error comment and skip to next issue
+4. Cooldown between issues to prevent rate limiting
+
+### State File
+
+Auto mode maintains state in `.wf/auto.json`:
+
+```json
+{
+  "enabled": true,
+  "session_start": "2026-01-30T10:00:00Z",
+  "processed_count": 2,
+  "current_issue": 456,
+  "tmux_session": "wf-auto"
+}
+```
 
 ## Notes
 
