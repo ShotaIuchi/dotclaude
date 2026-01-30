@@ -71,10 +71,14 @@ ln -s /path/to/dotclaude/dotclaude .claude
 
 | コマンド | 説明 |
 |---------|------|
-| `/wf0-restore [work-id]` | 既存ワークスペースの復元 |
 | `/wf0-status [work-id\|all]` | ステータス表示 |
 | `/wf0-nextstep [work-id]` | 次のワークフローステップを自動実行 |
+| `/wf0-nexttask` | スケジュールから次のタスクを実行 |
+| `/wf0-restore [work-id]` | 既存ワークスペースの復元 |
 | `/wf0-remote <start\|stop\|status> [target...]` | GitHub Issue経由のリモートワークフロー操作 |
+| `/wf0-config [show\|init\|<category>]` | config.jsonの対話式設定 |
+| `/wf0-schedule` | バッチワークフローのスケジュール管理 |
+| `/wf0-promote` | ローカルworkをGitHub/Jiraに昇格 |
 
 ### ワークフローコマンド (wf1-6)
 
@@ -97,7 +101,6 @@ ln -s /path/to/dotclaude/dotclaude .claude
 
 | コマンド | 説明 |
 |---------|------|
-| `/agent <name> [params]` | サブエージェントを直接呼び出し |
 | `/subask <質問>` | サブエージェントに質問（コンテキストを汚さない） |
 | `/commit [message]` | コミットメッセージ自動生成＋コミット |
 | `/doc-review <file_path>` | ドキュメントレビュー作成 |
@@ -157,38 +160,48 @@ ln -s /path/to/dotclaude/dotclaude .claude
 ```
 dotclaude/                 # リポジトリルート
 ├── dotclaude/             # ~/.claudeにリンクする対象
-│   ├── agents/            # サブエージェント定義
-│   ├── commands/          # スラッシュコマンド定義
-│   ├── skills/            # アーキテクチャスキル（iOS/Android/KMP/AWS SAM）
-│   ├── rules/             # プロジェクトルール・スキーマ
-│   ├── guides/            # アーキテクチャガイド
+│   ├── skills/            # スラッシュコマンド（wf0-*〜wf6-*, commit等）
+│   ├── rules/             # プロジェクトルール・コンテキストルール
+│   ├── references/        # 技術リファレンス（アーキテクチャ、規約等）
+│   ├── templates/         # ドキュメントテンプレート
 │   ├── examples/          # 設定ファイル例
-│   ├── scripts/           # シェルスクリプト
-│   └── templates/         # ドキュメントテンプレート
-├── .gitignore
-└── README.md
+│   ├── scripts/           # シェル/Node.jsスクリプト
+│   ├── tests/             # テストファイル
+│   └── docs/              # 内部ドキュメント・日本語訳
+├── README.md
+├── README.skills.md       # skills/の詳細
+├── README.rules.md        # rules/の詳細
+├── README.references.md   # references/の詳細
+├── README.templates.md    # templates/の詳細
+├── README.examples.md     # examples/の詳細
+├── README.scripts.md      # scripts/の詳細
+├── README.tests.md        # tests/の詳細
+└── README.docs.md         # docs/の詳細
 ```
 
-## ディレクトリ構造
+## プロジェクトディレクトリ構造
+
+WFシステムを使用するプロジェクトの構造：
 
 ```
 your-project/
 ├── .wf/
 │   ├── config.json      # 共有設定（コミット対象）
 │   ├── state.json       # 共有状態（コミット対象）
+│   ├── memory.json      # セッション記憶（コミット対象）
 │   └── local.json       # ローカル設定（gitignore）
 ├── docs/wf/
 │   └── FEAT-123-slug/
-│       ├── 00_KICKOFF.md
-│       ├── 01_SPEC.md
-│       ├── 02_PLAN.md
-│       ├── 03_REVIEW.md
-│       ├── 04_IMPLEMENT_LOG.md
-│       └── 05_REVISIONS.md
+│       ├── 01_KICKOFF.md
+│       ├── 02_SPEC.md
+│       ├── 03_PLAN.md
+│       ├── 04_REVIEW.md
+│       ├── 05_IMPLEMENT_LOG.md
+│       └── 06_REVISIONS.md
 └── .claude/             # dotclaudeからのシンボリックリンク
-    └── commands/        # スラッシュコマンド
-        ├── wf1-kickoff.md
-        ├── wf0-restore.md
+    └── skills/          # スラッシュコマンド
+        ├── wf1-kickoff/SKILL.md
+        ├── wf0-restore/SKILL.md
         └── ...
 ```
 
@@ -241,55 +254,6 @@ your-project/
 }
 ```
 
-## サブエージェント
-
-Claude CodeのTaskツールを活用した専門エージェント群。
-ワークフローコマンドと連携して動作し、`/agent`コマンドで直接呼び出すことも可能。
-
-### ワークフロー支援型
-
-| エージェント | 目的 | 呼び出し元 |
-|-------------|------|-----------|
-| `research` | Issue背景調査、関連コード特定 | wf1-kickoff |
-| `spec-writer` | 仕様書ドラフト作成 | wf2-spec |
-| `planner` | 実装計画立案 | wf3-plan |
-| `implementer` | 単一ステップ実装支援 | wf5-implement |
-
-### タスク特化型
-
-| エージェント | 目的 |
-|-------------|------|
-| `reviewer` | コードレビュー |
-| `test-writer` | テスト作成 |
-| `refactor` | リファクタリング提案 |
-| `doc-writer` | ドキュメント作成 |
-
-### プロジェクト分析型
-
-| エージェント | 目的 |
-|-------------|------|
-| `codebase` | コードベース調査 |
-| `dependency` | 依存関係分析 |
-| `impact` | 影響範囲特定 |
-
-### エージェント使用例
-
-```bash
-# Issue背景調査
-/agent research issue=123
-
-# コードベース調査
-/agent codebase query="認証フローの実装箇所"
-
-# コードレビュー
-/agent reviewer files="src/auth/*.ts"
-
-# 影響範囲分析
-/agent impact target="src/utils/format.ts"
-```
-
-詳細は `dotclaude/agents/README.md` を参照。
-
 ## 重要な制約
 
 ### 1. 計画外変更の禁止
@@ -304,7 +268,7 @@ Plan外の変更が必要な場合は、まずPlanを更新してください。
 
 ### 3. 原本の保持
 
-Kickoff更新時は履歴を`05_REVISIONS.md`に記録します。
+Kickoff更新時は履歴を`06_REVISIONS.md`に記録します。
 
 ### 4. 依存関係の明示
 
@@ -329,12 +293,12 @@ Kickoff更新時は履歴を`05_REVISIONS.md`に記録します。
 
 | ファイル | 役割 | 主要セクション |
 |---------|------|--------------|
-| `00_KICKOFF.md` | 目標と成功基準の定義 | Goal, Success Criteria, Dependencies（構造化）, Open Questions |
-| `01_SPEC.md` | 変更仕様 | Scope（In/Out）, Users/Use-cases, Requirements（FR/NFR分離）, Acceptance Criteria（Given/When/Then） |
-| `02_PLAN.md` | 実装計画 | Overview, Steps（シンプルな構造）, Risks, Rollback |
-| `03_REVIEW.md` | レビュー記録 | Review Result（Status）, Findings, Required Changes, Nice-to-have |
-| `04_IMPLEMENT_LOG.md` | 実装ログ | 日付ベースのログ形式（Step, Summary, Files, Test Result） |
-| `05_REVISIONS.md` | 変更履歴 | リビジョン番号ベース（Reason, Changed Sections） |
+| `01_KICKOFF.md` | 目標と成功基準の定義 | Goal, Success Criteria, Dependencies（構造化）, Open Questions |
+| `02_SPEC.md` | 変更仕様 | Scope（In/Out）, Users/Use-cases, Requirements（FR/NFR分離）, Acceptance Criteria（Given/When/Then） |
+| `03_PLAN.md` | 実装計画 | Overview, Steps（シンプルな構造）, Risks, Rollback |
+| `04_REVIEW.md` | レビュー記録 | Review Result（Status）, Findings, Required Changes, Nice-to-have |
+| `05_IMPLEMENT_LOG.md` | 実装ログ | 日付ベースのログ形式（Step, Summary, Files, Test Result） |
+| `06_REVISIONS.md` | 変更履歴 | リビジョン番号ベース（Reason, Changed Sections） |
 
 ## トラブルシューティング
 
