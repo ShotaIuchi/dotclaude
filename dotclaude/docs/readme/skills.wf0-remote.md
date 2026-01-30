@@ -27,7 +27,7 @@ GitHub Issueコメント経由でのリモートワークフロー操作コマ�
 
 ## Auto モード
 
-未対応のGitHub Issueを自動検出してノンストップで実行するモード。
+未対応のGitHub Issueを自動検出してノンストップで実行するモード。**再実行モード**もサポートし、PRレビュー後のフィードバックを自動で取り込む。
 
 ### 使用方法
 
@@ -49,7 +49,7 @@ GitHub Issueコメント経由でのリモートワークフロー操作コマ�
 | `--dry-run` | 実行せずにIssue確認のみ |
 | `--once` | 1件処理後終了 |
 
-### 動作フロー
+### 動作フロー（新規Issue）
 
 1. `auto-workflow` ラベル付きのIssueを検索
 2. 古い順に1件選択、ブランチ作成
@@ -57,6 +57,38 @@ GitHub Issueコメント経由でのリモートワークフロー操作コマ�
 4. 成功時: `completed` ラベル追加
 5. 失敗時: Issueにエラーコメント、スキップ
 6. クールダウン後、次のIssueへ
+
+### 再実行モード
+
+PRレビュー後のフィードバックを取り込み、既存PRに追加修正をプッシュする。
+
+#### トリガー
+
+`completed` ラベルが付いたIssueに `needs-revision` ラベルを追加する（人間が手動で付与）。
+
+#### 再実行フロー
+
+```
+[人間] PRをレビュー、フィードバックコメント追加
+    ↓
+[人間] Issue/PRに `needs-revision` ラベル追加
+    ↓
+[auto-daemon] 検知: completed + needs-revision
+    ↓
+[auto-daemon] wf0-restore で既存work-id復元
+    ↓
+[auto-daemon] wf1-kickoff revise (PR/Issueフィードバック反映)
+    ↓
+[auto-daemon] wf0-nextstep ループ (wf2 → ... → wf6)
+    ↓
+[auto-daemon] wf7-pr update (既存PRに追加コミット)
+    ↓
+[auto-daemon] needs-revision ラベル削除
+```
+
+#### 優先順位
+
+再実行対象は新規Issueより優先して処理される。
 
 ### 設定
 
@@ -68,6 +100,7 @@ GitHub Issueコメント経由でのリモートワークフロー操作コマ�
     "query": "auto-workflow",
     "exclude_labels": ["blocked", "wip"],
     "complete_label": "completed",
+    "revision_label": "needs-revision",
     "max_issues": 5,
     "cooldown_minutes": 5
   }
@@ -78,5 +111,6 @@ GitHub Issueコメント経由でのリモートワークフロー操作コマ�
 
 - コラボレーター権限（admin/write/maintain）のみ処理
 - セッション最大10ステップ
-- 実行は `/wf0-nextstep` のみ
+- 実行は `/wf0-nextstep`, `/wf0-restore` のみ
+- 再実行時はブランチ新規作成禁止（既存ブランチ継続）
 - 詳細は `rules/remote-operation.md` 参照

@@ -41,6 +41,7 @@
     "query": "auto-workflow",
     "exclude_labels": ["blocked", "wip"],
     "complete_label": "completed",
+    "revision_label": "needs-revision",
     "max_issues": 5,
     "cooldown_minutes": 5
   }

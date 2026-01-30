@@ -200,10 +200,10 @@ pkill -f "remote-daemon.sh FEAT-123"
 | 処理上限 | デフォルト5件/セッション |
 | クールダウン | Issue間5分の待機 |
 
-### 実行フロー
+### 実行フロー（新規Issue）
 
 ```
-1. GitHub Issue クエリ (label:auto-workflow)
+1. GitHub Issue クエリ (label:auto-workflow, NOT label:completed)
 2. 未処理Issue選択（古い順）
 3. ブランチ作成
 4. /wf1-kickoff → /wf0-nextstep ループ
@@ -220,6 +220,7 @@ pkill -f "remote-daemon.sh FEAT-123"
   "session_start": "2026-01-30T10:00:00Z",
   "processed_count": 2,
   "current_issue": 456,
+  "is_revision": false,
   "tmux_session": "wf-auto"
 }
 ```
@@ -231,7 +232,7 @@ pkill -f "remote-daemon.sh FEAT-123"
 | Issueの条件 | open状態、指定ラベル付き |
 | ブランチ操作 | 新規作成のみ（既存上書き禁止） |
 | Git操作 | push only（force push禁止） |
-| 実行コマンド | `/wf1-kickoff`, `/wf0-nextstep`のみ |
+| 実行コマンド | `/wf1-kickoff`, `/wf0-nextstep`, `/wf0-restore`のみ |
 
 ### 緊急停止
 
@@ -242,6 +243,94 @@ tmux kill-session -t wf-auto
 # 方法2: プロセス強制終了
 pkill -f "auto-daemon.sh"
 ```
+
+## Revision Mode（再実行モード）
+
+### 概要
+
+PRレビュー後のフィードバックを取り込み、既存PRに追加修正をプッシュする機能。
+
+### トリガー
+
+| 条件 | 説明 |
+|------|------|
+| 必須ラベル | `completed` + `needs-revision` |
+| 付与者 | 人間がレビュー後に手動で付与 |
+
+### セキュリティ要件
+
+| 要件 | 内容 |
+|------|------|
+| ラベル検証 | `completed`と`needs-revision`の両方が必要 |
+| ワークスペース検証 | state.jsonに既存work-idが存在すること |
+| ブランチ操作 | 既存ブランチを継続使用（新規作成禁止） |
+| PR操作 | 既存PRに追加コミット（新規作成禁止） |
+
+### 実行フロー（再実行）
+
+```
+1. GitHub Issue クエリ (label:completed + label:needs-revision)
+2. 再実行対象は新規より優先
+3. state.jsonから既存work-id検索
+4. /wf0-restore で既存ワークスペース復元
+5. /wf1-kickoff revise (PR/Issueフィードバック反映)
+6. /wf0-nextstep ループ (wf2 → ... → wf6 → wf7)
+7. 既存PRに追加コミットpush
+8. 成功: needs-revisionラベル削除（completed維持）
+9. 失敗: Issueコメント、スキップ
+```
+
+### 優先順位
+
+| 順位 | 対象 | 理由 |
+|------|------|------|
+| 1 | 再実行対象Issue | 既にレビュー中のPRを優先 |
+| 2 | 新規Issue | 古い順に処理 |
+
+### フィードバック取得
+
+再実行時に取り込む情報:
+
+| ソース | 取得方法 | 内容 |
+|--------|----------|------|
+| PRレビュー | `gh pr view --json reviews,comments` | レビューコメント、変更要求 |
+| Issue本文 | `gh issue view --json body` | 仕様の更新差分 |
+| Issueコメント | `gh issue view --json comments` | 追加の指示 |
+
+### state.json 拡張
+
+再実行対応のstate.json構造:
+
+```json
+{
+  "active_work": "FEAT-123-auth",
+  "works": {
+    "FEAT-123-auth": {
+      "current": "wf1-kickoff",
+      "next": "wf2-spec",
+      "kickoff": {
+        "revision": 2
+      },
+      "source": {
+        "type": "github",
+        "issue_number": 123
+      },
+      "pr": {
+        "number": 456,
+        "url": "https://github.com/..."
+      }
+    }
+  }
+}
+```
+
+### 制限事項
+
+| 制限 | 説明 |
+|------|------|
+| 連続再実行 | 1回の再実行完了後、再度`needs-revision`を付与する必要あり |
+| work-id不明 | state.jsonにwork-idがない場合は失敗（手動復旧が必要） |
+| ブランチ競合 | 手動でのブランチ変更は競合の原因となる |
 
 ## CONSTITUTIONとの関連
 

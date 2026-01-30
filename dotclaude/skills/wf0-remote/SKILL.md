@@ -97,7 +97,7 @@ Display for each monitored work: issue number, status, tmux session state, last 
 
 ## Auto Mode
 
-Auto mode automatically discovers GitHub Issues with a specific label and processes them without manual intervention.
+Auto mode automatically discovers GitHub Issues with a specific label and processes them without manual intervention. It also supports **revision mode** for re-processing issues after PR review feedback.
 
 ### Usage
 
@@ -129,15 +129,16 @@ Add to `.wf/config.json`:
     "query": "auto-workflow",
     "exclude_labels": ["blocked", "wip"],
     "complete_label": "completed",
+    "revision_label": "needs-revision",
     "max_issues": 5,
     "cooldown_minutes": 5
   }
 }
 ```
 
-### Workflow
+### Workflow (New Issues)
 
-1. Query GitHub Issues with configured label
+1. Query GitHub Issues with configured label (excluding `completed`)
 2. For each issue (oldest first):
    - Create feature branch from base
    - Execute `/wf1-kickoff #<issue>`
@@ -145,6 +146,47 @@ Add to `.wf/config.json`:
    - Push changes and add `completed` label
 3. On failure: post error comment and skip to next issue
 4. Cooldown between issues to prevent rate limiting
+
+### Revision Mode
+
+When a PR needs changes after review, the revision workflow automatically processes feedback:
+
+#### Trigger
+
+Add `needs-revision` label to an issue that already has `completed` label.
+
+#### Revision Workflow
+
+1. Auto-daemon detects issue with both `completed` and `needs-revision` labels
+2. **Revisions are prioritized** over new issues
+3. Existing workspace is restored via `/wf0-restore`
+4. `/wf1-kickoff revise` incorporates:
+   - PR review comments
+   - Issue body updates
+   - New Issue comments
+5. Full workflow re-executes (wf2 → ... → wf6 → wf7)
+6. Additional commits are pushed to existing PR
+7. `needs-revision` label is removed (keeping `completed`)
+
+#### Revision Flow Diagram
+
+```
+[Human] Reviews PR, adds feedback comments
+    ↓
+[Human] Adds `needs-revision` label to Issue/PR
+    ↓
+[auto-daemon] Detects: completed + needs-revision
+    ↓
+[auto-daemon] wf0-restore (existing work-id)
+    ↓
+[auto-daemon] wf1-kickoff revise (PR/Issue feedback)
+    ↓
+[auto-daemon] wf0-nextstep loop (wf2 → ... → wf6)
+    ↓
+[auto-daemon] wf7-pr update (additional commits)
+    ↓
+[auto-daemon] Remove `needs-revision` label
+```
 
 ### State File
 
@@ -156,9 +198,19 @@ Auto mode maintains state in `.wf/auto.json`:
   "session_start": "2026-01-30T10:00:00Z",
   "processed_count": 2,
   "current_issue": 456,
+  "is_revision": false,
   "tmux_session": "wf-auto"
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `enabled` | boolean | Auto mode is running |
+| `session_start` | string | Session start time (ISO8601) |
+| `processed_count` | number | Issues processed this session |
+| `current_issue` | number | Currently processing issue |
+| `is_revision` | boolean | Current issue is a revision |
+| `tmux_session` | string | tmux session name |
 
 ## Notes
 

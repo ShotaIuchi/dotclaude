@@ -92,6 +92,7 @@ if [[ "$EXCLUDE_LABELS" == "["* ]]; then
 fi
 
 COMPLETE_LABEL=$(wf_auto_get_config "auto.complete_label" "completed")
+REVISION_LABEL=$(wf_auto_get_config "auto.revision_label" "needs-revision")
 
 echo "==================================="
 echo "WF Auto Daemon"
@@ -100,6 +101,7 @@ echo "Project:     $PROJECT_ROOT"
 echo "Query:       label:$QUERY_LABEL"
 echo "Exclude:     $EXCLUDE_LABELS"
 echo "Complete:    $COMPLETE_LABEL"
+echo "Revision:    $REVISION_LABEL"
 echo "Max issues:  $MAX_ISSUES"
 echo "Cooldown:    ${COOLDOWN_MIN}m"
 echo "Poll:        ${POLL_INTERVAL}s"
@@ -134,14 +136,20 @@ process_issues() {
     while true; do
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Querying issues with label:$QUERY_LABEL..."
 
-        # Query issues
-        local issues
-        issues=$(wf_auto_query_issues "$QUERY_LABEL" "$COMPLETE_LABEL,$EXCLUDE_LABELS")
+        # Query new issues (without completed label)
+        local new_issues
+        new_issues=$(wf_auto_query_issues "$QUERY_LABEL" "$COMPLETE_LABEL,$EXCLUDE_LABELS")
 
-        local issue_count
-        issue_count=$(echo "$issues" | jq 'length')
+        # Query revision issues (with completed AND needs-revision labels)
+        local revision_issues
+        revision_issues=$(wf_auto_query_revision_issues "$QUERY_LABEL" "$COMPLETE_LABEL" "$REVISION_LABEL")
 
-        if [ "$issue_count" -eq 0 ]; then
+        local new_count
+        local revision_count
+        new_count=$(echo "$new_issues" | jq 'length')
+        revision_count=$(echo "$revision_issues" | jq 'length')
+
+        if [ "$new_count" -eq 0 ] && [ "$revision_count" -eq 0 ]; then
             echo "[INFO] No pending issues found"
 
             if [ "$RUN_ONCE" = true ]; then
@@ -153,10 +161,17 @@ process_issues() {
             continue
         fi
 
-        echo "[INFO] Found $issue_count pending issue(s)"
+        echo "[INFO] Found $new_count new issue(s), $revision_count revision(s)"
 
         if [ "$VERBOSE" = "true" ]; then
-            echo "$issues" | jq -r '.[] | "  #\(.number): \(.title)"'
+            if [ "$revision_count" -gt 0 ]; then
+                echo "  Revisions:"
+                echo "$revision_issues" | jq -r '.[] | "    #\(.number): \(.title) [REVISION]"'
+            fi
+            if [ "$new_count" -gt 0 ]; then
+                echo "  New:"
+                echo "$new_issues" | jq -r '.[] | "    #\(.number): \(.title)"'
+            fi
         fi
 
         # Check if we've hit the limit
@@ -165,9 +180,9 @@ process_issues() {
             break
         fi
 
-        # Pick next issue
+        # Pick next issue (revisions prioritized)
         local issue_num
-        issue_num=$(wf_auto_pick_next "$issues")
+        issue_num=$(wf_auto_pick_next "$new_issues" "$revision_issues")
 
         if [ -z "$issue_num" ]; then
             echo "[WARN] Failed to pick next issue"
@@ -175,15 +190,29 @@ process_issues() {
             continue
         fi
 
-        echo "[INFO] Processing issue #$issue_num..."
+        # Check if this is a revision
+        local is_revision=false
+        if wf_auto_is_revision_issue "$issue_num" "$revision_issues"; then
+            is_revision=true
+            echo "[INFO] Processing REVISION for issue #$issue_num..."
+        else
+            echo "[INFO] Processing NEW issue #$issue_num..."
+        fi
 
         # Update state
         wf_auto_update_state "current_issue" "$issue_num"
+        wf_auto_update_state "is_revision" "$is_revision"
 
         if [ "$DRY_RUN" = true ]; then
-            echo "[DRY-RUN] Would process issue #$issue_num"
-            echo "[DRY-RUN] Would create branch and execute workflow"
-            echo "[DRY-RUN] Would mark as $COMPLETE_LABEL on success"
+            if [ "$is_revision" = true ]; then
+                echo "[DRY-RUN] Would process REVISION for issue #$issue_num"
+                echo "[DRY-RUN] Would restore workspace and execute revision workflow"
+                echo "[DRY-RUN] Would remove $REVISION_LABEL on success"
+            else
+                echo "[DRY-RUN] Would process NEW issue #$issue_num"
+                echo "[DRY-RUN] Would create branch and execute workflow"
+                echo "[DRY-RUN] Would mark as $COMPLETE_LABEL on success"
+            fi
             PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
             wf_auto_update_state "processed_count" "$PROCESSED_COUNT"
 
@@ -195,47 +224,85 @@ process_issues() {
             continue
         fi
 
-        # Create branch
-        local branch
-        if ! branch=$(wf_auto_create_branch "$issue_num"); then
-            echo "[ERROR] Failed to create branch for issue #$issue_num"
-            wf_auto_mark_failed "$issue_num" "Failed to create branch"
-            wf_auto_update_state "current_issue" "null"
+        if [ "$is_revision" = true ]; then
+            # --- REVISION WORKFLOW ---
+            # Find existing work-id
+            local work_id
+            work_id=$(wf_auto_find_work_id "$issue_num")
 
-            # Continue to next issue
-            sleep "$POLL_INTERVAL"
-            continue
-        fi
+            if [ -z "$work_id" ]; then
+                echo "[ERROR] Could not find existing work-id for issue #$issue_num"
+                wf_auto_mark_failed "$issue_num" "Could not find existing workspace for revision"
+                wf_auto_update_state "current_issue" "null"
+                sleep "$POLL_INTERVAL"
+                continue
+            fi
 
-        echo "[INFO] Created branch: $branch"
+            echo "[INFO] Found existing work-id: $work_id"
 
-        # Extract work-id from branch
-        local work_id
-        work_id="${branch#*/}"
+            # Execute revision workflow
+            if wf_auto_execute_revision "$issue_num" "$work_id"; then
+                echo "[INFO] Revision workflow completed for issue #$issue_num"
 
-        # Execute workflow
-        if wf_auto_execute_workflow "$issue_num" "$work_id"; then
-            echo "[INFO] Workflow completed for issue #$issue_num"
-
-            # Push changes
-            if wf_auto_push_changes; then
-                # Mark as complete
-                wf_auto_mark_complete "$issue_num" "$COMPLETE_LABEL"
-                PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
-                wf_auto_update_state "processed_count" "$PROCESSED_COUNT"
+                # Push changes
+                if wf_auto_push_changes; then
+                    # Clear revision label (keep completed)
+                    wf_auto_clear_revision "$issue_num" "$REVISION_LABEL"
+                    PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
+                    wf_auto_update_state "processed_count" "$PROCESSED_COUNT"
+                else
+                    echo "[WARN] Failed to push revision changes for issue #$issue_num"
+                    wf_auto_mark_failed "$issue_num" "Failed to push revision changes"
+                fi
             else
-                echo "[WARN] Failed to push changes for issue #$issue_num"
-                wf_auto_mark_failed "$issue_num" "Failed to push changes"
+                echo "[ERROR] Revision workflow failed for issue #$issue_num"
+                wf_auto_mark_failed "$issue_num" "Revision workflow execution failed"
             fi
         else
-            echo "[ERROR] Workflow failed for issue #$issue_num"
-            wf_auto_mark_failed "$issue_num" "Workflow execution failed"
+            # --- NEW ISSUE WORKFLOW ---
+            # Create branch
+            local branch
+            if ! branch=$(wf_auto_create_branch "$issue_num"); then
+                echo "[ERROR] Failed to create branch for issue #$issue_num"
+                wf_auto_mark_failed "$issue_num" "Failed to create branch"
+                wf_auto_update_state "current_issue" "null"
 
-            # Clean up branch on failure
-            wf_auto_cleanup_branch "$branch"
+                # Continue to next issue
+                sleep "$POLL_INTERVAL"
+                continue
+            fi
+
+            echo "[INFO] Created branch: $branch"
+
+            # Extract work-id from branch
+            local work_id
+            work_id="${branch#*/}"
+
+            # Execute workflow
+            if wf_auto_execute_workflow "$issue_num" "$work_id"; then
+                echo "[INFO] Workflow completed for issue #$issue_num"
+
+                # Push changes
+                if wf_auto_push_changes; then
+                    # Mark as complete
+                    wf_auto_mark_complete "$issue_num" "$COMPLETE_LABEL"
+                    PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
+                    wf_auto_update_state "processed_count" "$PROCESSED_COUNT"
+                else
+                    echo "[WARN] Failed to push changes for issue #$issue_num"
+                    wf_auto_mark_failed "$issue_num" "Failed to push changes"
+                fi
+            else
+                echo "[ERROR] Workflow failed for issue #$issue_num"
+                wf_auto_mark_failed "$issue_num" "Workflow execution failed"
+
+                # Clean up branch on failure
+                wf_auto_cleanup_branch "$branch"
+            fi
         fi
 
         wf_auto_update_state "current_issue" "null"
+        wf_auto_update_state "is_revision" "false"
 
         if [ "$RUN_ONCE" = true ]; then
             break

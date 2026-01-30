@@ -101,9 +101,60 @@ Create a new workspace and Kickoff document, or update an existing one.
 Get active work from state.json. Require `01_KICKOFF.md` exists.
 
 - **update**: Dialogue → update `01_KICKOFF.md` → append to `06_REVISIONS.md` (template: `~/.claude/templates/06_REVISIONS.md`) → increment `kickoff.revision`
-- **revise**: Auto-revise from instruction → confirm → update → append revision history
+- **revise**: Auto-revise from instruction → confirm → update → append revision history (see Revise Processing below)
 - **chat**: Free dialogue with Issue context. Can reflect in Notes section.
 - **Commit**: `docs(wf): update kickoff <work-id>` with revision number.
+
+### Revise Processing (Auto Mode Integration)
+
+The `revise` subcommand supports automated revision based on PR/Issue feedback. This is used by `/wf0-remote auto` when processing `needs-revision` labeled issues.
+
+#### Steps
+
+1. **Load existing context**:
+   - Read current `01_KICKOFF.md`
+   - Read `state.json` for source info (issue number, PR number)
+
+2. **Fetch feedback sources**:
+   ```bash
+   # Get PR reviews and comments
+   gh pr view <pr_number> --json reviews,comments,body
+
+   # Get Issue updates (compare with original)
+   gh issue view <issue_number> --json body,comments
+   ```
+
+3. **Analyze feedback**:
+   - Extract actionable items from PR review comments
+   - Identify changes in Issue description since last revision
+   - Summarize new Issue comments since last processing
+
+4. **Generate revision plan**:
+   - Create list of changes to incorporate
+   - Confirm with user (unless running in auto mode)
+
+5. **Update documents**:
+   - Modify relevant sections in `01_KICKOFF.md`
+   - Append revision entry to `06_REVISIONS.md`:
+     ```markdown
+     ## Revision N (YYYY-MM-DD)
+
+     ### Trigger
+     - PR review feedback / Issue update / Manual instruction
+
+     ### Changes
+     - [List of changes made]
+
+     ### Feedback Incorporated
+     - [Summary of feedback addressed]
+     ```
+
+6. **Update state.json**:
+   - Increment `kickoff.revision`
+   - Set `current: "wf1-kickoff"`
+   - Set `next: "wf2-spec"`
+
+7. **Commit**: `docs(wf): revise kickoff <work-id> (revision N)`
 
 ## Worktree (Optional)
 

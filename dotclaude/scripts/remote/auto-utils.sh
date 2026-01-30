@@ -68,7 +68,7 @@ wf_auto_get_config() {
 }
 
 #
-# Query GitHub Issues for auto-workflow processing
+# Query GitHub Issues for auto-workflow processing (new issues only)
 # @param $1 Query label (default: auto-workflow)
 # @param $2 Exclude labels (comma-separated, default: completed)
 # @return JSON array of issue objects
@@ -94,15 +94,113 @@ wf_auto_query_issues() {
 }
 
 #
-# Pick next issue to process (oldest first)
-# @param $1 JSON array of issues
+# Query GitHub Issues needing revision (completed + needs-revision)
+# @param $1 Query label (default: auto-workflow)
+# @param $2 Complete label (default: completed)
+# @param $3 Revision label (default: needs-revision)
+# @return JSON array of issue objects
+#
+wf_auto_query_revision_issues() {
+    local query_label="${1:-auto-workflow}"
+    local complete_label="${2:-completed}"
+    local revision_label="${3:-needs-revision}"
+
+    # Query issues with both completed and needs-revision labels
+    gh issue list \
+        --label "$query_label" \
+        --label "$complete_label" \
+        --label "$revision_label" \
+        --state open \
+        --json number,title,labels,createdAt \
+        2>/dev/null || echo "[]"
+}
+
+#
+# Check if issue is a revision target
+# @param $1 JSON object of issue
+# @param $2 Revision label (default: needs-revision)
+# @return 0 if revision target, 1 otherwise
+#
+wf_auto_is_revision() {
+    local issue_json="$1"
+    local revision_label="${2:-needs-revision}"
+
+    local has_label
+    has_label=$(echo "$issue_json" | jq -r ".labels | map(.name) | index(\"$revision_label\") != null")
+
+    if [ "$has_label" = "true" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+#
+# Find existing work-id from issue number
+# @param $1 Issue number
+# @return Work ID or empty string
+#
+wf_auto_find_work_id() {
+    local issue_num="$1"
+    local project_root
+    project_root=$(_wf_auto_get_project_root)
+
+    local state_file="$project_root/.wf/state.json"
+
+    if [ ! -f "$state_file" ]; then
+        echo ""
+        return
+    fi
+
+    # Find work with matching issue number
+    local work_id
+    work_id=$(jq -r ".works | to_entries[] | select(.value.source.issue_number == $issue_num or .value.source.issue == $issue_num) | .key" "$state_file" 2>/dev/null | head -1)
+
+    echo "$work_id"
+}
+
+#
+# Pick next issue to process (revision issues prioritized, then oldest first)
+# @param $1 JSON array of new issues
+# @param $2 JSON array of revision issues (optional)
 # @return Issue number or empty
 #
 wf_auto_pick_next() {
-    local issues="$1"
+    local new_issues="$1"
+    local revision_issues="${2:-[]}"
 
-    # Sort by createdAt and return oldest
-    echo "$issues" | jq -r 'sort_by(.createdAt) | .[0].number // empty'
+    # Prioritize revision issues
+    local revision_count
+    revision_count=$(echo "$revision_issues" | jq 'length')
+
+    if [ "$revision_count" -gt 0 ]; then
+        # Return oldest revision issue
+        echo "$revision_issues" | jq -r 'sort_by(.createdAt) | .[0].number // empty'
+        return
+    fi
+
+    # Otherwise return oldest new issue
+    echo "$new_issues" | jq -r 'sort_by(.createdAt) | .[0].number // empty'
+}
+
+#
+# Check if an issue number is in the revision list
+# @param $1 Issue number
+# @param $2 JSON array of revision issues
+# @return 0 if revision, 1 otherwise
+#
+wf_auto_is_revision_issue() {
+    local issue_num="$1"
+    local revision_issues="$2"
+
+    local found
+    found=$(echo "$revision_issues" | jq -r ".[] | select(.number == $issue_num) | .number")
+
+    if [ -n "$found" ]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 #
@@ -232,6 +330,105 @@ wf_auto_execute_workflow() {
 
     echo "[WARN] Reached maximum steps ($max_steps)"
     return 0
+}
+
+#
+# Execute revision workflow for an issue (re-run after feedback)
+# @param $1 Issue number
+# @param $2 Work ID
+# @return 0 on success, 1 on failure
+#
+wf_auto_execute_revision() {
+    local issue_num="$1"
+    local work_id="$2"
+    local project_root
+    project_root=$(_wf_auto_get_project_root)
+
+    cd "$project_root" || return 1
+
+    # First restore the workspace
+    echo "[INFO] Restoring workspace for revision..."
+    local output_file
+    output_file=$(mktemp)
+
+    if ! claude --print "/wf0-restore $work_id" > "$output_file" 2>&1; then
+        echo "[ERROR] Failed to restore workspace. Output:" >&2
+        cat "$output_file" >&2
+        rm -f "$output_file"
+        return 1
+    fi
+    rm -f "$output_file"
+
+    # Execute kickoff revise to incorporate feedback
+    echo "[INFO] Starting revision kickoff for issue #$issue_num..."
+    output_file=$(mktemp)
+
+    if ! claude --print "/wf1-kickoff revise \"Incorporate PR review feedback and Issue updates\"" > "$output_file" 2>&1; then
+        echo "[ERROR] Revision kickoff failed. Output:" >&2
+        cat "$output_file" >&2
+        rm -f "$output_file"
+        return 1
+    fi
+    rm -f "$output_file"
+
+    # Then run nextstep loop
+    local max_steps=10
+    local step=0
+
+    while [ $step -lt $max_steps ]; do
+        step=$((step + 1))
+        echo "[INFO] Executing revision step $step/$max_steps..."
+
+        output_file=$(mktemp)
+        if ! claude --print "/wf0-nextstep" > "$output_file" 2>&1; then
+            echo "[ERROR] Step $step failed. Output:" >&2
+            cat "$output_file" >&2
+            rm -f "$output_file"
+            return 1
+        fi
+
+        # Check if workflow is complete
+        if grep -q "Workflow complete\|No next step\|completed" "$output_file" 2>/dev/null; then
+            echo "[INFO] Revision workflow completed at step $step"
+            rm -f "$output_file"
+            return 0
+        fi
+
+        rm -f "$output_file"
+
+        # Brief pause between steps
+        sleep 5
+    done
+
+    echo "[WARN] Reached maximum steps ($max_steps)"
+    return 0
+}
+
+#
+# Clear needs-revision label after successful revision
+# @param $1 Issue number
+# @param $2 Revision label (default: needs-revision)
+#
+wf_auto_clear_revision() {
+    local issue_num="$1"
+    local revision_label="${2:-needs-revision}"
+
+    # Remove revision label
+    if gh issue edit "$issue_num" --remove-label "$revision_label" 2>/dev/null; then
+        echo "[INFO] Removed '$revision_label' label from issue #$issue_num"
+    else
+        echo "[WARN] Failed to remove revision label from issue #$issue_num" >&2
+    fi
+
+    # Post revision completion comment
+    local body="## Revision Completed
+
+The revision workflow has been completed based on the feedback.
+
+---
+*Automated message from WF Auto Daemon*"
+
+    gh issue comment "$issue_num" --body "$body" 2>/dev/null || true
 }
 
 #
