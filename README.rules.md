@@ -9,6 +9,8 @@
 
 ## ルール一覧
 
+### 基本ルール
+
 | ファイル | 目的 |
 |----------|------|
 | `commit-guard.md` | コミット前のスキーマ検証ルール |
@@ -16,28 +18,18 @@
 | `hooks.md` | フックシステムの仕様と設定 |
 | `parallel-execution.md` | 並列実行による効率化ルール |
 | `remote-operation.md` | リモートワークフロー操作ルール |
+| `reference-decisions.md` | リファレンス内決定記録ルール |
 
-## 各ルールの概要
+### コンテキストルール
 
-### commit-guard.md
+開発タスク時に自動適用されるコンテキスト:
 
-コミット前にスキーマの存在を確認。スキーマがなければコミットをブロック。
-
-### docs-sync.md
-
-`dotclaude/`内のドキュメント更新時に`docs/readme/`への日本語訳を同期。
-
-### hooks.md
-
-`hooks.json`で定義されたフックによる自動化（デバッグログ警告等）。
-
-### parallel-execution.md
-
-独立したタスクの並列実行ルール。エージェントの並列実行可否を定義。
-
-### remote-operation.md
-
-リモートセッション（Claude Web）との連携ルール。
+| ファイル | 対象 |
+|----------|------|
+| `context-android.md` | Android開発タスク |
+| `context-ios.md` | iOS開発タスク |
+| `context-kmp.md` | Kotlin Multiplatform開発タスク |
+| `context-aws-sam.md` | AWS SAMサーバーレス開発 |
 
 ## 使用方法
 
