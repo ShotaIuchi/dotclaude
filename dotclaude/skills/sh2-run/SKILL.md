@@ -1,12 +1,12 @@
 ---
-name: wf0-nexttask
+name: sh2-run
 description: スケジュールから次のタスクを実行
 argument-hint: "[--dry-run] [--until <phase>] [--all] [--no-branch]"
 ---
 
 **Always respond in Japanese.**
 
-# /wf0-nexttask
+# /sh2-run
 
 Select and execute the next task from schedule.json, respecting dependency order.
 
@@ -25,7 +25,7 @@ Parse $ARGUMENTS and execute the following.
 
 ### 1. Load Schedule
 
-Read `.wf/schedule.json`. Error if missing (suggest `/wf0-schedule create`). Exit if `.status == "completed"`.
+Read `.wf/schedule.json`. Error if missing (suggest `/sh1-create create`). Exit if `.status == "completed"`.
 
 ### 2. Get Next Task
 
@@ -82,10 +82,10 @@ For `--all` / selection 5: loop steps 2-7 for each available task.
 | Command | Scope |
 |---------|-------|
 | `wf0-nextstep` | Phase transition within a single work (wf1→wf2→...→wf6) |
-| `wf0-nexttask` | Task selection across multiple works in schedule.json |
+| `sh2-run` | Task selection across multiple works in schedule.json |
 
 ## Notes
 
-- Schedule must exist (create with `/wf0-schedule create`)
+- Schedule must exist (create with `/sh1-create create`)
 - Tasks execute in priority order respecting dependencies
 - `--all` has a 50-task safety limit per invocation

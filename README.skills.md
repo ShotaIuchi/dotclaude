@@ -64,12 +64,17 @@ Claude Codeのスラッシュコマンドとして実行可能なスキルを定
 |--------|------|
 | `wf0-status` | 現在のワークフロー状態を表示 |
 | `wf0-nextstep` | 次のステップを実行 |
-| `wf0-nexttask` | スケジュールから次のタスクを実行 |
 | `wf0-restore` | 既存ワークスペースを復元 |
 | `wf0-remote` | GitHub Issue経由のリモート操作 |
 | `wf0-config` | config.jsonの対話式設定 |
-| `wf0-schedule` | バッチワークフローのスケジュール管理 |
 | `wf0-promote` | ローカルworkをGitHub/Jiraに昇格 |
+
+### スケジュール系 (sh*)
+
+| スキル | 目的 |
+|--------|------|
+| `sh1-create` | バッチワークフローのスケジュール管理 |
+| `sh2-run` | スケジュールから次のタスクを実行 |
 
 ### ドキュメント系 (wf1-4)
 
@@ -103,12 +108,12 @@ skills/
 ├── README.md
 ├── wf0-config/SKILL.md
 ├── wf0-nextstep/SKILL.md
-├── wf0-nexttask/SKILL.md
 ├── wf0-promote/SKILL.md
 ├── wf0-remote/SKILL.md
 ├── wf0-restore/SKILL.md
-├── wf0-schedule/SKILL.md
 ├── wf0-status/SKILL.md
+├── sh1-create/SKILL.md
+├── sh2-run/SKILL.md
 ├── wf1-kickoff/SKILL.md
 ├── wf2-spec/SKILL.md
 ├── wf3-plan/SKILL.md

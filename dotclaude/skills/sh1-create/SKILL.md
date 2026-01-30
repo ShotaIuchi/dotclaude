@@ -1,19 +1,19 @@
 ---
-name: wf0-schedule
+name: sh1-create
 description: バッチワークフロー実行のスケジュール管理
 argument-hint: "<create | show | edit | validate | clear> [args...]"
 ---
 
 **Always respond in Japanese.**
 
-# /wf0-schedule
+# /sh1-create
 
 Create and manage workflow schedules with dependency analysis.
 
 ## Usage
 
 ```
-/wf0-schedule <subcommand> [arguments...]
+/sh1-create <subcommand> [arguments...]
 ```
 
 ## Subcommands
@@ -30,18 +30,18 @@ Create and manage workflow schedules with dependency analysis.
 
 ```bash
 # GitHub Issues (by label or milestone)
-/wf0-schedule create github="label:scheduled"
-/wf0-schedule create github="milestone:v1.0"
+/sh1-create create github="label:scheduled"
+/sh1-create create github="milestone:v1.0"
 
 # Jira (by JQL)
-/wf0-schedule create jira="project=PROJ AND sprint=current"
+/sh1-create create jira="project=PROJ AND sprint=current"
 
 # Local works (comma-separated)
-/wf0-schedule create local=FEAT-001,FIX-002
+/sh1-create create local=FEAT-001,FIX-002
 
 # Combined / All from config
-/wf0-schedule create github="label:scheduled" jira="sprint=current"
-/wf0-schedule create --all
+/sh1-create create github="label:scheduled" jira="sprint=current"
+/sh1-create create --all
 ```
 
 ## Processing

@@ -73,11 +73,11 @@ ln -s /path/to/dotclaude/dotclaude .claude
 |---------|------|
 | `/wf0-status [work-id\|all]` | ステータス表示 |
 | `/wf0-nextstep [work-id]` | 次のワークフローステップを自動実行 |
-| `/wf0-nexttask` | スケジュールから次のタスクを実行 |
+| `/sh2-run` | スケジュールから次のタスクを実行 |
 | `/wf0-restore [work-id]` | 既存ワークスペースの復元 |
 | `/wf0-remote <start\|stop\|status> [target...]` | GitHub Issue経由のリモートワークフロー操作 |
 | `/wf0-config [show\|init\|<category>]` | config.jsonの対話式設定 |
-| `/wf0-schedule` | バッチワークフローのスケジュール管理 |
+| `/sh1-create` | バッチワークフローのスケジュール管理 |
 | `/wf0-promote` | ローカルworkをGitHub/Jiraに昇格 |
 
 ### ワークフローコマンド (wf1-6)

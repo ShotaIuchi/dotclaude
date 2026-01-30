@@ -1,15 +1,15 @@
-# /wf0-schedule
+# /sh1-create
 
 バッチワークフロー実行のスケジュール管理コマンド。
 
 ## 使用方法
 
 ```
-/wf0-schedule create github="label:scheduled"
-/wf0-schedule show
-/wf0-schedule edit [work-id]
-/wf0-schedule validate
-/wf0-schedule clear
+/sh1-create create github="label:scheduled"
+/sh1-create show
+/sh1-create edit [work-id]
+/sh1-create validate
+/sh1-create clear
 ```
 
 ## サブコマンド

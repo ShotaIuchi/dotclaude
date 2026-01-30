@@ -1,11 +1,11 @@
-# Review: wf0-schedule.md
+# Review: sh1-create.md (formerly wf0-schedule)
 
 > Reviewed: 2026-01-26
-> Original: dotclaude/commands/wf0-schedule.md
+> Original: dotclaude/skills/sh1-create/SKILL.md
 
 ## 概要 (Summary)
 
-`/wf0-schedule` は、バッチワークフロー実行のためのスケジュール管理コマンドである。GitHub Issues、Jira Issues、ローカルワークからタスクを収集し、依存関係を分析して実行スケジュールを構築する。`create`、`show`、`edit`、`validate`、`clear` の5つのサブコマンドを提供し、DAG（有向非巡回グラフ）検証による循環依存の検出、優先度の自動計算などの機能を持つ。
+`/sh1-create` は、バッチワークフロー実行のためのスケジュール管理コマンドである。GitHub Issues、Jira Issues、ローカルワークからタスクを収集し、依存関係を分析して実行スケジュールを構築する。`create`、`show`、`edit`、`validate`、`clear` の5つのサブコマンドを提供し、DAG（有向非巡回グラフ）検証による循環依存の検出、優先度の自動計算などの機能を持つ。
 
 ## 評価 (Evaluation)
 

@@ -15,12 +15,12 @@ references/からの知識を参照し、プロジェクトに最適化された
 |--------|------|
 | `wf0-config` | WF設定の対話的編集 (`show`, `init`, カテゴリ指定) |
 | `wf0-nextstep` | 次のワークフローステップを実行 |
-| `wf0-nexttask` | スケジュールから次タスクを実行 (`--dry-run`, `--until`, `--all`) |
 | `wf0-promote` | ローカルワークフローをGitHub/Jiraに昇格 |
 | `wf0-remote` | GitHub Issueコメント経由でリモート操作 (`start`, `stop`, `status`) |
 | `wf0-restore` | 既存ワークスペースの復元 |
-| `wf0-schedule` | スケジュール管理 (`create`, `show`, `edit`, `validate`, `clear`) |
 | `wf0-status` | 現在のワークフロー状態を表示 |
+| `sh1-create` | スケジュール管理 (`create`, `show`, `edit`, `validate`, `clear`) |
+| `sh2-run` | スケジュールから次タスクを実行 (`--dry-run`, `--until`, `--all`) |
 | `wf1-kickoff` | 新規ワークスペースとKickoffドキュメント作成 |
 | `wf2-spec` | 仕様書ドキュメント作成 |
 | `wf3-plan` | 実装計画ドキュメント作成 |
@@ -56,8 +56,8 @@ references/からの知識を参照し、プロジェクトに最適化された
 /wf6-verify pr
 
 # バッチ処理
-/wf0-schedule create github="label:batch"
-/wf0-nexttask --dry-run
+/sh1-create create github="label:batch"
+/sh2-run --dry-run
 
 # アーキテクチャ
 /android-architecture
@@ -112,17 +112,17 @@ skills/
 │   └── SKILL.md
 ├── wf0-nextstep/
 │   └── SKILL.md
-├── wf0-nexttask/
-│   └── SKILL.md
 ├── wf0-promote/
 │   └── SKILL.md
 ├── wf0-remote/
 │   └── SKILL.md
 ├── wf0-restore/
 │   └── SKILL.md
-├── wf0-schedule/
-│   └── SKILL.md
 ├── wf0-status/
+│   └── SKILL.md
+├── sh1-create/
+│   └── SKILL.md
+├── sh2-run/
 │   └── SKILL.md
 ├── wf1-kickoff/
 │   └── SKILL.md
