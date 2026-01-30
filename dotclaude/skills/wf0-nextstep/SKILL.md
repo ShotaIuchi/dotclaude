@@ -32,7 +32,8 @@ Load state.json. Resolve work-id (argument or active_work). Get `current` and `n
 |---|---|
 | null/empty | Error: suggest `/wf0-status` |
 | `"complete"` + PR exists | Display "work complete" with PR URL |
-| `"complete"` + no PR | Suggest `/wf6-verify pr` |
+| `"complete"` + no PR | Suggest `/wf7-pr` |
+| `"wf7-pr"` | Execute `/wf7-pr` |
 | `"wf5-implement"` | Check `plan.current_step < plan.total_steps`, execute `/wf5-implement <next_step>` |
 | Other phase | Execute `/<next_phase>` |
 

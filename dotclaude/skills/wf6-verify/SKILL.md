@@ -1,26 +1,20 @@
 ---
 name: wf6-verify
-description: 実装を検証しPRを作成
-argument-hint: "[pr | update]"
+description: 実装を検証
+argument-hint: ""
 ---
 
 **Always respond in Japanese.**
 
 # /wf6-verify
 
-Verify implementation quality and optionally create/update a PR.
+Verify implementation quality.
 
 ## Usage
 
 ```
-/wf6-verify [subcommand]
+/wf6-verify
 ```
-
-## Subcommands
-
-- `(none)`: Run verification only
-- `pr`: Create PR after verification passes
-- `update`: Update existing PR
 
 ## Processing
 
@@ -46,27 +40,15 @@ Compare against Success Criteria from `01_KICKOFF.md`. Mark each as OK or incomp
 
 Display: implementation progress, test results, build status, lint status, success criteria completion, overall PASS/FAIL.
 
-### 5. Create PR (`pr` subcommand)
+### 5. Update state.json
 
-Only if verification passes. Cannot create PR if tests or build fail.
+- On PASS: Set `current: "wf6-verify"`, `next: "wf7-pr"`
+- On FAIL: Set `current: "wf6-verify"`, `next: "wf6-verify"` (re-run after fixes)
 
-1. Get branch/base from state.json
-2. `git push -u origin <branch>`
-3. Generate PR title from Kickoff Goal. For github source: append `(#<issue_number>)`
-4. Create PR via `gh pr create` with body: Summary, Changes, Test Plan, Related Issues (`Closes #N`), Document links
+### 6. Completion Message
 
-### 6. Update PR (`update` subcommand)
-
-Push changes and optionally update PR description via `gh pr edit`.
-
-### 7. Update state.json
-
-Set `current: "wf6-verify"`, `next: "complete"`. Record PR number/URL if created.
-
-### 8. Completion Message
-
-- Verification only: Show results, suggest `/wf6-verify pr`
-- PR created: Show PR number, URL, title, base←branch, suggest requesting review
+- PASS: Show results, inform that `/wf7-pr` is next step
+- FAIL: List failed items, suggest fixes, instruct to re-run `/wf6-verify`
 
 ## Handling Failure
 
@@ -74,6 +56,6 @@ If verification fails: list failed items, suggest fixes, instruct to re-run `/wf
 
 ## Notes
 
-- Cannot create PR if tests or build fail
 - Warning for incomplete Success Criteria
-- Verification can be re-run after PR creation
+- Verification can be re-run multiple times
+- PR creation is handled by `/wf7-pr` after verification passes

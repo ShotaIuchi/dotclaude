@@ -1,18 +1,12 @@
 # /wf6-verify
 
-実装の検証とPR作成を行うコマンド。
+実装の検証を行うコマンド。
 
 ## 使用方法
 
 ```
-/wf6-verify [subcommand]
+/wf6-verify
 ```
-
-## サブコマンド
-
-- `(なし)`: 検証のみ実行
-- `pr`: 検証後にPR作成
-- `update`: 既存PRを更新
 
 ## 処理
 
@@ -20,11 +14,18 @@
 2. テスト/ビルド/Lint実行（config.json優先、なければプロジェクトファイルから自動検出）
 3. 成功条件チェック（Kickoffとの比較）
 4. 検証サマリー表示（PASS/FAIL）
-5. PR作成（prサブコマンド時、検証PASS必須）
-6. state.json更新（current: wf6-verify, next: complete）
+5. state.json更新
+   - PASS時: `current: "wf6-verify"`, `next: "wf7-pr"`
+   - FAIL時: `current: "wf6-verify"`, `next: "wf6-verify"`
+
+## 検証失敗時
+
+- 失敗項目を一覧表示
+- 修正方法を提案
+- 修正後に再度`/wf6-verify`を実行するよう案内
 
 ## 注意事項
 
-- テスト/ビルド失敗時はPR作成不可
 - 成功条件の未完了項目は警告表示
-- PR作成後も再検証可能
+- 複数回の再実行が可能
+- PR作成は検証PASS後に`/wf7-pr`で行う
