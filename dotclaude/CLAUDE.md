@@ -9,10 +9,9 @@ Use by creating a symlink from `dotclaude/` folder to `~/.claude`.
 
 | Directory/File | Purpose |
 |----------------|---------|
-| `skills/` | Interface definitions for slash commands (thin wrappers delegating to agents/references) |
+| `skills/` | Slash command definitions (self-contained workflow and utility commands) |
 | `rules/` | Project rules and schemas |
 | `templates/` | Document templates |
-| `agents/` | Execution logic for sub-agents (workflow/, task/, analysis/) |
 | `references/` | Knowledge base (non-executable reference documents) |
 | `scripts/` | Utility scripts |
 | `examples/` | Example files |

@@ -87,7 +87,7 @@
 すべてのソースドキュメントは英語で記述しなければならない。日本語訳は `docs/readme/` にのみ配置する。
 
 ### 必須事項
-- `skills/`, `agents/`, `rules/`, `references/`, `templates/` 配下のファイルはすべて英語
+- `skills/`, `rules/`, `references/`, `templates/` 配下のファイルはすべて英語
 - `CLAUDE.md`, `PRINCIPLES.md`, `CONSTITUTION.md` は英語
 - コード内コメントも英語
 

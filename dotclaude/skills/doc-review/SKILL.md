@@ -104,18 +104,18 @@ Each sub-agent invocation must include the following placeholder values in the p
 Task tool:
   subagent_type: general-purpose
   prompt: |
-    Execute the doc-reviewer agent defined in agents/task/doc-reviewer.md.
-    Input: file=<file_path>
+    Review the document at <file_path>.
 
     Template placeholders:
     - {{filename}} = <basename of file_path>
     - {{date}} = <current date YYYY-MM-DD>
     - {{file_path}} = <relative file_path>
 
-    Follow the agent instructions to:
-    1. Load and analyze the document
-    2. Generate review using template
-    3. Write output to docs/reviews/<path>.<filename>.md
+    Instructions:
+    1. Load template from ~/.claude/templates/DOC_REVIEW.md (or dotclaude/templates/DOC_REVIEW.md)
+    2. Analyze document for: purpose, completeness, clarity, consistency, technical accuracy
+    3. Generate review with prioritized improvement suggestions
+    4. Write output to docs/reviews/<path>.<filename>.md (replace / with . in path)
 
     Return the result in JSON format:
     {"status": "success|failure", "file": "<path>", "output": "<path>", "error": "<msg if failed>"}
@@ -148,18 +148,18 @@ Task tool:
   subagent_type: general-purpose
   run_in_background: true  # ← REQUIRED
   prompt: |
-    Execute the doc-reviewer agent defined in agents/task/doc-reviewer.md.
-    Input: file=<file_path>
+    Review the document at <file_path>.
 
     Template placeholders:
     - {{filename}} = <basename>
     - {{date}} = <current date>
     - {{file_path}} = <relative path>
 
-    Follow the agent instructions to:
-    1. Load and analyze the document
-    2. Generate review using template
-    3. Write output to docs/reviews/<path>.<filename>.md
+    Instructions:
+    1. Load template from ~/.claude/templates/DOC_REVIEW.md (or dotclaude/templates/DOC_REVIEW.md)
+    2. Analyze document for: purpose, completeness, clarity, consistency, technical accuracy
+    3. Generate review with prioritized improvement suggestions
+    4. Write output to docs/reviews/<path>.<filename>.md (replace / with . in path)
 
     Return the result in JSON format:
     {"status": "success|failure", "file": "<path>", "output": "<path>"}
@@ -254,11 +254,6 @@ Please review the review file and implement improvements as needed.
 To retry failed files:
   /doc-review API.md
 ```
-
-## Sub-agent Reference
-
-- **Agent**: `agents/task/doc-reviewer.md`
-- **Template**: `templates/DOC_REVIEW.md`
 
 ## Notes
 

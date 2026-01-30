@@ -4,7 +4,7 @@
 
 ## ソース言語の要件（CONSTITUTION 第7条）
 
-**すべてのソースドキュメントは英語で記述しなければならない。** `skills/`, `agents/`, `rules/`, `references/`, `templates/` 配下のすべての `.md` ファイル、およびルートレベルのドキュメント（`CLAUDE.md`, `PRINCIPLES.md`, `CONSTITUTION.md`）が対象。ソースドキュメントに日本語を含めてはならない。
+**すべてのソースドキュメントは英語で記述しなければならない。** `skills/`, `rules/`, `references/`, `templates/` 配下のすべての `.md` ファイル、およびルートレベルのドキュメント（`CLAUDE.md`, `PRINCIPLES.md`, `CONSTITUTION.md`）が対象。ソースドキュメントに日本語を含めてはならない。
 
 ## 概要
 
@@ -19,7 +19,6 @@
 | `CONSTITUTION.md` | `docs/readme/CONSTITUTION.md` |
 | `commands/{name}.md` | `docs/readme/commands.{name}.md` |
 | `rules/{name}.md` | `docs/readme/rules.{name}.md` |
-| `agents/{category}/{name}.md` | `docs/readme/agents.{category}.{name}.md` |
 | `skills/{name}/SKILL.md` | `docs/readme/skills.{name}.md` |
 
 ## 命名規則

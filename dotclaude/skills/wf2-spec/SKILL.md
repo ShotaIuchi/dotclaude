@@ -74,6 +74,3 @@ Check Kickoff↔Spec consistency. Display OK/warning/missing for each criterion.
 - Warn on contradictions with existing specs
 - Suggest Kickoff revision if technically infeasible
 
-## Agent Reference
-
-This skill delegates to the [spec-writer agent](../../agents/workflow/spec-writer.md).

@@ -81,6 +81,3 @@ Show changed files with diff stats, completion criteria results, progress (n/tot
 - **Minor** (typos, imports): Record in Notes section, continue
 - **Significant** (design changes): Interrupt, suggest `/wf3-plan update`
 
-## Agent Reference
-
-This skill delegates to the [implementer agent](../../agents/workflow/implementer.md).

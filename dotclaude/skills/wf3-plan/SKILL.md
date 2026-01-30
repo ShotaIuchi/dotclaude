@@ -77,6 +77,3 @@ Display specific step details: Title, Purpose, Target Files, Tasks, Completion C
 - Strictly respect dependency order
 - Each step should be independently testable
 
-## Agent Reference
-
-This skill delegates to the [planner agent](../../agents/workflow/planner.md).

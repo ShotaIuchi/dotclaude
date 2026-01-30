@@ -120,6 +120,3 @@ If `config.worktree.enabled` is true: `git worktree add .worktrees/<branch-name>
 | Still on main/master at Step 5+ | **ABORT immediately** |
 | `--no-branch` on main/master | **ABORT** with error message |
 
-## Agent Reference
-
-This skill delegates to the [research agent](../../agents/workflow/research.md).

@@ -53,6 +53,3 @@
 13. コミット
 14. 完了メッセージ（次ステップ: `/wf2-spec`）
 
-## エージェント参照
-
-[research エージェント](../../agents/workflow/research.md) に委譲。

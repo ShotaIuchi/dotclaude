@@ -4,7 +4,7 @@ Rule for automatically maintaining Japanese translations of documents.
 
 ## Source Language Requirement (CONSTITUTION Article 7)
 
-**All source documents must be written in English.** This includes all `.md` files under `skills/`, `agents/`, `rules/`, `references/`, and `templates/`, as well as root-level documents (`CLAUDE.md`, `PRINCIPLES.md`, `CONSTITUTION.md`). Japanese text must never appear in source documents.
+**All source documents must be written in English.** This includes all `.md` files under `skills/`, `rules/`, `references/`, and `templates/`, as well as root-level documents (`CLAUDE.md`, `PRINCIPLES.md`, `CONSTITUTION.md`). Japanese text must never appear in source documents.
 
 ### Exception: YAML Frontmatter
 
@@ -37,7 +37,6 @@ When creating or updating documents (`.md` files) under `dotclaude/`, create or 
 | `CONSTITUTION.md` | `docs/readme/CONSTITUTION.md` |
 | `commands/{name}.md` | `docs/readme/commands.{name}.md` |
 | `rules/{name}.md` | `docs/readme/rules.{name}.md` |
-| `agents/{category}/{name}.md` | `docs/readme/agents.{category}.{name}.md` |
 | `skills/{name}/SKILL.md` | `docs/readme/skills.{name}.md` |
 
 ## 命名規則

@@ -29,6 +29,3 @@ Planの1ステップを実装するコマンド。
 - **軽微**（typo、import追加等）: Notes記録で続行
 - **重大**（設計変更等）: 中断し `/wf3-plan update` を提案
 
-## エージェント参照
-
-[implementer エージェント](../../agents/workflow/implementer.md) に委譲。

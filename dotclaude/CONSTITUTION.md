@@ -87,7 +87,7 @@ Before executing a shell command, verify that the command exists.
 All source documents must be written in English. Japanese translations are maintained separately under `docs/readme/`.
 
 ### Required
-- All files under `skills/`, `agents/`, `rules/`, `references/`, `templates/` must be in English
+- All files under `skills/`, `rules/`, `references/`, `templates/` must be in English
 - `CLAUDE.md`, `PRINCIPLES.md`, `CONSTITUTION.md` must be in English
 - Code comments must be in English
 

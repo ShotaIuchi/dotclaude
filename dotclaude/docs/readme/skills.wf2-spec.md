@@ -30,6 +30,3 @@
 - 既存仕様との矛盾は警告
 - 技術的に不可能な場合はKickoff修正を提案
 
-## エージェント参照
-
-[spec-writer エージェント](../../agents/workflow/spec-writer.md) に委譲。

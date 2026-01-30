@@ -4,7 +4,7 @@
 
 | Pattern | Purpose | Adoption Reason | Alternatives |
 |---------|---------|----------------|-------------|
-| skills/ + agents/ separation | Command definition | Separate interface from logic | Embed logic in skills |
+| Self-contained skills/ | Command definition | Complete command logic in single file | Separate agents directory |
 | references/ knowledge base | Knowledge sharing | Referenced from multiple skills | Duplicate content in each skill |
 | context: fork | Sub-agents | Save main context tokens | Same-context execution |
 | .wf/state.json | State management | Structured workflow state | Filename-based detection |
@@ -18,7 +18,8 @@
 | MCP Server integration | File-based approach is sufficient; avoids server management complexity |
 | Custom CLI wrapper | Claude Code standard commands are sufficient |
 | DB-backed state management | Prefer simplicity of JSON files |
-| Single monolithic CLAUDE.md | Split into skills/agents/references for separation of concerns |
+| Single monolithic CLAUDE.md | Split into skills/references for separation of concerns |
+| Separate agents/ directory | Inline agent logic into skills for simpler structure |
 
 ## Related Documents
 

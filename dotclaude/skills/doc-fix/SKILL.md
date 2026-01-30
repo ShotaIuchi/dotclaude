@@ -196,16 +196,16 @@ All files are processed via the `doc-fixer` sub-agent for consistent behavior.
 Task tool:
   subagent_type: general-purpose
   prompt: |
-    Execute the doc-fixer agent defined in agents/task/doc-fixer.md.
-    Input: review_file=<review_file_path>, issues="all"
+    Fix issues in review file <review_file_path>.
 
-    Follow the agent instructions to:
-    1. Parse review file and extract all issues
-    2. Apply all fixes to the original document
-    3. Update review file with fix status
+    Instructions:
+    1. Parse review file to extract issues from High/Medium Priority tables and Future Considerations list
+    2. Derive original file path (docs/reviews/a.b.md → a/b.md, check extensions: md, yaml, yml, json, txt)
+    3. Apply all fixes to the original document based on suggestions
+    4. Update review file: add Status column, mark fixed items with "Fixed (YYYY-MM-DD)"
 
     Return the result in JSON format:
-    {"status": "success|partial|failure", "review_file": "<path>", ...}
+    {"status": "success|partial|failure", "review_file": "<path>", "original_file": "<path>", "fixed": [...], "failed": [...]}
 ```
 
 ##### Multiple Files (Parallel)
@@ -218,9 +218,15 @@ for each review_file in review_files (up to MAX_PARALLEL):
     subagent_type: general-purpose
     run_in_background: true
     prompt: |
-      Execute the doc-fixer agent defined in agents/task/doc-fixer.md.
-      Input: review_file=<review_file_path>, issues="all"
-      ...
+      Fix issues in review file <review_file_path>.
+
+      Instructions:
+      1. Parse review file to extract issues from High/Medium Priority tables and Future Considerations list
+      2. Derive original file path (docs/reviews/a.b.md → a/b.md, check extensions: md, yaml, yml, json, txt)
+      3. Apply all fixes to the original document based on suggestions
+      4. Update review file: add Status column, mark fixed items with "Fixed (YYYY-MM-DD)"
+
+      Return JSON: {"status": "success|partial|failure", "review_file": "<path>", ...}
 ```
 
 For file_count > MAX_PARALLEL, process in batches:
@@ -341,11 +347,6 @@ Files modified:
 
 No remaining issues. Consider deleting the review file.
 ```
-
-## Sub-agent Reference
-
-- **Agent**: `agents/task/doc-fixer.md`
-- **Template**: `~/.claude/templates/DOC_REVIEW.md` or `dotclaude/templates/DOC_REVIEW.md`
 
 ## Multiple Files Selection
 

@@ -27,7 +27,6 @@ dotclaude内の各ファイルの日本語訳を格納。
 | `CLAUDE.md` | `docs/readme/CLAUDE.md` |
 | `commands/{name}.md` | `docs/readme/commands.{name}.md` |
 | `rules/{name}.md` | `docs/readme/rules.{name}.md` |
-| `agents/{cat}/{name}.md` | `docs/readme/agents.{cat}.{name}.md` |
 | `skills/{name}/SKILL.md` | `docs/readme/skills.{name}.md` |
 
 ## reviews/

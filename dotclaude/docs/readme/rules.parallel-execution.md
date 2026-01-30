@@ -32,19 +32,7 @@ Task 3: 「テストカバレッジを確認」
 # BAD: 順番に調査
 ```
 
-### 3. 複数のagent起動
-
-```
-# GOOD
-/agent reviewer files="src/auth/*.kt"
-/agent security-reviewer files="src/auth/*.kt"
-（同時にレビュー）
-
-# BAD
-レビュー完了を待ってからセキュリティレビュー
-```
-
-### 4. Glob/Grep検索
+### 3. Glob/Grep検索
 
 ```
 # GOOD
@@ -83,16 +71,6 @@ Grep: "suspend fun"
 | Consistency Reviewer | 既存コードとの一貫性 |
 | Redundancy Checker | 重複コード、不要な処理 |
 
-## agentカテゴリ別の並列実行可否
-
-| カテゴリ | 並列実行 | 理由 |
-|----------|----------|------|
-| analysis/* | ✅ 可能 | 読み取り専用、副作用なし |
-| task/reviewer | ✅ 可能 | 読み取り専用 |
-| task/doc-reviewer | ✅ 可能 | 読み取り専用 |
-| workflow/* | ⚠️ 注意 | state.json更新の競合に注意 |
-| task/doc-fixer | ❌ 順次 | ファイル編集の競合回避 |
-
 ## 実践例
 
 ### ワークフロー開始時
@@ -102,8 +80,8 @@ Grep: "suspend fun"
 
 並列:
 - Issue情報取得 (gh issue view)
-- 関連コード調査 (research agent)
-- 依存関係確認 (dependency agent)
+- 関連コード調査 (Task tool with Explore)
+- 依存関係確認 (Task tool with Explore)
 
 順次:
 - 上記完了後 → 01_KICKOFF.md作成
@@ -113,9 +91,9 @@ Grep: "suspend fun"
 
 ```
 並列:
-- reviewer agent: コード品質
-- security-reviewer agent: セキュリティ
-- impact agent: 影響範囲
+- Task 1 (Explore): コード品質レビュー
+- Task 2 (Explore): セキュリティレビュー
+- Task 3 (Explore): 影響範囲調査
 
 順次:
 - 上記完了後 → 04_REVIEW.md作成
