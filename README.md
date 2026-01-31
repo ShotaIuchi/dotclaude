@@ -11,6 +11,26 @@ AI（Claude Code）と人間が同じ状態と成果物を見ながら作業す�
 - **作業の再現性**: 異なるPCやセッションで作業を継続可能
 - **計画外変更の防止**: 計画された作業のみを実装
 
+## ワークフローの選択
+
+| ワークフロー | 用途 | 制御方式 | PR作成 |
+|-------------|------|----------|--------|
+| **wf*** | 汎用（GitHub/Jira/ローカル） | コマンド実行 | wf6-verify後 |
+| **ghwf*** | GitHub専用・自動化向け | ラベル | ghwf1で即Draft PR |
+
+### ghwf* を選ぶ場合
+
+- GitHub Issueベースの開発
+- ラベルで進捗を可視化したい
+- 外出先からスマホで承認したい
+- Draft PRでレビュアーに早期共有したい
+
+### wf* を選ぶ場合
+
+- Jiraやローカルタスクも扱う
+- 対話的に作業を進めたい
+- 細かい制御が必要
+
 ## セットアップ
 
 ### 前提条件
@@ -73,14 +93,19 @@ ln -s /path/to/dotclaude/dotclaude .claude
 |---------|------|
 | `/wf0-status [work-id\|all]` | ステータス表示 |
 | `/wf0-nextstep [work-id]` | 次のワークフローステップを自動実行 |
-| `/sh2-run` | スケジュールから次のタスクを実行 |
 | `/wf0-restore [work-id]` | 既存ワークスペースの復元 |
 | `/wf0-remote <start\|stop\|status> [target...]` | GitHub Issue経由のリモートワークフロー操作 |
 | `/wf0-config [show\|init\|<category>]` | config.jsonの対話式設定 |
-| `/sh1-create` | バッチワークフローのスケジュール管理 |
 | `/wf0-promote` | ローカルworkをGitHub/Jiraに昇格 |
 
-### ワークフローコマンド (wf1-6)
+### スケジュールコマンド (sh*)
+
+| コマンド | 説明 |
+|---------|------|
+| `/sh1-create` | バッチワークフローのスケジュール管理 |
+| `/sh2-run` | スケジュールから次のタスクを実行 |
+
+### ワークフローコマンド (wf1-7)
 
 | コマンド | 説明 |
 |---------|------|
@@ -89,13 +114,12 @@ ln -s /path/to/dotclaude/dotclaude .claude
 | `/wf1-kickoff local=<id> title="..."` | ワークスペース作成＋Kickoff（ローカル） |
 | `/wf1-kickoff update` | 既存Kickoffの更新 |
 | `/wf1-kickoff revise "<指示>"` | Kickoff修正 |
-| `/wf1-kickoff chat` | ブレインストーミング対話 |
 | `/wf2-spec` | 仕様書（Spec）作成 |
 | `/wf3-plan` | 実装計画（Plan）作成 |
 | `/wf4-review [plan\|code\|pr]` | レビュー記録作成 |
 | `/wf5-implement [step]` | Planの1ステップを実装 |
 | `/wf6-verify` | テスト・ビルド検証 |
-| `/wf6-verify pr` | 検証後にPR作成 |
+| `/wf7-pr` | PR作成または更新 |
 
 ### GitHub専用ワークフロー (ghwf*)
 
@@ -123,7 +147,7 @@ ln -s /path/to/dotclaude/dotclaude .claude
 
 ## ワークフロー
 
-### 基本フロー
+### 基本フロー (wf*)
 
 ```
 /wf1-kickoff github=123（ワークスペース＋目標と成功基準を定義）
@@ -136,7 +160,9 @@ ln -s /path/to/dotclaude/dotclaude .claude
     ↓
 /wf5-implement（1ステップずつ実装）
     ↓ ↑ 繰り返し
-/wf6-verify pr（検証してPR作成）
+/wf6-verify（検証）
+    ↓
+/wf7-pr（PR作成）
 ```
 
 ### 自動進行
@@ -170,36 +196,43 @@ ln -s /path/to/dotclaude/dotclaude .claude
 /wf0-remote start --all
 ```
 
-### GitHub専用ワークフロー (ghwf)
+### GitHub専用フロー (ghwf*)
 
-ラベルベースの完全自動化ワークフロー。
+ラベルベースの完全自動化ワークフロー。ghwf1でDraft PRを即座に作成。
 
-```bash
-# 1. デーモン起動
-/ghwf0-remote start
-
-# 2. Issue に ghwf:approve ラベルを付与
-#    → デーモンが検知して自動実行
-
-# 3. 各ステップ完了後、ghwf:waiting ラベルが付く
-#    → 確認後、ghwf:approve で次へ
-
-# 4. 修正が必要な場合
-#    → コメントで指示 + ghwf:redo-3 で step 3 から再実行
+```
+[Issue作成] + ghwf:approve ラベル付与
+    ↓
+/ghwf0-remote start（デーモン起動）
+    ↓
+[デーモンが自動実行]
+    ghwf1-kickoff → Draft PR作成
+    ghwf2-spec → ghwf3-plan → ...
+    ↓
+[各ステップ後] ghwf:waiting ラベル
+    → 確認して ghwf:approve で続行
+    ↓
+ghwf7-pr（Draft → Ready for Review）
 ```
 
-ラベルで状態管理:
-- `ghwf:approve` - 次ステップ実行
-- `ghwf:redo-N` - step N から再実行
-- `ghwf:revision` - 全体再実行
-- `ghwf:stop` - 監視停止
+**ラベル一覧:**
+
+| ラベル | 操作 | 付与者 |
+|--------|------|--------|
+| `ghwf:approve` | 次ステップ実行 | ユーザー |
+| `ghwf:redo-N` | step N から再実行 | ユーザー |
+| `ghwf:revision` | wf1から全体再実行 | ユーザー |
+| `ghwf:stop` | 監視停止 | ユーザー |
+| `ghwf:executing` | 実行中 | デーモン |
+| `ghwf:waiting` | 承認待ち | デーモン |
+| `ghwf:completed` | 完了 | デーモン |
 
 ## リポジトリ構造
 
 ```
 dotclaude/                 # リポジトリルート
 ├── dotclaude/             # ~/.claudeにリンクする対象
-│   ├── skills/            # スラッシュコマンド（wf0-*〜wf6-*, commit等）
+│   ├── skills/            # スラッシュコマンド（wf*, ghwf*, commit等）
 │   ├── rules/             # プロジェクトルール・コンテキストルール
 │   ├── references/        # 技術リファレンス（アーキテクチャ、規約等）
 │   ├── templates/         # ドキュメントテンプレート
@@ -365,6 +398,27 @@ git fetch --all --prune
 git worktree list
 # 削除
 git worktree remove .worktrees/feat-123-slug
+```
+
+### ghwfデーモンが応答しない場合
+
+```bash
+# tmuxセッション確認
+tmux ls
+
+# ログ確認
+tmux attach -t ghwf-daemon
+
+# 再起動
+/ghwf0-remote stop && /ghwf0-remote start
+```
+
+### ghwfラベルが存在しない場合
+
+デーモン起動時に自動作成されます。手動で作成する場合:
+
+```bash
+gh label create "ghwf:approve" --color "5319E7"
 ```
 
 ## ライセンス
