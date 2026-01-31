@@ -159,6 +159,23 @@ ghwf0-remote status  → Show status
 | `MAX_STEPS_PER_SESSION` | 10 | Max workflow steps per daemon session |
 | `POLL_INTERVAL` | 60 | Polling interval in seconds |
 
+### Retry Strategy
+
+Exponential backoff with configurable parameters:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `GHWF_RETRY_MAX` | 3 | Max retry attempts for API calls |
+| `GHWF_RETRY_DELAY` | 5 | Initial delay between retries (seconds) |
+| `GHWF_RETRY_BACKOFF` | 2 | Backoff multiplier |
+| `GHWF_CLAUDE_RETRY_MAX` | 2 | Max retries for Claude invocation |
+| `GHWF_CLAUDE_RETRY_DELAY` | 30 | Initial delay for Claude retries |
+
+Retry-enabled operations:
+- GitHub API calls (issue list, view, edit, comment)
+- Git push
+- Claude Code invocation
+
 ### Security
 
 - **Collaborator-only**: Only users with `admin`/`write`/`maintain` permission can trigger commands

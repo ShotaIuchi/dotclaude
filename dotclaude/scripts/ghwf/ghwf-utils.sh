@@ -5,6 +5,54 @@
 # Shared functions for GitHub Workflow daemon
 #
 
+# =============================================================================
+# Retry Configuration
+# =============================================================================
+
+GHWF_RETRY_MAX="${GHWF_RETRY_MAX:-3}"
+GHWF_RETRY_DELAY="${GHWF_RETRY_DELAY:-5}"
+GHWF_RETRY_BACKOFF="${GHWF_RETRY_BACKOFF:-2}"
+
+# Generic retry wrapper with exponential backoff
+# Usage: ghwf_retry <max_attempts> <initial_delay> <backoff_multiplier> <command...>
+ghwf_retry() {
+    local max_attempts="$1"
+    local delay="$2"
+    local backoff="$3"
+    shift 3
+
+    local attempt=1
+    local exit_code=0
+
+    while [ "$attempt" -le "$max_attempts" ]; do
+        if "$@"; then
+            return 0
+        fi
+        exit_code=$?
+
+        if [ "$attempt" -lt "$max_attempts" ]; then
+            echo "[RETRY] Attempt $attempt/$max_attempts failed. Retrying in ${delay}s..." >&2
+            sleep "$delay"
+            delay=$((delay * backoff))
+        fi
+
+        ((attempt++))
+    done
+
+    echo "[RETRY] All $max_attempts attempts failed" >&2
+    return "$exit_code"
+}
+
+# Retry with default settings
+# Usage: ghwf_retry_default <command...>
+ghwf_retry_default() {
+    ghwf_retry "$GHWF_RETRY_MAX" "$GHWF_RETRY_DELAY" "$GHWF_RETRY_BACKOFF" "$@"
+}
+
+# =============================================================================
+# Core Functions
+# =============================================================================
+
 # Get project root
 ghwf_get_project_root() {
     git rev-parse --show-toplevel 2>/dev/null || pwd
@@ -48,20 +96,19 @@ ghwf_update_daemon_state() {
         mv "$tmp_file" "$state_file"
 }
 
-# Query issues with ghwf command labels
+# Query issues with ghwf command labels (with retry)
 ghwf_query_command_issues() {
-    # Query for any ghwf: command label
-    gh issue list --json number,title,labels --limit 100 | jq -r '
+    ghwf_retry_default gh issue list --json number,title,labels --limit 100 | jq -r '
         .[] | select(.labels[]?.name |
             test("^ghwf:(approve|redo|redo-[1-7]|revision|stop)$"))
     '
 }
 
-# Get command label from issue
+# Get command label from issue (with retry)
 ghwf_get_command_label() {
     local issue_number="$1"
 
-    gh issue view "$issue_number" --json labels --jq '
+    ghwf_retry_default gh issue view "$issue_number" --json labels --jq '
         .labels[].name | select(test("^ghwf:(approve|redo|redo-[1-7]|revision|stop)$"))
     ' | head -1
 }
@@ -83,12 +130,12 @@ ghwf_remove_label() {
     gh issue edit "$issue_number" --remove-label "$label" 2>/dev/null || true
 }
 
-# Add label to issue
+# Add label to issue (with retry)
 ghwf_add_label() {
     local issue_number="$1"
     local label="$2"
 
-    gh issue edit "$issue_number" --add-label "$label"
+    ghwf_retry_default gh issue edit "$issue_number" --add-label "$label"
 }
 
 # Check for updates since last execution
@@ -154,12 +201,12 @@ ghwf_get_instruction() {
     "
 }
 
-# Post status comment
+# Post status comment (with retry)
 ghwf_post_comment() {
     local issue_number="$1"
     local message="$2"
 
-    gh issue comment "$issue_number" --body "🤖 $message"
+    ghwf_retry_default gh issue comment "$issue_number" --body "🤖 $message"
 }
 
 # Get work-id from issue number
@@ -222,7 +269,8 @@ ghwf_get_step_command() {
     esac
 }
 
-# Invoke Claude Code for workflow step
+# Invoke Claude Code for workflow step (with retry)
+# Note: Uses fewer retries for Claude as it's a heavier operation
 ghwf_invoke_claude() {
     local step="$1"
     local work_id="$2"
@@ -236,19 +284,23 @@ ghwf_invoke_claude() {
         return 1
     fi
 
+    # Use 2 retries with longer delay for Claude invocations
+    local max_retries="${GHWF_CLAUDE_RETRY_MAX:-2}"
+    local retry_delay="${GHWF_CLAUDE_RETRY_DELAY:-30}"
+
     if [ -n "$instruction" ]; then
-        echo "$instruction" | claude --print "/$cmd revise"
+        ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "echo '$instruction' | claude --print '/$cmd revise'"
     else
-        claude --print "/$cmd"
+        ghwf_retry "$max_retries" "$retry_delay" 2 claude --print "/$cmd"
     fi
 }
 
-# Push changes
+# Push changes (with retry)
 ghwf_push_changes() {
     local branch
     branch=$(git branch --show-current)
 
-    git push origin "$branch"
+    ghwf_retry_default git push origin "$branch"
 }
 
 # Check collaborator permission for a user

@@ -50,9 +50,19 @@ GitHub Issue/PR のラベルを監視し、ワークフローを自動実行す�
 | `MAX_STEPS_PER_SESSION` | 10 | Max workflow steps before daemon pauses |
 | `VERBOSE` | false | Enable detailed logging |
 
+### Retry Settings
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `GHWF_RETRY_MAX` | 3 | Max retry attempts for API calls |
+| `GHWF_RETRY_DELAY` | 5 | Initial retry delay (seconds) |
+| `GHWF_RETRY_BACKOFF` | 2 | Backoff multiplier |
+| `GHWF_CLAUDE_RETRY_MAX` | 2 | Max retries for Claude calls |
+| `GHWF_CLAUDE_RETRY_DELAY` | 30 | Initial delay for Claude retries |
+
 Example:
 ```bash
-MAX_STEPS_PER_SESSION=20 /ghwf0-remote start
+GHWF_RETRY_MAX=5 MAX_STEPS_PER_SESSION=20 /ghwf0-remote start
 ```
 
 ## Daemon Behavior
