@@ -76,6 +76,32 @@ Claude Codeのスラッシュコマンドとして実行可能なスキルを定
 | `sh1-create` | バッチワークフローのスケジュール管理 |
 | `sh2-run` | スケジュールから次のタスクを実行 |
 
+### GitHub専用ワークフロー (ghwf*)
+
+GitHub Issue/PRをラベルで制御する自動化ワークフロー。
+
+| スキル | 目的 |
+|--------|------|
+| `ghwf0-remote` | デーモン制御（start/stop/status） |
+| `ghwf1-kickoff` | Issue取得、ブランチ作成、Draft PR作成 |
+| `ghwf2-spec` | 仕様書作成 |
+| `ghwf3-plan` | 実装計画作成 |
+| `ghwf4-review` | レビュー |
+| `ghwf5-implement` | 実装 |
+| `ghwf6-verify` | 検証（lint/test/build） |
+| `ghwf7-pr` | Draft → Ready for Review |
+
+#### ラベル体系
+
+| ラベル | 説明 | 付与者 |
+|--------|------|--------|
+| `ghwf:approve` | 次ステップ実行 | ユーザー |
+| `ghwf:redo-N` | step Nから再実行 | ユーザー |
+| `ghwf:revision` | 全体再実行 | ユーザー |
+| `ghwf:executing` | 実行中 | デーモン |
+| `ghwf:waiting` | 承認待ち | デーモン |
+| `ghwf:completed` | 完了 | デーモン |
+
 ### ドキュメント系 (wf1-4)
 
 | スキル | 目的 | 成果物 |
@@ -120,6 +146,15 @@ skills/
 ├── wf4-review/SKILL.md
 ├── wf5-implement/SKILL.md
 ├── wf6-verify/SKILL.md
+├── wf7-pr/SKILL.md
+├── ghwf0-remote/SKILL.md      # GitHub専用デーモン
+├── ghwf1-kickoff/SKILL.md
+├── ghwf2-spec/SKILL.md
+├── ghwf3-plan/SKILL.md
+├── ghwf4-review/SKILL.md
+├── ghwf5-implement/SKILL.md
+├── ghwf6-verify/SKILL.md
+├── ghwf7-pr/SKILL.md
 ├── commit/SKILL.md
 ├── subask/SKILL.md
 ├── doc-review/SKILL.md

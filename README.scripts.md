@@ -18,9 +18,12 @@ scripts/
 │   ├── session-start.js    # セッション開始時
 │   ├── session-end.js      # セッション終了時
 │   └── pre-compact.js      # コンパクション前
-└── remote/                 # リモート操作用
-    ├── remote-daemon.sh    # リモート監視デーモン
-    └── remote-utils.sh     # リモート操作ユーティリティ
+├── remote/                 # リモート操作用（旧wf系）
+│   ├── remote-daemon.sh    # リモート監視デーモン
+│   └── remote-utils.sh     # リモート操作ユーティリティ
+└── ghwf/                   # GitHub専用ワークフロー
+    ├── ghwf-daemon.sh      # ラベル監視デーモン
+    └── ghwf-utils.sh       # ghwf共通関数（リトライ対応）
 ```
 
 ## 主要スクリプト
@@ -64,12 +67,30 @@ source ./scripts/wf-utils.sh
 
 ### remote/
 
-リモートワークフロー操作用スクリプト。
+リモートワークフロー操作用スクリプト（旧wf系）。
 
 | スクリプト | 目的 |
 |------------|------|
 | `remote-daemon.sh` | GitHub Issueコメント監視デーモン |
 | `remote-utils.sh` | リモート操作共通関数 |
+
+### ghwf/
+
+GitHub専用ワークフロー（ラベルベース制御）。
+
+| スクリプト | 目的 |
+|------------|------|
+| `ghwf-daemon.sh` | ghwf:*ラベル監視デーモン |
+| `ghwf-utils.sh` | ghwf共通関数（リトライ・権限チェック） |
+
+環境変数:
+
+| 変数 | デフォルト | 説明 |
+|------|-----------|------|
+| `POLL_INTERVAL` | 60 | ポーリング間隔（秒） |
+| `MAX_STEPS_PER_SESSION` | 10 | セッションあたり最大ステップ数 |
+| `GHWF_RETRY_MAX` | 3 | API呼び出しリトライ回数 |
+| `GHWF_RETRY_DELAY` | 5 | リトライ初期遅延（秒） |
 
 ## 関連
 

@@ -97,6 +97,21 @@ ln -s /path/to/dotclaude/dotclaude .claude
 | `/wf6-verify` | テスト・ビルド検証 |
 | `/wf6-verify pr` | 検証後にPR作成 |
 
+### GitHub専用ワークフロー (ghwf*)
+
+ラベルベースの自動化ワークフロー。Draft PRを早期に作成し、ラベルで状態管理。
+
+| コマンド | 説明 |
+|---------|------|
+| `/ghwf0-remote <start\|stop\|status>` | デーモン制御 |
+| `/ghwf1-kickoff <issue>` | Issue取得→ブランチ→Draft PR作成 |
+| `/ghwf2-spec` | 仕様書作成 |
+| `/ghwf3-plan` | 実装計画作成 |
+| `/ghwf4-review` | レビュー |
+| `/ghwf5-implement` | 実装 |
+| `/ghwf6-verify` | 検証 |
+| `/ghwf7-pr` | Draft → Ready for Review |
+
 ### ユーティリティコマンド
 
 | コマンド | 説明 |
@@ -154,6 +169,30 @@ ln -s /path/to/dotclaude/dotclaude .claude
 # 複数ワークを同時監視
 /wf0-remote start --all
 ```
+
+### GitHub専用ワークフロー (ghwf)
+
+ラベルベースの完全自動化ワークフロー。
+
+```bash
+# 1. デーモン起動
+/ghwf0-remote start
+
+# 2. Issue に ghwf:approve ラベルを付与
+#    → デーモンが検知して自動実行
+
+# 3. 各ステップ完了後、ghwf:waiting ラベルが付く
+#    → 確認後、ghwf:approve で次へ
+
+# 4. 修正が必要な場合
+#    → コメントで指示 + ghwf:redo-3 で step 3 から再実行
+```
+
+ラベルで状態管理:
+- `ghwf:approve` - 次ステップ実行
+- `ghwf:redo-N` - step N から再実行
+- `ghwf:revision` - 全体再実行
+- `ghwf:stop` - 監視停止
 
 ## リポジトリ構造
 
