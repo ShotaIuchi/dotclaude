@@ -21,7 +21,7 @@ source "${SCRIPT_DIR}/ghwf-utils.sh"
 # Configuration
 POLL_INTERVAL="${POLL_INTERVAL:-60}"
 VERBOSE="${VERBOSE:-false}"
-MAX_STEPS_PER_SESSION="${MAX_STEPS_PER_SESSION:-10}"
+MAX_STEPS_PER_SESSION="${MAX_STEPS_PER_SESSION:-0}"  # 0 = unlimited
 
 # Track executed steps in this session
 EXECUTED_STEPS=0
@@ -30,7 +30,8 @@ echo "==================================="
 echo "GHWF Daemon"
 echo "==================================="
 echo "Poll interval: ${POLL_INTERVAL}s"
-echo "Max steps:     $MAX_STEPS_PER_SESSION"
+echo "Max steps:     ${MAX_STEPS_PER_SESSION:-unlimited}"
+[ "$MAX_STEPS_PER_SESSION" -eq 0 ] && echo "               (unlimited)"
 echo "Verbose:       $VERBOSE"
 echo "==================================="
 echo ""
@@ -66,8 +67,8 @@ process_issue() {
 
     echo "[INFO] Processing issue #$issue_number with label: $command_label"
 
-    # Check max steps limit
-    if [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
+    # Check max steps limit (0 = unlimited)
+    if [ "$MAX_STEPS_PER_SESSION" -gt 0 ] && [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
         echo "[WARN] Max steps ($MAX_STEPS_PER_SESSION) reached for this session"
         ghwf_post_comment "$issue_number" "セッションの最大ステップ数 ($MAX_STEPS_PER_SESSION) に達しました。デーモンを再起動してください。"
         return 1
@@ -149,8 +150,8 @@ process_issue() {
                         return
                     fi
 
-                    # Check max steps limit
-                    if [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
+                    # Check max steps limit (0 = unlimited)
+                    if [ "$MAX_STEPS_PER_SESSION" -gt 0 ] && [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
                         ghwf_remove_label "$issue_number" "ghwf:executing"
                         ghwf_add_label "$issue_number" "ghwf:waiting"
                         ghwf_post_comment "$issue_number" "最大ステップ数に達しました。\`ghwf:exec\` で続行できます。"
@@ -233,8 +234,8 @@ process_issue() {
                 ghwf_push_changes
                 ghwf_add_label "$issue_number" "ghwf:step-$step"
 
-                # Check max steps
-                if [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
+                # Check max steps (0 = unlimited)
+                if [ "$MAX_STEPS_PER_SESSION" -gt 0 ] && [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
                     ghwf_remove_label "$issue_number" "ghwf:executing"
                     ghwf_add_label "$issue_number" "ghwf:waiting"
                     ghwf_post_comment "$issue_number" "最大ステップ数に達しました。\`ghwf:approve\` で続行できます。"
@@ -294,8 +295,8 @@ process_issue() {
                 ghwf_push_changes
                 ghwf_add_label "$issue_number" "ghwf:step-$step"
 
-                # Check max steps
-                if [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
+                # Check max steps (0 = unlimited)
+                if [ "$MAX_STEPS_PER_SESSION" -gt 0 ] && [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
                     ghwf_remove_label "$issue_number" "ghwf:executing"
                     ghwf_add_label "$issue_number" "ghwf:waiting"
                     ghwf_post_comment "$issue_number" "最大ステップ数に達しました。\`ghwf:approve\` で続行できます。"
@@ -328,8 +329,8 @@ while true; do
     ghwf_update_daemon_state "last_poll" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     ghwf_update_daemon_state "executed_steps" "$EXECUTED_STEPS"
 
-    # Check max steps before polling
-    if [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
+    # Check max steps before polling (0 = unlimited)
+    if [ "$MAX_STEPS_PER_SESSION" -gt 0 ] && [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
         echo "[WARN] Max steps reached. Daemon will stop processing new commands."
         echo "[INFO] Restart daemon to reset step count."
         sleep "$POLL_INTERVAL"

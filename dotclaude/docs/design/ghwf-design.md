@@ -173,7 +173,7 @@ ghwf0-remote status  → Show status
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `MAX_STEPS_PER_SESSION` | 10 | Max workflow steps per daemon session |
+| `MAX_STEPS_PER_SESSION` | 0 (unlimited) | Max workflow steps per daemon session |
 | `POLL_INTERVAL` | 60 | Polling interval in seconds |
 
 ### Retry Strategy

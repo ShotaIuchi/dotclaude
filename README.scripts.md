@@ -88,7 +88,7 @@ GitHub専用ワークフロー（ラベルベース制御）。
 | 変数 | デフォルト | 説明 |
 |------|-----------|------|
 | `POLL_INTERVAL` | 60 | ポーリング間隔（秒） |
-| `MAX_STEPS_PER_SESSION` | 10 | セッションあたり最大ステップ数 |
+| `MAX_STEPS_PER_SESSION` | 0 (無制限) | セッションあたり最大ステップ数 |
 | `GHWF_RETRY_MAX` | 3 | API呼び出しリトライ回数 |
 | `GHWF_RETRY_DELAY` | 5 | リトライ初期遅延（秒） |
 

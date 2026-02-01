@@ -55,7 +55,7 @@ GitHub Issue/PR のラベルを監視し、ワークフローを自動実行す�
 | Environment Variable | Default | Description |
 |---------------------|---------|-------------|
 | `POLL_INTERVAL` | 60 | Polling interval in seconds |
-| `MAX_STEPS_PER_SESSION` | 10 | Max workflow steps before daemon pauses |
+| `MAX_STEPS_PER_SESSION` | 0 (unlimited) | Max workflow steps before daemon pauses |
 | `VERBOSE` | false | Enable detailed logging |
 
 ### Retry Settings
