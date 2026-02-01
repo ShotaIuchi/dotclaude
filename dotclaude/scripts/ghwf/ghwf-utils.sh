@@ -409,6 +409,7 @@ ghwf_ensure_labels() {
         "ghwf:auto-to-5:#5319E7:Auto-run until step 5 (implement)"
         "ghwf:auto-to-6:#5319E7:Auto-run until step 6 (verify)"
         "ghwf:auto-all:#5319E7:Auto-run all steps without approval"
+        "ghwf:waiting-deps:#FEF2C0:Waiting for dependency issues to close"
         "ghwf:step-1:#C5DEF5:Step 1 completed"
         "ghwf:step-2:#C5DEF5:Step 2 completed"
         "ghwf:step-3:#C5DEF5:Step 3 completed"
@@ -439,6 +440,31 @@ ghwf_update_work_state() {
     jq --arg work_id "$work_id" --arg key "$key" --arg value "$value" \
         '.works[$work_id][$key] = $value' "$state_file" > "$tmp_file" && \
         mv "$tmp_file" "$state_file"
+}
+
+# Check if issue is blocked by dependencies
+# Returns: "blocked" if has open blocking issues, "ok" otherwise
+ghwf_check_dependencies() {
+    local issue_number="$1"
+
+    # Get blocked_by dependencies via REST API
+    local blocked_by
+    blocked_by=$(gh api "repos/{owner}/{repo}/issues/$issue_number/dependencies/blocked_by" \
+        --jq '[.[] | select(.state == "open")] | length' 2>/dev/null || echo "0")
+
+    if [ "$blocked_by" -gt 0 ]; then
+        echo "blocked"
+    else
+        echo "ok"
+    fi
+}
+
+# Get list of blocking issue numbers (open only)
+ghwf_get_blocking_issues() {
+    local issue_number="$1"
+
+    gh api "repos/{owner}/{repo}/issues/$issue_number/dependencies/blocked_by" \
+        --jq '[.[] | select(.state == "open") | .number] | join(", ")' 2>/dev/null || echo ""
 }
 
 # Get PR number from issue

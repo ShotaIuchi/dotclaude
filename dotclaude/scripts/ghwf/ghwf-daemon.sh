@@ -90,6 +90,22 @@ process_issue() {
         echo "[INFO] Permission check passed for user: $label_author"
     fi
 
+    # Check dependencies (after permission check, before command processing)
+    local dep_status
+    dep_status=$(ghwf_check_dependencies "$issue_number")
+
+    if [ "$dep_status" = "blocked" ]; then
+        local blocking_issues
+        blocking_issues=$(ghwf_get_blocking_issues "$issue_number")
+        echo "[INFO] Issue #$issue_number is blocked by: #$blocking_issues"
+        ghwf_add_label "$issue_number" "ghwf:waiting-deps"
+        ghwf_remove_label "$issue_number" "$command_label"
+        return 0  # Skip without error
+    fi
+
+    # Remove waiting-deps label if exists (no longer blocked)
+    ghwf_remove_label "$issue_number" "ghwf:waiting-deps" 2>/dev/null || true
+
     # Get work-id
     local work_id
     work_id=$(ghwf_get_work_id "$issue_number")
