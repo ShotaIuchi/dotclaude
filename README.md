@@ -215,17 +215,40 @@ ln -s /path/to/dotclaude/dotclaude .claude
 ghwf7-pr（Draft → Ready for Review）
 ```
 
-**ラベル一覧:**
+**ラベル仕様:**
 
-| ラベル | 操作 | 付与者 |
-|--------|------|--------|
-| `ghwf:approve` | 次ステップ実行 | ユーザー |
-| `ghwf:redo-N` | step N から再実行 | ユーザー |
-| `ghwf:revision` | wf1から全体再実行 | ユーザー |
-| `ghwf:stop` | 監視停止 | ユーザー |
-| `ghwf:executing` | 実行中 | デーモン |
-| `ghwf:waiting` | 承認待ち | デーモン |
-| `ghwf:completed` | 完了 | デーモン |
+### Command Labels（ユーザー付与）
+
+| ラベル | 説明 | 更新必須 |
+|--------|------|----------|
+| `ghwf:approve` | 次ステップへ進む | No |
+| `ghwf:redo` | 現在のステップを再実行 | Yes |
+| `ghwf:redo-N` | ステップNから再実行（N=1-7） | Yes |
+| `ghwf:revision` | step 1から全体再実行 | Yes |
+| `ghwf:stop` | 監視を停止 | No |
+
+### State Labels（デーモン管理）
+
+| ラベル | 説明 |
+|--------|------|
+| `ghwf:executing` | ステップ実行中 |
+| `ghwf:waiting` | 承認待ち |
+| `ghwf:completed` | 全ステップ完了 |
+
+### Progress Labels（デーモン管理）
+
+| ラベル | 説明 |
+|--------|------|
+| `ghwf:step-1` ~ `ghwf:step-7` | 各ステップ完了マーカー |
+
+**「更新必須」について:**
+`redo*`/`revision` は Issue/PR に新しいコメントか本文更新がないと実行されません。
+再実行の指示をコメントで書いてからラベルを付与してください。
+
+**redo vs revision の使い分け:**
+- `ghwf:redo`: 現在のステップだけやり直す（軽微な修正）
+- `ghwf:redo-3`: step 3（plan）からやり直す（計画変更が必要な場合）
+- `ghwf:revision`: step 1 から全てやり直す（仕様変更が必要な場合）
 
 ## リポジトリ構造
 
