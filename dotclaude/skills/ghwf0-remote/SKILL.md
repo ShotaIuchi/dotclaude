@@ -20,6 +20,14 @@ GitHub Issue/PR のラベルを監視し、ワークフローを自動実行す�
 
 ## Label Schema
 
+### Opt-in Label (Required)
+
+| Label | Description |
+|-------|-------------|
+| `ghwf` | デーモン監視を有効化（必須） |
+
+**Note**: `ghwf` ラベルがないIssueは、コマンドラベルがあっても無視されます。
+
 ### State Labels (Daemon Managed)
 
 | Label | Description |
@@ -32,7 +40,7 @@ GitHub Issue/PR のラベルを監視し、ワークフローを自動実行す�
 
 | Label | Description | Requires Update |
 |-------|-------------|-----------------|
-| `ghwf:approve` | 次ステップへ | No |
+| `ghwf:exec` | 次ステップを実行 | No |
 | `ghwf:redo` | 現在ステップ再実行 | Yes |
 | `ghwf:redo-N` | step N から再実行 | Yes |
 | `ghwf:revision` | wf1 から全体再実行 | Yes |
@@ -70,9 +78,9 @@ GHWF_RETRY_MAX=5 MAX_STEPS_PER_SESSION=20 /ghwf0-remote start
 ### Polling (60秒間隔)
 
 ```
-1. Query: Issues/PRs with ghwf:* command labels
+1. Query: Issues/PRs with ghwf + ghwf:* command labels
 2. For each:
-   a. ghwf:approve → 次ステップ実行
+   a. ghwf:exec → 次ステップ実行
    b. ghwf:redo* → 更新チェック → step N から実行
    c. ghwf:revision → 更新チェック → step 1 から実行
    d. ghwf:stop → 監視停止

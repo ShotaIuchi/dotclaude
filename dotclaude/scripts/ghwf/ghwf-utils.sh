@@ -97,10 +97,13 @@ ghwf_update_daemon_state() {
 }
 
 # Query issues with ghwf command labels (with retry)
+# Only returns issues that have BOTH:
+#   1. The base "ghwf" label (opt-in for monitoring)
+#   2. A command label (ghwf:start, ghwf:approve, etc.)
 ghwf_query_command_issues() {
-    ghwf_retry_default gh issue list --json number,title,labels --limit 100 | jq -r '
+    ghwf_retry_default gh issue list --label "ghwf" --json number,title,labels --limit 100 | jq -r '
         .[] | select(.labels[]?.name |
-            test("^ghwf:(approve|redo|redo-[1-7]|revision|stop)$"))
+            test("^ghwf:(exec|redo|redo-[1-7]|revision|stop)$"))
     '
 }
 
@@ -109,7 +112,7 @@ ghwf_get_command_label() {
     local issue_number="$1"
 
     ghwf_retry_default gh issue view "$issue_number" --json labels --jq '
-        .labels[].name | select(test("^ghwf:(approve|redo|redo-[1-7]|revision|stop)$"))
+        .labels[].name | select(test("^ghwf:(exec|redo|redo-[1-7]|revision|stop)$"))
     ' | head -1
 }
 
@@ -385,10 +388,11 @@ ghwf_get_label_author() {
 # Ensure required labels exist in the repository
 ghwf_ensure_labels() {
     local labels=(
+        "ghwf:#6F42C1:Enable ghwf daemon monitoring"
         "ghwf:executing:#0E8A16:Currently executing a step"
         "ghwf:waiting:#FBCA04:Waiting for user approval"
         "ghwf:completed:#1D76DB:All steps completed"
-        "ghwf:approve:#5319E7:Proceed to next step"
+        "ghwf:exec:#5319E7:Execute next step"
         "ghwf:redo:#D93F0B:Redo current step"
         "ghwf:redo-1:#D93F0B:Redo from step 1"
         "ghwf:redo-2:#D93F0B:Redo from step 2"

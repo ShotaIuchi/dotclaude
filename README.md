@@ -201,7 +201,7 @@ ln -s /path/to/dotclaude/dotclaude .claude
 ラベルベースの完全自動化ワークフロー。ghwf1でDraft PRを即座に作成。
 
 ```
-[Issue作成] + ghwf:approve ラベル付与
+[Issue作成] + ghwf + ghwf:exec ラベル付与
     ↓
 /ghwf0-remote start（デーモン起動）
     ↓
@@ -210,18 +210,26 @@ ln -s /path/to/dotclaude/dotclaude .claude
     ghwf2-spec → ghwf3-plan → ...
     ↓
 [各ステップ後] ghwf:waiting ラベル
-    → 確認して ghwf:approve で続行
+    → 確認して ghwf:exec で続行
     ↓
 ghwf7-pr（Draft → Ready for Review）
 ```
 
 **ラベル仕様:**
 
+### Opt-in Label（必須）
+
+| ラベル | 説明 |
+|--------|------|
+| `ghwf` | デーモン監視を有効化 |
+
+**Note**: `ghwf` ラベルがないIssueは、コマンドラベルがあっても無視されます。
+
 ### Command Labels（ユーザー付与）
 
 | ラベル | 説明 | 更新必須 |
 |--------|------|----------|
-| `ghwf:approve` | 次ステップへ進む | No |
+| `ghwf:exec` | 次ステップを実行 | No |
 | `ghwf:redo` | 現在のステップを再実行 | Yes |
 | `ghwf:redo-N` | ステップNから再実行（N=1-7） | Yes |
 | `ghwf:revision` | step 1から全体再実行 | Yes |
@@ -229,7 +237,7 @@ ghwf7-pr（Draft → Ready for Review）
 
 ### Auto-to Labels（ノンストップ実行）
 
-指定ステップまで承認なしで連続実行するラベル。`ghwf:approve` と併用。
+指定ステップまで承認なしで連続実行するラベル。`ghwf:exec` と併用。
 
 | ラベル | 停止ステップ | 説明 |
 |--------|-------------|------|
@@ -278,11 +286,11 @@ sequenceDiagram
     participant Daemon as 🤖 Daemon
     participant Claude as 🧠 Claude
 
-    Note over User,Claude: ── Normal Flow (ghwf:approve) ──
+    Note over User,Claude: ── Start Flow (ghwf + ghwf:exec) ──
     User->>GH: Create Issue
-    User->>GH: Add ghwf:approve
-    Daemon->>GH: Detect ghwf:approve
-    Daemon->>GH: Remove ghwf:approve
+    User->>GH: Add ghwf + ghwf:exec
+    Daemon->>GH: Detect ghwf:exec
+    Daemon->>GH: Remove ghwf:exec
     Daemon->>GH: Add ghwf:executing
     Daemon->>Claude: Execute ghwf1-kickoff
     Claude-->>Daemon: Done
@@ -290,12 +298,12 @@ sequenceDiagram
     Daemon->>GH: Remove ghwf:executing
     Daemon->>GH: Add ghwf:waiting
     Note over User: Review & Approve
-    User->>GH: Add ghwf:approve
+    User->>GH: Add ghwf:exec
     Note over Daemon,Claude: Repeat steps 2-7...
 
-    Note over User,Claude: ── Auto-to Flow (ghwf:approve + ghwf:auto-to-N) ──
-    User->>GH: Add ghwf:approve + ghwf:auto-to-4
-    Daemon->>GH: Detect ghwf:approve
+    Note over User,Claude: ── Auto-to Flow (ghwf:exec + ghwf:auto-to-N) ──
+    User->>GH: Add ghwf:exec + ghwf:auto-to-4
+    Daemon->>GH: Detect ghwf:exec
     Daemon->>GH: Add ghwf:executing
     loop step < auto-to limit (4)
         Daemon->>Claude: Execute step N
@@ -337,7 +345,7 @@ sequenceDiagram
 stateDiagram-v2
     [*] --> NoLabel : Issue created
 
-    NoLabel --> Executing : approve
+    NoLabel --> Executing : exec
 
     state Executing {
         [*] --> Step1
@@ -353,7 +361,7 @@ stateDiagram-v2
     Executing --> Stopped : stop
     Executing --> Completed : Step 7 done
 
-    Waiting --> Executing : approve
+    Waiting --> Executing : exec
     Waiting --> Executing : redo-N (with updates)
     Waiting --> Executing : revision (with updates)
 
@@ -367,13 +375,16 @@ stateDiagram-v2
 
 | 目的 | 付与ラベル | 結果 |
 |------|-----------|------|
-| 新規開始（1ステップずつ） | `ghwf:approve` | step 1 実行 → waiting |
-| 新規開始（step 4まで自動） | `ghwf:approve` + `ghwf:auto-to-4` | step 1-4 実行 → waiting |
-| 全自動実行 | `ghwf:approve` + `ghwf:auto-all` | step 1-7 実行 → completed |
+| 新規開始（1ステップずつ） | `ghwf` + `ghwf:exec` | step 1 実行 → waiting |
+| 新規開始（step 4まで自動） | `ghwf` + `ghwf:exec` + `ghwf:auto-to-4` | step 1-4 実行 → waiting |
+| 全自動実行 | `ghwf` + `ghwf:exec` + `ghwf:auto-all` | step 1-7 実行 → completed |
+| 次ステップへ進む | `ghwf:exec` | 次ステップ実行 → waiting |
 | 現ステップ再実行 | `ghwf:redo` + コメント | 現ステップから再開 |
 | 特定ステップから再実行 | `ghwf:redo-3` + コメント | step 3 から再開 |
 | 全体やり直し | `ghwf:revision` + コメント | step 1 から全再実行 |
 | 緊急停止 | `ghwf:stop` | 即時停止 |
+
+**Note**: `ghwf` ラベルは監視対象にするための必須ラベルです（初回のみ付与）。
 
 ## リポジトリ構造
 
@@ -566,7 +577,7 @@ tmux attach -t ghwf-daemon
 デーモン起動時に自動作成されます。手動で作成する場合:
 
 ```bash
-gh label create "ghwf:approve" --color "5319E7"
+gh label create "ghwf:exec" --color "5319E7"
 ```
 
 ## ライセンス

@@ -6,6 +6,14 @@ GitHub Issue/PR をラベルで制御するワークフローシステム。
 
 ## Label Schema
 
+### Opt-in Label (Required)
+
+| Label | Description |
+|-------|-------------|
+| `ghwf` | Enable daemon monitoring for this issue |
+
+**Note**: Issues without the `ghwf` label are ignored, even if they have command labels.
+
 ### State Labels (Daemon Managed)
 
 | Label | Description |
@@ -18,7 +26,7 @@ GitHub Issue/PR をラベルで制御するワークフローシステム。
 
 | Label | Description | Requires Update |
 |-------|-------------|-----------------|
-| `ghwf:approve` | Proceed to next step | No |
+| `ghwf:exec` | Execute next step | No |
 | `ghwf:redo` | Redo current step | Yes |
 | `ghwf:redo-N` | Redo from step N (1-7) | Yes |
 | `ghwf:revision` | Full revision from step 1 | Yes |
@@ -53,11 +61,11 @@ GitHub Issue/PR をラベルで制御するワークフローシステム。
 ### Normal Flow
 
 ```
-[Human] Create Issue + add ghwf:approve label
+[Human] Create Issue + add ghwf + ghwf:exec labels
     ↓
-[Daemon] Detect ghwf:approve
+[Daemon] Detect ghwf:exec (on ghwf-labeled issue)
     ↓
-[Daemon] Remove ghwf:approve, Add ghwf:executing
+[Daemon] Remove ghwf:exec, Add ghwf:executing
     ↓
 [Daemon] Execute ghwf1-kickoff
     ├── Create branch
@@ -67,7 +75,7 @@ GitHub Issue/PR をラベルで制御するワークフローシステム。
     ↓
 [Daemon] Remove ghwf:executing, Add ghwf:waiting + ghwf:step-1
     ↓
-[Human] Review, add ghwf:approve
+[Human] Review, add ghwf:exec
     ↓
 [Daemon] Execute ghwf2-spec ...
     ↓
@@ -77,6 +85,15 @@ GitHub Issue/PR をラベルで制御するワークフローシステム。
     ↓
 [Daemon] Remove ghwf:waiting, Add ghwf:completed
 ```
+
+### Label Usage
+
+| Action | Use Label |
+|--------|-----------|
+| Execute next step | `ghwf:exec` |
+| Redo current/specific step | `ghwf:redo` / `ghwf:redo-N` |
+| Full revision | `ghwf:revision` |
+| Stop workflow | `ghwf:stop` |
 
 ### Redo Flow
 
@@ -188,10 +205,11 @@ Retry-enabled operations:
 Every 60 seconds:
 1. Query Issues/PRs with ghwf:* labels
 2. For each found:
-   a. ghwf:approve → execute next step
-   b. ghwf:redo* → check updates → execute from step N
-   c. ghwf:revision → check updates → execute from step 1
-   d. ghwf:stop → stop monitoring this issue
+   a. ghwf:exec → execute from step 1 (new issues only)
+   b. ghwf:exec → execute next step (step 1+ required)
+   c. ghwf:redo* → check updates → execute from step N
+   d. ghwf:revision → check updates → execute from step 1
+   e. ghwf:stop → stop monitoring this issue
 3. Update labels accordingly
 4. Push changes
 ```
@@ -244,7 +262,7 @@ Every 60 seconds:
    ```
 6. **Update labels** (NEW)
    - Add: `ghwf:waiting`, `ghwf:step-1`
-   - Remove: `ghwf:approve`, `ghwf:executing`
+   - Remove: `ghwf:exec`, `ghwf:executing`
 
 ## ghwf7-pr Changes
 

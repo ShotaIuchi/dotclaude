@@ -106,7 +106,7 @@ process_issue() {
     fi
 
     case "$command_label" in
-        ghwf:approve)
+        ghwf:exec)
             # Get next step
             local current_step
             current_step=$(ghwf_get_current_step "$issue_number")
@@ -114,17 +114,12 @@ process_issue() {
 
             if [ "$next_step" -gt 7 ]; then
                 echo "[INFO] Workflow already completed"
-                ghwf_remove_label "$issue_number" "ghwf:approve"
+                ghwf_remove_label "$issue_number" "ghwf:exec"
                 return
             fi
 
-            # If no work-id and step 0, this is a new issue
-            if [ -z "$work_id" ] && [ "$current_step" -eq 0 ]; then
-                next_step=1
-            fi
-
             # Update labels
-            ghwf_remove_label "$issue_number" "ghwf:approve"
+            ghwf_remove_label "$issue_number" "ghwf:exec"
             ghwf_remove_label "$issue_number" "ghwf:waiting"
             ghwf_add_label "$issue_number" "ghwf:executing"
 
@@ -158,7 +153,7 @@ process_issue() {
                     if [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
                         ghwf_remove_label "$issue_number" "ghwf:executing"
                         ghwf_add_label "$issue_number" "ghwf:waiting"
-                        ghwf_post_comment "$issue_number" "最大ステップ数に達しました。\`ghwf:approve\` で続行できます。"
+                        ghwf_post_comment "$issue_number" "最大ステップ数に達しました。\`ghwf:exec\` で続行できます。"
                         return
                     fi
 
