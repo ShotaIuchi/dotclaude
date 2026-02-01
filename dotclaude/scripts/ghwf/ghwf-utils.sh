@@ -386,45 +386,64 @@ ghwf_get_label_author() {
 }
 
 # Ensure required labels exist in the repository
+# Format: name|color|description (using | as delimiter to avoid conflict with : in label names)
+# Auto-detects repository from current directory
 ghwf_ensure_labels() {
+    # Get repository name (owner/repo format)
+    local repo
+    repo=$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null) || {
+        echo "[WARN] Could not detect repository. Skipping label creation." >&2
+        return 1
+    }
+
+    echo "[INFO] Creating labels for $repo..."
+
     local labels=(
-        "ghwf:#6F42C1:Enable ghwf daemon monitoring"
-        "ghwf:executing:#0E8A16:Currently executing a step"
-        "ghwf:waiting:#FBCA04:Waiting for user approval"
-        "ghwf:completed:#1D76DB:All steps completed"
-        "ghwf:exec:#5319E7:Execute next step"
-        "ghwf:redo:#D93F0B:Redo current step"
-        "ghwf:redo-1:#D93F0B:Redo from step 1"
-        "ghwf:redo-2:#D93F0B:Redo from step 2"
-        "ghwf:redo-3:#D93F0B:Redo from step 3"
-        "ghwf:redo-4:#D93F0B:Redo from step 4"
-        "ghwf:redo-5:#D93F0B:Redo from step 5"
-        "ghwf:redo-6:#D93F0B:Redo from step 6"
-        "ghwf:redo-7:#D93F0B:Redo from step 7"
-        "ghwf:revision:#D93F0B:Full revision from step 1"
-        "ghwf:stop:#B60205:Stop monitoring"
-        "ghwf:auto-to-2:#5319E7:Auto-run until step 2 (spec)"
-        "ghwf:auto-to-3:#5319E7:Auto-run until step 3 (plan)"
-        "ghwf:auto-to-4:#5319E7:Auto-run until step 4 (review)"
-        "ghwf:auto-to-5:#5319E7:Auto-run until step 5 (implement)"
-        "ghwf:auto-to-6:#5319E7:Auto-run until step 6 (verify)"
-        "ghwf:auto-all:#5319E7:Auto-run all steps without approval"
-        "ghwf:waiting-deps:#FEF2C0:Waiting for dependency issues to close"
-        "ghwf:waiting-subs:#FEF2C0:Waiting for sub-issues to complete"
-        "ghwf:step-1:#C5DEF5:Step 1 completed"
-        "ghwf:step-2:#C5DEF5:Step 2 completed"
-        "ghwf:step-3:#C5DEF5:Step 3 completed"
-        "ghwf:step-4:#C5DEF5:Step 4 completed"
-        "ghwf:step-5:#C5DEF5:Step 5 completed"
-        "ghwf:step-6:#C5DEF5:Step 6 completed"
-        "ghwf:step-7:#C5DEF5:Step 7 completed"
+        "ghwf|#6F42C1|Enable ghwf daemon monitoring"
+        "ghwf:executing|#0E8A16|Currently executing a step"
+        "ghwf:waiting|#FBCA04|Waiting for user approval"
+        "ghwf:completed|#1D76DB|All steps completed"
+        "ghwf:exec|#5319E7|Execute next step"
+        "ghwf:redo|#D93F0B|Redo current step"
+        "ghwf:redo-1|#D93F0B|Redo from step 1"
+        "ghwf:redo-2|#D93F0B|Redo from step 2"
+        "ghwf:redo-3|#D93F0B|Redo from step 3"
+        "ghwf:redo-4|#D93F0B|Redo from step 4"
+        "ghwf:redo-5|#D93F0B|Redo from step 5"
+        "ghwf:redo-6|#D93F0B|Redo from step 6"
+        "ghwf:redo-7|#D93F0B|Redo from step 7"
+        "ghwf:revision|#D93F0B|Full revision from step 1"
+        "ghwf:stop|#B60205|Stop monitoring"
+        "ghwf:auto-to-2|#5319E7|Auto-run until step 2 (spec)"
+        "ghwf:auto-to-3|#5319E7|Auto-run until step 3 (plan)"
+        "ghwf:auto-to-4|#5319E7|Auto-run until step 4 (review)"
+        "ghwf:auto-to-5|#5319E7|Auto-run until step 5 (implement)"
+        "ghwf:auto-to-6|#5319E7|Auto-run until step 6 (verify)"
+        "ghwf:auto-all|#5319E7|Auto-run all steps without approval"
+        "ghwf:waiting-deps|#FEF2C0|Waiting for dependency issues to close"
+        "ghwf:waiting-subs|#FEF2C0|Waiting for sub-issues to complete"
+        "ghwf:step-1|#C5DEF5|Step 1 completed"
+        "ghwf:step-2|#C5DEF5|Step 2 completed"
+        "ghwf:step-3|#C5DEF5|Step 3 completed"
+        "ghwf:step-4|#C5DEF5|Step 4 completed"
+        "ghwf:step-5|#C5DEF5|Step 5 completed"
+        "ghwf:step-6|#C5DEF5|Step 6 completed"
+        "ghwf:step-7|#C5DEF5|Step 7 completed"
     )
 
+    local created=0
+    local skipped=0
     for label_def in "${labels[@]}"; do
-        IFS=':' read -r name color description <<< "$label_def"
-        # Try to create, ignore if exists
-        gh label create "$name" --color "${color#\#}" --description "$description" 2>/dev/null || true
+        IFS='|' read -r name color description <<< "$label_def"
+        # Try to create with explicit --repo, ignore if exists
+        if gh label create "$name" --repo "$repo" --color "${color#\#}" --description "$description" 2>/dev/null; then
+            ((created++))
+        else
+            ((skipped++))
+        fi
     done
+
+    echo "[INFO] Labels: $created created, $skipped already exist"
 }
 
 # Update work state in state file
