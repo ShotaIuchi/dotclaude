@@ -170,7 +170,7 @@ process_issue() {
                 fi
 
                 # Execute step
-                if ghwf_invoke_claude "$next_step" "$work_id" ""; then
+                if ghwf_invoke_claude "$next_step" "$issue_number" "$work_id" ""; then
                     ((EXECUTED_STEPS++)) || true
                     ghwf_push_changes
                     ghwf_add_label "$issue_number" "ghwf:step-$next_step"
@@ -255,7 +255,7 @@ process_issue() {
                     step_instruction="$instruction"
                 fi
 
-                if ! ghwf_invoke_claude "$step" "$work_id" "$step_instruction"; then
+                if ! ghwf_invoke_claude "$step" "$issue_number" "$work_id" "$step_instruction"; then
                     ghwf_remove_label "$issue_number" "ghwf:executing"
                     ghwf_add_label "$issue_number" "ghwf:waiting"
                     ghwf_post_comment "$issue_number" "Step $(get_step_name "$step") failed."
@@ -316,7 +316,7 @@ process_issue() {
                     step_instruction="$instruction"
                 fi
 
-                if ! ghwf_invoke_claude "$step" "$work_id" "$step_instruction"; then
+                if ! ghwf_invoke_claude "$step" "$issue_number" "$work_id" "$step_instruction"; then
                     ghwf_remove_label "$issue_number" "ghwf:executing"
                     ghwf_add_label "$issue_number" "ghwf:waiting"
                     ghwf_post_comment "$issue_number" "Step $(get_step_name "$step") failed."

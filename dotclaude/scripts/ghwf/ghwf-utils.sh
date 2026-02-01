@@ -315,10 +315,12 @@ ghwf_get_step_command() {
 
 # Invoke Claude Code for workflow step (with retry)
 # Note: Uses fewer retries for Claude as it's a heavier operation
+# Args: step, issue_number, work_id, instruction
 ghwf_invoke_claude() {
     local step="$1"
-    local work_id="$2"
-    local instruction="$3"
+    local issue_number="$2"
+    local work_id="$3"
+    local instruction="$4"
 
     local cmd
     cmd=$(ghwf_get_step_command "$step")
@@ -333,9 +335,15 @@ ghwf_invoke_claude() {
     local retry_delay="${GHWF_CLAUDE_RETRY_DELAY:-30}"
 
     if [ -n "$instruction" ]; then
+        # Revise mode: all steps use state.json, no extra args needed
         ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "echo '$instruction' | claude --print '/$cmd revise'"
     else
-        ghwf_retry "$max_retries" "$retry_delay" 2 claude --print "/$cmd"
+        # New execution: ghwf1-kickoff requires issue number
+        if [ "$step" -eq 1 ]; then
+            ghwf_retry "$max_retries" "$retry_delay" 2 claude --print "/$cmd $issue_number"
+        else
+            ghwf_retry "$max_retries" "$retry_delay" 2 claude --print "/$cmd"
+        fi
     fi
 }
 
