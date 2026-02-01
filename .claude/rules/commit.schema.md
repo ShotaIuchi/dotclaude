@@ -10,6 +10,12 @@
 [footer]
 ```
 
+## Language (Required)
+
+- Subject and body must be written in **Japanese**
+- Type prefix remains in English (`feat`, `fix`, etc.)
+- Ticket references remain in original format (`#123`, `PROJ-123`)
+
 ## Type (Required)
 
 | Type | Purpose |
@@ -32,11 +38,11 @@
 
 - 50 characters or less (including ticket)
 - No period at the end
-- Use imperative mood (Add, Fix, Update...)
+- Write in Japanese (e.g., 「〜を追加」「〜を修正」)
 
 ## Body (Optional)
 
-- Describe the reason or background of the change
+- Describe the reason or background of the change in Japanese
 - Wrap at 72 characters
 
 ## Footer (Optional)
@@ -47,16 +53,16 @@
 ## Examples
 
 ```
-feat: #40 Add wf0-nextstep command
+feat: #40 wf0-nextstepコマンドを追加
 
-Implement feature to suggest next workflow step.
-Reads state.json status and displays appropriate next action.
-```
-
-```
-fix: Closes-87 Correct token refresh timing
+次のワークフローステップを提案する機能を実装。
+state.jsonのステータスを読み取り、適切な次のアクションを表示する。
 ```
 
 ```
-refactor: Renumber workflow templates from 0-based to 1-based
+fix: #87 トークンリフレッシュのタイミングを修正
+```
+
+```
+refactor: ワークフローテンプレートの番号を0始まりから1始まりに変更
 ```
