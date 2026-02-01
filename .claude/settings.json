@@ -9,7 +9,12 @@
       "Read(./__README*.md)"
     ],
     "allow": [
-      "mcp__pencil"
+      "mcp__pencil",
+      "Bash(gh issue *)",
+      "Bash(gh pr *)",
+      "Bash(gh label *)",
+      "Bash(gh api *)",
+      "Bash(gh auth status)"
     ]
   },
   "plansDirectory": "./.claude/plans"

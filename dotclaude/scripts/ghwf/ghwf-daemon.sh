@@ -36,9 +36,13 @@ echo "Verbose:       $VERBOSE"
 echo "==================================="
 echo ""
 
-# Ensure labels exist
-echo "[INFO] Ensuring ghwf labels exist..."
-ghwf_ensure_labels
+# Ensure labels exist (skip if SKIP_LABEL_CHECK=true)
+if [ "${SKIP_LABEL_CHECK:-false}" != "true" ]; then
+    echo "[INFO] Ensuring ghwf labels exist..."
+    ghwf_ensure_labels
+else
+    echo "[INFO] Skipping label check (SKIP_LABEL_CHECK=true)"
+fi
 
 # Initialize state
 ghwf_init_state

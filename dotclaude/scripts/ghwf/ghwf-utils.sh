@@ -93,7 +93,7 @@ ghwf_update_daemon_state() {
     local tmp_file="${state_file}.tmp"
     jq --arg key "$key" --arg value "$value" \
         '.daemon[$key] = $value' "$state_file" > "$tmp_file" && \
-        mv "$tmp_file" "$state_file"
+        mv -f "$tmp_file" "$state_file"
 }
 
 # Query issues with ghwf command labels (with retry)
@@ -439,15 +439,24 @@ ghwf_ensure_labels() {
         "ghwf:step-7|#C5DEF5|Step 7 completed"
     )
 
+    # Get existing labels (single API call)
+    local existing_labels
+    existing_labels=$(gh label list --repo "$repo" --json name --jq '.[].name' 2>/dev/null | grep "^ghwf" || true)
+
     local created=0
     local skipped=0
     for label_def in "${labels[@]}"; do
         IFS='|' read -r name color description <<< "$label_def"
-        # Try to create with explicit --repo, ignore if exists
+        # Skip if already exists
+        if echo "$existing_labels" | grep -q "^${name}$"; then
+            ((skipped++)) || true
+            continue
+        fi
+        # Create label
         if gh label create "$name" --repo "$repo" --color "${color#\#}" --description "$description" 2>/dev/null; then
-            ((created++))
+            ((created++)) || true
         else
-            ((skipped++))
+            ((skipped++)) || true
         fi
     done
 
@@ -467,7 +476,7 @@ ghwf_update_work_state() {
     local tmp_file="${state_file}.tmp"
     jq --arg work_id "$work_id" --arg key "$key" --arg value "$value" \
         '.works[$work_id][$key] = $value' "$state_file" > "$tmp_file" && \
-        mv "$tmp_file" "$state_file"
+        mv -f "$tmp_file" "$state_file"
 }
 
 # Check if issue is blocked by dependencies
