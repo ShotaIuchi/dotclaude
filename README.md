@@ -268,6 +268,113 @@ ghwf7-pr（Draft → Ready for Review）
 - `ghwf:redo-3`: step 3（plan）からやり直す（計画変更が必要な場合）
 - `ghwf:revision`: step 1 から全てやり直す（仕様変更が必要な場合）
 
+### ラベルワークフロー シーケンス図
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant User as 👤 User
+    participant GH as 🏷️ GitHub Labels
+    participant Daemon as 🤖 Daemon
+    participant Claude as 🧠 Claude
+
+    Note over User,Claude: ── Normal Flow (ghwf:approve) ──
+    User->>GH: Create Issue
+    User->>GH: Add ghwf:approve
+    Daemon->>GH: Detect ghwf:approve
+    Daemon->>GH: Remove ghwf:approve
+    Daemon->>GH: Add ghwf:executing
+    Daemon->>Claude: Execute ghwf1-kickoff
+    Claude-->>Daemon: Done
+    Daemon->>GH: Add ghwf:step-1
+    Daemon->>GH: Remove ghwf:executing
+    Daemon->>GH: Add ghwf:waiting
+    Note over User: Review & Approve
+    User->>GH: Add ghwf:approve
+    Note over Daemon,Claude: Repeat steps 2-7...
+
+    Note over User,Claude: ── Auto-to Flow (ghwf:approve + ghwf:auto-to-N) ──
+    User->>GH: Add ghwf:approve + ghwf:auto-to-4
+    Daemon->>GH: Detect ghwf:approve
+    Daemon->>GH: Add ghwf:executing
+    loop step < auto-to limit (4)
+        Daemon->>Claude: Execute step N
+        Claude-->>Daemon: Done
+        Daemon->>GH: Add ghwf:step-N
+        Note over Daemon: Check: step < 4? → Continue
+    end
+    Daemon->>GH: Remove ghwf:executing
+    Daemon->>GH: Add ghwf:waiting
+    Note over User: Stopped at step 4, waiting approval
+
+    Note over User,Claude: ── Redo Flow (ghwf:redo-N) ──
+    User->>GH: Add comment "Fix parallel section"
+    User->>GH: Add ghwf:redo-3
+    Daemon->>GH: Detect ghwf:redo-3
+    Daemon->>Daemon: Check updates since last execution
+    alt Updates found
+        Daemon->>GH: Remove ghwf:step-3 ~ step-7
+        Daemon->>GH: Add ghwf:executing
+        Daemon->>Claude: Execute ghwf3 with instruction
+        Claude-->>Daemon: Done
+        Note over Daemon,Claude: Continue steps 4-7...
+    else No updates
+        Daemon->>GH: Post "変更内容をコメントで指示してください"
+    end
+
+    Note over User,Claude: ── Stop Flow (ghwf:stop) ──
+    User->>GH: Add ghwf:stop
+    Daemon->>GH: Detect ghwf:stop (highest priority)
+    Daemon->>GH: Remove ghwf:executing
+    Daemon->>GH: Remove ghwf:stop
+    Daemon->>GH: Post "停止ラベルを検出しました"
+    Note over Daemon: Execution halted immediately
+```
+
+### ラベル状態遷移図
+
+```mermaid
+stateDiagram-v2
+    [*] --> NoLabel : Issue created
+
+    NoLabel --> Executing : approve
+
+    state Executing {
+        [*] --> Step1
+        Step1 --> Step2 : auto-to >= 2
+        Step2 --> Step3 : auto-to >= 3
+        Step3 --> Step4 : auto-to >= 4
+        Step4 --> Step5 : auto-to >= 5
+        Step5 --> Step6 : auto-to >= 6
+        Step6 --> Step7 : auto-all
+    }
+
+    Executing --> Waiting : Reached auto-to limit
+    Executing --> Stopped : stop
+    Executing --> Completed : Step 7 done
+
+    Waiting --> Executing : approve
+    Waiting --> Executing : redo-N (with updates)
+    Waiting --> Executing : revision (with updates)
+
+    Completed --> Executing : revision (with updates)
+
+    Stopped --> [*]
+    Completed --> [*] : PR merged
+```
+
+### ラベル組み合わせ早見表
+
+| 目的 | 付与ラベル | 結果 |
+|------|-----------|------|
+| 新規開始（1ステップずつ） | `ghwf:approve` | step 1 実行 → waiting |
+| 新規開始（step 4まで自動） | `ghwf:approve` + `ghwf:auto-to-4` | step 1-4 実行 → waiting |
+| 全自動実行 | `ghwf:approve` + `ghwf:auto-all` | step 1-7 実行 → completed |
+| 現ステップ再実行 | `ghwf:redo` + コメント | 現ステップから再開 |
+| 特定ステップから再実行 | `ghwf:redo-3` + コメント | step 3 から再開 |
+| 全体やり直し | `ghwf:revision` + コメント | step 1 から全再実行 |
+| 緊急停止 | `ghwf:stop` | 即時停止 |
+
 ## リポジトリ構造
 
 ```
