@@ -243,6 +243,47 @@ ghwf_get_step_from_label() {
     esac
 }
 
+# Get auto-to step limit from issue labels
+# Returns the minimum step from auto-to labels, or 0 if none
+ghwf_get_auto_to_step() {
+    local issue_number="$1"
+
+    gh issue view "$issue_number" --json labels --jq '
+        [.labels[].name |
+         select(test("^ghwf:auto-to-[2-6]$")) |
+         sub("ghwf:auto-to-"; "") | tonumber
+        ] + [
+         .labels[].name |
+         select(. == "ghwf:auto-all") |
+         7
+        ] |
+        if length > 0 then min else 0 end
+    '
+}
+
+# Check if current step should auto-continue (no approval needed)
+# Returns: "yes" if should continue, "no" if should wait
+ghwf_should_auto_continue() {
+    local issue_number="$1"
+    local current_step="$2"
+
+    local auto_limit
+    auto_limit=$(ghwf_get_auto_to_step "$issue_number")
+
+    if [ "$auto_limit" -eq 0 ]; then
+        echo "no"
+        return 1
+    fi
+
+    if [ "$current_step" -lt "$auto_limit" ]; then
+        echo "yes"
+        return 0
+    else
+        echo "no"
+        return 1
+    fi
+}
+
 # Get current step from labels
 ghwf_get_current_step() {
     local issue_number="$1"
@@ -358,6 +399,12 @@ ghwf_ensure_labels() {
         "ghwf:redo-7:#D93F0B:Redo from step 7"
         "ghwf:revision:#D93F0B:Full revision from step 1"
         "ghwf:stop:#B60205:Stop monitoring"
+        "ghwf:auto-to-2:#5319E7:Auto-run until step 2 (spec)"
+        "ghwf:auto-to-3:#5319E7:Auto-run until step 3 (plan)"
+        "ghwf:auto-to-4:#5319E7:Auto-run until step 4 (review)"
+        "ghwf:auto-to-5:#5319E7:Auto-run until step 5 (implement)"
+        "ghwf:auto-to-6:#5319E7:Auto-run until step 6 (verify)"
+        "ghwf:auto-all:#5319E7:Auto-run all steps without approval"
         "ghwf:step-1:#C5DEF5:Step 1 completed"
         "ghwf:step-2:#C5DEF5:Step 2 completed"
         "ghwf:step-3:#C5DEF5:Step 3 completed"

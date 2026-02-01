@@ -123,30 +123,63 @@ process_issue() {
                 next_step=1
             fi
 
-            echo "[INFO] Executing step $next_step: $(get_step_name "$next_step")"
-
             # Update labels
             ghwf_remove_label "$issue_number" "ghwf:approve"
             ghwf_remove_label "$issue_number" "ghwf:waiting"
             ghwf_add_label "$issue_number" "ghwf:executing"
 
-            # Execute step
-            if ghwf_invoke_claude "$next_step" "$work_id" ""; then
-                ((EXECUTED_STEPS++)) || true
-                ghwf_push_changes
-                ghwf_remove_label "$issue_number" "ghwf:executing"
-                ghwf_add_label "$issue_number" "ghwf:waiting"
-                ghwf_add_label "$issue_number" "ghwf:step-$next_step"
+            # Execute steps (loop for auto-to support)
+            while [ "$next_step" -le 7 ]; do
+                echo "[INFO] Executing step $next_step: $(get_step_name "$next_step")"
 
-                if [ "$next_step" -eq 7 ]; then
-                    ghwf_remove_label "$issue_number" "ghwf:waiting"
-                    ghwf_add_label "$issue_number" "ghwf:completed"
+                # Check for stop label (highest priority)
+                if gh issue view "$issue_number" --json labels --jq '.labels[].name' | grep -q "^ghwf:stop$"; then
+                    echo "[INFO] Stop label detected, halting execution"
+                    ghwf_remove_label "$issue_number" "ghwf:executing"
+                    ghwf_remove_label "$issue_number" "ghwf:stop"
+                    ghwf_post_comment "$issue_number" "停止ラベルを検出しました。Step $((next_step - 1)) で停止。"
+                    return
                 fi
-            else
-                ghwf_remove_label "$issue_number" "ghwf:executing"
-                ghwf_add_label "$issue_number" "ghwf:waiting"
-                ghwf_post_comment "$issue_number" "Step $(get_step_name "$next_step") failed. Please check and retry."
-            fi
+
+                # Execute step
+                if ghwf_invoke_claude "$next_step" "$work_id" ""; then
+                    ((EXECUTED_STEPS++)) || true
+                    ghwf_push_changes
+                    ghwf_add_label "$issue_number" "ghwf:step-$next_step"
+
+                    # Check if completed all steps
+                    if [ "$next_step" -eq 7 ]; then
+                        ghwf_remove_label "$issue_number" "ghwf:executing"
+                        ghwf_add_label "$issue_number" "ghwf:completed"
+                        return
+                    fi
+
+                    # Check max steps limit
+                    if [ "$EXECUTED_STEPS" -ge "$MAX_STEPS_PER_SESSION" ]; then
+                        ghwf_remove_label "$issue_number" "ghwf:executing"
+                        ghwf_add_label "$issue_number" "ghwf:waiting"
+                        ghwf_post_comment "$issue_number" "最大ステップ数に達しました。\`ghwf:approve\` で続行できます。"
+                        return
+                    fi
+
+                    # Check if should auto-continue
+                    if [ "$(ghwf_should_auto_continue "$issue_number" "$next_step")" = "yes" ]; then
+                        echo "[INFO] Auto-continuing to next step..."
+                        next_step=$((next_step + 1))
+                        continue
+                    else
+                        # Reached auto-to limit or no auto-to label, wait for approval
+                        ghwf_remove_label "$issue_number" "ghwf:executing"
+                        ghwf_add_label "$issue_number" "ghwf:waiting"
+                        return
+                    fi
+                else
+                    ghwf_remove_label "$issue_number" "ghwf:executing"
+                    ghwf_add_label "$issue_number" "ghwf:waiting"
+                    ghwf_post_comment "$issue_number" "Step $(get_step_name "$next_step") failed. Please check and retry."
+                    return
+                fi
+            done
             ;;
 
         ghwf:redo|ghwf:redo-[1-7])

@@ -31,6 +31,24 @@
 
 **禁止**: 任意のシェルコマンド、ファイルパス指定
 
+### 4. auto-to ラベル（ノンストップ実行）
+
+指定ステップまで承認なしで連続実行する。
+
+| ラベル | 停止ステップ |
+|--------|-------------|
+| `ghwf:auto-to-2` | step 2 (spec) |
+| `ghwf:auto-to-3` | step 3 (plan) |
+| `ghwf:auto-to-4` | step 4 (review) |
+| `ghwf:auto-to-5` | step 5 (implement) |
+| `ghwf:auto-to-6` | step 6 (verify) |
+| `ghwf:auto-all` | step 7 (pr) |
+
+**セキュリティルール**:
+- 最小値採用: 複数ラベル時は最小 step を採用
+- stop 優先: `ghwf:stop` は auto-to より常に優先
+- 上限制限: セッション上限（10ステップ）は auto-to でも適用
+
 ### 4. 実行環境の制限
 
 - 作業ディレクトリ: プロジェクトルートのみ

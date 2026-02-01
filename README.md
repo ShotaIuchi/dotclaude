@@ -227,6 +227,24 @@ ghwf7-pr（Draft → Ready for Review）
 | `ghwf:revision` | step 1から全体再実行 | Yes |
 | `ghwf:stop` | 監視を停止 | No |
 
+### Auto-to Labels（ノンストップ実行）
+
+指定ステップまで承認なしで連続実行するラベル。`ghwf:approve` と併用。
+
+| ラベル | 停止ステップ | 説明 |
+|--------|-------------|------|
+| `ghwf:auto-to-2` | step 2 | spec まで自動実行 |
+| `ghwf:auto-to-3` | step 3 | plan まで自動実行 |
+| `ghwf:auto-to-4` | step 4 | review まで自動実行 |
+| `ghwf:auto-to-5` | step 5 | implement まで自動実行 |
+| `ghwf:auto-to-6` | step 6 | verify まで自動実行 |
+| `ghwf:auto-all` | step 7 | 全ステップを自動実行 |
+
+**ルール:**
+- 複数の auto-to ラベルがある場合、最小の step を採用
+- `ghwf:stop` は auto-to より常に優先（即時停止）
+- セッション上限（10ステップ）は auto-to でも適用
+
 ### State Labels（デーモン管理）
 
 | ラベル | 説明 |

@@ -107,10 +107,54 @@ PRレビュー後のフィードバックを取り込み、既存PRに追加修�
 }
 ```
 
+## ノンストップ実行（auto-to ラベル）
+
+指定したステップまで承認なしで連続実行する機能。
+
+### 利用可能なラベル
+
+| ラベル | 停止ステップ | 説明 |
+|--------|-------------|------|
+| `ghwf:auto-to-2` | step 2 | spec まで自動実行 |
+| `ghwf:auto-to-3` | step 3 | plan まで自動実行 |
+| `ghwf:auto-to-4` | step 4 | review まで自動実行 |
+| `ghwf:auto-to-5` | step 5 | implement まで自動実行 |
+| `ghwf:auto-to-6` | step 6 | verify まで自動実行 |
+| `ghwf:auto-all` | step 7 | 全ステップを自動実行 |
+
+### 使用方法
+
+1. Issue に auto-to ラベルを付与
+2. `ghwf:approve` で開始
+3. 指定ステップまで自動で連続実行
+4. 指定ステップ完了後に `ghwf:waiting` 状態になる
+
+### ルール
+
+- **最小値採用**: 複数の auto-to ラベルがある場合、最小の step を採用
+  - 例: `auto-to-3` + `auto-to-6` → step 3 まで自動
+- **stop 優先**: `ghwf:stop` は auto-to より常に優先（即時停止）
+- **最大ステップ制限**: セッション上限（10ステップ）に達すると自動停止
+
+### 例
+
+```
+Issue に ghwf:auto-to-3 を付与
+↓
+ghwf:approve で開始
+↓
+step 1 (kickoff) → step 2 (spec) → step 3 (plan) 自動実行
+↓
+step 3 完了後に ghwf:waiting になる
+↓
+続行するには再度 ghwf:approve を付与
+```
+
 ## セキュリティ
 
 - コラボレーター権限（admin/write/maintain）のみ処理
 - セッション最大10ステップ
 - 実行は `/wf0-nextstep`, `/wf0-restore` のみ
 - 再実行時はブランチ新規作成禁止（既存ブランチ継続）
+- `ghwf:stop` は auto-to より常に優先（即時停止）
 - 詳細は `rules/remote-operation.md` 参照
