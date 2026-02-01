@@ -20,6 +20,8 @@ GitHub Issue/PR をラベルで制御するワークフローシステム。
 |-------|-------------|
 | `ghwf:executing` | Currently executing a step |
 | `ghwf:waiting` | Waiting for user approval |
+| `ghwf:waiting-deps` | Waiting for dependency issues to close |
+| `ghwf:waiting-subs` | Waiting for sub-issues to complete |
 | `ghwf:completed` | All steps completed |
 
 ### Command Labels (User Assigned)
@@ -199,17 +201,56 @@ Retry-enabled operations:
 - **Label author check**: Daemon verifies who added the command label via timeline API
 - **Bot ignore**: Comments from bots are excluded from update detection
 
+### Dependency and Sub-issues Check
+
+Before executing any command, the daemon checks:
+
+1. **Dependency Check**: Issues blocked by other open issues
+2. **Sub-issues Check**: Parent issues with open sub-issues
+
+```
+[Daemon] Detect ghwf:exec
+    ↓
+[Daemon] Check collaborator permission
+    ↓
+[Daemon] Check dependencies (blocked_by)
+    ├── Has open blockers → Add ghwf:waiting-deps, skip
+    └── OK → Continue
+    ↓
+[Daemon] Check sub-issues
+    ├── Has open sub-issues → Add ghwf:waiting-subs, skip
+    └── OK → Continue
+    ↓
+[Daemon] Execute step...
+```
+
+#### Dependency Handling
+
+- Uses GitHub REST API: `repos/{owner}/{repo}/issues/{issue}/dependencies/blocked_by`
+- Only checks issues in the same repository
+- Automatically removes `ghwf:waiting-deps` when blockers are closed
+
+#### Sub-issues Handling
+
+- Uses GitHub REST API: `repos/{owner}/{repo}/issues/{issue}/sub_issues`
+- Parent issues wait for all child sub-issues to close
+- Automatically removes `ghwf:waiting-subs` when all sub-issues are closed
+- **Note**: Sub-issues API is only available on github.com (not GitHub Enterprise Server)
+
 ### Polling Logic
 
 ```
 Every 60 seconds:
 1. Query Issues/PRs with ghwf:* labels
 2. For each found:
-   a. ghwf:exec → execute from step 1 (new issues only)
-   b. ghwf:exec → execute next step (step 1+ required)
-   c. ghwf:redo* → check updates → execute from step N
-   d. ghwf:revision → check updates → execute from step 1
-   e. ghwf:stop → stop monitoring this issue
+   a. Check permission (collaborator only)
+   b. Check dependencies (blocked_by)
+   c. Check sub-issues (parent-child)
+   d. ghwf:exec → execute from step 1 (new issues only)
+   e. ghwf:exec → execute next step (step 1+ required)
+   f. ghwf:redo* → check updates → execute from step N
+   g. ghwf:revision → check updates → execute from step 1
+   h. ghwf:stop → stop monitoring this issue
 3. Update labels accordingly
 4. Push changes
 ```

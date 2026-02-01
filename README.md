@@ -259,6 +259,8 @@ ghwf7-pr（Draft → Ready for Review）
 |--------|------|
 | `ghwf:executing` | ステップ実行中 |
 | `ghwf:waiting` | 承認待ち |
+| `ghwf:waiting-deps` | 依存 Issue のクローズ待ち |
+| `ghwf:waiting-subs` | Sub-issues の完了待ち |
 | `ghwf:completed` | 全ステップ完了 |
 
 ### Progress Labels（デーモン管理）
@@ -266,6 +268,36 @@ ghwf7-pr（Draft → Ready for Review）
 | ラベル | 説明 |
 |--------|------|
 | `ghwf:step-1` ~ `ghwf:step-7` | 各ステップ完了マーカー |
+
+### 依存関係チェック（Blocked by / Blocking）
+
+GitHub の **Issue Dependencies** 機能を使用している場合、デーモンは自動的に依存関係をチェックします。
+
+| 状態 | 動作 |
+|------|------|
+| ブロック中の Issue がオープン | `ghwf:waiting-deps` を付与してスキップ |
+| 全てのブロック Issue がクローズ | `ghwf:waiting-deps` を削除して続行 |
+
+**例:**
+- Issue #10 が Issue #5 に "blocked by" されている場合
+- #5 がオープンの間、#10 に `ghwf:exec` を付けても実行されない
+- #5 がクローズされると、次のポーリングで #10 が実行可能になる
+
+### Sub-issues チェック
+
+GitHub の **Sub-issues** 機能を使用している場合、親 Issue は全ての子 Issue が完了するまで待機します。
+
+| 状態 | 動作 |
+|------|------|
+| オープンな Sub-issues あり | `ghwf:waiting-subs` を付与してスキップ |
+| 全ての Sub-issues がクローズ | `ghwf:waiting-subs` を削除して続行 |
+
+**例:**
+- 親 Issue #20 に Sub-issues #21, #22, #23 がある場合
+- #21, #22, #23 が全てクローズされるまで #20 は実行されない
+- 子 Issue を先に処理することで、親 Issue での集約作業を確実に行える
+
+**Note**: Sub-issues API は github.com でのみ利用可能（GitHub Enterprise Server は未対応）。
 
 **「更新必須」について:**
 `redo*`/`revision` は Issue/PR に新しいコメントか本文更新がないと実行されません。

@@ -410,6 +410,7 @@ ghwf_ensure_labels() {
         "ghwf:auto-to-6:#5319E7:Auto-run until step 6 (verify)"
         "ghwf:auto-all:#5319E7:Auto-run all steps without approval"
         "ghwf:waiting-deps:#FEF2C0:Waiting for dependency issues to close"
+        "ghwf:waiting-subs:#FEF2C0:Waiting for sub-issues to complete"
         "ghwf:step-1:#C5DEF5:Step 1 completed"
         "ghwf:step-2:#C5DEF5:Step 2 completed"
         "ghwf:step-3:#C5DEF5:Step 3 completed"
@@ -464,6 +465,31 @@ ghwf_get_blocking_issues() {
     local issue_number="$1"
 
     gh api "repos/{owner}/{repo}/issues/$issue_number/dependencies/blocked_by" \
+        --jq '[.[] | select(.state == "open") | .number] | join(", ")' 2>/dev/null || echo ""
+}
+
+# Check if issue has open sub-issues
+# Returns: "blocked" if has open sub-issues, "ok" otherwise
+ghwf_check_sub_issues() {
+    local issue_number="$1"
+
+    # Get sub-issues via REST API
+    local open_subs
+    open_subs=$(gh api "repos/{owner}/{repo}/issues/$issue_number/sub_issues" \
+        --jq '[.[] | select(.state == "open")] | length' 2>/dev/null || echo "0")
+
+    if [ "$open_subs" -gt 0 ]; then
+        echo "blocked"
+    else
+        echo "ok"
+    fi
+}
+
+# Get list of open sub-issue numbers
+ghwf_get_open_sub_issues() {
+    local issue_number="$1"
+
+    gh api "repos/{owner}/{repo}/issues/$issue_number/sub_issues" \
         --jq '[.[] | select(.state == "open") | .number] | join(", ")' 2>/dev/null || echo ""
 }
 

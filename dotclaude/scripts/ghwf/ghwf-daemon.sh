@@ -106,6 +106,22 @@ process_issue() {
     # Remove waiting-deps label if exists (no longer blocked)
     ghwf_remove_label "$issue_number" "ghwf:waiting-deps" 2>/dev/null || true
 
+    # Check sub-issues (parent should wait for children)
+    local sub_status
+    sub_status=$(ghwf_check_sub_issues "$issue_number")
+
+    if [ "$sub_status" = "blocked" ]; then
+        local open_subs
+        open_subs=$(ghwf_get_open_sub_issues "$issue_number")
+        echo "[INFO] Issue #$issue_number has open sub-issues: #$open_subs"
+        ghwf_add_label "$issue_number" "ghwf:waiting-subs"
+        ghwf_remove_label "$issue_number" "$command_label"
+        return 0  # Skip without error
+    fi
+
+    # Remove waiting-subs label if exists (no longer blocked)
+    ghwf_remove_label "$issue_number" "ghwf:waiting-subs" 2>/dev/null || true
+
     # Get work-id
     local work_id
     work_id=$(ghwf_get_work_id "$issue_number")
