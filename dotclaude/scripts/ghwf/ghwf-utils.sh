@@ -313,6 +313,44 @@ ghwf_get_step_command() {
     esac
 }
 
+# Get Claude log file path
+ghwf_get_claude_log_file() {
+    echo "$(ghwf_get_project_root)/.wf/ghwf-claude.log"
+}
+
+# Get current execution info file path
+ghwf_get_current_exec_file() {
+    echo "$(ghwf_get_project_root)/.wf/ghwf-current.json"
+}
+
+# Update current execution info
+ghwf_update_current_exec() {
+    local step="$1"
+    local issue_number="$2"
+    local cmd="$3"
+    local mode="$4"  # "new" or "revise"
+    local exec_file
+    exec_file=$(ghwf_get_current_exec_file)
+
+    cat > "$exec_file" << EOF
+{
+  "step": $step,
+  "command": "$cmd",
+  "mode": "$mode",
+  "issue": $issue_number,
+  "started_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "pid": $$
+}
+EOF
+}
+
+# Clear current execution info
+ghwf_clear_current_exec() {
+    local exec_file
+    exec_file=$(ghwf_get_current_exec_file)
+    rm -f "$exec_file"
+}
+
 # Invoke Claude Code for workflow step (with retry)
 # Note: Uses fewer retries for Claude as it's a heavier operation
 # Args: step, issue_number, work_id, instruction
@@ -334,17 +372,34 @@ ghwf_invoke_claude() {
     local max_retries="${GHWF_CLAUDE_RETRY_MAX:-2}"
     local retry_delay="${GHWF_CLAUDE_RETRY_DELAY:-30}"
 
+    # Log file for Claude output
+    local log_file
+    log_file=$(ghwf_get_claude_log_file)
+    mkdir -p "$(dirname "$log_file")"
+
+    # Clear previous log and record current execution
+    : > "$log_file"
+    local mode="new"
+    [ -n "$instruction" ] && mode="revise"
+    ghwf_update_current_exec "$step" "$issue_number" "$cmd" "$mode"
+
+    local result=0
     if [ -n "$instruction" ]; then
         # Revise mode: all steps use state.json, no extra args needed
-        ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "echo '$instruction' | claude --print '/$cmd revise'"
+        ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "echo '$instruction' | claude --print --output-format stream-json '/$cmd revise' 2>&1 | tee '$log_file'" || result=$?
     else
         # New execution: ghwf1-kickoff requires issue number
         if [ "$step" -eq 1 ]; then
-            ghwf_retry "$max_retries" "$retry_delay" 2 claude --print "/$cmd $issue_number"
+            ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "claude --print --output-format stream-json '/$cmd $issue_number' 2>&1 | tee '$log_file'" || result=$?
         else
-            ghwf_retry "$max_retries" "$retry_delay" 2 claude --print "/$cmd"
+            ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "claude --print --output-format stream-json '/$cmd' 2>&1 | tee '$log_file'" || result=$?
         fi
     fi
+
+    # Clear current execution info
+    ghwf_clear_current_exec
+
+    return $result
 }
 
 # Push changes (with retry)

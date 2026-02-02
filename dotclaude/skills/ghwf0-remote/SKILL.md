@@ -124,6 +124,12 @@ tmux ls 2>&1 | grep -E "ghwf-daemon"
 # Active Claude process
 ps aux | grep -E "claude.*ghwf" | grep -v grep
 
+# Current execution info (if running)
+cat .wf/ghwf-current.json 2>/dev/null
+
+# Claude output log (stream-json format)
+cat .wf/ghwf-claude.log 2>/dev/null | tail -50
+
 # Recent daemon log
 tmux capture-pane -t ghwf-daemon -p -S -20
 ```
@@ -155,6 +161,11 @@ ghwf-daemon ステータス
 監視中のワーク
 - なし
 
+Claude詳細出力 (直近)
+{"type":"tool_use","name":"Read","input":{"file_path":"/path/to/file"}}
+{"type":"tool_result","content":"file contents..."}
+{"type":"text","content":"ファイルを読み込みました。"}
+
 最近のログ (直近10行)
 [2026-02-02 11:32:31] Polling for ghwf:* labels...
 [2026-02-02 11:32:35] Processing issue #1 with label: ghwf:revision
@@ -165,11 +176,14 @@ If no Claude process running, show:
 ```
 実行中のClaudeプロセス
 なし（待機中）
+
+Claude詳細出力
+なし（実行中のプロセスがありません）
 ```
 
-## State File
+## State Files
 
-`.wf/ghwf-state.json`:
+### `.wf/ghwf-state.json` (Daemon state)
 
 ```json
 {
@@ -188,6 +202,32 @@ If no Claude process running, show:
     }
   }
 }
+```
+
+### `.wf/ghwf-current.json` (Current execution)
+
+Claude実行中のみ存在。実行完了時に削除される。
+
+```json
+{
+  "step": 1,
+  "command": "ghwf1-kickoff",
+  "mode": "revise",
+  "issue": 1,
+  "started_at": "2026-02-02T02:32:36Z",
+  "pid": 12345
+}
+```
+
+### `.wf/ghwf-claude.log` (Claude output)
+
+`claude --print --output-format stream-json` の出力。
+各行がJSONオブジェクト（tool_use, tool_result, text等）。
+
+```
+{"type":"tool_use","name":"Read","input":{"file_path":"..."}}
+{"type":"tool_result","content":"..."}
+{"type":"text","content":"処理完了"}
 ```
 
 ## Security
