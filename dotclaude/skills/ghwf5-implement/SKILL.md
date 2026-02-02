@@ -50,6 +50,8 @@ agent: general-purpose
 
 ### 4. Commit & Push
 
+**Execute immediately without confirmation:**
+
 ```bash
 git add .
 git commit -m "feat(<scope>): <description>

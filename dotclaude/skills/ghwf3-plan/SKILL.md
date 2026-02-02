@@ -48,6 +48,8 @@ agent: general-purpose
 
 ### 3. Commit & Push
 
+**Execute immediately without confirmation:**
+
 ```bash
 git add docs/wf/<work-id>/03_PLAN.md
 git commit -m "docs(wf): create plan <work-id>"

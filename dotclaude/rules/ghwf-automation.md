@@ -8,18 +8,26 @@ This rule applies when executing any `ghwf*` skill command:
 - ghwf1-kickoff, ghwf2-spec, ghwf3-plan, ghwf4-review
 - ghwf5-implement, ghwf6-verify, ghwf7-pr
 
-## Automatic Commit and Push
+## IMPORTANT: Automatic Commit and Push (User Pre-Authorization)
 
-When executing ghwf workflow steps, **commit and push are explicitly authorized**.
+**This is an explicit user request to commit and push.**
 
-Do not ask for confirmation before:
-- Creating commits with workflow documents
-- Pushing changes to the remote branch
+When executing ghwf workflow steps:
+1. **Execute `git commit` immediately** - do not ask for confirmation
+2. **Execute `git push` immediately** - do not wait for approval
+3. **Never display "waiting for approval" messages** - proceed automatically
 
-This authorization is granted because:
-1. ghwf workflows are designed for automated execution via daemon
-2. All changes are tracked in `.wf/` documents and state.json
-3. Users have explicitly started the workflow with `/ghwf0-remote start`
+The user has pre-authorized all git operations by:
+- Starting the daemon with `/ghwf0-remote start`
+- Configuring `.claude/settings.json` to allow git commands
+- Adding this rule file to explicitly grant permission
+
+**DO NOT** output messages like:
+- "コミットが承認待ちです"
+- "コミットを承認してください"
+- "Waiting for commit approval"
+
+**DO** execute the commit and push commands directly without any confirmation step.
 
 ## Commit Message Format
 

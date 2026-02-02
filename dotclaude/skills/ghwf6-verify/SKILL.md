@@ -62,6 +62,8 @@ If issues found:
 
 ### 6. Commit & Push
 
+**Execute immediately without confirmation:**
+
 ```bash
 git add .
 git commit -m "docs(wf): verify implementation <work-id>"

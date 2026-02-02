@@ -70,6 +70,8 @@ GitHub Issue を取得し、ブランチ作成、キックオフドキュメン�
 
 ### Phase 3: Git Operations
 
+**Execute immediately without confirmation:**
+
 9. **Commit**:
    ```bash
    git add .wf/ docs/wf/<work-id>/

@@ -51,6 +51,8 @@ Plan または実装コードのレビューを行い、記録を作成する。
 
 ### 4. Commit & Push
 
+**Execute immediately without confirmation:**
+
 ```bash
 git add docs/wf/<work-id>/04_REVIEW.md
 git commit -m "docs(wf): create review <work-id>"

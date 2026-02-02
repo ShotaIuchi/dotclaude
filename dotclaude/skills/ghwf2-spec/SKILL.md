@@ -49,6 +49,8 @@ GitHub Issue とキックオフドキュメントから仕様書を作成する�
 
 ### 3. Commit & Push
 
+**Execute immediately without confirmation:**
+
 ```bash
 git add docs/wf/<work-id>/02_SPEC.md
 git commit -m "docs(wf): create spec <work-id>"
