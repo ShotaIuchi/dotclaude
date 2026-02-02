@@ -386,13 +386,13 @@ ghwf_invoke_claude() {
     local result=0
     if [ -n "$instruction" ]; then
         # Revise mode: all steps use state.json, no extra args needed
-        ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "echo '$instruction' | claude --print --output-format stream-json '/$cmd revise' 2>&1 | tee '$log_file'" || result=$?
+        ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "echo '$instruction' | claude --print --verbose --output-format stream-json '/$cmd revise' 2>&1 | tee '$log_file'" || result=$?
     else
         # New execution: ghwf1-kickoff requires issue number
         if [ "$step" -eq 1 ]; then
-            ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "claude --print --output-format stream-json '/$cmd $issue_number' 2>&1 | tee '$log_file'" || result=$?
+            ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "claude --print --verbose --output-format stream-json '/$cmd $issue_number' 2>&1 | tee '$log_file'" || result=$?
         else
-            ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "claude --print --output-format stream-json '/$cmd' 2>&1 | tee '$log_file'" || result=$?
+            ghwf_retry "$max_retries" "$retry_delay" 2 bash -c "claude --print --verbose --output-format stream-json '/$cmd' 2>&1 | tee '$log_file'" || result=$?
         fi
     fi
 
