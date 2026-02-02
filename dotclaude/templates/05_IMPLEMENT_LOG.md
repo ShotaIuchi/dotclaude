@@ -1,23 +1,23 @@
-# Implementation Log: {{WORK_ID}}
+# 実装ログ: {{WORK_ID}}
 
-> Plan: [02_PLAN.md](./02_PLAN.md)
-> Started: {{STARTED_AT}}
+> 実装計画: [03_PLAN.md](./03_PLAN.md)
+> 開始日: {{STARTED_AT}}
 
 ---
 
-## Step {{STEP_NUMBER}}: {{STEP_TITLE}}
+## ステップ {{STEP_NUMBER}}: {{STEP_TITLE}}
 
-### Started: {{STEP_STARTED_AT}}
+### 開始: {{STEP_STARTED_AT}}
 
-### Planned
+### 予定タスク
 
-<!-- Planned tasks extracted from Plan -->
+<!-- Planから抽出した予定タスク -->
 - {{PLANNED_TASK_1}}
 - {{PLANNED_TASK_2}}
 
-### Changes Made
+### 実施した変更
 
-<!-- Actual changes made (diff format recommended) -->
+<!-- 実際に行った変更（diff形式推奨） -->
 
 **{{FILE_1}}:**
 ```diff
@@ -29,31 +29,31 @@
 {{DIFF_2}}
 ```
 
-### Issues Encountered
+### 発生した問題
 
-<!-- Problems encountered and resolutions -->
-| Issue | Resolution |
-|-------|------------|
+<!-- 遭遇した問題と解決方法 -->
+| 問題 | 解決方法 |
+|------|----------|
 | {{ISSUE_1}} | {{RESOLUTION_1}} |
 
-### Test Result
+### テスト結果
 
 ```
 {{TEST_OUTPUT}}
 ```
 
-### Completed: {{STEP_COMPLETED_AT}}
+### 完了: {{STEP_COMPLETED_AT}}
 
-### Handover
+### 引き継ぎ事項
 
-<!-- Items to pass on to the next step -->
+<!-- 次のステップに引き継ぐ事項 -->
 - {{HANDOVER_1}}
 - {{HANDOVER_2}}
 
 ---
 
-## Final Summary
+## 最終サマリー
 
-| Step | Title | Status | Started | Completed | Notes |
-|------|-------|--------|---------|-----------|-------|
+| ステップ | タイトル | ステータス | 開始 | 完了 | 備考 |
+|----------|----------|------------|------|------|------|
 | {{STEP_NUMBER}} | {{STEP_TITLE}} | {{STATUS}} | {{STARTED}} | {{COMPLETED}} | {{NOTES}} |

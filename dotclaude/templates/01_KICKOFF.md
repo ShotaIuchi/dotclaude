@@ -1,58 +1,58 @@
-# Kickoff: {{WORK_ID}}
+# キックオフ: {{WORK_ID}}
 
 > Issue: #{{ISSUE_NUMBER}}
-> Created: {{CREATED_AT}}
-> Revision: {{REVISION}}
+> 作成日: {{CREATED_AT}}
+> リビジョン: {{REVISION}}
 
-## Goal
+## 目標
 
-<!-- Describe what you want to achieve with this work in 1-2 sentences -->
+<!-- このワークで達成したいことを1-2文で記述 -->
 {{GOAL}}
 
-## Success Criteria
+## 完了条件
 
-<!-- List the conditions to consider this complete -->
+<!-- 完了とみなす条件をリスト -->
 - [ ] {{CRITERIA_1}}
 - [ ] {{CRITERIA_2}}
 - [ ] {{CRITERIA_3}}
 
-## Constraints
+## 制約
 
-<!-- Constraints and non-functional requirements to follow -->
+<!-- 守るべき制約・非機能要件 -->
 - {{CONSTRAINT_1}}
 - {{CONSTRAINT_2}}
 
-## Non-goals
+## 対象外
 
-<!-- Explicitly state what is out of scope -->
+<!-- スコープ外であることを明示 -->
 - {{NON_GOAL_1}}
 
-## Dependencies
+## 依存関係
 
-<!-- Structured to prevent conflicts during parallel development -->
+<!-- 並行開発時の競合を防ぐための構造化 -->
 
-### Depends on
+### 前提条件
 
-<!-- Other work or external factors this work depends on -->
+<!-- このワークが依存する他のワークや外部要因 -->
 - {{DEPENDS_ON_1}}
 
-### Impacts
+### 影響範囲
 
-<!-- Areas that may be affected by this work -->
+<!-- このワークが影響を与える可能性のある領域 -->
 - {{IMPACTS_1}}
 
-### Conflicts
+### 競合の可能性
 
-<!-- Work that may conflict in parallel development -->
+<!-- 並行開発で競合する可能性のあるワーク -->
 - {{CONFLICTS_1}}
 
-## Open Questions
+## 未決定事項
 
-<!-- Items AI should not decide alone. List points requiring human judgment -->
+<!-- AIが単独で判断すべきでない項目。人間の判断が必要なポイント -->
 - [ ] {{QUESTION_1}}
 - [ ] {{QUESTION_2}}
 
-## Notes
+## 備考
 
-<!-- Supplementary information, discussion notes, etc. -->
+<!-- 補足情報、議論メモなど -->
 {{NOTES}}

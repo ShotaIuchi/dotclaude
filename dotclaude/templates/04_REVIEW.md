@@ -1,77 +1,77 @@
-# Review: {{WORK_ID}}
+# レビュー: {{WORK_ID}}
 
-> Plan: [02_PLAN.md](./02_PLAN.md)
-> Reviewed: {{REVIEWED_AT}}
-> Reviewer: {{REVIEWER}}
+> 実装計画: [03_PLAN.md](./03_PLAN.md)
+> レビュー日: {{REVIEWED_AT}}
+> レビュアー: {{REVIEWER}}
 
-## Review Summary
+## レビュー概要
 
-<!-- Overall review findings -->
+<!-- 全体的なレビュー所見 -->
 {{SUMMARY}}
 
-## Checklist
+## チェックリスト
 
-<!-- Review perspective checklist -->
+<!-- レビュー観点チェックリスト -->
 
-### Code Quality
-- [ ] Code style conforms to project conventions
-- [ ] Proper error handling
-- [ ] Unnecessary comments/debug code removed
+### コード品質
+- [ ] プロジェクト規約に準拠したコードスタイル
+- [ ] 適切なエラーハンドリング
+- [ ] 不要なコメント・デバッグコードの削除
 
-### Functionality
-- [ ] Works according to specification
-- [ ] Edge cases are considered
-- [ ] No performance issues
+### 機能
+- [ ] 仕様通りに動作
+- [ ] エッジケースを考慮
+- [ ] パフォーマンス問題なし
 
-### Security
-- [ ] No security issues
-- [ ] Proper handling of sensitive information
+### セキュリティ
+- [ ] セキュリティ問題なし
+- [ ] 機密情報の適切な取り扱い
 
-### Testing
-- [ ] Adequate test coverage
-- [ ] Tests work correctly
+### テスト
+- [ ] 十分なテストカバレッジ
+- [ ] テストが正しく動作
 
-## Findings
+## 指摘事項
 
-<!-- Issues found during review -->
+<!-- レビューで発見した問題 -->
 
-### Must Fix (Blocking)
+### 要修正（ブロッキング）
 
-<!-- Required fixes. Cannot merge until resolved -->
-| # | Location | Issue | Suggestion |
-|---|----------|-------|------------|
+<!-- 必須の修正。解決するまでマージ不可 -->
+| # | 箇所 | 問題 | 提案 |
+|---|------|------|------|
 | 1 | {{LOCATION_1}} | {{ISSUE_1}} | {{SUGGESTION_1}} |
 
-### Should Fix (Non-blocking)
+### 修正推奨（ノンブロッキング）
 
-<!-- Recommended fixes. Should be addressed in this scope -->
-| # | Location | Issue | Suggestion |
-|---|----------|-------|------------|
+<!-- 推奨される修正。このスコープで対応すべき -->
+| # | 箇所 | 問題 | 提案 |
+|---|------|------|------|
 | 1 | {{LOCATION_2}} | {{ISSUE_2}} | {{SUGGESTION_2}} |
 
-### Nice-to-have
+### 改善提案
 
-<!-- Improvement suggestions. Can be addressed later -->
+<!-- 改善提案。後で対応可 -->
 - {{NICE_TO_HAVE_1}}
 - {{NICE_TO_HAVE_2}}
 
-## Decision
+## 判定
 
-<!-- Review result determination -->
-**Status:** {{STATUS}}
+<!-- レビュー結果の判定 -->
+**ステータス:** {{STATUS}}
 
 <!-- approved / request-changes / needs-discussion -->
 
-**Comments:**
+**コメント:**
 {{DECISION_COMMENTS}}
 
-## Follow-up Actions
+## フォローアップ
 
-<!-- Actions that need follow-up -->
+<!-- フォローアップが必要なアクション -->
 - [ ] {{FOLLOW_UP_1}}
 - [ ] {{FOLLOW_UP_2}}
 
-## Notes
+## 備考
 
-<!-- Review comments, supplementary information -->
+<!-- レビューコメント、補足情報 -->
 {{NOTES}}

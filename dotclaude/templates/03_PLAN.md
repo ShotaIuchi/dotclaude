@@ -1,51 +1,51 @@
-# Plan: {{WORK_ID}}
+# 実装計画: {{WORK_ID}}
 
-> Spec: [01_SPEC.md](./01_SPEC.md)
-> Created: {{CREATED_AT}}
-> Last Updated: {{UPDATED_AT}}
+> 仕様: [02_SPEC.md](./02_SPEC.md)
+> 作成日: {{CREATED_AT}}
+> 最終更新: {{UPDATED_AT}}
 
-## Overview
+## 概要
 
-<!-- Briefly describe the implementation approach -->
+<!-- 実装アプローチを簡潔に説明 -->
 {{OVERVIEW}}
 
-## Steps
+## ステップ
 
-<!-- Repeat the following for as many steps as needed (guideline: 5-10 steps) -->
+<!-- 必要なステップ数だけ繰り返す（目安: 5-10ステップ） -->
 
-### Step {{N}}: {{STEP_TITLE}}
+### ステップ {{N}}: {{STEP_TITLE}}
 
-- **Purpose:** {{STEP_GOAL}}
-- **Files:** `{{FILE_1}}`, `{{FILE_2}}`
-- **Tasks:**
+- **目的:** {{STEP_GOAL}}
+- **ファイル:** `{{FILE_1}}`, `{{FILE_2}}`
+- **タスク:**
   - {{TASK_1}}
   - {{TASK_2}}
-- **Done when:** {{DONE_CRITERIA}}
-- **Size:** {{SIZE}}
-- **Depends on:** {{DEPENDS_ON}}
+- **完了条件:** {{DONE_CRITERIA}}
+- **規模:** {{SIZE}}
+- **依存:** {{DEPENDS_ON}}
 
-<!-- Repeat the above according to the number of steps -->
+<!-- 上記をステップ数に応じて繰り返す -->
 
-## Progress
+## 進捗
 
-| Step | Title | Status |
-|------|-------|--------|
-<!-- Add rows according to the number of steps -->
+| ステップ | タイトル | ステータス |
+|----------|----------|------------|
+<!-- ステップ数に応じて行を追加 -->
 | {{N}} | {{STEP_TITLE}} | pending |
 
-## Risks
+## リスク
 
-<!-- Implementation risks and countermeasures -->
-| Risk | Impact | Prob | Mitigation |
-|------|--------|------|------------|
+<!-- 実装リスクと対策 -->
+| リスク | 影響 | 確率 | 対策 |
+|--------|------|------|------|
 | {{RISK_1}} | {{IMPACT_1}} | {{PROB_1}} | {{MITIGATION_1}} |
 
-## Rollback
+## ロールバック
 
-<!-- Rollback procedure in case of problems -->
+<!-- 問題発生時のロールバック手順 -->
 {{ROLLBACK_PLAN}}
 
-## Notes
+## 備考
 
-<!-- Implementation notes, memos -->
+<!-- 実装メモ、覚書 -->
 {{NOTES}}

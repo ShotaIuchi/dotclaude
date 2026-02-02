@@ -1,121 +1,121 @@
-# Spec: {{WORK_ID}}
+# 仕様: {{WORK_ID}}
 
-> Kickoff: [00_KICKOFF.md](./00_KICKOFF.md)
-> Created: {{CREATED_AT}}
-> Last Updated: {{UPDATED_AT}}
+> キックオフ: [01_KICKOFF.md](./01_KICKOFF.md)
+> 作成日: {{CREATED_AT}}
+> 最終更新: {{UPDATED_AT}}
 
-## Overview
+## 概要
 
-<!-- Summarize the changes in one paragraph -->
+<!-- 変更内容を1段落で要約 -->
 {{OVERVIEW}}
 
-## Scope
+## スコープ
 
-### In Scope
+### 対象範囲
 
-<!-- Areas covered by this work -->
+<!-- このワークでカバーする領域 -->
 - {{IN_SCOPE_1}}
 - {{IN_SCOPE_2}}
 
-### Out of Scope
+### 対象外
 
-<!-- Areas not covered by this work -->
+<!-- このワークでカバーしない領域 -->
 - {{OUT_OF_SCOPE_1}}
 
-## Users / Use-cases
+## ユーザー / ユースケース
 
-<!-- Target users and use-cases -->
+<!-- 対象ユーザーとユースケース -->
 
-| User | Use-case | Priority |
-|------|----------|----------|
+| ユーザー | ユースケース | 優先度 |
+|----------|--------------|--------|
 | {{USER_1}} | {{USE_CASE_1}} | {{PRIORITY_1}} |
 
-## Functional Requirements
+## 機能要件
 
-<!-- Functional requirements -->
+<!-- 機能要件 -->
 - FR-1: {{FUNCTIONAL_REQ_1}}
 - FR-2: {{FUNCTIONAL_REQ_2}}
 
-## Non-functional Requirements
+## 非機能要件
 
-<!-- Non-functional requirements (performance, security, etc.) -->
+<!-- 非機能要件（パフォーマンス、セキュリティなど） -->
 - NFR-1: {{NON_FUNCTIONAL_REQ_1}}
 - NFR-2: {{NON_FUNCTIONAL_REQ_2}}
 
-## Acceptance Criteria
+## 受け入れ条件
 
-<!-- Testable acceptance criteria (Given/When/Then format) -->
+<!-- テスト可能な受け入れ条件（Given/When/Then形式） -->
 
 ### AC-1: {{AC_1_TITLE}}
 
-- **Given:** {{AC_1_GIVEN}}
-- **When:** {{AC_1_WHEN}}
-- **Then:** {{AC_1_THEN}}
+- **前提:** {{AC_1_GIVEN}}
+- **操作:** {{AC_1_WHEN}}
+- **結果:** {{AC_1_THEN}}
 
 ### AC-2: {{AC_2_TITLE}}
 
-- **Given:** {{AC_2_GIVEN}}
-- **When:** {{AC_2_WHEN}}
-- **Then:** {{AC_2_THEN}}
+- **前提:** {{AC_2_GIVEN}}
+- **操作:** {{AC_2_WHEN}}
+- **結果:** {{AC_2_THEN}}
 
-## Affected Components
+## 影響コンポーネント
 
-<!-- Components/modules affected -->
-| Component | Impact | Notes |
-|-----------|--------|-------|
+<!-- 影響を受けるコンポーネント/モジュール -->
+| コンポーネント | 影響 | 備考 |
+|----------------|------|------|
 | {{COMPONENT_1}} | {{IMPACT_1}} | {{NOTES_1}} |
 
-## Detailed Changes
+## 変更詳細
 
-<!-- Details of changes (Before/After format) -->
+<!-- 変更の詳細（Before/After形式） -->
 
 ### {{CHANGE_TITLE}}
 
-**Before:**
+**変更前:**
 ```
 {{BEFORE_CODE_OR_SPEC}}
 ```
 
-**After:**
+**変更後:**
 ```
 {{AFTER_CODE_OR_SPEC}}
 ```
 
-## API Changes
+## API変更
 
-<!-- If there are API changes -->
+<!-- API変更がある場合 -->
 {{API_CHANGES}}
 
-## Data Changes
+## データ変更
 
-<!-- If there are data structure/schema changes -->
+<!-- データ構造/スキーマ変更がある場合 -->
 {{DATA_CHANGES}}
 
-## UI Changes
+## UI変更
 
-<!-- If there are UI changes -->
+<!-- UI変更がある場合 -->
 {{UI_CHANGES}}
 
-## Test Strategy
+## テスト戦略
 
-<!-- Test strategy -->
-- **Unit Tests:** {{UNIT_TEST_STRATEGY}}
-- **Integration Tests:** {{INTEGRATION_TEST_STRATEGY}}
-- **Manual Tests:** {{MANUAL_TEST_STRATEGY}}
+<!-- テスト戦略 -->
+- **単体テスト:** {{UNIT_TEST_STRATEGY}}
+- **結合テスト:** {{INTEGRATION_TEST_STRATEGY}}
+- **手動テスト:** {{MANUAL_TEST_STRATEGY}}
 
-## Assumptions
+## 仮定事項
 
-<!-- Tentative items. Assumptions that need to be verified later -->
+<!-- 暫定項目。後で確認が必要な前提 -->
 - [ ] {{ASSUMPTION_1}}
 - [ ] {{ASSUMPTION_2}}
 
-## Open Questions
+## 未決定事項
 
-<!-- Items AI should not decide alone. Points requiring human judgment -->
+<!-- AIが単独で判断すべきでない項目。人間の判断が必要なポイント -->
 - [ ] {{QUESTION_1}}
 - [ ] {{QUESTION_2}}
 
-## References
+## 参考資料
 
-<!-- Reference materials, related documents -->
+<!-- 参考資料、関連ドキュメント -->
 - {{REFERENCE_1}}

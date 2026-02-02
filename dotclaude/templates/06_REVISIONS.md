@@ -1,11 +1,11 @@
-# Revisions: {{WORK_ID}}
+# リビジョン履歴: {{WORK_ID}}
 
-> Kickoff: [00_KICKOFF.md](./00_KICKOFF.md)
+> キックオフ: [01_KICKOFF.md](./01_KICKOFF.md)
 
-## History
+## 履歴
 
-| Rev | Date | Reason | Changed Sections |
-|-----|------|--------|------------------|
+| Rev | 日付 | 理由 | 変更セクション |
+|-----|------|------|----------------|
 | 1 | {{DATE_1}} | {{REASON_1}} | {{SECTIONS_1}} |
 | 2 | {{DATE_2}} | {{REASON_2}} | {{SECTIONS_2}} |
 
@@ -13,9 +13,9 @@
 
 ## Rev {{REVISION_NUMBER}}
 
-**Date:** {{REVISION_DATE}}
-**Reason:** {{REVISION_REASON}}
-**Changed:** {{CHANGED_SECTIONS}}
+**日付:** {{REVISION_DATE}}
+**理由:** {{REVISION_REASON}}
+**変更箇所:** {{CHANGED_SECTIONS}}
 
 {{REVISION_NOTES}}
 

@@ -4,7 +4,7 @@ description: GitHub Issue/PR のラベル監視デーモン制御
 argument-hint: "<start|stop|status>"
 ---
 
-**Always respond in Japanese.**
+**Always respond in Japanese. Write all workflow documents (*.md) in Japanese.**
 
 # /ghwf0-remote
 

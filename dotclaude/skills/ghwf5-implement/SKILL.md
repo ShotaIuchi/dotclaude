@@ -6,7 +6,7 @@ context: fork
 agent: general-purpose
 ---
 
-**Always respond in Japanese.**
+**Always respond in Japanese. Write all workflow documents (*.md) in Japanese.**
 
 # /ghwf5-implement
 
