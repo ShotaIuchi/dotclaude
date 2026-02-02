@@ -116,10 +116,56 @@ Bot コメントの判定:
 
 ### status
 
-Display:
-- Daemon running status
-- Active works being monitored
-- Last poll time
+Check commands:
+```bash
+# Daemon status
+tmux ls 2>&1 | grep -E "ghwf-daemon"
+
+# Active Claude process
+ps aux | grep -E "claude.*ghwf" | grep -v grep
+
+# Recent daemon log
+tmux capture-pane -t ghwf-daemon -p -S -20
+```
+
+Display (table format):
+
+```
+ghwf-daemon ステータス
+┌──────────────────┬───────────────────────────┐
+│       項目       │           状態            │
+├──────────────────┼───────────────────────────┤
+│ デーモン         │ ✅ 実行中                 │
+│ tmux session     │ ghwf-daemon               │
+│ 起動時刻         │ 2026-02-02 11:32:31 (JST) │
+│ 最終ポーリング   │ 2026-02-02 11:32:36 (JST) │
+│ 実行済みステップ │ 0                         │
+└──────────────────┴───────────────────────────┘
+
+実行中のClaudeプロセス
+┌───────────┬──────────────────────────────────────┐
+│   項目    │                 状態                 │
+├───────────┼──────────────────────────────────────┤
+│ コマンド  │ /ghwf1-kickoff revise                │
+│ 対象      │ Issue #1                             │
+│ 実行時間  │ 21秒                                 │
+│ CPU使用率 │ 2.3%                                 │
+└───────────┴──────────────────────────────────────┘
+
+監視中のワーク
+- なし
+
+最近のログ (直近10行)
+[2026-02-02 11:32:31] Polling for ghwf:* labels...
+[2026-02-02 11:32:35] Processing issue #1 with label: ghwf:revision
+[2026-02-02 11:32:36] Executing step 1: ghwf1-kickoff
+```
+
+If no Claude process running, show:
+```
+実行中のClaudeプロセス
+なし（待機中）
+```
 
 ## State File
 
