@@ -26,9 +26,15 @@ agent: general-purpose
 
 ## Processing
 
-### 1. Load Plan
+### 1. Load Context
 
+- Read `state.json` for active work
 - Read `03_PLAN.md`
+- Fetch Issue/PR with comments:
+  ```bash
+  gh issue view <issue> --json body,comments
+  gh pr view <pr> --json comments,reviews
+  ```
 - Identify next step to implement
 
 ### 2. Implement

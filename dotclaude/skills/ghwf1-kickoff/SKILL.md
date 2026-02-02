@@ -38,8 +38,9 @@ GitHub Issue を取得し、ブランチ作成、キックオフドキュメン�
 
 2. **Fetch Issue**:
    ```bash
-   gh issue view <number> --json title,body,labels,author
+   gh issue view <number> --json title,body,labels,author,comments
    ```
+   - Include comments as additional context/requirements
 
 3. **Generate work-id**:
    - Format: `<TYPE>-<issue>-<slug>`

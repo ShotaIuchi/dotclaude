@@ -26,12 +26,21 @@ Plan または実装コードのレビューを行い、記録を作成する。
 
 ## Processing
 
-### 1. Determine Review Target
+### 1. Load Context
+
+- Read `state.json` for active work
+- Fetch Issue/PR with comments:
+  ```bash
+  gh issue view <issue> --json body,comments
+  gh pr view <pr> --json comments,reviews
+  ```
+
+### 2. Determine Review Target
 
 - 実装前: Plan レビュー
 - 実装後: Code レビュー
 
-### 2. Create/Update 04_REVIEW.md
+### 3. Create/Update 04_REVIEW.md
 
 - Template: `~/.claude/templates/04_REVIEW.md`
 - Sections:
@@ -40,7 +49,7 @@ Plan または実装コードのレビューを行い、記録を作成する。
   - Recommendations
   - Approval Status
 
-### 3. Commit & Push
+### 4. Commit & Push
 
 ```bash
 git add docs/wf/<work-id>/04_REVIEW.md
@@ -48,12 +57,12 @@ git commit -m "docs(wf): create review <work-id>"
 git push
 ```
 
-### 4. Update PR & Labels
+### 5. Update PR & Labels
 
 - PR チェックリスト更新
 - `ghwf:step-4` ラベル追加
 
-### 5. Update State
+### 6. Update State
 
 ```json
 {

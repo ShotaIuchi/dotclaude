@@ -31,7 +31,11 @@ GitHub Issue とキックオフドキュメントから仕様書を作成する�
 
 - Read `state.json` for active work
 - Read `01_KICKOFF.md`
-- Fetch Issue body for latest requirements
+- Fetch Issue with comments:
+  ```bash
+  gh issue view <issue> --json body,comments
+  ```
+  - Include comments as additional requirements
 
 ### 2. Create 02_SPEC.md
 

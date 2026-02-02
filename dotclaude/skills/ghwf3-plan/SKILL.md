@@ -29,7 +29,12 @@ agent: general-purpose
 
 ### 1. Load Context
 
-- Read `02_SPEC.md`
+- Read `state.json` for active work
+- Read `01_KICKOFF.md`, `02_SPEC.md`
+- Fetch Issue with comments:
+  ```bash
+  gh issue view <issue> --json body,comments
+  ```
 - Analyze codebase structure
 
 ### 2. Create 03_PLAN.md

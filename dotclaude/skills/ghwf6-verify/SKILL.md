@@ -25,33 +25,42 @@ agent: general-purpose
 
 ## Processing
 
-### 1. Run Verification
+### 1. Load Context
+
+- Read `state.json` for active work
+- Fetch Issue/PR with comments:
+  ```bash
+  gh issue view <issue> --json body,comments
+  gh pr view <pr> --json comments,reviews
+  ```
+
+### 2. Run Verification
 
 - Lint: `pnpm lint`
 - Type check: `pnpm type-check`
 - Build: `pnpm build`
 - Test: `pnpm test`
 
-### 2. Code Review
+### 3. Code Review
 
 - Review implementation against spec
 - Check for security issues
 - Verify edge cases handled
 
-### 3. Create/Update 06_VERIFY.md
+### 4. Create/Update 06_VERIFY.md
 
 - Test results
 - Review findings
 - Issues to address
 
-### 4. Handle Issues
+### 5. Handle Issues
 
 If issues found:
 - Fix issues
 - Re-run verification
 - Update documentation
 
-### 5. Commit & Push
+### 6. Commit & Push
 
 ```bash
 git add .
@@ -59,12 +68,12 @@ git commit -m "docs(wf): verify implementation <work-id>"
 git push
 ```
 
-### 6. Update PR & Labels
+### 7. Update PR & Labels
 
 - PR チェックリスト更新
 - `ghwf:step-6` ラベル追加
 
-### 7. Update State
+### 8. Update State
 
 ```json
 {

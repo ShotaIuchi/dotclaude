@@ -25,13 +25,22 @@ Draft PR を Ready for Review に変更し、ワークフローを完了する�
 
 ## Processing
 
-### 1. Final Check
+### 1. Load Context
+
+- Read `state.json` for active work
+- Fetch Issue/PR with comments:
+  ```bash
+  gh issue view <issue> --json body,comments
+  gh pr view <pr> --json comments,reviews
+  ```
+
+### 2. Final Check
 
 - All CI checks passing
 - No uncommitted changes
 - Documentation complete
 
-### 2. Update PR Body
+### 3. Update PR Body
 
 全チェックボックスを完了に:
 
@@ -46,13 +55,13 @@ Draft PR を Ready for Review に変更し、ワークフローを完了する�
 - [x] ghwf7-pr (Ready for Review)
 ```
 
-### 3. Convert to Ready
+### 4. Convert to Ready
 
 ```bash
 gh pr ready
 ```
 
-### 4. Update PR Title
+### 5. Update PR Title
 
 Remove "WIP: " prefix:
 
@@ -60,7 +69,7 @@ Remove "WIP: " prefix:
 gh pr edit --title "<issue-title>"
 ```
 
-### 5. Update Labels
+### 6. Update Labels
 
 ```bash
 gh issue edit <issue> \
@@ -68,7 +77,7 @@ gh issue edit <issue> \
   --add-label "ghwf:completed,ghwf:step-7"
 ```
 
-### 6. Post Completion Comment
+### 7. Post Completion Comment
 
 ```bash
 gh pr comment --body "🤖 Workflow completed. Ready for review.
@@ -85,7 +94,7 @@ gh pr comment --body "🤖 Workflow completed. Ready for review.
 "
 ```
 
-### 7. Update State
+### 8. Update State
 
 ```json
 {
