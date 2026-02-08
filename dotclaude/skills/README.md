@@ -37,6 +37,97 @@ references/からの知識を参照し、プロジェクトに最適化された
 | `kmp-architecture` | Kotlin Multiplatformアーキテクチャ設計 |
 | `aws-sam` | AWS SAMテンプレートとLambda実装 |
 
+### Agent Teams
+
+並列サブエージェントで専門分析を行うチームスキル。親チーム（`/team-name`）がトピックを分析し、適切な専門家を選択・起動します。
+
+#### review-team — コードレビュー
+
+| スキル | 専門家 | 評価指標 |
+|--------|--------|---------|
+| `review-security` | セキュリティレビュアー | 深刻度: Critical / High / Medium / Low / Info |
+| `review-architecture` | アーキテクチャレビュアー | 分類: Violation / Concern / Suggestion / Positive |
+| `review-performance` | パフォーマンスレビュアー | 影響度: Critical / High / Medium / Low |
+| `review-concurrency` | 並行処理レビュアー | — |
+| `review-error-handling` | エラーハンドリングレビュアー | — |
+| `review-api-design` | API設計レビュアー | — |
+| `review-test-coverage` | テストカバレッジレビュアー | — |
+| `review-dependency` | 依存関係レビュアー | — |
+| `review-accessibility` | アクセシビリティレビュアー | — |
+| `review-observability` | オブザーバビリティレビュアー | — |
+
+#### debug-team — バグ原因の並列仮説検証
+
+| スキル | 専門家 | 評価指標 |
+|--------|--------|---------|
+| `debug-stacktrace` | スタックトレース分析官 | 確信度: High / Medium / Low / Inconclusive |
+| `debug-state` | 状態検査官 | 確信度: High / Medium / Low / Inconclusive |
+| `debug-concurrency` | 並行処理調査官 | 確信度: High / Medium / Low / Inconclusive |
+| `debug-dataflow` | データフロー追跡官 | 確信度: High / Medium / Low / Inconclusive |
+| `debug-environment` | 環境チェッカー | 確信度: High / Medium / Low / Inconclusive |
+| `debug-dependency` | 依存関係監査官 | 確信度: High / Medium / Low / Inconclusive |
+| `debug-reproduction` | 再現スペシャリスト | 確信度: High / Medium / Low / Inconclusive |
+
+#### design-team — 設計検討・複数視点議論
+
+| スキル | 専門家 | 評価指標 |
+|--------|--------|---------|
+| `design-pragmatist` | 実用主義者 | 強度: Strong / Moderate / Weak / Neutral |
+| `design-futurist` | 未来志向者 | 強度: Strong / Moderate / Weak / Neutral |
+| `design-skeptic` | 懐疑論者 | 強度: Strong / Moderate / Weak / Neutral |
+| `design-domain` | ドメインエキスパート | 強度: Strong / Moderate / Weak / Neutral |
+| `design-user-advocate` | ユーザー代弁者 | 強度: Strong / Moderate / Weak / Neutral |
+| `design-cost` | コスト分析官 | 強度: Strong / Moderate / Weak / Neutral |
+| `design-standards` | 標準規格管理者 | 強度: Strong / Moderate / Weak / Neutral |
+
+#### feature-team — 新機能の並列実装
+
+| スキル | 専門家 | 評価指標 |
+|--------|--------|---------|
+| `feature-api` | API設計者 | 状態: Complete / Partial / Blocked / Skipped |
+| `feature-ui` | UI実装者 | 状態: Complete / Partial / Blocked / Skipped |
+| `feature-data` | データモデラー | 状態: Complete / Partial / Blocked / Skipped |
+| `feature-logic` | ビジネスロジック実装者 | 状態: Complete / Partial / Blocked / Skipped |
+| `feature-test` | テスト作成者 | 状態: Complete / Partial / Blocked / Skipped |
+| `feature-doc` | ドキュメント作成者 | 状態: Complete / Partial / Blocked / Skipped |
+| `feature-security` | セキュリティ分析官 | 状態: Complete / Partial / Blocked / Skipped |
+
+#### migration-team — 技術移行の並列実行
+
+| スキル | 専門家 | 評価指標 |
+|--------|--------|---------|
+| `migration-breaking` | 破壊的変更分析官 | リスク: Critical / High / Medium / Low |
+| `migration-compatibility` | 互換性ブリッジ構築者 | リスク: Critical / High / Medium / Low |
+| `migration-transform` | コード変換者 | リスク: Critical / High / Medium / Low |
+| `migration-data` | データ移行者 | リスク: Critical / High / Medium / Low |
+| `migration-test` | テスト移行者 | リスク: Critical / High / Medium / Low |
+| `migration-rollback` | ロールバック計画者 | リスク: Critical / High / Medium / Low |
+| `migration-resolver` | 依存関係解決者 | リスク: Critical / High / Medium / Low |
+
+#### refactor-team — 大規模リファクタリング
+
+| スキル | 専門家 | 評価指標 |
+|--------|--------|---------|
+| `refactor-dependency` | 依存関係マッパー | 影響度: Breaking / High / Medium / Low |
+| `refactor-archeology` | コード考古学者 | 影響度: Breaking / High / Medium / Low |
+| `refactor-pattern` | パターン分析官 | 影響度: Breaking / High / Medium / Low |
+| `refactor-migration` | 移行計画者 | 影響度: Breaking / High / Medium / Low |
+| `refactor-test` | テスト守護者 | 影響度: Breaking / High / Medium / Low |
+| `refactor-impact` | 影響評価者 | 影響度: Breaking / High / Medium / Low |
+| `refactor-compat` | 互換性チェッカー | 影響度: Breaking / High / Medium / Low |
+
+#### test-team — テスト一括作成
+
+| スキル | 専門家 | 評価指標 |
+|--------|--------|---------|
+| `test-unit` | ユニットテスト作成者 | 優先度: Must / Should / Could / Won't |
+| `test-integration` | 統合テスト作成者 | 優先度: Must / Should / Could / Won't |
+| `test-edge` | エッジケーススペシャリスト | 優先度: Must / Should / Could / Won't |
+| `test-mock` | モック/フィクスチャ設計者 | 優先度: Must / Should / Could / Won't |
+| `test-performance` | パフォーマンステスト作成者 | 優先度: Must / Should / Could / Won't |
+| `test-security` | セキュリティテスト作成者 | 優先度: Must / Should / Could / Won't |
+| `test-snapshot` | スナップショットテスト作成者 | 優先度: Must / Should / Could / Won't |
+
 ## 使用方法
 
 スキルは2つの方法で呼び出せます：
