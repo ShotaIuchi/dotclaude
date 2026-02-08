@@ -1,4 +1,4 @@
-# /migration-team
+# /team-migration
 
 Agent Teamsで技術移行の並列実行チームを自動構成・起動する。
 
@@ -10,20 +10,20 @@ Agent Teamsで技術移行の並列実行チームを自動構成・起動する
 ## 使用方法
 
 ```
-/migration-team [--pr N | --diff | migration target]
+/team-migration [--pr N | --diff | migration target]
 ```
 
 ## 使用例
 
 ```bash
 # 移行対象を指定
-/migration-team "React 17から18への移行"
+/team-migration "React 17から18への移行"
 
 # PRの移行内容をレビュー
-/migration-team --pr 456
+/team-migration --pr 456
 
 # 差分から移行を分析
-/migration-team --diff
+/team-migration --diff
 ```
 
 ## 動作の流れ

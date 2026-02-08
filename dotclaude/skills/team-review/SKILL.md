@@ -1,5 +1,5 @@
 ---
-name: review-team
+name: team-review
 description: Agent Teamsでターゲットに最適なコードレビューチームを自動構成・起動
 argument-hint: "[--pr N | --issue N | --commit REF | --diff | --staged | --branch NAME | path | text]"
 user-invocable: true

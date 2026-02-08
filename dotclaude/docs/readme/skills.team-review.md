@@ -1,4 +1,4 @@
-# /review-team
+# /team-review
 
 Agent Teamsでターゲットに最適なコードレビューチームを自動構成・起動する。
 
@@ -10,20 +10,20 @@ Agent Teamsでターゲットに最適なコードレビューチームを自動
 ## 使用方法
 
 ```
-/review-team [--pr N | --issue N | --commit REF | --diff | --staged | --branch NAME | path | text]
+/team-review [--pr N | --issue N | --commit REF | --diff | --staged | --branch NAME | path | text]
 ```
 
 ## 使用例
 
 ```bash
 # PRをレビュー
-/review-team --pr 123
+/team-review --pr 123
 
 # ステージ済み変更をレビュー
-/review-team --staged
+/team-review --staged
 
 # 特定ディレクトリをレビュー
-/review-team src/auth/
+/team-review src/auth/
 ```
 
 ## 動作の流れ

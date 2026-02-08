@@ -1,4 +1,4 @@
-# /feature-team
+# /team-feature
 
 Agent Teamsで新機能の並列実装チームを自動構成・起動する。
 
@@ -10,20 +10,20 @@ Agent Teamsで新機能の並列実装チームを自動構成・起動する。
 ## 使用方法
 
 ```
-/feature-team [--issue N | --pr N | path | description]
+/team-feature [--issue N | --pr N | path | description]
 ```
 
 ## 使用例
 
 ```bash
 # Issueの機能を実装
-/feature-team --issue 789
+/team-feature --issue 789
 
 # 機能の説明から実装
-/feature-team "ユーザー認証機能を追加"
+/team-feature "ユーザー認証機能を追加"
 
 # 特定ディレクトリに機能を追加
-/feature-team src/auth/
+/team-feature src/auth/
 ```
 
 ## 動作の流れ

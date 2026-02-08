@@ -1,5 +1,5 @@
 ---
-name: refactor-team
+name: team-refactor
 description: Agent Teamsで大規模リファクタリングチームを自動構成・起動
 argument-hint: "[--pr N | --commit REF | --diff | --staged | path | goal]"
 user-invocable: true

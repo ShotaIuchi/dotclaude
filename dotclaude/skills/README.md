@@ -47,18 +47,18 @@ references/からの知識を参照し、プロジェクトに最適化された
 
 | フラグ | スコープ | 例 |
 |--------|----------|-----|
-| `--pr <N>` | PRの差分・情報 | `/review-team --pr 42` |
-| `--issue <N>` | Issueの内容・コメント | `/debug-team --issue 123` |
-| `--commit <ref>` | コミットの差分 | `/review-team --commit HEAD~3..HEAD` |
-| `--staged` | ステージ済み差分 | `/review-team --staged` |
-| `--diff` | 未ステージ差分 | `/test-team --diff` |
-| `--branch <name>` | ブランチ差分 | `/review-team --branch feature/auth` |
-| パス | ファイル/ディレクトリ | `/test-team src/auth/` |
-| テキスト | フリーテキスト指示 | `/debug-team login fails on timeout` |
+| `--pr <N>` | PRの差分・情報 | `/team-review --pr 42` |
+| `--issue <N>` | Issueの内容・コメント | `/team-debug --issue 123` |
+| `--commit <ref>` | コミットの差分 | `/team-review --commit HEAD~3..HEAD` |
+| `--staged` | ステージ済み差分 | `/team-review --staged` |
+| `--diff` | 未ステージ差分 | `/team-test --diff` |
+| `--branch <name>` | ブランチ差分 | `/team-review --branch feature/auth` |
+| パス | ファイル/ディレクトリ | `/team-test src/auth/` |
+| テキスト | フリーテキスト指示 | `/team-debug login fails on timeout` |
 
 引数なし・曖昧な場合はユーザーに確認を行います。
 
-#### review-team — コードレビュー
+#### team-review — コードレビュー
 
 | スキル | 専門家 | 評価指標 |
 |--------|--------|---------|
@@ -73,7 +73,7 @@ references/からの知識を参照し、プロジェクトに最適化された
 | `review-accessibility` | アクセシビリティレビュアー | — |
 | `review-observability` | オブザーバビリティレビュアー | — |
 
-#### debug-team — バグ原因の並列仮説検証
+#### team-debug — バグ原因の並列仮説検証
 
 | スキル | 専門家 | 評価指標 |
 |--------|--------|---------|
@@ -85,7 +85,7 @@ references/からの知識を参照し、プロジェクトに最適化された
 | `debug-dependency` | 依存関係監査官 | 確信度: High / Medium / Low / Inconclusive |
 | `debug-reproduction` | 再現スペシャリスト | 確信度: High / Medium / Low / Inconclusive |
 
-#### design-team — 設計検討・複数視点議論
+#### team-design — 設計検討・複数視点議論
 
 | スキル | 専門家 | 評価指標 |
 |--------|--------|---------|
@@ -97,7 +97,7 @@ references/からの知識を参照し、プロジェクトに最適化された
 | `design-cost` | コスト分析官 | 強度: Strong / Moderate / Weak / Neutral |
 | `design-standards` | 標準規格管理者 | 強度: Strong / Moderate / Weak / Neutral |
 
-#### feature-team — 新機能の並列実装
+#### team-feature — 新機能の並列実装
 
 | スキル | 専門家 | 評価指標 |
 |--------|--------|---------|
@@ -109,7 +109,7 @@ references/からの知識を参照し、プロジェクトに最適化された
 | `feature-doc` | ドキュメント作成者 | 状態: Complete / Partial / Blocked / Skipped |
 | `feature-security` | セキュリティ分析官 | 状態: Complete / Partial / Blocked / Skipped |
 
-#### migration-team — 技術移行の並列実行
+#### team-migration — 技術移行の並列実行
 
 | スキル | 専門家 | 評価指標 |
 |--------|--------|---------|
@@ -121,7 +121,7 @@ references/からの知識を参照し、プロジェクトに最適化された
 | `migration-rollback` | ロールバック計画者 | リスク: Critical / High / Medium / Low |
 | `migration-resolver` | 依存関係解決者 | リスク: Critical / High / Medium / Low |
 
-#### refactor-team — 大規模リファクタリング
+#### team-refactor — 大規模リファクタリング
 
 | スキル | 専門家 | 評価指標 |
 |--------|--------|---------|
@@ -133,7 +133,7 @@ references/からの知識を参照し、プロジェクトに最適化された
 | `refactor-impact` | 影響評価者 | 影響度: Breaking / High / Medium / Low |
 | `refactor-compat` | 互換性チェッカー | 影響度: Breaking / High / Medium / Low |
 
-#### test-team — テスト一括作成
+#### team-test — テスト一括作成
 
 | スキル | 専門家 | 評価指標 |
 |--------|--------|---------|

@@ -1,5 +1,5 @@
 ---
-name: test-team
+name: team-test
 description: Agent Teamsでテスト一括作成チームを自動構成・起動
 argument-hint: "[--pr N | --commit REF | --diff | --staged | path | module]"
 user-invocable: true

@@ -1,4 +1,4 @@
-# /refactor-team
+# /team-refactor
 
 Agent Teamsで大規模リファクタリングチームを自動構成・起動する。
 
@@ -10,20 +10,20 @@ Agent Teamsで大規模リファクタリングチームを自動構成・起動
 ## 使用方法
 
 ```
-/refactor-team [--pr N | --commit REF | --diff | --staged | path | goal]
+/team-refactor [--pr N | --commit REF | --diff | --staged | path | goal]
 ```
 
 ## 使用例
 
 ```bash
 # リファクタリング目標を指定
-/refactor-team "認証モジュールをコンポジションに移行"
+/team-refactor "認証モジュールをコンポジションに移行"
 
 # 特定ディレクトリのリファクタリング
-/refactor-team src/legacy/
+/team-refactor src/legacy/
 
 # PRのリファクタリングを分析
-/refactor-team --pr 789
+/team-refactor --pr 789
 ```
 
 ## 動作の流れ

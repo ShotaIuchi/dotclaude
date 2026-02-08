@@ -1,5 +1,5 @@
 ---
-name: design-team
+name: team-design
 description: Agent Teamsで設計検討・複数視点議論チームを自動構成・起動
 argument-hint: "[--issue N | path | question]"
 user-invocable: true

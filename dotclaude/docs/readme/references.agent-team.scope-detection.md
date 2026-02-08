@@ -7,14 +7,14 @@ Lead Agentはサブエージェント起動前に分析対象を確定する必�
 
 | スコープ | フラグ | 取得コマンド | 例 |
 |----------|--------|-------------|-----|
-| PR | `--pr <N>` | `gh pr diff <N>` + `gh pr view <N> --json title,body,files` | `/review-team --pr 42` |
-| Issue | `--issue <N>` | `gh issue view <N> --json title,body,comments` | `/debug-team --issue 123` |
-| コミット | `--commit <ref>` | `git show <ref>` or `git diff <A>..<B>` | `/review-team --commit HEAD~3..HEAD` |
-| ステージ済み差分 | `--staged` | `git diff --staged` | `/review-team --staged` |
-| 未ステージ差分 | `--diff` | `git diff` | `/test-team --diff` |
-| ブランチ差分 | `--branch <name>` | `git diff main...<name>` | `/review-team --branch feature/auth` |
-| ファイル/ディレクトリ | パス（自動検出） | `Read` / `Glob` | `/test-team src/auth/` |
-| フリーテキスト | （残余テキスト） | 指示・コンテキストとして使用 | `/debug-team login fails on timeout` |
+| PR | `--pr <N>` | `gh pr diff <N>` + `gh pr view <N> --json title,body,files` | `/team-review --pr 42` |
+| Issue | `--issue <N>` | `gh issue view <N> --json title,body,comments` | `/team-debug --issue 123` |
+| コミット | `--commit <ref>` | `git show <ref>` or `git diff <A>..<B>` | `/team-review --commit HEAD~3..HEAD` |
+| ステージ済み差分 | `--staged` | `git diff --staged` | `/team-review --staged` |
+| 未ステージ差分 | `--diff` | `git diff` | `/team-test --diff` |
+| ブランチ差分 | `--branch <name>` | `git diff main...<name>` | `/team-review --branch feature/auth` |
+| ファイル/ディレクトリ | パス（自動検出） | `Read` / `Glob` | `/team-test src/auth/` |
+| フリーテキスト | （残余テキスト） | 指示・コンテキストとして使用 | `/team-debug login fails on timeout` |
 
 ## 自動検出ルール（フラグなしの場合）
 

@@ -1,5 +1,5 @@
 ---
-name: feature-team
+name: team-feature
 description: Agent Teamsで新機能の並列実装チームを自動構成・起動
 argument-hint: "[--issue N | --pr N | path | description]"
 user-invocable: true

@@ -1,4 +1,4 @@
-# /debug-team
+# /team-debug
 
 Agent Teamsでバグ原因の並列仮説検証チームを自動構成・起動する。
 
@@ -10,20 +10,20 @@ Agent Teamsでバグ原因の並列仮説検証チームを自動構成・起動
 ## 使用方法
 
 ```
-/debug-team [--issue N | --pr N | --commit REF | --diff | path | text]
+/team-debug [--issue N | --pr N | --commit REF | --diff | path | text]
 ```
 
 ## 使用例
 
 ```bash
 # Issueのバグを調査
-/debug-team --issue 456
+/team-debug --issue 456
 
 # エラーメッセージから調査
-/debug-team "NullPointerException in AuthService.login"
+/team-debug "NullPointerException in AuthService.login"
 
 # 特定ファイルを調査
-/debug-team src/auth/login.kt
+/team-debug src/auth/login.kt
 ```
 
 ## 動作の流れ

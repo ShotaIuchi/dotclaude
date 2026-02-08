@@ -1,4 +1,4 @@
-# /design-team
+# /team-design
 
 Agent Teamsで設計検討・複数視点議論チームを自動構成・起動する。
 
@@ -10,20 +10,20 @@ Agent Teamsで設計検討・複数視点議論チームを自動構成・起動
 ## 使用方法
 
 ```
-/design-team [--issue N | path | question]
+/team-design [--issue N | path | question]
 ```
 
 ## 使用例
 
 ```bash
 # 設計質問を議論
-/design-team "認証にJWTとセッションのどちらを使うべきか"
+/team-design "認証にJWTとセッションのどちらを使うべきか"
 
 # Issueの設計を検討
-/design-team --issue 321
+/team-design --issue 321
 
 # 既存コードのリアーキテクチャを議論
-/design-team src/api/
+/team-design src/api/
 ```
 
 ## 動作の流れ

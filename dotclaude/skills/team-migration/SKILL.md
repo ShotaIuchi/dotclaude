@@ -1,5 +1,5 @@
 ---
-name: migration-team
+name: team-migration
 description: Agent Teamsで技術移行の並列実行チームを自動構成・起動
 argument-hint: "[--pr N | --diff | migration target]"
 user-invocable: true

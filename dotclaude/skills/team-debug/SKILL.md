@@ -1,5 +1,5 @@
 ---
-name: debug-team
+name: team-debug
 description: Agent Teamsでバグ原因の並列仮説検証チームを自動構成・起動
 argument-hint: "[--issue N | --pr N | --commit REF | --diff | path | text]"
 user-invocable: true

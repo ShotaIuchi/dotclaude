@@ -7,14 +7,14 @@ The Lead Agent must resolve the analysis target before spawning any sub-agents.
 
 | Scope | Flag | Retrieval Command | Example |
 |-------|------|-------------------|---------|
-| PR | `--pr <N>` | `gh pr diff <N>` + `gh pr view <N> --json title,body,files` | `/review-team --pr 42` |
-| Issue | `--issue <N>` | `gh issue view <N> --json title,body,comments` | `/debug-team --issue 123` |
-| Commit | `--commit <ref>` | `git show <ref>` or `git diff <A>..<B>` | `/review-team --commit HEAD~3..HEAD` |
-| Staged diff | `--staged` | `git diff --staged` | `/review-team --staged` |
-| Unstaged diff | `--diff` | `git diff` | `/test-team --diff` |
-| Branch diff | `--branch <name>` | `git diff main...<name>` | `/review-team --branch feature/auth` |
-| File/Directory | path (auto-detect) | `Read` / `Glob` | `/test-team src/auth/` |
-| Free text | (residual) | Use as instruction/context | `/debug-team login fails on timeout` |
+| PR | `--pr <N>` | `gh pr diff <N>` + `gh pr view <N> --json title,body,files` | `/team-review --pr 42` |
+| Issue | `--issue <N>` | `gh issue view <N> --json title,body,comments` | `/team-debug --issue 123` |
+| Commit | `--commit <ref>` | `git show <ref>` or `git diff <A>..<B>` | `/team-review --commit HEAD~3..HEAD` |
+| Staged diff | `--staged` | `git diff --staged` | `/team-review --staged` |
+| Unstaged diff | `--diff` | `git diff` | `/team-test --diff` |
+| Branch diff | `--branch <name>` | `git diff main...<name>` | `/team-review --branch feature/auth` |
+| File/Directory | path (auto-detect) | `Read` / `Glob` | `/team-test src/auth/` |
+| Free text | (residual) | Use as instruction/context | `/team-debug login fails on timeout` |
 
 ## Auto-Detection Rules (when no flag is given)
 

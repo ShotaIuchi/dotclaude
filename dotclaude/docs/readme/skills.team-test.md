@@ -1,4 +1,4 @@
-# /test-team
+# /team-test
 
 Agent Teamsでテスト一括作成チームを自動構成・起動する。
 
@@ -10,20 +10,20 @@ Agent Teamsでテスト一括作成チームを自動構成・起動する。
 ## 使用方法
 
 ```
-/test-team [--pr N | --commit REF | --diff | --staged | path | module]
+/team-test [--pr N | --commit REF | --diff | --staged | path | module]
 ```
 
 ## 使用例
 
 ```bash
 # 特定ディレクトリのテストを作成
-/test-team src/auth/
+/team-test src/auth/
 
 # PRの変更に対するテストを作成
-/test-team --pr 123
+/team-test --pr 123
 
 # ステージ済み変更のテストを作成
-/test-team --staged
+/team-test --staged
 ```
 
 ## 動作の流れ
