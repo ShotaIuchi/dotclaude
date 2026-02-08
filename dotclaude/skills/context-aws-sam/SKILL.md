@@ -1,3 +1,9 @@
+---
+name: context-aws-sam
+description: AWS SAM serverless development context (Lambda, API Gateway, SAM templates, sam local)
+user-invocable: false
+---
+
 # AWS SAM Context Rule
 
 Auto-applied context when working on AWS SAM serverless development.
@@ -16,8 +22,8 @@ Read and apply patterns from:
 
 | Document | Purpose |
 |----------|---------|
-| [AWS Conventions](../references/services/aws/conventions.md) | Project structure, naming |
-| [SAM Architecture](../references/services/aws/sam-architecture-patterns.md) | Lambda/API patterns |
+| [AWS Conventions](../../references/services/aws/conventions.md) | Project structure, naming |
+| [SAM Architecture](../../references/services/aws/sam-architecture-patterns.md) | Lambda/API patterns |
 
 ## External References
 

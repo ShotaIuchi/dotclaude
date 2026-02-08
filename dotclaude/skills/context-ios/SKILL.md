@@ -1,3 +1,9 @@
+---
+name: context-ios
+description: iOS development context (SwiftUI, async/await, Combine, MVVM patterns)
+user-invocable: false
+---
+
 # iOS Context Rule
 
 Auto-applied context when working on iOS development tasks.
@@ -16,10 +22,10 @@ Read and apply patterns from:
 
 | Document | Purpose |
 |----------|---------|
-| [Clean Architecture](../references/common/clean-architecture.md) | Layer separation principles |
-| [Testing Strategy](../references/common/testing-strategy.md) | Test patterns and coverage |
-| [iOS Conventions](../references/platforms/ios/conventions.md) | Naming, structure, idioms |
-| [Architecture Patterns](../references/platforms/ios/architecture-patterns.md) | MVVM/State management |
+| [Clean Architecture](../../references/common/clean-architecture.md) | Layer separation principles |
+| [Testing Strategy](../../references/common/testing-strategy.md) | Test patterns and coverage |
+| [iOS Conventions](../../references/platforms/ios/conventions.md) | Naming, structure, idioms |
+| [Architecture Patterns](../../references/platforms/ios/architecture-patterns.md) | MVVM/State management |
 
 ## External References
 
