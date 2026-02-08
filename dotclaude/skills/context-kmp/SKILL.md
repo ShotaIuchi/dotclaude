@@ -1,6 +1,9 @@
 ---
 name: context-kmp
-description: Kotlin Multiplatform development context (expect/actual, Koin, SQLDelight, Ktor, Compose Multiplatform)
+description: >-
+  Kotlin Multiplatform development context. Apply when working with
+  shared/ or commonMain/, expect/actual declarations, .kt files in
+  multiplatform modules, Koin, SQLDelight, Ktor, Compose Multiplatform.
 user-invocable: false
 ---
 

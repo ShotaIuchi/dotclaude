@@ -1,6 +1,8 @@
 ---
 name: context-ios
-description: iOS development context (SwiftUI, async/await, Combine, MVVM patterns)
+description: >-
+  iOS development context. Apply when working with .swift files,
+  Xcode project, SwiftUI views, async/await, Combine, MVVM patterns.
 user-invocable: false
 ---
 

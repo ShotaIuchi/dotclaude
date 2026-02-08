@@ -1,6 +1,9 @@
 ---
 name: context-android
-description: Android development context (ViewModel, Jetpack Compose, Hilt, MVVM/UDF patterns)
+description: >-
+  Android development context. Apply when working with Android modules,
+  .kt files under android/, build.gradle.kts with Hilt/Compose dependencies,
+  ViewModel, Jetpack Compose, MVVM/UDF patterns.
 user-invocable: false
 ---
 

@@ -1,6 +1,9 @@
 ---
 name: context-aws-sam
-description: AWS SAM serverless development context (Lambda, API Gateway, SAM templates, sam local)
+description: >-
+  AWS SAM serverless development context. Apply when working with
+  template.yaml, Lambda handler files, samconfig.toml,
+  API Gateway integrations, sam local commands.
 user-invocable: false
 ---
 
