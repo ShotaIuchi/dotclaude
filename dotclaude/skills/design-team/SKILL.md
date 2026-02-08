@@ -1,7 +1,7 @@
 ---
 name: design-team
 description: Agent Teamsで設計検討・複数視点議論チームを自動構成・起動
-argument-hint: "[design question, RFC, or architecture topic]"
+argument-hint: "[--issue N | path | question]"
 user-invocable: true
 disable-model-invocation: true
 ---
@@ -16,6 +16,23 @@ Create an Agent Team with automatically selected panelists based on the design t
 2. **Select appropriate panelists** based on the selection matrix below
 3. **Create the agent team** with only the selected panelists
 4. Have them debate from their perspectives and produce a decision document
+
+## Step 0: Scope Detection
+
+Parse `$ARGUMENTS` to determine the analysis target.
+See `references/agent-team/scope-detection.md` for full detection rules.
+
+| Flag | Scope | Action |
+|------|-------|--------|
+| `--pr <N>` | PR | `gh pr diff <N>` + `gh pr view <N> --json title,body,files` |
+| `--issue <N>` | Issue | `gh issue view <N> --json title,body,comments` |
+| `--commit <ref>` | Commit | `git show <ref>` or `git diff <range>` |
+| `--diff` | Unstaged changes | `git diff` |
+| `--staged` | Staged changes | `git diff --staged` |
+| `--branch <name>` | Branch diff | `git diff main...<name>` |
+| Path pattern | File/Directory | `Glob` + `Read` |
+| Free text | Description | Use as context for analysis |
+| (empty or ambiguous) | Unknown | Ask user to specify target |
 
 ## Step 1: Topic Analysis
 

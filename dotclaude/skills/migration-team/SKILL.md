@@ -1,7 +1,7 @@
 ---
 name: migration-team
 description: Agent Teamsで技術移行の並列実行チームを自動構成・起動
-argument-hint: "[migration target: e.g., 'React 17→18', 'REST→GraphQL', 'JS→TS']"
+argument-hint: "[--pr N | --diff | migration target]"
 user-invocable: true
 disable-model-invocation: true
 ---
@@ -16,6 +16,23 @@ Create an Agent Team with automatically selected migration specialists based on 
 2. **Select appropriate specialists** based on the selection matrix below
 3. **Create the agent team** with only the selected specialists
 4. Have them coordinate to produce a phased migration plan and execute transformations
+
+## Step 0: Scope Detection
+
+Parse `$ARGUMENTS` to determine the analysis target.
+See `references/agent-team/scope-detection.md` for full detection rules.
+
+| Flag | Scope | Action |
+|------|-------|--------|
+| `--pr <N>` | PR | `gh pr diff <N>` + `gh pr view <N> --json title,body,files` |
+| `--issue <N>` | Issue | `gh issue view <N> --json title,body,comments` |
+| `--commit <ref>` | Commit | `git show <ref>` or `git diff <range>` |
+| `--diff` | Unstaged changes | `git diff` |
+| `--staged` | Staged changes | `git diff --staged` |
+| `--branch <name>` | Branch diff | `git diff main...<name>` |
+| Path pattern | File/Directory | `Glob` + `Read` |
+| Free text | Description | Use as context for analysis |
+| (empty or ambiguous) | Unknown | Ask user to specify target |
 
 ## Step 1: Migration Analysis
 

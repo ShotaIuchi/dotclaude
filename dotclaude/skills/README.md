@@ -41,6 +41,23 @@ references/からの知識を参照し、プロジェクトに最適化された
 
 並列サブエージェントで専門分析を行うチームスキル。親チーム（`/team-name`）がトピックを分析し、適切な専門家を選択・起動します。
 
+#### 共通スコープ指定
+
+全チームスキルは共通の引数フォーマットで分析対象を指定できます（詳細: `references/agent-team/scope-detection.md`）。
+
+| フラグ | スコープ | 例 |
+|--------|----------|-----|
+| `--pr <N>` | PRの差分・情報 | `/review-team --pr 42` |
+| `--issue <N>` | Issueの内容・コメント | `/debug-team --issue 123` |
+| `--commit <ref>` | コミットの差分 | `/review-team --commit HEAD~3..HEAD` |
+| `--staged` | ステージ済み差分 | `/review-team --staged` |
+| `--diff` | 未ステージ差分 | `/test-team --diff` |
+| `--branch <name>` | ブランチ差分 | `/review-team --branch feature/auth` |
+| パス | ファイル/ディレクトリ | `/test-team src/auth/` |
+| テキスト | フリーテキスト指示 | `/debug-team login fails on timeout` |
+
+引数なし・曖昧な場合はユーザーに確認を行います。
+
 #### review-team — コードレビュー
 
 | スキル | 専門家 | 評価指標 |

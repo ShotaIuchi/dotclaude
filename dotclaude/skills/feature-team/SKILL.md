@@ -1,7 +1,7 @@
 ---
 name: feature-team
 description: Agent Teamsで新機能の並列実装チームを自動構成・起動
-argument-hint: "[feature description, issue number, or spec file path]"
+argument-hint: "[--issue N | --pr N | path | description]"
 user-invocable: true
 disable-model-invocation: true
 ---
@@ -16,6 +16,23 @@ Create an Agent Team with automatically selected specialists to implement new fe
 2. **Select appropriate specialists** based on the selection matrix below
 3. **Create the agent team** with only the selected specialists
 4. Have them coordinate on integration points and produce a completion report
+
+## Step 0: Scope Detection
+
+Parse `$ARGUMENTS` to determine the analysis target.
+See `references/agent-team/scope-detection.md` for full detection rules.
+
+| Flag | Scope | Action |
+|------|-------|--------|
+| `--pr <N>` | PR | `gh pr diff <N>` + `gh pr view <N> --json title,body,files` |
+| `--issue <N>` | Issue | `gh issue view <N> --json title,body,comments` |
+| `--commit <ref>` | Commit | `git show <ref>` or `git diff <range>` |
+| `--diff` | Unstaged changes | `git diff` |
+| `--staged` | Staged changes | `git diff --staged` |
+| `--branch <name>` | Branch diff | `git diff main...<name>` |
+| Path pattern | File/Directory | `Glob` + `Read` |
+| Free text | Description | Use as context for analysis |
+| (empty or ambiguous) | Unknown | Ask user to specify target |
 
 ## Step 1: Feature Analysis
 

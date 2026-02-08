@@ -1,7 +1,7 @@
 ---
 name: refactor-team
 description: Agent Teamsで大規模リファクタリングチームを自動構成・起動
-argument-hint: "[file/directory path or refactoring goal]"
+argument-hint: "[--pr N | --commit REF | --diff | --staged | path | goal]"
 user-invocable: true
 disable-model-invocation: true
 ---
@@ -16,6 +16,23 @@ Create an Agent Team with automatically selected specialists based on the refact
 2. **Select appropriate specialists** based on the selection matrix below
 3. **Create the agent team** with only the selected specialists
 4. Have them share findings and produce a comprehensive refactoring plan
+
+## Step 0: Scope Detection
+
+Parse `$ARGUMENTS` to determine the analysis target.
+See `references/agent-team/scope-detection.md` for full detection rules.
+
+| Flag | Scope | Action |
+|------|-------|--------|
+| `--pr <N>` | PR | `gh pr diff <N>` + `gh pr view <N> --json title,body,files` |
+| `--issue <N>` | Issue | `gh issue view <N> --json title,body,comments` |
+| `--commit <ref>` | Commit | `git show <ref>` or `git diff <range>` |
+| `--diff` | Unstaged changes | `git diff` |
+| `--staged` | Staged changes | `git diff --staged` |
+| `--branch <name>` | Branch diff | `git diff main...<name>` |
+| Path pattern | File/Directory | `Glob` + `Read` |
+| Free text | Description | Use as context for analysis |
+| (empty or ambiguous) | Unknown | Ask user to specify target |
 
 ## Step 1: Codebase Analysis
 

@@ -1,7 +1,7 @@
 ---
 name: debug-team
 description: Agent Teamsでバグ原因の並列仮説検証チームを自動構成・起動
-argument-hint: "[error message, file path, or issue number]"
+argument-hint: "[--issue N | --pr N | --commit REF | --diff | path | text]"
 user-invocable: true
 disable-model-invocation: true
 ---
@@ -17,6 +17,23 @@ Create an Agent Team with automatically selected investigators to analyze and id
 3. **Select appropriate investigators** based on the selection matrix below
 4. **Create the agent team** with only the selected investigators
 5. Have them share evidence and produce a consolidated root cause analysis
+
+## Step 0: Scope Detection
+
+Parse `$ARGUMENTS` to determine the analysis target.
+See `references/agent-team/scope-detection.md` for full detection rules.
+
+| Flag | Scope | Action |
+|------|-------|--------|
+| `--pr <N>` | PR | `gh pr diff <N>` + `gh pr view <N> --json title,body,files` |
+| `--issue <N>` | Issue | `gh issue view <N> --json title,body,comments` |
+| `--commit <ref>` | Commit | `git show <ref>` or `git diff <range>` |
+| `--diff` | Unstaged changes | `git diff` |
+| `--staged` | Staged changes | `git diff --staged` |
+| `--branch <name>` | Branch diff | `git diff main...<name>` |
+| Path pattern | File/Directory | `Glob` + `Read` |
+| Free text | Description | Use as context for analysis |
+| (empty or ambiguous) | Unknown | Ask user to specify target |
 
 ## Step 1: Bug Analysis
 

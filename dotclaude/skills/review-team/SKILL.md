@@ -1,7 +1,7 @@
 ---
 name: review-team
 description: Agent Teamsでターゲットに最適なコードレビューチームを自動構成・起動
-argument-hint: "[PR number or file/directory path]"
+argument-hint: "[--pr N | --issue N | --commit REF | --diff | --staged | --branch NAME | path | text]"
 user-invocable: true
 disable-model-invocation: true
 ---
@@ -16,6 +16,23 @@ Create an Agent Team with automatically selected reviewers based on the target t
 2. **Select appropriate reviewers** based on the selection matrix below
 3. **Create the agent team** with only the selected reviewers
 4. Have them share findings and produce a consolidated report
+
+## Step 0: Scope Detection
+
+Parse `$ARGUMENTS` to determine the analysis target.
+See `references/agent-team/scope-detection.md` for full detection rules.
+
+| Flag | Scope | Action |
+|------|-------|--------|
+| `--pr <N>` | PR | `gh pr diff <N>` + `gh pr view <N> --json title,body,files` |
+| `--issue <N>` | Issue | `gh issue view <N> --json title,body,comments` |
+| `--commit <ref>` | Commit | `git show <ref>` or `git diff <range>` |
+| `--diff` | Unstaged changes | `git diff` |
+| `--staged` | Staged changes | `git diff --staged` |
+| `--branch <name>` | Branch diff | `git diff main...<name>` |
+| Path pattern | File/Directory | `Glob` + `Read` |
+| Free text | Description | Use as context for analysis |
+| (empty or ambiguous) | Unknown | Ask user to specify target |
 
 ## Step 1: Target Analysis
 
