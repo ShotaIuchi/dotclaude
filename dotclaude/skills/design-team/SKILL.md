@@ -70,7 +70,13 @@ When uncertain, **include the panelist** (prefer thoroughness over efficiency).
 
 ## Step 3: Team Creation
 
-Spawn only the selected panelists with their specialized prompts:
+Spawn only the selected panelists using the **Task tool** (`subagent_type: "general-purpose"`).
+
+**Execution Rules:**
+- Send ALL Task tool calls in a **single message** for parallel execution
+- Each subagent runs in its own context and returns findings to the lead (main context)
+- Provide each subagent with the full target context (design question, relevant code, etc.) in the prompt
+- The lead (main context) is responsible for synthesis — do NOT spawn a subagent for synthesis
 
 1. **Pragmatist**: Advocate for practical, proven solutions. Focus on time-to-market, team capabilities, and maintenance cost. Challenge over-engineering and premature optimization. Ground discussions in real-world constraints.
 

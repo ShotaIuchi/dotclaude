@@ -69,7 +69,13 @@ When uncertain, **include the specialist** (prefer thoroughness over efficiency)
 
 ## Step 3: Team Creation
 
-Spawn only the selected specialists with their specialized prompts:
+Spawn only the selected specialists using the **Task tool** (`subagent_type: "general-purpose"`).
+
+**Execution Rules:**
+- Send ALL Task tool calls in a **single message** for parallel execution
+- Each subagent runs in its own context and returns findings to the lead (main context)
+- Provide each subagent with the full target context (feature spec, file contents, etc.) in the prompt
+- The lead (main context) is responsible for synthesis — do NOT spawn a subagent for synthesis
 
 1. **API Designer**: Design API endpoints, request/response schemas, error handling, versioning, and integration contracts.
 

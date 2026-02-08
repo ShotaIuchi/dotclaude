@@ -70,7 +70,13 @@ When uncertain, **include the test writer** (prefer thoroughness over efficiency
 
 ## Step 3: Team Creation
 
-Spawn only the selected test writers with their specialized prompts:
+Spawn only the selected test writers using the **Task tool** (`subagent_type: "general-purpose"`).
+
+**Execution Rules:**
+- Send ALL Task tool calls in a **single message** for parallel execution
+- Each subagent runs in its own context and returns findings to the lead (main context)
+- Provide each subagent with the full target context (file contents, existing tests, etc.) in the prompt
+- The lead (main context) is responsible for synthesis — do NOT spawn a subagent for synthesis
 
 1. **Unit Test Writer**: Create comprehensive unit tests for individual functions, methods, and classes with proper isolation. Cover happy paths, expected error conditions, and return value validation. Use appropriate assertions and test naming conventions for the project's language and framework.
 

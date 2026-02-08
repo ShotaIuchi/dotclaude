@@ -69,7 +69,13 @@ When uncertain, **include the specialist** (prefer thoroughness over efficiency)
 
 ## Step 3: Team Creation
 
-Spawn only the selected specialists with their specialized prompts:
+Spawn only the selected specialists using the **Task tool** (`subagent_type: "general-purpose"`).
+
+**Execution Rules:**
+- Send ALL Task tool calls in a **single message** for parallel execution
+- Each subagent runs in its own context and returns findings to the lead (main context)
+- Provide each subagent with the full target context (refactoring scope, file contents, etc.) in the prompt
+- The lead (main context) is responsible for synthesis — do NOT spawn a subagent for synthesis
 
 1. **Dependency Mapper**: Map all dependencies, import chains, call graphs, and coupling relationships for the target code. Identify tightly coupled modules, circular dependencies, and hidden connections that could break during refactoring.
 

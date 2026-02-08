@@ -74,7 +74,13 @@ When uncertain, **include the reviewer** (prefer thoroughness over efficiency).
 
 ## Step 3: Team Creation
 
-Spawn only the selected reviewers with their specialized prompts:
+Spawn only the selected reviewers using the **Task tool** (`subagent_type: "general-purpose"`).
+
+**Execution Rules:**
+- Send ALL Task tool calls in a **single message** for parallel execution
+- Each subagent runs in its own context and returns findings to the lead (main context)
+- Provide each subagent with the full target context (diff, file contents, etc.) in the prompt
+- The lead (main context) is responsible for synthesis — do NOT spawn a subagent for synthesis
 
 1. **Security Reviewer**: Review for vulnerabilities, authentication, authorization, input validation, injection attacks, CSRF, XSS, secrets exposure, and OWASP Top 10 issues.
 

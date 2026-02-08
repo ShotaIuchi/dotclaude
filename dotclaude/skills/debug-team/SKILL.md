@@ -79,7 +79,13 @@ When uncertain, **include the investigator** (prefer thoroughness over efficienc
 
 ## Step 4: Team Creation
 
-Spawn only the selected investigators with their specialized prompts:
+Spawn only the selected investigators using the **Task tool** (`subagent_type: "general-purpose"`).
+
+**Execution Rules:**
+- Send ALL Task tool calls in a **single message** for parallel execution
+- Each subagent runs in its own context and returns findings to the lead (main context)
+- Provide each subagent with the full target context (error messages, stack traces, file contents, etc.) in the prompt
+- The lead (main context) is responsible for synthesis — do NOT spawn a subagent for synthesis
 
 1. **Stack Trace Analyzer**: Analyze error messages, stack traces, exception chains, and error propagation paths to pinpoint failure locations.
 

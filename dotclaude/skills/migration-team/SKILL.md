@@ -70,7 +70,13 @@ When uncertain, **include the specialist** (prefer safety over speed).
 
 ## Step 3: Team Creation
 
-Spawn only the selected specialists with their specialized prompts:
+Spawn only the selected specialists using the **Task tool** (`subagent_type: "general-purpose"`).
+
+**Execution Rules:**
+- Send ALL Task tool calls in a **single message** for parallel execution
+- Each subagent runs in its own context and returns findings to the lead (main context)
+- Provide each subagent with the full target context (migration scope, file contents, etc.) in the prompt
+- The lead (main context) is responsible for synthesis — do NOT spawn a subagent for synthesis
 
 1. **Breaking Change Analyst**: Catalog all breaking changes between source and target versions, APIs, and behaviors. Produce a comprehensive inventory of incompatible changes, deprecated features, removed APIs, and behavioral differences with impact assessment for each item.
 
