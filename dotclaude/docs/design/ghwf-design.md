@@ -54,7 +54,7 @@ GitHub Issue/PR をラベルで制御するワークフローシステム。
 | 2 | ghwf2-spec | Create specification document |
 | 3 | ghwf3-plan | Create implementation plan |
 | 4 | ghwf4-review | Review plan or code |
-| 5 | ghwf5-implement | Implement one step from plan |
+| 5 | ghwf5-implement | Implement all steps from plan (commit per step, push once) |
 | 6 | ghwf6-verify | Verify implementation |
 | 7 | ghwf7-pr | Convert Draft PR to Ready for Review |
 
@@ -81,7 +81,15 @@ GitHub Issue/PR をラベルで制御するワークフローシステム。
     ↓
 [Daemon] Execute ghwf2-spec ...
     ↓
-... repeat ...
+... repeat (ghwf3 → ghwf4) ...
+    ↓
+[Daemon] Execute ghwf5-implement (all steps in single execution)
+    ├── Implement step 1 → commit
+    ├── Implement step 2 → commit
+    ├── ...
+    └── Push once
+    ↓
+[Daemon] Execute ghwf6-verify
     ↓
 [Daemon] Execute ghwf7-pr (Draft → Ready for Review)
     ↓

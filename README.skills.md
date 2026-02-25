@@ -87,7 +87,7 @@ GitHub Issue/PRをラベルで制御する自動化ワークフロー。
 | `ghwf2-spec` | 仕様書作成 |
 | `ghwf3-plan` | 実装計画作成 |
 | `ghwf4-review` | レビュー |
-| `ghwf5-implement` | 実装 |
+| `ghwf5-implement` | 全ステップ一括実装（ステップ毎commit、最後にpush） |
 | `ghwf6-verify` | 検証（lint/test/build） |
 | `ghwf7-pr` | Draft → Ready for Review |
 

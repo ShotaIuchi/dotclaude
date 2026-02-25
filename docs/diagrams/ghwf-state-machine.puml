@@ -22,14 +22,23 @@ state "Executing" as Exec {
   state "ghwf2-spec" as S2
   state "ghwf3-plan" as S3
   state "ghwf4-review" as S4
-  state "ghwf5-implement" as S5 <<loop>> {
-    state "Step [i]" as S5i
-    state "done?" as S5check <<choice>>
+  state "ghwf5-implement" as S5 {
+    state "Step [i] impl & commit" as S5i
+    state "all done?" as S5check <<choice>>
+    state "Push" as S5push
 
     [*] --> S5i
     S5i --> S5check
     S5check --> S5i : i < total
-    S5check --> [*] : i == total
+    S5check --> S5push : i == total
+    S5push --> [*]
+
+    note right of S5i
+      Single execution:
+      loop all steps internally,
+      commit per step,
+      push once at end
+    end note
   }
   state "ghwf6-verify" as S6
   state "ghwf7-pr" as S7

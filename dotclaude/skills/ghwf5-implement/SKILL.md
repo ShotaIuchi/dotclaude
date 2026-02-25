@@ -1,7 +1,7 @@
 ---
 name: ghwf5-implement
-description: Plan の1ステップを実装
-argument-hint: "[step-number]"
+description: Planの全ステップを一括実装
+argument-hint: ""
 context: fork
 agent: general-purpose
 ---
@@ -10,76 +10,100 @@ agent: general-purpose
 
 # /ghwf5-implement
 
-実装計画の1ステップを実装する。
+Implement all steps of the plan in a single execution. Each step is committed individually; push is done once at the end.
 
 ## Usage
 
 ```
-/ghwf5-implement          # 次のステップを実装
-/ghwf5-implement <N>      # ステップ N を実装
+/ghwf5-implement          # 全ステップを一括実装
 ```
 
 ## Prerequisites
 
-- `ghwf4-review` 完了済み (Plan レビュー)
-- `03_PLAN.md` が存在
+- `ghwf4-review` completed (Plan review)
+- `03_PLAN.md` exists
 
 ## Processing
 
 ### 1. Load Context
 
 - Read `state.json` for active work
-- Read `03_PLAN.md`
+- Read `03_PLAN.md` and extract all steps
 - Fetch Issue/PR with comments:
   ```bash
   gh issue view <issue> --json body,comments
   gh pr view <pr> --json comments,reviews
   ```
-- Identify next step to implement
+- Determine starting step (first incomplete step from state)
 
-### 2. Implement
+### 2. Implement All Steps (Loop)
 
-- Write code according to plan
+For each remaining step (from current to last):
+
+#### 2a. Implement Step N
+
+- Write code according to plan for step N
 - Follow existing code patterns
 - Add tests if applicable
 
-### 3. Update 05_IMPLEMENTATION.md
+#### 2b. Commit Step N
 
-- Track completed steps
-- Note any deviations from plan
-
-### 4. Commit & Push
-
-**Execute immediately without confirmation:**
+**Commit immediately without confirmation (do NOT push yet):**
 
 ```bash
 git add .
-git commit -m "feat(<scope>): <description>
+git commit -m "<type>(<scope>): <description>
 
 Implements step N of <work-id>"
+```
+
+Auto-detect commit type from step content:
+- `bug`/`fix`/`repair` → `fix`
+- `refactor` → `refactor`
+- `test` → `test`
+- `doc`/`documentation` → `docs`
+- otherwise → `feat`
+
+#### 2c. Update Progress
+
+- Update `implement.current_step` in state.json
+- Continue to next step
+
+### 3. Update 05_IMPLEMENTATION.md
+
+After all steps are complete:
+- Record all completed steps with summary
+- Note any deviations from plan
+
+### 4. Push
+
+**Push once after all steps are committed:**
+
+```bash
 git push
 ```
 
-### 5. Check Completion
+### 5. Update PR & Labels
 
-- All steps done → next: ghwf6-verify
-- More steps → next: ghwf5-implement (same step)
+- Update PR checklist
+- Add `ghwf:step-5` label
 
-### 6. Update PR & Labels
-
-- PR チェックリスト更新
-- `ghwf:step-5` ラベル追加 (完了時)
-
-### 7. Update State
+### 6. Update State
 
 ```json
 {
   "current": "ghwf5-implement",
-  "next": "ghwf6-verify",  // or "ghwf5-implement"
+  "next": "ghwf6-verify",
   "last_execution": "<ISO8601>",
   "implement": {
-    "current_step": N,
+    "current_step": M,
     "total_steps": M
   }
 }
 ```
+
+## Error Handling
+
+- If a step fails to implement, commit all successfully completed steps, push, and stop
+- Record the failure in 05_IMPLEMENTATION.md with the failing step number
+- Set `next: "ghwf5-implement"` so the remaining steps can be retried
