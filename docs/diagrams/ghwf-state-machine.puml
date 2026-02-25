@@ -1,0 +1,108 @@
+@startuml ghwf-state-machine
+title GHWF Workflow State Machine
+
+skinparam state {
+  BackgroundColor<<loop>> LightGreen
+  BackgroundColor<<terminal>> LightGray
+  BackgroundColor<<daemon>> LightYellow
+}
+
+[*] --> Idle
+
+state "Idle" as Idle <<daemon>> {
+  Idle : ghwf label on Issue
+  Idle : Daemon polling (60s)
+}
+
+' ===== Executing (ghwf1-7) =====
+
+state "Executing" as Exec {
+
+  state "ghwf1-kickoff" as S1
+  state "ghwf2-spec" as S2
+  state "ghwf3-plan" as S3
+  state "ghwf4-review" as S4
+  state "ghwf5-implement" as S5 <<loop>> {
+    state "Step [i]" as S5i
+    state "done?" as S5check <<choice>>
+
+    [*] --> S5i
+    S5i --> S5check
+    S5check --> S5i : i < total
+    S5check --> [*] : i == total
+  }
+  state "ghwf6-verify" as S6
+  state "ghwf7-pr" as S7
+
+  [*] --> S1
+  S1 --> S2
+  S2 --> S3
+  S3 --> S4
+  S4 --> S5
+  S5 --> S6
+  S6 --> S7
+  S7 --> [*]
+}
+
+' ===== Normal Flow =====
+
+Idle --> Exec : ghwf:exec
+
+state "Completed" as Done <<terminal>>
+Exec --> Done
+Done --> [*]
+
+' ===== Waiting / Approval =====
+
+state "Waiting" as Wait <<daemon>> {
+  Wait : ghwf:waiting
+  Wait : Awaiting user approval
+}
+
+Exec --> Wait : auto-limit reached
+Wait --> Exec : ghwf:exec\n(resume next step)
+
+' ===== Redo / Revision =====
+
+Wait -[dashed]-> Exec : ghwf:redo\nghwf:redo-N
+Wait -[dashed]-> Exec : ghwf:revision\n(restart from step 1)
+
+note right of Exec
+  **ghwf:redo** — Re-execute current step
+  **ghwf:redo-N** — Rollback to step N
+  **ghwf:revision** — Full restart (increments revision)
+end note
+
+' ===== Blocking =====
+
+state "Blocked" as Block <<daemon>> {
+  state "Waiting Deps" as WDep
+  state "Waiting Subs" as WSub
+
+  WDep : ghwf:waiting-deps
+  WSub : ghwf:waiting-subs
+}
+
+Idle --> Block : open dependencies\nor sub-issues
+Block --> Idle : resolved
+
+' ===== Stop =====
+
+state "Stopped" as Stop <<terminal>>
+
+Wait --> Stop : ghwf:stop
+Idle --> Stop : ghwf:stop
+
+' ===== Legend =====
+
+legend right
+  |= Label |= Auto-continue through |
+  | ghwf:auto-to-2 | Step 2 (spec) |
+  | ghwf:auto-to-3 | Step 3 (plan) |
+  | ghwf:auto-to-4 | Step 4 (review) |
+  | ghwf:auto-to-5 | Step 5 (implement) |
+  | ghwf:auto-to-6 | Step 6 (verify) |
+  | ghwf:auto-all | All steps |
+endlegend
+
+@enduml
