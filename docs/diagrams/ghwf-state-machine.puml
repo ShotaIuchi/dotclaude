@@ -19,6 +19,10 @@ state "待機中" as Idle <<daemon>> {
 state "実行中" as Exec {
 
   state "ghwf1-kickoff" as S1
+  note right of S1
+    ブランチ作成 + Draft PR作成
+    git push -u origin <branch>
+  end note
   state "ghwf2-spec" as S2
   state "ghwf3-plan" as S3
   state "ghwf4-review" as S4
@@ -43,13 +47,13 @@ state "実行中" as Exec {
   state "ghwf7-pr" as S7
 
   [*] --> S1
-  S1 --> S2
-  S2 --> S3
-  S3 --> S4
-  S4 --> S5
-  S5 --> S6
-  S6 --> S7
-  S7 --> [*]
+  S1 --> S2 : commit & push
+  S2 --> S3 : commit & push
+  S3 --> S4 : commit & push
+  S4 --> S5 : commit & push
+  S5 --> S6 : commit & push
+  S6 --> S7 : commit & push
+  S7 --> [*] : GitHub操作のみ\n(git操作なし)
 }
 
 ' ===== 通常フロー =====
