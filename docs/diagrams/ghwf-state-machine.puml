@@ -1,5 +1,5 @@
 @startuml ghwf-state-machine
-title GHWF Workflow State Machine
+title GHWF ワークフロー ステートマシン
 
 skinparam state {
   BackgroundColor<<loop>> LightGreen
@@ -9,23 +9,23 @@ skinparam state {
 
 [*] --> Idle
 
-state "Idle" as Idle <<daemon>> {
-  Idle : ghwf label on Issue
-  Idle : Daemon polling (60s)
+state "待機中" as Idle <<daemon>> {
+  Idle : ghwf ラベル付きIssue
+  Idle : デーモン監視中 (60秒間隔)
 }
 
-' ===== Executing (ghwf1-7) =====
+' ===== 実行中 (ghwf1-7) =====
 
-state "Executing" as Exec {
+state "実行中" as Exec {
 
   state "ghwf1-kickoff" as S1
   state "ghwf2-spec" as S2
   state "ghwf3-plan" as S3
   state "ghwf4-review" as S4
   state "ghwf5-implement" as S5 {
-    state "Step [i] impl & commit" as S5i
-    state "all done?" as S5check <<choice>>
-    state "Push" as S5push
+    state "ステップ[i] 実装 & コミット" as S5i
+    state "全完了?" as S5check <<choice>>
+    state "プッシュ" as S5push
 
     [*] --> S5i
     S5i --> S5check
@@ -34,10 +34,9 @@ state "Executing" as Exec {
     S5push --> [*]
 
     note right of S5i
-      Single execution:
-      loop all steps internally,
-      commit per step,
-      push once at end
+      1回の実行で全ステップを処理:
+      ステップごとにコミット、
+      最後に1回プッシュ
     end note
   }
   state "ghwf6-verify" as S6
@@ -53,65 +52,73 @@ state "Executing" as Exec {
   S7 --> [*]
 }
 
-' ===== Normal Flow =====
+' ===== 通常フロー =====
 
 Idle --> Exec : ghwf:exec
 
-state "Completed" as Done <<terminal>>
+state "完了" as Done <<terminal>>
 Exec --> Done
 Done --> [*]
 
-' ===== Waiting / Approval =====
+' ===== 承認待ち =====
 
-state "Waiting" as Wait <<daemon>> {
+state "承認待ち" as Wait <<daemon>> {
   Wait : ghwf:waiting
-  Wait : Awaiting user approval
+  Wait : ユーザー承認待ち
 }
 
-Exec --> Wait : auto-limit reached
-Wait --> Exec : ghwf:exec\n(resume next step)
+Exec --> Wait : 自動実行上限到達
+Wait --> Exec : ghwf:exec\n(次のステップを再開)
 
-' ===== Redo / Revision =====
+' ===== やり直し / リビジョン =====
 
 Wait -[dashed]-> Exec : ghwf:redo\nghwf:redo-N
-Wait -[dashed]-> Exec : ghwf:revision\n(restart from step 1)
+Wait -[dashed]-> Exec : ghwf:revision\n(ステップ1から再開)
 
 note right of Exec
-  **ghwf:redo** — Re-execute current step
-  **ghwf:redo-N** — Rollback to step N
-  **ghwf:revision** — Full restart (increments revision)
+  **ghwf:redo** — 現在のステップを再実行
+  **ghwf:redo-N** — ステップNまでロールバック
+  **ghwf:revision** — 全体再実行 (リビジョン番号加算)
 end note
 
-' ===== Blocking =====
+' ===== ブロック中 =====
 
-state "Blocked" as Block <<daemon>> {
-  state "Waiting Deps" as WDep
-  state "Waiting Subs" as WSub
+state "ブロック中" as Block <<daemon>> {
+  state "依存待ち" as WDep
+  state "サブIssue待ち" as WSub
 
   WDep : ghwf:waiting-deps
   WSub : ghwf:waiting-subs
 }
 
-Idle --> Block : open dependencies\nor sub-issues
-Block --> Idle : resolved
+Idle --> Block : 未解決の依存関係\nまたはサブIssue
+Block --> Idle : 解決済み
 
-' ===== Stop =====
+note bottom of Block
+  ブロック判定はGitHub Issue APIで検出:
+  - 依存待ち: Issue Dependencies (blocked_by)
+  - サブIssue待ち: Sub-issues API
+  ラベルはトリガーではなく状態の可視化用。
+  デーモンが自動で付与・除去する。
+end note
 
-state "Stopped" as Stop <<terminal>>
+' ===== 停止 =====
+
+state "停止" as Stop <<terminal>>
 
 Wait --> Stop : ghwf:stop
 Idle --> Stop : ghwf:stop
 
-' ===== Legend =====
+' ===== 凡例 =====
 
 legend right
-  |= Label |= Auto-continue through |
-  | ghwf:auto-to-2 | Step 2 (spec) |
-  | ghwf:auto-to-3 | Step 3 (plan) |
-  | ghwf:auto-to-4 | Step 4 (review) |
-  | ghwf:auto-to-5 | Step 5 (implement) |
-  | ghwf:auto-to-6 | Step 6 (verify) |
-  | ghwf:auto-all | All steps |
+  |= ラベル |= 自動実行範囲 |
+  | ghwf:auto-to-2 | ステップ2 (仕様書) まで |
+  | ghwf:auto-to-3 | ステップ3 (計画) まで |
+  | ghwf:auto-to-4 | ステップ4 (レビュー) まで |
+  | ghwf:auto-to-5 | ステップ5 (実装) まで |
+  | ghwf:auto-to-6 | ステップ6 (検証) まで |
+  | ghwf:auto-all | 全ステップ |
 endlegend
 
 @enduml
