@@ -52,16 +52,18 @@ wf_init_project() {
         wf_info "Created config.json"
     fi
 
-    # Create state.json (if not exists)
+    # Create state.json (if not exists) - minimal index
     local state_path="${wf_path}/state.json"
     if wf_file_exists "$state_path"; then
         wf_warn "state.json already exists"
+        # Attempt migration if old format detected
+        wf_migrate_state "$project_root"
     else
-        wf_write_state '{"active_work": null, "works": {}}' "$project_root"
-        wf_info "Created state.json"
+        wf_write_state '{}' "$project_root"
+        wf_info "Created state.json (minimal index)"
     fi
 
-    # Add local.json to .gitignore
+    # Add gitignored files to .gitignore
     wf_update_gitignore "$project_root"
 
     wf_success "WF system initialization complete"
@@ -138,26 +140,43 @@ wf_detect_default_branch() {
 wf_update_gitignore() {
     local project_root="$1"
     local gitignore_path="${project_root}/.gitignore"
-    local entry=".wf/local.json"
+
+    local entries=(
+        ".wf/local.json"
+        ".wf/ghwf-daemon.json"
+        ".wf/ghwf-current.json"
+        ".wf/ghwf-claude.log"
+        ".wf/memory.json"
+        ".wf/auto.json"
+    )
 
     # Create .gitignore if it doesn't exist
     if ! wf_file_exists "$gitignore_path"; then
-        echo "$entry" > "$gitignore_path"
-        wf_info "Created .gitignore and added ${entry}"
+        echo "# WF local settings (gitignored)" > "$gitignore_path"
+        for entry in "${entries[@]}"; do
+            echo "$entry" >> "$gitignore_path"
+        done
+        wf_info "Created .gitignore and added WF entries"
         return 0
     fi
 
-    # Check if already included
-    if grep -qF "$entry" "$gitignore_path" 2>/dev/null; then
-        wf_info ".gitignore already contains ${entry}"
-        return 0
-    fi
+    local added=0
+    for entry in "${entries[@]}"; do
+        if ! grep -qF "$entry" "$gitignore_path" 2>/dev/null; then
+            if [ "$added" -eq 0 ]; then
+                echo "" >> "$gitignore_path"
+                echo "# WF local settings (gitignored)" >> "$gitignore_path"
+            fi
+            echo "$entry" >> "$gitignore_path"
+            ((added++)) || true
+        fi
+    done
 
-    # Add entry
-    echo "" >> "$gitignore_path"
-    echo "# WF local settings" >> "$gitignore_path"
-    echo "$entry" >> "$gitignore_path"
-    wf_info "Added ${entry} to .gitignore"
+    if [ "$added" -gt 0 ]; then
+        wf_info "Added ${added} WF entries to .gitignore"
+    else
+        wf_info ".gitignore already contains all WF entries"
+    fi
 }
 
 #

@@ -1,0 +1,55 @@
+{
+  "current": "wf5-implement",
+  "next": "wf6-verify",
+  "git": {
+    "base": "develop",
+    "branch": "feat/123-export-csv"
+  },
+  "kickoff": {
+    "revision": 2,
+    "last_updated": "2026-01-17T14:30:00+09:00"
+  },
+  "source": {
+    "type": "github",
+    "issue": 123,
+    "pr": 456
+  },
+  "plan": {
+    "total_steps": 5,
+    "current_step": 3,
+    "steps": {
+      "1": {
+        "status": "completed",
+        "completed_at": "2026-01-17T11:00:00+09:00"
+      },
+      "2": {
+        "status": "completed",
+        "completed_at": "2026-01-17T12:30:00+09:00"
+      },
+      "3": {
+        "status": "completed",
+        "completed_at": "2026-01-17T14:00:00+09:00"
+      }
+    }
+  },
+  "agents": {
+    "last_used": "implementer",
+    "sessions": {
+      "research": {
+        "status": "completed",
+        "last_run": "2026-01-17T10:30:00+09:00"
+      },
+      "implementer": {
+        "status": "completed",
+        "last_run": "2026-01-17T14:00:00+09:00"
+      }
+    }
+  },
+  "remote": {
+    "status": "waiting_approval"
+  },
+  "ghwf": {
+    "last_execution": "2026-01-17T14:30:00+09:00"
+  },
+  "created_at": "2026-01-17T10:00:00+09:00"
+}

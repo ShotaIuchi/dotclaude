@@ -1,4 +1,5 @@
 {
+  "active_work": "FEAT-123-export-csv",
   "works": {
     "FEAT-123-export-csv": {
       "worktree_path": ".worktrees/feat-123-export-csv"

@@ -4,6 +4,10 @@
 #
 # Shared functions for GitHub Workflow daemon
 #
+# State architecture:
+#   .wf/ghwf-daemon.json  - daemon-only state (gitignored)
+#   docs/wf/<work-id>/state.json - per-work state (committed, branch-isolated)
+#
 
 # =============================================================================
 # Retry Configuration
@@ -58,15 +62,20 @@ ghwf_get_project_root() {
     git rev-parse --show-toplevel 2>/dev/null || pwd
 }
 
-# Get state file path
-ghwf_get_state_file() {
-    echo "$(ghwf_get_project_root)/.wf/ghwf-state.json"
+# Get daemon state file path (gitignored)
+ghwf_get_daemon_state_file() {
+    echo "$(ghwf_get_project_root)/.wf/ghwf-daemon.json"
 }
 
-# Initialize state file if not exists
+# Backward compat alias
+ghwf_get_state_file() {
+    ghwf_get_daemon_state_file
+}
+
+# Initialize daemon state file if not exists
 ghwf_init_state() {
     local state_file
-    state_file=$(ghwf_get_state_file)
+    state_file=$(ghwf_get_daemon_state_file)
 
     if [ ! -f "$state_file" ]; then
         mkdir -p "$(dirname "$state_file")"
@@ -74,8 +83,7 @@ ghwf_init_state() {
 {
   "daemon": {
     "enabled": false
-  },
-  "works": {}
+  }
 }
 EOF
     fi
@@ -86,7 +94,7 @@ ghwf_update_daemon_state() {
     local key="$1"
     local value="$2"
     local state_file
-    state_file=$(ghwf_get_state_file)
+    state_file=$(ghwf_get_daemon_state_file)
 
     ghwf_init_state
 
@@ -213,20 +221,50 @@ ghwf_post_comment() {
 }
 
 # Get work-id from issue number
+# Scans docs/wf/*/state.json for matching issue, falls back to daemon state
 ghwf_get_work_id() {
     local issue_number="$1"
-    local state_file
-    state_file=$(ghwf_get_state_file)
+    local project_root
+    project_root=$(ghwf_get_project_root)
+    local docs_dir="${project_root}/docs/wf"
 
-    if [ ! -f "$state_file" ]; then
-        return 1
+    # Scan per-work state files
+    if [ -d "$docs_dir" ]; then
+        for state_file in "$docs_dir"/*/state.json; do
+            if [ -f "$state_file" ]; then
+                local match
+                match=$(jq -r --arg issue "$issue_number" '
+                    select(.source.issue == ($issue | tonumber) or .source.issue_number == ($issue | tonumber)) |
+                    "match"
+                ' "$state_file" 2>/dev/null || true)
+
+                if [ "$match" = "match" ]; then
+                    basename "$(dirname "$state_file")"
+                    return 0
+                fi
+            fi
+        done
     fi
 
-    jq -r --arg issue "$issue_number" '
-        .works | to_entries[] |
-        select(.value.source.issue == ($issue | tonumber)) |
-        .key
-    ' "$state_file"
+    # Fallback: check old daemon state file
+    local daemon_file
+    daemon_file=$(ghwf_get_daemon_state_file)
+
+    if [ -f "$daemon_file" ]; then
+        local result
+        result=$(jq -r --arg issue "$issue_number" '
+            .works // {} | to_entries[] |
+            select(.value.source.issue == ($issue | tonumber)) |
+            .key
+        ' "$daemon_file" 2>/dev/null || true)
+
+        if [ -n "$result" ]; then
+            echo "$result"
+            return 0
+        fi
+    fi
+
+    return 1
 }
 
 # Get step number from label
@@ -518,20 +556,33 @@ ghwf_ensure_labels() {
     echo "[INFO] Labels: $created created, $skipped already exist"
 }
 
-# Update work state in state file
+# Update work state in per-work state file under .ghwf key
+# Also writes to daemon state for backward compat
 ghwf_update_work_state() {
     local work_id="$1"
     local key="$2"
     local value="$3"
-    local state_file
-    state_file=$(ghwf_get_state_file)
+    local project_root
+    project_root=$(ghwf_get_project_root)
 
+    # Write to per-work state under .ghwf key
+    local work_state_path="${project_root}/docs/wf/${work_id}/state.json"
+    if [ -f "$work_state_path" ]; then
+        local tmp_file="${work_state_path}.tmp"
+        jq --arg key "$key" --arg value "$value" \
+            '.ghwf[$key] = $value' "$work_state_path" > "$tmp_file" && \
+            mv -f "$tmp_file" "$work_state_path"
+    fi
+
+    # Also write to daemon state for backward compat
+    local daemon_file
+    daemon_file=$(ghwf_get_daemon_state_file)
     ghwf_init_state
 
-    local tmp_file="${state_file}.tmp"
+    local tmp_file="${daemon_file}.tmp"
     jq --arg work_id "$work_id" --arg key "$key" --arg value "$value" \
-        '.works[$work_id][$key] = $value' "$state_file" > "$tmp_file" && \
-        mv -f "$tmp_file" "$state_file"
+        '.works[$work_id][$key] = $value' "$daemon_file" > "$tmp_file" && \
+        mv -f "$tmp_file" "$daemon_file"
 }
 
 # Check if issue is blocked by dependencies
@@ -585,18 +636,40 @@ ghwf_get_open_sub_issues() {
 }
 
 # Get PR number from issue
+# Scans per-work state files, falls back to daemon state
 ghwf_get_pr_from_issue() {
     local issue_number="$1"
-    local state_file
-    state_file=$(ghwf_get_state_file)
+    local project_root
+    project_root=$(ghwf_get_project_root)
+    local docs_dir="${project_root}/docs/wf"
 
-    if [ ! -f "$state_file" ]; then
-        return 1
+    # Scan per-work state files
+    if [ -d "$docs_dir" ]; then
+        for state_file in "$docs_dir"/*/state.json; do
+            if [ -f "$state_file" ]; then
+                local pr
+                pr=$(jq -r --arg issue "$issue_number" '
+                    select(.source.issue == ($issue | tonumber) or .source.issue_number == ($issue | tonumber)) |
+                    .source.pr // ""
+                ' "$state_file" 2>/dev/null || true)
+
+                if [ -n "$pr" ]; then
+                    echo "$pr"
+                    return 0
+                fi
+            fi
+        done
     fi
 
-    jq -r --arg issue "$issue_number" '
-        .works | to_entries[] |
-        select(.value.source.issue == ($issue | tonumber)) |
-        .value.source.pr // ""
-    ' "$state_file"
+    # Fallback: check daemon state
+    local daemon_file
+    daemon_file=$(ghwf_get_daemon_state_file)
+
+    if [ -f "$daemon_file" ]; then
+        jq -r --arg issue "$issue_number" '
+            .works // {} | to_entries[] |
+            select(.value.source.issue == ($issue | tonumber)) |
+            .value.source.pr // ""
+        ' "$daemon_file" 2>/dev/null || true
+    fi
 }

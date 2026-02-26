@@ -3,37 +3,80 @@
  * SessionStart Hook
  *
  * セッション開始時に前回のコンテキストを復元する。
+ * - .wf/local.json から active_work を読み込み
+ * - docs/wf/<work-id>/state.json から per-work 状態を表示
  * - .wf/memory.json から記憶を読み込み
- * - state.json から現在のワークフロー状態を表示
  */
 
 const fs = require('fs');
 const path = require('path');
 
+const LOCAL_FILE = '.wf/local.json';
 const MEMORY_FILE = '.wf/memory.json';
-const STATE_FILE = '.wf/state.json';
+const DOCS_WF_DIR = 'docs/wf';
 
 function main() {
   const cwd = process.cwd();
+  const localPath = path.join(cwd, LOCAL_FILE);
   const memoryPath = path.join(cwd, MEMORY_FILE);
-  const statePath = path.join(cwd, STATE_FILE);
 
   const output = [];
 
-  // state.json から現在のワークフロー状態を取得
-  if (fs.existsSync(statePath)) {
-    try {
-      const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
-      const activeWork = state.active_work;
+  // local.json から active_work を取得
+  let activeWork = null;
 
-      if (activeWork && state.works && state.works[activeWork]) {
-        const work = state.works[activeWork];
+  if (fs.existsSync(localPath)) {
+    try {
+      const local = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+      activeWork = local.active_work;
+    } catch (e) {
+      // local.json の読み込みエラーは無視
+    }
+  }
+
+  // Fallback: 旧形式の state.json をチェック
+  if (!activeWork) {
+    const statePath = path.join(cwd, '.wf/state.json');
+    if (fs.existsSync(statePath)) {
+      try {
+        const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+        activeWork = state.active_work;
+      } catch (e) {
+        // ignore
+      }
+    }
+  }
+
+  // Per-work state から現在のワークフロー状態を取得
+  if (activeWork) {
+    const workStatePath = path.join(cwd, DOCS_WF_DIR, activeWork, 'state.json');
+
+    if (fs.existsSync(workStatePath)) {
+      try {
+        const work = JSON.parse(fs.readFileSync(workStatePath, 'utf8'));
         output.push('[Session] Active work: ' + activeWork);
         output.push('[Session] Current phase: ' + (work.current || 'unknown'));
         output.push('[Session] Next phase: ' + (work.next || 'unknown'));
+      } catch (e) {
+        output.push('[Session] Active work: ' + activeWork);
+        output.push('[Session] (per-work state read error)');
       }
-    } catch (e) {
-      // state.json の読み込みエラーは無視
+    } else {
+      // Fallback: 旧形式の state.json をチェック
+      const statePath = path.join(cwd, '.wf/state.json');
+      if (fs.existsSync(statePath)) {
+        try {
+          const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+          if (state.works && state.works[activeWork]) {
+            const work = state.works[activeWork];
+            output.push('[Session] Active work: ' + activeWork);
+            output.push('[Session] Current phase: ' + (work.current || 'unknown'));
+            output.push('[Session] Next phase: ' + (work.next || 'unknown'));
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
     }
   }
 

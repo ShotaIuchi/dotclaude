@@ -18,6 +18,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 # Load utilities
 source "${SCRIPT_DIR}/ghwf-utils.sh"
 
+# Load wf-state.sh for per-work state access
+WF_STATE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+source "${WF_STATE_DIR}/wf-state.sh"
+
 # Configuration
 POLL_INTERVAL="${POLL_INTERVAL:-60}"
 VERBOSE="${VERBOSE:-false}"
@@ -130,16 +134,29 @@ process_issue() {
     local work_id
     work_id=$(ghwf_get_work_id "$issue_number")
 
-    # Get state file info
-    local state_file
-    state_file=$(ghwf_get_state_file)
-
+    # Read per-work state for last_execution and pr_number
     local last_execution=""
     local pr_number=""
 
-    if [ -n "$work_id" ] && [ -f "$state_file" ]; then
-        last_execution=$(jq -r ".works[\"$work_id\"].last_execution // \"\"" "$state_file")
-        pr_number=$(jq -r ".works[\"$work_id\"].source.pr // \"\"" "$state_file")
+    if [ -n "$work_id" ]; then
+        local project_root
+        project_root=$(ghwf_get_project_root)
+        local work_state_path="${project_root}/docs/wf/${work_id}/state.json"
+
+        if [ -f "$work_state_path" ]; then
+            last_execution=$(jq -r '.ghwf.last_execution // ""' "$work_state_path")
+            pr_number=$(jq -r '.source.pr // ""' "$work_state_path")
+        fi
+
+        # Fallback: check daemon state
+        if [ -z "$last_execution" ]; then
+            local daemon_file
+            daemon_file=$(ghwf_get_daemon_state_file)
+            if [ -f "$daemon_file" ]; then
+                last_execution=$(jq -r ".works[\"$work_id\"].last_execution // \"\"" "$daemon_file" 2>/dev/null || true)
+                [ -z "$pr_number" ] && pr_number=$(jq -r ".works[\"$work_id\"].source.pr // \"\"" "$daemon_file" 2>/dev/null || true)
+            fi
+        fi
     fi
 
     case "$command_label" in

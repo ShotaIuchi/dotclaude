@@ -4,6 +4,10 @@
 # WF Remote Utilities
 # Helper functions for remote workflow operations
 #
+# State architecture:
+#   docs/wf/<work-id>/state.json - per-work state (committed)
+#   .wf/state.json               - legacy fallback (minimal)
+#
 # NOTE: Run `shellcheck scripts/remote/remote-utils.sh` for static analysis
 #
 
@@ -12,7 +16,14 @@ _wf_remote_get_project_root() {
     git rev-parse --show-toplevel 2>/dev/null || pwd
 }
 
-# Get state file path
+# Get per-work state file path
+# @param $1 work-id
+_wf_remote_get_work_state_file() {
+    local work_id="$1"
+    echo "$(_wf_remote_get_project_root)/docs/wf/${work_id}/state.json"
+}
+
+# Get legacy state file path (fallback)
 _wf_remote_get_state_file() {
     echo "$(_wf_remote_get_project_root)/.wf/state.json"
 }
@@ -80,17 +91,34 @@ wf_remote_update_status() {
     local work_id="$1"
     local field="$2"
     local value="$3"
+
+    # Write to per-work state under .remote key
+    local work_state_file
+    work_state_file=$(_wf_remote_get_work_state_file "$work_id")
+
+    if [ -f "$work_state_file" ]; then
+        if [ "$value" = "true" ] || [ "$value" = "false" ]; then
+            jq ".remote.$field = $value" "$work_state_file" > "$work_state_file.tmp" && \
+                mv "$work_state_file.tmp" "$work_state_file"
+        else
+            jq ".remote.$field = \"$value\"" "$work_state_file" > "$work_state_file.tmp" && \
+                mv "$work_state_file.tmp" "$work_state_file"
+        fi
+        return 0
+    fi
+
+    # Fallback: write to legacy state file
     local state_file
     state_file=$(_wf_remote_get_state_file)
 
-    # Handle boolean and string values
-    # Use && to ensure jq succeeds before moving the file
-    if [ "$value" = "true" ] || [ "$value" = "false" ]; then
-        jq ".works[\"$work_id\"].remote.$field = $value" "$state_file" > "$state_file.tmp" && \
-            mv "$state_file.tmp" "$state_file"
-    else
-        jq ".works[\"$work_id\"].remote.$field = \"$value\"" "$state_file" > "$state_file.tmp" && \
-            mv "$state_file.tmp" "$state_file"
+    if [ -f "$state_file" ]; then
+        if [ "$value" = "true" ] || [ "$value" = "false" ]; then
+            jq ".works[\"$work_id\"].remote.$field = $value" "$state_file" > "$state_file.tmp" && \
+                mv "$state_file.tmp" "$state_file"
+        else
+            jq ".works[\"$work_id\"].remote.$field = \"$value\"" "$state_file" > "$state_file.tmp" && \
+                mv "$state_file.tmp" "$state_file"
+        fi
     fi
 }
 
@@ -133,13 +161,26 @@ wf_remote_post_status() {
 wf_remote_post_step_complete() {
     local issue_num="$1"
     local work_id="$2"
-    local state_file
-    state_file=$(_wf_remote_get_state_file)
 
-    # Get current and next phase
-    local current_phase next_phase
-    current_phase=$(jq -r ".works[\"$work_id\"].current // \"unknown\"" "$state_file")
-    next_phase=$(jq -r ".works[\"$work_id\"].next // \"unknown\"" "$state_file")
+    # Read from per-work state
+    local work_state_file
+    work_state_file=$(_wf_remote_get_work_state_file "$work_id")
+
+    local current_phase="unknown"
+    local next_phase="unknown"
+
+    if [ -f "$work_state_file" ]; then
+        current_phase=$(jq -r '.current // "unknown"' "$work_state_file")
+        next_phase=$(jq -r '.next // "unknown"' "$work_state_file")
+    else
+        # Fallback: legacy state file
+        local state_file
+        state_file=$(_wf_remote_get_state_file)
+        if [ -f "$state_file" ]; then
+            current_phase=$(jq -r ".works[\"$work_id\"].current // \"unknown\"" "$state_file")
+            next_phase=$(jq -r ".works[\"$work_id\"].next // \"unknown\"" "$state_file")
+        fi
+    fi
 
     # Get document list
     local doc_dir="docs/wf/$work_id"
@@ -207,12 +248,25 @@ wf_remote_invoke_claude() {
 #
 wf_remote_push_changes() {
     local work_id="$1"
-    local state_file
-    state_file=$(_wf_remote_get_state_file)
 
-    # Get branch name
-    local branch
-    branch=$(jq -r ".works[\"$work_id\"].git.branch // empty" "$state_file")
+    # Read branch from per-work state
+    local work_state_file
+    work_state_file=$(_wf_remote_get_work_state_file "$work_id")
+
+    local branch=""
+
+    if [ -f "$work_state_file" ]; then
+        branch=$(jq -r '.git.branch // empty' "$work_state_file")
+    fi
+
+    # Fallback: legacy state file
+    if [ -z "$branch" ]; then
+        local state_file
+        state_file=$(_wf_remote_get_state_file)
+        if [ -f "$state_file" ]; then
+            branch=$(jq -r ".works[\"$work_id\"].git.branch // empty" "$state_file")
+        fi
+    fi
 
     if [ -z "$branch" ]; then
         echo "[ERROR] No branch found for $work_id"

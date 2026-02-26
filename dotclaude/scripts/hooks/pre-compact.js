@@ -4,13 +4,16 @@
  *
  * コンテキストコンパクション前に重要な状態を保存する。
  * コンパクションで失われる情報を memory.json に退避。
+ *
+ * Reads active_work from local.json, per-work state from docs/wf/<work-id>/state.json.
  */
 
 const fs = require('fs');
 const path = require('path');
 
+const LOCAL_FILE = '.wf/local.json';
 const MEMORY_FILE = '.wf/memory.json';
-const STATE_FILE = '.wf/state.json';
+const DOCS_WF_DIR = 'docs/wf';
 
 function main() {
   let input = '';
@@ -21,8 +24,8 @@ function main() {
 
   process.stdin.on('end', () => {
     const cwd = process.cwd();
+    const localPath = path.join(cwd, LOCAL_FILE);
     const memoryPath = path.join(cwd, MEMORY_FILE);
-    const statePath = path.join(cwd, STATE_FILE);
     const wfDir = path.join(cwd, '.wf');
 
     // .wf ディレクトリが存在する場合のみ処理
@@ -39,17 +42,60 @@ function main() {
         memory.last_compact = new Date().toISOString();
         memory.compact_count = (memory.compact_count || 0) + 1;
 
-        // state.json から現在の状態を同期
-        if (fs.existsSync(statePath)) {
-          const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
-          if (state.active_work) {
-            memory.context = memory.context || {};
-            memory.context.active_work = state.active_work;
+        // local.json から active_work を取得
+        let activeWork = null;
 
-            const work = state.works && state.works[state.active_work];
-            if (work) {
+        if (fs.existsSync(localPath)) {
+          try {
+            const local = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+            activeWork = local.active_work;
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        // Fallback: 旧形式の state.json
+        if (!activeWork) {
+          const statePath = path.join(cwd, '.wf/state.json');
+          if (fs.existsSync(statePath)) {
+            try {
+              const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+              activeWork = state.active_work;
+            } catch (e) {
+              // ignore
+            }
+          }
+        }
+
+        if (activeWork) {
+          memory.context = memory.context || {};
+          memory.context.active_work = activeWork;
+
+          // Per-work state からフェーズ情報を同期
+          const workStatePath = path.join(cwd, DOCS_WF_DIR, activeWork, 'state.json');
+
+          if (fs.existsSync(workStatePath)) {
+            try {
+              const work = JSON.parse(fs.readFileSync(workStatePath, 'utf8'));
               memory.context.current_phase = work.current;
               memory.context.next_phase = work.next;
+            } catch (e) {
+              // ignore
+            }
+          } else {
+            // Fallback: 旧形式
+            const statePath = path.join(cwd, '.wf/state.json');
+            if (fs.existsSync(statePath)) {
+              try {
+                const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+                const work = state.works && state.works[activeWork];
+                if (work) {
+                  memory.context.current_phase = work.current;
+                  memory.context.next_phase = work.next;
+                }
+              } catch (e) {
+                // ignore
+              }
             }
           }
         }
