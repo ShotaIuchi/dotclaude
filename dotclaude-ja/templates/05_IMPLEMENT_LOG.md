@@ -1,0 +1,1 @@
+../../dotclaude/templates/05_IMPLEMENT_LOG.md
