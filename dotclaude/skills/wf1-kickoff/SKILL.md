@@ -1,17 +1,17 @@
 ---
-name: wf-kickoff
+name: wf1-kickoff
 description: >
   キックオフドキュメントを作成してワークフローを開始する。作業ディレクトリの作成、
   state.jsonの初期化、テンプレートからのキックオフドキュメント生成を行う。
   ユーザーが新しいタスクを始めたい、ワークフローを開始したい、作業に着手したい場合や、
   「新しいタスク」「始めよう」「キックオフ」「Xの作業開始」などと言った場合に使用する。
-  wf-*ワークフローシリーズの最初のステップ。
+  wf1〜wf5ワークフローシリーズの最初のステップ。
 argument-hint: "<work-id> [goal]"
 ---
 
-# /wf-kickoff
+# /wf1-kickoff
 
-Initialize a new workflow workspace. This is the entry point for all wf-* workflows.
+Initialize a new workflow workspace. This is the entry point for all wf1-wf5 workflows.
 
 ## What This Skill Does
 
@@ -75,11 +75,11 @@ sections rather than leaving them empty.
 1. Update `state.json`: set `phases.kickoff.status` to `"completed"` and
    `phases.kickoff.completed_at` to the current timestamp
 2. Update `phase` to `"spec"` (next phase)
-3. Tell the user: the kickoff is complete, and they can proceed with `/wf-spec <work-id>`
+3. Tell the user: the kickoff is complete, and they can proceed with `/wf2-spec <work-id>`
 
 ## Important Notes
 
-- The template is bundled with this skill at `skills/wf-kickoff/templates/01_KICKOFF.md`.
+- The template is bundled with this skill at `skills/wf1-kickoff/templates/01_KICKOFF.md`.
 - The work directory structure is: `docs/wf/<work-id>/` (relative to project root)
 - Always show the user the completed kickoff document before finalizing
 - The kickoff document is written in Japanese (following the template language)

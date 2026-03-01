@@ -1,15 +1,15 @@
 ---
-name: wf-spec
+name: wf2-spec
 description: >
   キックオフに基づいて仕様書を作成する。キックオフドキュメントを読み、コードベースを
   調査し、要件と受け入れ基準を含む詳細な仕様をドラフトする。
   ユーザーが要件を書きたい、仕様書を作成したい、受け入れ基準を定義したい場合や、
   「仕様を書いて」「要件」「何を作るべきか」と言った場合に使用する。
-  キックオフの完了が前提（先に /wf-kickoff を実行すること）。
+  キックオフの完了が前提（先に /wf1-kickoff を実行すること）。
 argument-hint: "<work-id>"
 ---
 
-# /wf-spec
+# /wf2-spec
 
 既存ワークフローの仕様書を作成する。
 
@@ -24,7 +24,7 @@ argument-hint: "<work-id>"
 
 1. `docs/wf/<work-id>/state.json` を読み、ワークフローの存在とキックオフ完了を確認
 2. `docs/wf/<work-id>/01_KICKOFF.md` を読み、ゴールと制約を理解
-3. キックオフフェーズが未完了の場合、`/wf-kickoff` を先に実行するよう案内
+3. キックオフフェーズが未完了の場合、`/wf1-kickoff` を先に実行するよう案内
 
 ### ステップ 2: 調査
 
@@ -62,7 +62,7 @@ argument-hint: "<work-id>"
    - `phases.spec.status` を `"completed"` に設定
    - `phases.spec.completed_at` を現在のタイムスタンプに設定
    - `phase` を `"plan"` に設定
-2. ユーザーに通知: 仕様完了、`/wf-plan <work-id>` で次に進めることを伝える
+2. ユーザーに通知: 仕様完了、`/wf3-plan <work-id>` で次に進めることを伝える
 
 ## 重要な注意事項
 

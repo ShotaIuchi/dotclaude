@@ -1,15 +1,15 @@
 ---
-name: wf-plan
+name: wf3-plan
 description: >
   仕様から実装計画を作成する。作業をファイルリスト、タスク、完了基準を含む
   順序付きステップに分解する。
   ユーザーが実装を計画したい、作業をステップに分解したい、タスクリストを作成したい場合や、
   「計画して」「どう実装すべきか」「分解して」と言った場合に使用する。
-  仕様の完了が前提（先に /wf-spec を実行すること）。
+  仕様の完了が前提（先に /wf2-spec を実行すること）。
 argument-hint: "<work-id>"
 ---
 
-# /wf-plan
+# /wf3-plan
 
 Create a step-by-step implementation plan for an existing workflow.
 
@@ -25,7 +25,7 @@ Create a step-by-step implementation plan for an existing workflow.
 1. Read `docs/wf/<work-id>/state.json` to verify spec is done
 2. Read `docs/wf/<work-id>/01_KICKOFF.md` for goal and constraints
 3. Read `docs/wf/<work-id>/02_SPEC.md` for requirements
-4. If spec phase is not completed, tell the user to run `/wf-spec` first
+4. If spec phase is not completed, tell the user to run `/wf2-spec` first
 
 ### Step 2: Analyze and Design
 
@@ -71,12 +71,12 @@ Present the plan and ask for feedback. Common adjustments:
    - Set `phases.plan.completed_at` to current timestamp
    - Set `phases.impl.total_steps` to the number of steps
    - Set `phase` to `"impl"`
-2. Tell the user: the plan is complete, proceed with `/wf-impl <work-id>`
+2. Tell the user: the plan is complete, proceed with `/wf4-impl <work-id>`
 
 ## Important Notes
 
 - The plan document is written in Japanese (following the template language).
 - Steps should map clearly to spec requirements for traceability.
 - The plan is a living document — it may be updated during implementation if
-  the user discovers issues via `/wf-review`.
+  the user discovers issues via `/wf5-review`.
 - All timestamps in `state.json` must use UTC: `YYYY-MM-DDTHH:MM:SSZ`.

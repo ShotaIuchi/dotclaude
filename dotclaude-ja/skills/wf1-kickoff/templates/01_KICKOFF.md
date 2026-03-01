@@ -1,0 +1,1 @@
+../../../../dotclaude/skills/wf1-kickoff/templates/01_KICKOFF.md

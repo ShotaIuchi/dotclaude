@@ -1,5 +1,5 @@
 ---
-name: wf-review
+name: wf5-review
 description: >
   ワークフローの成果物をレビューし改訂する。キックオフ、仕様、計画、実装の
   いずれのフェーズの出力でもレビュー可能で、品質、完全性、一貫性をチェックする。
@@ -9,7 +9,7 @@ description: >
 argument-hint: "<work-id> [phase]"
 ---
 
-# /wf-review
+# /wf5-review
 
 Review workflow deliverables and suggest or apply revisions.
 

@@ -1,15 +1,15 @@
 ---
-name: wf-impl
+name: wf4-impl
 description: >
   計画に従ってステップバイステップで実装を実行する。実装計画を読み、各ステップを
   実行し、変更内容とテスト結果を記録し、進捗を更新する。
   ユーザーがコーディングを開始したい、計画を実装したい、ステップを実行したい場合や、
   「実装して」「作って」「コーディング開始」「ステップNをやって」と言った場合に使用する。
-  計画の完了が前提（先に /wf-plan を実行すること）。
+  計画の完了が前提（先に /wf3-plan を実行すること）。
 argument-hint: "<work-id> [step-number]"
 ---
 
-# /wf-impl
+# /wf4-impl
 
 Execute implementation according to the plan, step by step.
 
@@ -64,14 +64,14 @@ After each step:
 - If there are more steps, ask the user if they want to continue to the next step
   or pause here
 - If all steps are complete, tell the user implementation is done and suggest
-  running `/wf-review <work-id>` for a final review
+  running `/wf5-review <work-id>` for a final review
 
 ## Handling Issues During Implementation
 
 - If a step can't be completed as planned, log the issue and ask the user how to
   proceed. Options include: modify the plan, skip the step, or try an alternative.
 - If you discover something that affects the spec, note it in the implementation log
-  and suggest running `/wf-review <work-id> spec` to update the spec.
+  and suggest running `/wf5-review <work-id> spec` to update the spec.
 - Never silently deviate from the plan. Always log deviations.
 
 ## Important Notes

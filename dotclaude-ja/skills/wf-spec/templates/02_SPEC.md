@@ -1,1 +1,0 @@
-../../../../dotclaude/skills/wf-spec/templates/02_SPEC.md

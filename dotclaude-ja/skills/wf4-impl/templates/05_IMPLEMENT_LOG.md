@@ -1,0 +1,1 @@
+../../../../dotclaude/skills/wf4-impl/templates/05_IMPLEMENT_LOG.md
