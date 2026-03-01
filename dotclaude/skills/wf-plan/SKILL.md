@@ -1,0 +1,82 @@
+---
+name: wf-plan
+description: >
+  Create an implementation plan from the specification. Breaks down the work into
+  ordered steps with file lists, tasks, and completion criteria. Use when the user
+  wants to plan implementation, break down work into steps, create a task list, or
+  says "plan it", "how should we implement this", "break it down".
+  Requires a completed spec (run /wf-spec first).
+argument-hint: "<work-id>"
+---
+
+# /wf-plan
+
+Create a step-by-step implementation plan for an existing workflow.
+
+## Prerequisites
+
+- A completed spec exists at `docs/wf/<work-id>/02_SPEC.md`
+- `state.json` shows spec phase is completed
+
+## Workflow
+
+### Step 1: Load Context
+
+1. Read `docs/wf/<work-id>/state.json` to verify spec is done
+2. Read `docs/wf/<work-id>/01_KICKOFF.md` for goal and constraints
+3. Read `docs/wf/<work-id>/02_SPEC.md` for requirements
+4. If spec phase is not completed, tell the user to run `/wf-spec` first
+
+### Step 2: Analyze and Design
+
+Research the codebase to determine:
+- Exact files that need to be created or modified
+- The right order of changes (dependency-aware)
+- Risks and potential rollback strategies
+- Estimated scope of each step
+
+### Step 3: Draft the Plan
+
+1. Copy this skill's bundled `templates/03_PLAN.md` to `docs/wf/<work-id>/03_PLAN.md`
+2. Fill in the plan:
+   - **Overview**: High-level approach in 1-2 sentences
+   - **Steps**: Each step should be:
+     - Small enough to complete and verify independently
+     - Ordered by dependency (foundational changes first)
+     - Clear about which files are touched
+     - Have concrete completion criteria
+   - **Progress table**: One row per step, all starting as "pending"
+   - **Risks**: Identified risks with impact, probability, and mitigation
+   - **Rollback plan**: How to undo if things go wrong
+
+### Step Guidelines
+
+- Aim for 3-10 steps. If you need more than 10, consider grouping related changes.
+- Each step should be testable on its own.
+- Include both the "what" (task list) and "why" (purpose) for each step.
+- Specify file paths concretely (e.g., `src/utils/csv.ts`, not "the CSV module").
+
+### Step 4: Review with User
+
+Present the plan and ask for feedback. Common adjustments:
+- Reordering steps
+- Splitting or merging steps
+- Adjusting scope per step
+- Adding/removing risks
+
+### Step 5: Finalize
+
+1. Update `state.json`:
+   - Set `phases.plan.status` to `"completed"`
+   - Set `phases.plan.completed_at` to current timestamp
+   - Set `phases.impl.total_steps` to the number of steps
+   - Set `phase` to `"impl"`
+2. Tell the user: the plan is complete, proceed with `/wf-impl <work-id>`
+
+## Important Notes
+
+- The plan document is written in Japanese (following the template language).
+- Steps should map clearly to spec requirements for traceability.
+- The plan is a living document — it may be updated during implementation if
+  the user discovers issues via `/wf-review`.
+- All timestamps in `state.json` must use UTC: `YYYY-MM-DDTHH:MM:SSZ`.
