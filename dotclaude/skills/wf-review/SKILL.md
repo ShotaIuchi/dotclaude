@@ -1,11 +1,11 @@
 ---
 name: wf-review
 description: >
-  Review and revise workflow deliverables. Can review any phase's output — kickoff,
-  spec, plan, or implementation — checking for quality, completeness, and consistency.
-  Use when the user wants to review work, check quality, get feedback, revise a
-  document, or says "review", "check this", "is this right", "revise the spec".
-  Works at any point in the workflow.
+  ワークフローの成果物をレビューし改訂する。キックオフ、仕様、計画、実装の
+  いずれのフェーズの出力でもレビュー可能で、品質、完全性、一貫性をチェックする。
+  ユーザーが作業をレビューしたい、品質をチェックしたい、フィードバックを得たい、
+  ドキュメントを改訂したい場合や、「レビュー」「確認して」「これで合ってる？」
+  「仕様を修正」と言った場合に使用する。ワークフローのどの時点でも使用可能。
 argument-hint: "<work-id> [phase]"
 ---
 

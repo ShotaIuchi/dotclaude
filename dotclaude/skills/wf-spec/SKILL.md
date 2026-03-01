@@ -1,11 +1,11 @@
 ---
 name: wf-spec
 description: >
-  Create a specification document based on the kickoff. Reads the kickoff document,
-  researches the codebase, and drafts a detailed spec with requirements and acceptance
-  criteria. Use when the user wants to write requirements, create a spec, define
-  acceptance criteria, or says "write the spec", "requirements", "what should we build".
-  Requires a completed kickoff (run /wf-kickoff first).
+  キックオフに基づいて仕様書を作成する。キックオフドキュメントを読み、コードベースを
+  調査し、要件と受け入れ基準を含む詳細な仕様をドラフトする。
+  ユーザーが要件を書きたい、仕様書を作成したい、受け入れ基準を定義したい場合や、
+  「仕様を書いて」「要件」「何を作るべきか」と言った場合に使用する。
+  キックオフの完了が前提（先に /wf-kickoff を実行すること）。
 argument-hint: "<work-id>"
 ---
 

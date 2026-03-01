@@ -1,11 +1,11 @@
 ---
 name: wf-plan
 description: >
-  Create an implementation plan from the specification. Breaks down the work into
-  ordered steps with file lists, tasks, and completion criteria. Use when the user
-  wants to plan implementation, break down work into steps, create a task list, or
-  says "plan it", "how should we implement this", "break it down".
-  Requires a completed spec (run /wf-spec first).
+  仕様から実装計画を作成する。作業をファイルリスト、タスク、完了基準を含む
+  順序付きステップに分解する。
+  ユーザーが実装を計画したい、作業をステップに分解したい、タスクリストを作成したい場合や、
+  「計画して」「どう実装すべきか」「分解して」と言った場合に使用する。
+  仕様の完了が前提（先に /wf-spec を実行すること）。
 argument-hint: "<work-id>"
 ---
 

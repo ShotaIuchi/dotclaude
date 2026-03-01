@@ -1,11 +1,11 @@
 ---
 name: wf-kickoff
 description: >
-  Start a new workflow by creating the work directory, initializing state.json,
-  and generating the kickoff document from template. Use this skill when the user
-  wants to begin a new task, start a new workflow, kick off work, or says things
-  like "new task", "let's start", "kick off", "begin work on X". This is always
-  the first step in the wf-* workflow series.
+  キックオフドキュメントを作成してワークフローを開始する。作業ディレクトリの作成、
+  state.jsonの初期化、テンプレートからのキックオフドキュメント生成を行う。
+  ユーザーが新しいタスクを始めたい、ワークフローを開始したい、作業に着手したい場合や、
+  「新しいタスク」「始めよう」「キックオフ」「Xの作業開始」などと言った場合に使用する。
+  wf-*ワークフローシリーズの最初のステップ。
 argument-hint: "<work-id> [goal]"
 ---
 

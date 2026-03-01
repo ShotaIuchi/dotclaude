@@ -1,11 +1,11 @@
 ---
 name: wf-impl
 description: >
-  Execute implementation following the plan step by step. Reads the implementation
-  plan, executes each step, logs changes and test results, and updates progress.
-  Use when the user wants to start coding, implement the plan, execute a step,
-  or says "implement", "build it", "start coding", "do step N".
-  Requires a completed plan (run /wf-plan first).
+  計画に従ってステップバイステップで実装を実行する。実装計画を読み、各ステップを
+  実行し、変更内容とテスト結果を記録し、進捗を更新する。
+  ユーザーがコーディングを開始したい、計画を実装したい、ステップを実行したい場合や、
+  「実装して」「作って」「コーディング開始」「ステップNをやって」と言った場合に使用する。
+  計画の完了が前提（先に /wf-plan を実行すること）。
 argument-hint: "<work-id> [step-number]"
 ---
 
