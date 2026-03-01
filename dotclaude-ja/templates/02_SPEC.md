@@ -1,1 +1,0 @@
-../../dotclaude/templates/02_SPEC.md
