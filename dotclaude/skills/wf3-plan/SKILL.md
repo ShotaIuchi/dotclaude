@@ -51,7 +51,7 @@ Research the codebase to determine:
 
 ### Step Guidelines
 
-- Aim for 3-10 steps. If you need more than 10, consider grouping related changes.
+- Aim for 3-10 steps. If you need more than 10, consider grouping related changes. For very small tasks, fewer steps are acceptable.
 - Each step should be testable on its own.
 - Include both the "what" (task list) and "why" (purpose) for each step.
 - Specify file paths concretely (e.g., `src/utils/csv.ts`, not "the CSV module").
