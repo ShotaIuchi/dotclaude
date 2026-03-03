@@ -58,7 +58,7 @@ Parse `$ARGUMENTS` to figure out what to review:
 | `diff` | Run `git diff` (unstaged changes) |
 | PR number (`#123` or `123`) | Run `gh pr diff <number>` |
 | Empty | Try `git diff --staged` first; fall back to `git diff` |
-| Natural language | Identify relevant files from the description, confirm with user if ambiguous |
+| Natural language | Identify relevant files from the description, confirm with user if ambiguous. Example: `"review the authentication flow"` → search for files matching `auth`, `login`, `session`, read them, and ask the user to confirm before proceeding if the match is uncertain. |
 
 For diff-based reviews, also read the full files being changed to provide context.
 
@@ -80,12 +80,24 @@ Review this target and return findings as JSON:
 {review_target}
 ---
 
+**Error handling**: If you encounter files that cannot be read, binary files, or
+content that cannot be parsed, do NOT silently skip them. Instead, include a
+finding with severity "important" (see Severity Guide below), title
+"Unreadable or unparseable content", and describe which file/section could
+not be processed and why. Continue reviewing the remaining content normally.
+If a tool call fails (e.g., file read error, timeout), retry once. If it
+fails again, report the failure as a finding and proceed with the content
+you do have. Never return an empty findings list without explanation.
+
+Use the severity levels defined in the **Severity Guide** section below
+(critical, important, suggestion, positive).
+
 Return:
 {
   "expert": "{role}",
   "findings": [
     {
-      "severity": "critical | important | suggestion | positive",
+      "severity": "<see Severity Guide>",
       "title": "Brief one-line description",
       "location": "file_path:line_number (if applicable)",
       "detail": "Why this matters and what could go wrong",
@@ -100,7 +112,7 @@ Return:
 
 Collect all agents' findings and produce the final report.
 
-**Default: Integrated Report** — organized by severity, expert tagged in brackets:
+**Default: Integrated Report** — organized by severity (see **Severity Guide** below for level definitions), expert tagged in brackets:
 
 ```markdown
 # Review Report
@@ -108,6 +120,7 @@ Collect all agents' findings and produce the final report.
 **Target**: <what was reviewed>
 **Experts**: <list of experts used>
 
+<!-- Use the four severity levels from the Severity Guide -->
 | Severity | Count |
 |----------|-------|
 | Critical | N |
@@ -143,6 +156,8 @@ Collect all agents' findings and produce the final report.
 **Alternative: Per-Expert Report** — when the user says `--by-expert`, group findings under each expert heading instead. Still include the Cross-Expert Overlaps table.
 
 ## Severity Guide
+
+This is the **canonical definition** of severity levels. All agent prompts and report templates reference this table — do not redefine levels elsewhere.
 
 | Level | Meaning | Action |
 |-------|---------|--------|
