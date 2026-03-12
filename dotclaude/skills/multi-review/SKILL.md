@@ -60,7 +60,7 @@ Parse `$ARGUMENTS` to figure out what to review:
 | Empty | Try `git diff --staged` first; fall back to `git diff` |
 | Natural language | Identify relevant files from the description, confirm with user if ambiguous. Example: `"review the authentication flow"` → search for files matching `auth`, `login`, `session`, read them, and ask the user to confirm before proceeding if the match is uncertain. |
 
-For diff-based reviews, also read the full files being changed to provide context.
+For diff-based reviews, also read the full files being changed to provide context. However, clearly separate the **diff** (the actual changes) from the **context** (surrounding unchanged code). Only the changes in the diff are the review target — context is provided solely to help experts understand the code.
 
 ## Execution
 
@@ -76,9 +76,21 @@ Use the Agent tool to spawn all selected experts **in a single message** (one to
 You are a {Role} expert reviewing code.
 
 Review this target and return findings as JSON:
+
+## Changes (REVIEW TARGET — only report findings on these changes)
 ---
-{review_target}
+{diff}
 ---
+
+## Context (reference only — do NOT report findings on unchanged code)
+---
+{full_file_contents}
+---
+
+**Scope**: Your review MUST focus exclusively on the code that was added or
+modified in the diff. The context section is provided only to help you
+understand the surrounding code. Do NOT flag issues in unchanged lines, even
+if they have problems — those are out of scope for this review.
 
 **Error handling**: If you encounter files that cannot be read, binary files, or
 content that cannot be parsed, do NOT silently skip them. Instead, include a
