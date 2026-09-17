@@ -15,3 +15,8 @@ Thumbs.db
 .vscode/
 *.sublime-project
 *.sublime-workspace
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
