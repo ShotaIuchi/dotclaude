@@ -1,0 +1,1 @@
+../../../../dotclaude/skills/review-design/scripts/check_mermaid.py
