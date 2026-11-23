@@ -24,15 +24,17 @@ ln -s /path/to/dotclaude/dotclaude ~/.claude
 ln -s /path/to/dotclaude/dotclaude-ja ~/.claude
 ```
 
-## スキル一覧
+## スキル
 
-| コマンド | 説明 |
+スキルはすべて、個人用プラグインのマーケットプレイス [ShotaIuchi/ip](https://github.com/ShotaIuchi/ip) に移しました。
+
+| 旧スキル | 移行先 |
 |---------|------|
-| `/qa-inspect` | 読み取り専用の Q&A モード。終了時に Q&A レポートを出力する |
-| `/task-decompose` | Issue などのタスクをサブタスクに分解する |
-
-機能開発のスキル（旧 `/feature-auto`）は、個人用プラグインのマーケットプレイス [ShotaIuchi/ip](https://github.com/ShotaIuchi/ip) の
-`dev` プラグイン（`/dev:spec`、`/dev:build`）に移しました。feature-dev プラグインは不要です。
+| `/feature-auto` | `dev` プラグインの `/dev:spec`、`/dev:build` |
+| `/task-decompose` | `dev` プラグインの `/dev:decompose` |
+| `/review-design`、`/review-skim` | `read` プラグインの `/read:diagram`、`/read:outline` |
+| `/multi-review`、`/review-fix`、`/pr-comment-fix` | `review` プラグイン |
+| `/qa-inspect` | 廃止 |
 
 ## ディレクトリ構成
 
