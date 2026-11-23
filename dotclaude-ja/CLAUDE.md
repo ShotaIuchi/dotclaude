@@ -16,18 +16,7 @@ Claude Codeと人間が同じ状態と成果物を見ながら作業するため
 
 ## 機能開発ワークフロー
 
-### feature-dev プラグイン（必須）
+機能開発には、個人用プラグインのマーケットプレイス [ShotaIuchi/ip](https://github.com/ShotaIuchi/ip) の `dev` プラグインを使う（feature-dev プラグインは不要）。
 
-構造化された機能開発のために、マーケットプレイスから **feature-dev** プラグインをインストールする：
-
-```
-/plugin install feature-dev@claude-plugins-official
-```
-
-7フェーズのワークフロー（ディスカバリー、探索、明確化質問、アーキテクチャ、実装、レビュー、サマリー）と3種の専門エージェント（`code-explorer`、`code-architect`、`code-reviewer`）を提供する。
-
-`/feature-dev <説明>` でインタラクティブなワークフローを開始する。
-
-### feature-auto スキル
-
-`/feature-auto <説明>` で feature-dev の全7フェーズワークフローを人間の介入なしで実行する。全てのヒューマンインザループチェックポイントが自律的な意思決定でオーバーライドされる。
+- `/dev:spec <やりたいこと>` — ユーザーと詳細を詰めて、承認済みの `SPEC.md` を書く
+- `/dev:build [<SPEC.md>]` — 仕様をもとに実装し、チェック・仕様との照合・レビュー・修正を問題が無くなるまで（最大3周）回す。仕様からずれる時だけ質問する
